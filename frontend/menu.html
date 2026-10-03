@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu - casestudy-system</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <!-- Header with static markup fallback -->
+  <header id="site-header" class="site-header">
+    <div class="container header-container">
+      <a href="index.html" class="brand-logo" aria-label="casestudy-system Home">
+        <img src="assets/logo.svg" alt="casestudy-system Logo" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 200 40\' width=\'200\' height=\'40\'%3E%3Ctext x=\'10\' y=\'26\' font-family=\'sans-serif\' font-size=\'18\' font-weight=\'bold\' fill=\'%23F2A413\'%3EBURGER%3Ctspan fill=\'%23FFFFFF\'%3ESHOP%3C/tspan%3E%3C/text%3E%3C/svg%3E';">
+      </a>
+
+      <nav aria-label="Main Navigation">
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="menu.html" class="active">Menu</a></li>
+          <li><a href="index.html#about">About</a></li>
+          <li><a href="index.html#featured">Featured</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="cart.html" id="header-cart-btn" class="cart-btn" aria-label="View Shopping Cart">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          <span id="header-cart-badge" class="cart-badge hidden">0</span>
+        </a>
+
+        <div id="header-user-slot">
+          <a href="login.html" class="btn btn-primary btn-sm">Login</a>
+        </div>
+
+        <button id="mobile-nav-btn" class="mobile-nav-toggle" aria-label="Toggle mobile menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="mobile-drawer-menu" class="mobile-drawer">
+      <a href="index.html">Home</a>
+      <a href="menu.html" style="color:var(--color-accent);font-weight:700;">Menu</a>
+      <a href="index.html#about">About Us</a>
+      <a href="index.html#featured">Featured Burgers</a>
+      <a href="index.html#contact">Contact & Store Hours</a>
+      <a href="cart.html">My Cart</a>
+      <a href="login.html" style="color:var(--color-accent);font-weight:700;">Login / Register</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- Sticky Menu Toolbar -->
+    <section class="menu-toolbar">
+      <div class="container toolbar-flex">
+        <!-- Category chips with built-in defaults -->
+        <div class="category-chips" id="category-chips">
+          <button class="chip active" data-category="all">All Items</button>
+          <button class="chip" data-category="Burgers">Burgers</button>
+          <button class="chip" data-category="Cheese Burgers">Cheese Burgers</button>
+          <button class="chip" data-category="Sandwiches">Sandwiches</button>
+          <button class="chip" data-category="Complete">Complete</button>
+          <button class="chip" data-category="Footlong">Footlong</button>
+          <button class="chip" data-category="Sides">Sides</button>
+        </div>
+
+        <!-- Search & Sort Row -->
+        <div class="search-sort-bar">
+          <div class="search-input-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="menu-search" class="form-input" placeholder="Search burgers, sandwiches, footlongs...">
+          </div>
+
+          <div style="display:flex;align-items:center;gap:8px;">
+            <label for="menu-sort" class="form-label" style="margin:0;font-size:0.85rem;white-space:nowrap;">Sort by:</label>
+            <select id="menu-sort" class="form-select" style="width:auto;padding:6px 10px;font-size:0.85rem;">
+              <option value="featured">Featured First</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+              <option value="name_asc">Name: A to Z</option>
+              <option value="stock_desc">Most Stock</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Menu Grid Section -->
+    <section class="section" style="padding-top:16px;">
+      <div class="container">
+        <div class="product-grid" id="menu-grid">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add to Cart Modal -->
+  <div id="add-to-cart-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-product-name">Add to Cart</h3>
+        <button type="button" class="modal-close" id="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--color-border);">
+          <div>
+            <div style="font-size:0.8rem;color:var(--color-text-muted);">Base Price</div>
+            <div id="modal-product-price" class="font-price" style="font-size:1.3rem;color:var(--color-brand);">₱0.00</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:0.85rem;font-weight:600;">Quantity:</span>
+            <div class="qty-stepper">
+              <button type="button" class="stepper-btn" id="modal-qty-minus">-</button>
+              <span class="stepper-val" id="modal-qty-val">1</span>
+              <button type="button" class="stepper-btn" id="modal-qty-plus">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <h4 style="font-size:0.95rem;margin-bottom:8px;">Customize with Add-ons:</h4>
+          <div id="modal-addons-list">
+            <!-- Addons checkboxes rendered dynamically -->
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--color-surface-alt);padding:12px;border-radius:var(--radius-md);margin-top:16px;">
+          <span style="font-weight:700;">Line Total:</span>
+          <span id="modal-line-total" class="font-price" style="font-size:1.3rem;color:var(--color-brand);">₱0.00</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" id="modal-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" id="modal-confirm-btn">Confirm &amp; Add to Cart</button>
+      </div>
+    </div>
+  </div>
+
+  <footer id="site-footer" class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4 style="font-size:1.15rem;color:var(--color-accent);">casestudy-system</h4>
+          <p>Flavor on Wheels - Freshly Grilled Everyday</p>
+          <p style="margin-top:12px;font-size:0.85rem;">
+            Serving handcrafted hot burgers, specialty sandwiches, footlongs, and sizzling sides with premium local ingredients.
+          </p>
+        </div>
+        <div class="footer-col">
+          <h4>Store Hours</h4>
+          <ul class="footer-hours-list">
+            <li><span>Mon - Fri</span> <span>9:00 AM - 9:00 PM</span></li>
+            <li><span>Saturday</span> <span>9:00 AM - 10:00 PM</span></li>
+            <li><span>Sunday</span> <span>10:00 AM - 8:00 PM</span></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact &amp; Location</h4>
+          <p><strong>Address:</strong><br>123 Main Street, City Center</p>
+          <p style="margin-top:8px;"><strong>Phone:</strong><br>+63 912 345 6789</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        &copy; 2026 casestudy-system. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="js/menu.js"></script>
+</body>
+</html>

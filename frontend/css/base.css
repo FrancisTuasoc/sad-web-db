@@ -1,0 +1,286 @@
+/* ========================================================
+   BASE STYLES - CASESTUDY-SYSTEM (BURGER ORDERING & BILLING)
+   60-30-10 Color Scheme:
+   - 60% Neutral Base: #FBF8F3 (bg), #FFFFFF (cards), #E9E2D6 (borders)
+   - 30% Brand: #2A1E18 (charcoal-brown), #A4262C (brick red)
+   - 10% Accent: #F2A413 (golden mustard)
+   ======================================================== */
+
+:root {
+  --color-bg: #FBF8F3;
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #F4EFEA;
+  --color-border: #E9E2D6;
+  --color-border-hover: #D5C9B7;
+
+  --color-text-main: #2A1E18;
+  --color-text-muted: #6B5B52;
+  --color-text-light: #9B8B82;
+  --color-text-white: #FFFFFF;
+
+  --color-brand: #2A1E18;
+  --color-brand-gradient: linear-gradient(135deg, #2A1E18 0%, #4A2C20 100%);
+  --color-brand-secondary: #A4262C;
+  --color-brand-secondary-hover: #881F24;
+
+  --color-accent: #F2A413;
+  --color-accent-gradient: linear-gradient(180deg, #F6B02C 0%, #E8950C 100%);
+  --color-accent-hover: #E08F00;
+  --color-accent-text: #2A1E18;
+
+  --color-success: #287D3C;
+  --color-success-bg: #E8F5E9;
+  --color-warning: #D97A07;
+  --color-warning-bg: #FEF3C7;
+  --color-danger: #A4262C;
+  --color-danger-bg: #FDE8E8;
+  --color-info: #1D6FB8;
+  --color-info-bg: #E1EFFE;
+
+  --font-heading: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 2px rgba(42, 30, 24, 0.05);
+  --shadow-md: 0 4px 12px rgba(42, 30, 24, 0.08);
+  --shadow-lg: 0 10px 24px rgba(42, 30, 24, 0.12);
+
+  --header-height: 64px;
+  --container-max: 1200px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 14px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  flex: 1;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--color-text-main);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.6rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.05rem; }
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+p {
+  margin-bottom: 0.5rem;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  outline: none;
+}
+
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Base Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  min-height: 40px;
+  border-radius: var(--radius-md);
+  transition: all 0.15s ease-in-out;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--color-accent-gradient);
+  color: var(--color-accent-text);
+  box-shadow: 0 2px 4px rgba(242, 164, 19, 0.25);
+  border: 1px solid #E08F00;
+}
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.05);
+  box-shadow: 0 4px 8px rgba(242, 164, 19, 0.35);
+}
+.btn-primary:active:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+.btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text-main);
+  border: 1px solid var(--color-border);
+}
+.btn-secondary:hover:not(:disabled) {
+  background: var(--color-surface-alt);
+  border-color: var(--color-border-hover);
+}
+
+.btn-dark {
+  background: var(--color-brand);
+  color: var(--color-text-white);
+  border: 1px solid var(--color-brand);
+}
+.btn-dark:hover:not(:disabled) {
+  background: #3e281e;
+}
+
+.btn-danger {
+  background: var(--color-danger);
+  color: #fff;
+  border: 1px solid var(--color-danger-hover);
+}
+.btn-danger:hover:not(:disabled) {
+  background: var(--color-brand-secondary-hover);
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  min-height: 32px;
+  font-size: 0.82rem;
+}
+
+.btn-lg {
+  padding: 12px 24px;
+  min-height: 48px;
+  font-size: 1rem;
+}
+
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-in-stock {
+  background: #EAF7ED;
+  color: #1E6B30;
+  border: 1px solid #B8E4C0;
+}
+
+.badge-low-stock {
+  background: var(--color-warning-bg);
+  color: #B45309;
+  border: 1px solid #FCD34D;
+}
+
+.badge-out-stock {
+  background: var(--color-danger-bg);
+  color: #991B1B;
+  border: 1px solid #FCA5A5;
+}
+
+.badge-pending {
+  background: #FEF3C7;
+  color: #92400E;
+}
+.badge-to_pickup, .badge-to_ship {
+  background: #E0E7FF;
+  color: #3730A3;
+}
+.badge-completed {
+  background: #DCFCE7;
+  color: #166534;
+}
+.badge-cancelled {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+.badge-paid {
+  background: #DCFCE7;
+  color: #166534;
+}
+.badge-unpaid {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+/* Utilities */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-muted { color: var(--color-text-muted); }
+.text-danger { color: var(--color-danger); }
+.text-accent { color: var(--color-accent); }
+.font-price { font-family: var(--font-heading); font-weight: 700; }
+.hidden { display: none !important; }
