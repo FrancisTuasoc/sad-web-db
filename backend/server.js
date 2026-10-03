@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { checkEnv, PORT, MONGODB_URI } = require('./src/config/env');
+const { checkEnv, PORT, MONGODB_URI, FRONTEND_URL } = require('./src/config/env');
 
 // Validate critical environment variables before starting
 checkEnv();
@@ -23,8 +23,20 @@ const adminRoutes = require('./src/routes/admin.routes');
 
 const app = express();
 
+const allowedOrigins = [FRONTEND_URL, 'http://localhost:5500', 'http://127.0.0.1:5500'];
+
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 

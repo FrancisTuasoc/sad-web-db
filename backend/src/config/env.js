@@ -37,6 +37,7 @@ module.exports = {
   JWT_SECRET: process.env.JWT_SECRET,
   PORT: process.env.PORT || 5000,
   NODE_ENV: process.env.NODE_ENV || 'development',
+  FRONTEND_URL: process.env.FRONTEND_URL || 'https://sad-web-db-frontend.vercel.app',
   ADMIN_EMAIL: process.env.ADMIN_EMAIL || '',
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || '',
   ADMIN_USERNAME: process.env.ADMIN_USERNAME || 'Admin',

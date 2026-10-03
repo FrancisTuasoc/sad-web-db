@@ -1,7 +1,11 @@
 // Central API Fetch Wrapper
 
+const API_BASE_URL = 'https://sad-web-db.onrender.com';
+
 export async function apiFetch(endpoint, options = {}) {
-  const url = endpoint.startsWith('http') ? endpoint : `/api${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
+  const url = endpoint.startsWith('http')
+    ? endpoint
+    : `${API_BASE_URL}/api${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
 
   const headers = {
     'Content-Type': 'application/json',
