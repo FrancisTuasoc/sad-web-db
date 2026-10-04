@@ -212,9 +212,47 @@ export async function updateCartBadge() {
 }
 
 // ---------------- Header & Footer Renderer ----------------
+export function setupBackToTop() {
+  let button = document.getElementById('back-to-top');
+  if (!button) {
+    button = document.createElement('button');
+    button.id = 'back-to-top';
+    button.className = 'back-to-top';
+    button.type = 'button';
+    button.setAttribute('aria-label', 'Back to top');
+    button.title = 'Back to top';
+    button.tabIndex = -1;
+    button.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"></path></svg>';
+    document.body.appendChild(button);
+  }
+
+  if (button.dataset.initialized === 'true') return;
+  button.dataset.initialized = 'true';
+
+  function updateVisibility() {
+    const isVisible = window.scrollY > 400;
+    button.classList.toggle('is-visible', isVisible);
+    button.tabIndex = isVisible ? 0 : -1;
+  }
+
+  window.addEventListener('scroll', updateVisibility, { passive: true });
+  document.addEventListener('scroll', updateVisibility, { passive: true });
+  button.addEventListener('click', () => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    });
+  });
+
+  updateVisibility();
+}
+
 export function renderHeader(activeNav = '') {
   const headerElem = document.getElementById('site-header');
   if (!headerElem) return;
+
+  setupBackToTop();
 
   const user = getUser();
   const userLoggedIn = isLoggedIn();

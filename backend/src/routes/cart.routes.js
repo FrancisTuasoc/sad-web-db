@@ -233,6 +233,7 @@ router.delete(
     res.json({
       success: true,
       message: 'Item removed from cart.',
+      deletedCount: 1,
     });
   })
 );
@@ -241,10 +242,11 @@ router.delete(
 router.delete(
   '/',
   asyncHandler(async (req, res) => {
-    await CartItem.deleteMany({ user: req.user._id });
+    const result = await CartItem.deleteMany({ user: req.user._id });
     res.json({
       success: true,
-      message: 'Cart cleared.',
+      message: `${result.deletedCount} cart entr${result.deletedCount === 1 ? 'y' : 'ies'} removed.`,
+      deletedCount: result.deletedCount,
     });
   })
 );

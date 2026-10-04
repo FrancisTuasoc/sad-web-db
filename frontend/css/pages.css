@@ -8,15 +8,19 @@
 .hero-section {
   background: var(--color-brand-gradient);
   color: #FFFFFF;
-  padding: 48px 0;
+  min-height: calc(100vh - var(--header-height));
+  min-height: calc(100svh - var(--header-height));
+  display: grid;
+  align-items: center;
+  padding: clamp(24px, 5vh, 56px) 0;
   border-bottom: 3px solid var(--color-accent);
 }
 
 .hero-grid {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   align-items: center;
-  gap: 36px;
+  gap: clamp(24px, 4vw, 56px);
 }
 
 .hero-badge {
@@ -61,21 +65,21 @@
 
 .hero-image-wrap {
   position: relative;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-lg);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  background: #3e281e;
-  aspect-ratio: 4/3;
+  overflow: visible;
+  width: 100%;
+  aspect-ratio: 3/2;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .hero-image-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 120%;
+  max-width: none;
+  height: auto;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 18px rgba(0, 0, 0, 0.28));
 }
 
 .section {
@@ -832,10 +836,19 @@
   background: #FAF7F2;
 }
 
+@media (min-width: 901px) and (max-width: 1279px) {
+  .hero-image-wrap img {
+    width: 108%;
+  }
+}
+
 /* Mobile drawer for admin */
 @media (max-width: 900px) {
   .admin-layout {
     grid-template-columns: 1fr;
+  }
+  #admin-toggle-sidebar-btn {
+    display: inline-flex;
   }
   .admin-sidebar {
     display: none;
@@ -861,10 +874,88 @@
   .hero-grid {
     grid-template-columns: 1fr;
   }
+  .hero-image-wrap {
+    width: min(100%, 640px);
+    margin: 0 auto;
+  }
+  .hero-image-wrap img {
+    width: 112%;
+  }
+  .hero-section {
+    padding: clamp(24px, 4vh, 40px) 0;
+  }
   .about-card {
     grid-template-columns: 1fr;
   }
   .contact-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 24px 0;
+  }
+
+  .hero-image-wrap img {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .site-header .header-container > div:last-child a {
+    display: none;
+  }
+
+  .cart-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cart-box,
+  .receipt-sidebar {
+    min-width: 0;
+    padding: 14px;
+  }
+  .cart-line-item {
+    grid-template-columns: 20px 56px minmax(0, 1fr);
+    gap: 10px;
+  }
+  .cart-item-img {
+    width: 56px;
+    height: 56px;
+  }
+  .cart-item-right {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+  .profile-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .profile-nav,
+  .profile-tab-content {
+    min-width: 0;
+  }
+  .profile-nav-btn {
+    width: 100%;
+    min-width: 0;
+  }
+  .profile-tab-content .tab-pill-group {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .profile-tab-content .tab-pill {
+    min-width: 0;
+    padding-right: 6px;
+    padding-left: 6px;
+    overflow-wrap: anywhere;
+  }
+  .order-card-footer {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .order-card-footer > div:last-child {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
   }
 }

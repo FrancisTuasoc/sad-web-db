@@ -1,6 +1,6 @@
 // Real-time Stock Stream Client (SSE with auto-reconnect and polling fallback)
 
-import { apiFetch } from './api.js';
+import { apiFetch, apiUrl } from './api.js';
 
 class StockStream {
   constructor() {
@@ -21,7 +21,7 @@ class StockStream {
     }
 
     try {
-      this.source = new EventSource('/api/stream');
+      this.source = new EventSource(apiUrl('/stream'));
 
       this.source.addEventListener('stock', (event) => {
         try {

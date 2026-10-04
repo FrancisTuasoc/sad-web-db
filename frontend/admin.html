@@ -16,7 +16,7 @@
   <header class="site-header" style="background:#1F1511;">
     <div class="container header-container">
       <div style="display:flex;align-items:center;gap:12px;">
-        <button type="button" id="admin-toggle-sidebar-btn" class="btn btn-secondary btn-sm" style="display:none;" aria-label="Toggle navigation drawer">
+        <button type="button" id="admin-toggle-sidebar-btn" class="btn btn-secondary btn-sm" aria-label="Toggle navigation drawer">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
         <a href="admin.html" class="brand-logo" style="text-decoration:none;">
@@ -668,15 +668,15 @@
   </div>
 
   <!-- Customer History Modal -->
-  <div id="customer-history-modal" class="modal-overlay">
+  <div id="customer-history-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="customer-history-title">
     <div class="modal-card" style="max-width:540px;">
       <div class="modal-header">
-        <h3>Customer History</h3>
-        <button type="button" class="modal-close" onclick="closeModal('customer-history-modal')">&times;</button>
+        <h3 id="customer-history-title">Customer History</h3>
+        <button type="button" class="modal-close" id="close-customer-history-modal" aria-label="Close customer history">&times;</button>
       </div>
       <div class="modal-body" id="customer-history-body"></div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('customer-history-modal')">Close</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="customer-history-close-btn">Close</button>
       </div>
     </div>
   </div>

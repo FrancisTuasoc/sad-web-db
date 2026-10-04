@@ -381,6 +381,7 @@ export function attachProductGridListeners(containerId = 'featured-grid', getPro
 
 function initHome() {
   renderHeader('home');
+  setupHomeSectionNavigation();
   renderFooter();
   loadStoreInfo();
   loadFeaturedProducts();
@@ -389,8 +390,84 @@ function initHome() {
   stockStream.init();
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initHome);
-} else {
-  initHome();
+function setupHomeSectionNavigation() {
+  const header = document.getElementById('site-header');
+  const sections = [
+    { id: '', element: document.querySelector('.hero-section') },
+    { id: 'featured', element: document.getElementById('featured') },
+    { id: 'about', element: document.getElementById('about') },
+    { id: 'contact', element: document.getElementById('contact') },
+  ].filter((section) => section.element);
+  let updateScheduled = false;
+
+  function updateActiveSection() {
+    const headerBottom = header.getBoundingClientRect().bottom;
+    const isAtPageBottom = window.scrollY + window.innerHeight
+      >= document.documentElement.scrollHeight - 1;
+    const activeSection = isAtPageBottom
+      ? sections[sections.length - 1]
+      : sections.reduce((current, section) => {
+        return section.element.getBoundingClientRect().top <= headerBottom + 1
+          ? section
+          : current;
+      }, sections[0]);
+
+    header.querySelectorAll('.nav-links a').forEach((link) => {
+      const linkUrl = new URL(link.href, window.location.href);
+      const isHomeLink = linkUrl.pathname === window.location.pathname
+        && !linkUrl.hash
+        && link.getAttribute('href').endsWith('index.html');
+      const isActive = activeSection.id
+        ? linkUrl.pathname === window.location.pathname && linkUrl.hash === `#${activeSection.id}`
+        : isHomeLink;
+
+      link.classList.toggle('active', isActive);
+      if (isActive) {
+        link.setAttribute('aria-current', 'location');
+      } else {
+        link.removeAttribute('aria-current');
+      }
+    });
+  }
+
+  function scheduleActiveSectionUpdate() {
+    if (updateScheduled) return;
+    updateScheduled = true;
+    window.requestAnimationFrame(() => {
+      updateScheduled = false;
+      updateActiveSection();
+    });
+  }
+
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest('#site-header .nav-links a');
+    if (!link) return;
+
+    const linkUrl = new URL(link.href, window.location.href);
+    const sectionId = linkUrl.hash.slice(1);
+    if (
+      linkUrl.pathname === window.location.pathname &&
+      (sectionId ? document.getElementById(sectionId) : isHomeLink(link))
+    ) {
+      scheduleActiveSectionUpdate();
+    }
+  });
+
+  function isHomeLink(link) {
+    return !link.hash && link.getAttribute('href').endsWith('index.html');
+  }
+
+  window.addEventListener('scroll', scheduleActiveSectionUpdate, { passive: true });
+  document.addEventListener('scroll', scheduleActiveSectionUpdate, { passive: true });
+  window.addEventListener('resize', scheduleActiveSectionUpdate);
+  window.addEventListener('hashchange', scheduleActiveSectionUpdate);
+  updateActiveSection();
+}
+
+if (document.getElementById('featured-grid')) {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHome);
+  } else {
+    initHome();
+  }
 }

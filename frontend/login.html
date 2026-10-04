@@ -155,7 +155,18 @@
             if (res.user.role === 'admin') {
               window.location.href = 'admin.html';
             } else {
-              const redirect = urlParams.get('redirect') || 'index.html';
+              const requestedRedirect = urlParams.get('redirect');
+              let redirect = 'index.html';
+              if (requestedRedirect) {
+                try {
+                  const destination = new URL(requestedRedirect, window.location.href);
+                  if (destination.origin === window.location.origin) {
+                    redirect = `${destination.pathname}${destination.search}${destination.hash}`;
+                  }
+                } catch (err) {
+                  // Keep the safe default for malformed redirect values.
+                }
+              }
               window.location.href = redirect;
             }
           }, 600);

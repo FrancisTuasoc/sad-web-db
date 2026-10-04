@@ -209,6 +209,22 @@
     </div>
   </main>
 
+  <div id="cart-delete-confirm-modal" class="modal-overlay" role="alertdialog" aria-modal="true" aria-labelledby="cart-delete-confirm-title" aria-describedby="cart-delete-confirm-message">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="cart-delete-confirm-title">Remove cart items?</h3>
+        <button type="button" class="modal-close" id="cart-delete-confirm-close" aria-label="Close confirmation">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="cart-delete-confirm-message">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" id="cart-delete-cancel">Keep items</button>
+        <button type="button" class="btn btn-danger btn-sm" id="cart-delete-confirm">Remove items</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Edit Add-ons Modal -->
   <div id="edit-addons-modal" class="modal-overlay">
     <div class="modal-card">

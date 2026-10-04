@@ -224,7 +224,7 @@ function renderOrderCard(order, isLive = false) {
         <strong>Items:</strong> ${itemsSnippet}
       </div>
 
-      <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px dashed var(--color-border);">
+      <div class="order-card-footer" style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px dashed var(--color-border);">
         <div>
           <span style="font-size:0.82rem;color:var(--color-text-muted);">
             ${order.fulfillment.toUpperCase()} &bull; ${order.paymentMethod.toUpperCase().replace(/_/g, ' ')}

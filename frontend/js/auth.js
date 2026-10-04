@@ -46,7 +46,7 @@ export function isAdmin() {
 export function logout() {
   removeToken();
   removeUser();
-  window.location.href = '/index.html';
+  window.location.href = 'index.html';
 }
 
 export function getAvatarColor(username = '') {
@@ -74,12 +74,12 @@ export function renderAvatar(user, size = 32) {
 
 export function requireAuth(targetRole = null) {
   if (!isLoggedIn()) {
-    window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.pathname)}`;
+    window.location.href = `login.html?redirect=${encodeURIComponent(window.location.pathname)}`;
     return false;
   }
 
   if (targetRole === 'admin' && !isAdmin()) {
-    window.location.href = '/index.html';
+    window.location.href = 'index.html';
     return false;
   }
 

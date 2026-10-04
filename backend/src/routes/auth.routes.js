@@ -10,6 +10,7 @@ const validate = require('../middleware/validate');
 const { requireAuth } = require('../middleware/auth');
 const { rateLimitAuth } = require('../middleware/rateLimit');
 const { JWT_SECRET } = require('../config/env');
+const { isValidGmailAddress, isValidUsername, isValidCustomerAccount } = require('../utils/accountValidation');
 
 const router = express.Router();
 
@@ -20,8 +21,13 @@ const registerSchema = z
       .trim()
       .min(3, 'Username must be at least 3 characters long')
       .max(20, 'Username cannot exceed 20 characters')
-      .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
-    email: z.string().trim().email('Please enter a valid email address').toLowerCase(),
+      .refine(isValidUsername, 'Username must start with a letter and can only contain letters, numbers, and underscores'),
+    email: z
+      .string()
+      .trim()
+      .email('Please enter a valid email address')
+      .toLowerCase()
+      .refine(isValidGmailAddress, 'Use a Gmail address with a 6-30 character local part containing at least 2 letters and more letters than numbers'),
     password: z
       .string()
       .min(8, 'Password must be at least 8 characters long')
@@ -102,6 +108,13 @@ router.post(
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
       throw new AppError('Invalid email or password.', 401);
+    }
+
+    if (!isValidCustomerAccount(user)) {
+      throw new AppError(
+        'This customer account does not meet current account requirements. Please contact the shop to update your details.',
+        403
+      );
     }
 
     const token = signToken(user._id);

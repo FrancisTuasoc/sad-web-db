@@ -70,13 +70,14 @@
       <form id="register-form">
         <div class="form-group">
           <label class="form-label" for="reg-username">Username <span class="req">*</span></label>
-          <input type="text" id="reg-username" class="form-input" required minlength="3" maxlength="20" placeholder="Enter your username">
-          <div class="form-hint">3-20 characters (letters, numbers, underscores)</div>
+          <input type="text" id="reg-username" class="form-input" required minlength="3" maxlength="20" pattern="[A-Za-z][A-Za-z0-9_]*" title="Use 3-20 characters. Start with a letter, then use letters, numbers, or underscores." placeholder="Enter your username">
+          <div class="form-hint">3-20 characters; start with a letter, then use letters, numbers, or underscores</div>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="reg-email">Email Address <span class="req">*</span></label>
-          <input type="email" id="reg-email" class="form-input" required placeholder="Enter your email address">
+          <input type="email" id="reg-email" class="form-input" required placeholder="Enter your Gmail address">
+          <div class="form-hint">Gmail only; use 6-30 characters before @gmail.com, with at least 2 letters and more letters than numbers</div>
         </div>
 
         <div class="form-group">
@@ -147,6 +148,16 @@
         const email = document.getElementById('reg-email').value.trim();
         const password = document.getElementById('reg-password').value;
         const confirmPassword = document.getElementById('reg-confirm-password').value;
+
+        const gmailMatch = /^([a-z0-9]+(?:\.[a-z0-9]+)*)@gmail\.com$/i.exec(email);
+        const gmailLocalPart = gmailMatch ? gmailMatch[1] : '';
+        const gmailLetters = (gmailLocalPart.match(/[a-z]/gi) || []).length;
+        const gmailNumbers = (gmailLocalPart.match(/[0-9]/g) || []).length;
+        if (!gmailMatch || gmailLocalPart.length < 6 || gmailLocalPart.length > 30 || gmailLetters < 2 || gmailLetters <= gmailNumbers) {
+          showToast('Use a Gmail address with 6-30 letters, numbers, or single periods, at least 2 letters, and more letters than numbers.', 'warning');
+          document.getElementById('reg-email').focus();
+          return;
+        }
 
         if (password !== confirmPassword) {
           showToast('Passwords do not match.', 'warning');

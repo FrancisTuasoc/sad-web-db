@@ -2,10 +2,14 @@
 
 const API_BASE_URL = 'https://sad-web-db.onrender.com';
 
-export async function apiFetch(endpoint, options = {}) {
-  const url = endpoint.startsWith('http')
+export function apiUrl(endpoint) {
+  return endpoint.startsWith('http')
     ? endpoint
     : `${API_BASE_URL}/api${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
+}
+
+export async function apiFetch(endpoint, options = {}) {
+  const url = apiUrl(endpoint);
 
   const headers = {
     'Content-Type': 'application/json',
@@ -41,7 +45,7 @@ export async function apiFetch(endpoint, options = {}) {
       if (!isAuthPage && token) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '/login.html?expired=1';
+        window.location.href = 'login.html?expired=1';
         return;
       }
     }

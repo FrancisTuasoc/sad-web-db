@@ -9,6 +9,7 @@ let checkedItemIds = new Set();
 let debounceSyncTimers = {};
 let editingCartItem = null;
 let allAddons = [];
+let pendingCartDeletion = null;
 
 export function getCheckedCartItems() {
   return cartItems.filter((item) => checkedItemIds.has(item._id));
@@ -187,6 +188,84 @@ function syncQuantityToServer(cartItemId, quantity) {
   }, 400);
 }
 
+function openCartDeleteConfirmation(deletion) {
+  pendingCartDeletion = deletion;
+  const message = document.getElementById('cart-delete-confirm-message');
+  const title = document.getElementById('cart-delete-confirm-title');
+  const confirmButton = document.getElementById('cart-delete-confirm');
+
+  if (deletion.type === 'all') {
+    title.textContent = 'Clear your entire cart?';
+    message.textContent = `This will permanently remove all ${deletion.count} cart entr${deletion.count === 1 ? 'y' : 'ies'}.`;
+    confirmButton.textContent = 'Clear Cart';
+  } else {
+    title.textContent = 'Remove this item?';
+    message.textContent = `Remove ${deletion.name} (quantity ${deletion.quantity}) from your cart?`;
+    confirmButton.textContent = 'Remove Item';
+  }
+
+  openModal('cart-delete-confirm-modal');
+  document.getElementById('cart-delete-cancel').focus();
+}
+
+function closeCartDeleteConfirmation() {
+  pendingCartDeletion = null;
+  closeModal('cart-delete-confirm-modal');
+}
+
+async function confirmCartDeletion() {
+  if (!pendingCartDeletion) return;
+
+  const deletion = pendingCartDeletion;
+  const confirmButton = document.getElementById('cart-delete-confirm');
+  const cancelButton = document.getElementById('cart-delete-cancel');
+  const closeButton = document.getElementById('cart-delete-confirm-close');
+  confirmButton.disabled = true;
+  cancelButton.disabled = true;
+  closeButton.disabled = true;
+  confirmButton.textContent = 'Removing...';
+
+  try {
+    const endpoint = deletion.type === 'all' ? '/cart' : `/cart/${deletion.id}`;
+    const result = await apiFetch(endpoint, { method: 'DELETE' });
+    if (!result.success) {
+      throw new Error('The server did not confirm the cart deletion.');
+    }
+
+    const currentCart = await apiFetch('/cart');
+    const remainingItems = currentCart.items || [];
+    const isDeleted = deletion.type === 'all'
+      ? remainingItems.length === 0
+      : !remainingItems.some((item) => item._id === deletion.id);
+
+    if (!isDeleted) {
+      throw new Error('The item is still present in your cart after deletion. Please try again.');
+    }
+
+    cartItems = remainingItems;
+    checkedItemIds = new Set([...checkedItemIds].filter((id) => cartItems.some((item) => item._id === id)));
+    renderCartLines();
+    updateReceipt();
+    await updateCartBadge();
+    closeCartDeleteConfirmation();
+    showToast(
+      deletion.type === 'all'
+        ? 'Cart cleared.'
+        : 'Item removed from cart.',
+      'success'
+    );
+  } catch (err) {
+    showToast(err.message, 'error');
+    closeCartDeleteConfirmation();
+    await fetchCart();
+  } finally {
+    confirmButton.disabled = false;
+    cancelButton.disabled = false;
+    closeButton.disabled = false;
+    confirmButton.textContent = 'Remove items';
+  }
+}
+
 // Edit Add-ons Modal Flow
 async function openEditAddonsModal(cartItemId) {
   editingCartItem = cartItems.find((c) => c._id === cartItemId);
@@ -359,13 +438,14 @@ function setupCartListeners() {
     const removeBtn = e.target.closest('.btn-remove-line');
     if (removeBtn) {
       const lineId = removeBtn.getAttribute('data-line-id');
-      try {
-        await apiFetch(`/cart/${lineId}`, { method: 'DELETE' });
-        checkedItemIds.delete(lineId);
-        showToast('Item removed from cart', 'info');
-        fetchCart();
-      } catch (err) {
-        showToast(err.message, 'error');
+      const item = cartItems.find((cartItem) => cartItem._id === lineId);
+      if (item) {
+        openCartDeleteConfirmation({
+          type: 'item',
+          id: lineId,
+          name: item.product ? item.product.name : 'this item',
+          quantity: item.quantity,
+        });
       }
       return;
     }
@@ -396,21 +476,32 @@ function setupCartListeners() {
   // Clear all cart button
   const clearCartBtn = document.getElementById('clear-cart-btn');
   if (clearCartBtn) {
-    clearCartBtn.addEventListener('click', async () => {
-      if (!confirm('Are you sure you want to clear your shopping cart?')) return;
-      try {
-        await apiFetch('/cart', { method: 'DELETE' });
-        cartItems = [];
-        checkedItemIds.clear();
-        renderCartLines();
-        updateReceipt();
-        updateCartBadge();
-        showToast('Shopping cart cleared', 'info');
-      } catch (err) {
-        showToast(err.message, 'error');
+    clearCartBtn.addEventListener('click', () => {
+      if (cartItems.length === 0) return;
+      openCartDeleteConfirmation({ type: 'all', count: cartItems.length });
+    });
+  }
+
+  const confirmDeleteBtn = document.getElementById('cart-delete-confirm');
+  const cancelDeleteBtn = document.getElementById('cart-delete-cancel');
+  const closeDeleteBtn = document.getElementById('cart-delete-confirm-close');
+  const deleteModal = document.getElementById('cart-delete-confirm-modal');
+
+  if (confirmDeleteBtn) confirmDeleteBtn.addEventListener('click', confirmCartDeletion);
+  if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', closeCartDeleteConfirmation);
+  if (closeDeleteBtn) closeDeleteBtn.addEventListener('click', closeCartDeleteConfirmation);
+  if (deleteModal) {
+    deleteModal.addEventListener('click', (event) => {
+      if (event.target === deleteModal && !confirmDeleteBtn.disabled) {
+        closeCartDeleteConfirmation();
       }
     });
   }
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && pendingCartDeletion && !confirmDeleteBtn.disabled) {
+      closeCartDeleteConfirmation();
+    }
+  });
 
   // Edit Addons Modal buttons
   const closeEditBtn = document.getElementById('close-edit-addons-modal');

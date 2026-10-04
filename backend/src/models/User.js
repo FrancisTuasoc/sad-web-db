@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { isValidGmailAddress } = require('../utils/accountValidation');
 
 const userSchema = new mongoose.Schema(
   {
@@ -9,6 +10,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minlength: 3,
       maxlength: 20,
+      match: [/^[a-zA-Z][a-zA-Z0-9_]*$/, 'Username must start with a letter and can only contain letters, numbers, and underscores'],
     },
     email: {
       type: String,
@@ -16,6 +18,12 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
+      validate: {
+        validator: function (email) {
+          return this.role !== 'customer' || isValidGmailAddress(email);
+        },
+        message: 'Customer email must be a Gmail address with a 6-30 character local part containing at least 2 letters and more letters than numbers',
+      },
     },
     passwordHash: {
       type: String,

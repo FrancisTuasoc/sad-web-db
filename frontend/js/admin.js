@@ -1,6 +1,6 @@
 // Admin Dashboard & Operations Controller
 import { apiFetch } from './api.js';
-import { showToast, escapeHtml, openModal, closeModal, BURGER_PLACEHOLDER, getProductImageUrl } from './ui.js';
+import { showToast, escapeHtml, openModal, closeModal, BURGER_PLACEHOLDER, getProductImageUrl, setupBackToTop } from './ui.js';
 import { requireAuth, getUser, resizeImageToDataUrl } from './auth.js';
 
 let activeSection = 'dashboard';
@@ -692,6 +692,30 @@ async function loadAdminSettings() {
 
 // ---------------- GLOBAL EVENT ATTACHMENTS ----------------
 function attachAdminEventListeners() {
+  const customerHistoryModal = document.getElementById('customer-history-modal');
+  const closeCustomerHistory = () => closeModal('customer-history-modal');
+  const closeCustomerHistoryButton = document.getElementById('close-customer-history-modal');
+  const customerHistoryCloseButton = document.getElementById('customer-history-close-btn');
+
+  if (closeCustomerHistoryButton) {
+    closeCustomerHistoryButton.addEventListener('click', closeCustomerHistory);
+  }
+  if (customerHistoryCloseButton) {
+    customerHistoryCloseButton.addEventListener('click', closeCustomerHistory);
+  }
+  if (customerHistoryModal) {
+    customerHistoryModal.addEventListener('click', (event) => {
+      if (event.target === customerHistoryModal) {
+        closeCustomerHistory();
+      }
+    });
+  }
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && customerHistoryModal && customerHistoryModal.classList.contains('open')) {
+      closeCustomerHistory();
+    }
+  });
+
   // Sales view toggles (daily, weekly, monthly)
   document.querySelectorAll('.btn-sales-toggle').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -1152,6 +1176,7 @@ function attachAdminEventListeners() {
 // ---------------- INITIALIZE ADMIN ----------------
 function initAdmin() {
   if (!requireAuth('admin')) return;
+  setupBackToTop();
   setupAdminNavigation();
   attachAdminEventListeners();
   loadDashboardStats();
