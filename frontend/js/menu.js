@@ -3,7 +3,7 @@ import { apiFetch } from './api.js';
 import { renderHeader, renderFooter, showToast, escapeHtml } from './ui.js';
 import { isLoggedIn } from './auth.js';
 import { stockStream } from './stock-stream.js';
-import { renderProductCard, setupAddToCartModal, attachProductGridListeners, DEFAULT_ADDONS } from './home.js';
+import { renderProductCard, setupAddToCartModal, attachProductGridListeners, setAvailableAddons } from './home.js';
 
 export const ALL_MENU_PRODUCTS = [
   // Burgers
@@ -52,6 +52,7 @@ export const ALL_MENU_PRODUCTS = [
 ];
 
 let liveProducts = [...ALL_MENU_PRODUCTS];
+let hasLiveProducts = false;
 let activeCategory = 'all';
 let searchQuery = '';
 let currentSort = 'featured';
@@ -156,7 +157,7 @@ function filterAndRenderProducts() {
   }
 
   const isGuest = !isLoggedIn();
-  container.innerHTML = filtered.map((p) => renderProductCard(p, isGuest)).join('');
+  container.innerHTML = filtered.map((p) => renderProductCard(p, isGuest, hasLiveProducts)).join('');
 }
 
 async function loadProducts() {
@@ -171,12 +172,12 @@ async function loadProducts() {
     params.append('isAddon', 'false');
 
     const data = await apiFetch(`/products?${params.toString()}`);
-    if (data && data.products && data.products.length > 0) {
-      liveProducts = data.products;
-      filterAndRenderProducts();
-    }
+    setAvailableAddons(data && data.addons);
+    liveProducts = data && Array.isArray(data.products) ? data.products : [];
+    hasLiveProducts = true;
+    filterAndRenderProducts();
   } catch (err) {
-    // Keep currently rendered products
+    showToast(`Unable to load the live menu: ${err.message}. Sample items cannot be ordered until the connection returns.`, 'error');
   }
 }
 

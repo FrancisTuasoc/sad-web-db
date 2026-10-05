@@ -260,7 +260,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   background: #FEF3C7;
   color: #92400E;
 }
-.badge-to_pickup, .badge-to_ship {
+.badge-ready_for_pickup, .badge-ready_to_deliver, .badge-to_pickup, .badge-to_ship {
   background: #E0E7FF;
   color: #3730A3;
 }

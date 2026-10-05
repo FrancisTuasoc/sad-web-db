@@ -126,7 +126,7 @@ router.get(
 
 router.patch(
   '/orders/:id/status',
-  validate(z.object({ status: z.enum(['to_pickup', 'to_ship', 'completed', 'cancelled']) })),
+  validate(z.object({ status: z.enum(['ready_for_pickup', 'ready_to_deliver', 'completed']) })),
   asyncHandler(async (req, res) => {
     const updated = await updateOrderStatus(req.params.id, req.body.status);
     res.json({

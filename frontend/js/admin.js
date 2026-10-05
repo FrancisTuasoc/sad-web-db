@@ -75,6 +75,11 @@ async function loadDashboardStats() {
     document.getElementById('stat-total-revenue').textContent = `₱${Number(dashboardStats.totalRevenue).toFixed(2)}`;
     document.getElementById('stat-total-orders').textContent = String(dashboardStats.totalOrders);
     document.getElementById('stat-pending-orders').textContent = String(dashboardStats.pendingOrders);
+    const pendingBadge = document.getElementById('admin-pending-count');
+    if (pendingBadge) {
+      pendingBadge.textContent = String(dashboardStats.pendingOrders);
+      pendingBadge.classList.toggle('hidden', dashboardStats.pendingOrders === 0);
+    }
     document.getElementById('stat-completed-orders').textContent = String(dashboardStats.completedOrders);
     document.getElementById('stat-cancelled-orders').textContent = String(dashboardStats.cancelledOrders);
     document.getElementById('stat-total-customers').textContent = String(dashboardStats.totalCustomers);
@@ -244,8 +249,25 @@ async function loadAdminOrders() {
     params.append('page', ordersFilter.page);
     params.append('limit', ordersFilter.limit);
 
-    const res = await apiFetch(`/admin/orders?${params.toString()}`);
+    const [res, pendingRes] = await Promise.all([
+      apiFetch(`/admin/orders?${params.toString()}`),
+      apiFetch('/admin/orders?status=pending&page=1&limit=1'),
+    ]);
     const { orders, pagination } = res;
+    const pendingBadge = document.getElementById('admin-pending-count');
+    if (pendingBadge) {
+      pendingBadge.textContent = String(pendingRes.pagination.total);
+      pendingBadge.classList.toggle('hidden', pendingRes.pagination.total === 0);
+    }
+
+    const pageIndicator = document.getElementById('orders-pagination-info');
+    if (pageIndicator) {
+      pageIndicator.textContent = `Page ${pagination.page} of ${pagination.totalPages} (${pagination.total} orders)`;
+    }
+    const prevPageBtn = document.getElementById('orders-prev-page');
+    const nextPageBtn = document.getElementById('orders-next-page');
+    if (prevPageBtn) prevPageBtn.disabled = pagination.page <= 1;
+    if (nextPageBtn) nextPageBtn.disabled = pagination.page >= pagination.totalPages;
 
     if (orders.length === 0) {
       tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted" style="padding:32px;">No orders match the selected filters.</td></tr>';
@@ -269,7 +291,7 @@ async function loadAdminOrders() {
             <td>${o.fulfillment.toUpperCase()}</td>
             <td><strong>₱${o.total.toFixed(2)}</strong></td>
             <td><span class="badge badge-${o.paymentStatus}">${o.paymentStatus.toUpperCase()}</span></td>
-            <td><span class="badge badge-${o.status}">${o.status.toUpperCase()}</span></td>
+            <td><span class="badge badge-${o.status}">${statusLabel(o.status)}</span></td>
             <td>
               <button class="btn btn-secondary btn-sm btn-open-order-drawer" data-order-id="${o._id}">
                 Manage
@@ -279,13 +301,21 @@ async function loadAdminOrders() {
         `;
       })
       .join('');
-
-    // Pagination controls
-    const pageIndicator = document.getElementById('orders-pagination-info');
-    if (pageIndicator) pageIndicator.textContent = `Page ${pagination.page} of ${pagination.totalPages} (${pagination.total} orders)`;
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger" style="padding:24px;">Failed to load orders: ${escapeHtml(err.message)}</td></tr>`;
   }
+}
+
+function statusLabel(status) {
+  return ({
+    pending: 'PENDING ACCEPTANCE',
+    ready_for_pickup: 'READY FOR PICKUP',
+    ready_to_deliver: 'READY TO DELIVER',
+    to_pickup: 'READY FOR PICKUP',
+    to_ship: 'READY TO DELIVER',
+    completed: 'COMPLETED',
+    cancelled: 'CANCELLED',
+  })[status] || status.toUpperCase();
 }
 
 // Order Detail Drawer
@@ -317,25 +347,21 @@ async function openOrderDrawer(orderId) {
     // Action buttons based on status
     let actionButtons = '';
     if (order.status === 'pending') {
-      const nextStatus = order.fulfillment === 'pickup' ? 'to_pickup' : 'to_ship';
-      const nextLabel = order.fulfillment === 'pickup' ? 'Accept & Mark Ready for Pickup' : 'Accept & Mark Out for Delivery';
+      const nextStatus = order.fulfillment === 'pickup' ? 'ready_for_pickup' : 'ready_to_deliver';
+      const nextLabel = order.fulfillment === 'pickup' ? 'Accept & Mark Ready for Pickup' : 'Accept & Mark Ready for Delivery';
       actionButtons += `
         <button type="button" class="btn btn-primary btn-sm btn-action-status" data-order-id="${order._id}" data-status="${nextStatus}">
           ${nextLabel}
         </button>
-        <button type="button" class="btn btn-danger btn-sm btn-action-status" data-order-id="${order._id}" data-status="cancelled">
-          Cancel & Return Stock
-        </button>
       `;
-    } else if (order.status === 'to_pickup' || order.status === 'to_ship') {
+    } else if (order.status === 'ready_for_pickup' || order.status === 'to_pickup') {
       actionButtons += `
         <button type="button" class="btn btn-primary btn-sm btn-action-status" data-order-id="${order._id}" data-status="completed">
-          Mark Order as Completed
-        </button>
-        <button type="button" class="btn btn-danger btn-sm btn-action-status" data-order-id="${order._id}" data-status="cancelled">
-          Cancel Order
+          Mark Pick Up as Completed
         </button>
       `;
+    } else if (order.status === 'ready_to_deliver' || order.status === 'to_ship') {
+      actionButtons += '<p class="text-muted">Waiting for the customer to confirm delivery.</p>';
     }
 
     if (order.paymentStatus === 'unpaid' && order.status !== 'cancelled') {
@@ -353,7 +379,7 @@ async function openOrderDrawer(orderId) {
       </div>
 
       <div style="display:flex;gap:8px;margin-bottom:16px;">
-        <span class="badge badge-${order.status}">${order.status.toUpperCase()}</span>
+        <span class="badge badge-${order.status}">${statusLabel(order.status)}</span>
         <span class="badge badge-${order.paymentStatus}">${order.paymentStatus.toUpperCase()}</span>
       </div>
 
@@ -692,6 +718,13 @@ async function loadAdminSettings() {
 
 // ---------------- GLOBAL EVENT ATTACHMENTS ----------------
 function attachAdminEventListeners() {
+  document.addEventListener('click', (event) => {
+    const closeButton = event.target.closest('[data-modal-close]');
+    if (closeButton) {
+      closeModal(closeButton.getAttribute('data-modal-close'));
+    }
+  });
+
   const customerHistoryModal = document.getElementById('customer-history-modal');
   const closeCustomerHistory = () => closeModal('customer-history-modal');
   const closeCustomerHistoryButton = document.getElementById('close-customer-history-modal');
@@ -777,6 +810,35 @@ function attachAdminEventListeners() {
     });
   }
 
+  const menuSearch = document.getElementById('admin-menu-search');
+  if (menuSearch) {
+    let t = null;
+    menuSearch.addEventListener('input', (e) => {
+      clearTimeout(t);
+      t = setTimeout(() => {
+        menuSearchQuery = e.target.value;
+        loadAdminMenu();
+      }, 300);
+    });
+  }
+
+  const menuStockFilterInput = document.getElementById('admin-menu-stock-filter');
+  if (menuStockFilterInput) {
+    menuStockFilterInput.addEventListener('change', (e) => {
+      menuStockFilter = e.target.value;
+      loadAdminMenu();
+    });
+  }
+
+  const customerSearch = document.getElementById('customer-search-input');
+  if (customerSearch) {
+    let t = null;
+    customerSearch.addEventListener('input', () => {
+      clearTimeout(t);
+      t = setTimeout(() => loadAdminCustomers(), 300);
+    });
+  }
+
   // Orders pagination
   const prevPageBtn = document.getElementById('orders-prev-page');
   const nextPageBtn = document.getElementById('orders-next-page');
@@ -809,20 +871,20 @@ function attachAdminEventListeners() {
     if (statusActionBtn) {
       const orderId = statusActionBtn.getAttribute('data-order-id');
       const status = statusActionBtn.getAttribute('data-status');
-      if (status === 'cancelled' && !confirm('Are you sure you want to cancel this order? This will restore stock to inventory.')) {
-        return;
-      }
+      statusActionBtn.disabled = true;
       try {
         await apiFetch(`/admin/orders/${orderId}/status`, {
           method: 'PATCH',
           body: JSON.stringify({ status }),
         });
-        showToast(`Order status updated to ${status}`, 'success');
+        showToast(`Order status updated to ${statusLabel(status).toLowerCase()}`, 'success');
         closeModal('order-drawer-modal');
         loadAdminOrders();
         loadDashboardStats();
       } catch (err) {
         showToast(err.message, 'error');
+        statusActionBtn.disabled = false;
+        loadAdminOrders();
       }
       return;
     }

@@ -11,10 +11,10 @@ async function getDashboardStats() {
           $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] },
         },
         toPickupOrders: {
-          $sum: { $cond: [{ $eq: ['$status', 'to_pickup'] }, 1, 0] },
+          $sum: { $cond: [{ $in: ['$status', ['ready_for_pickup', 'to_pickup']] }, 1, 0] },
         },
         toShipOrders: {
-          $sum: { $cond: [{ $eq: ['$status', 'to_ship'] }, 1, 0] },
+          $sum: { $cond: [{ $in: ['$status', ['ready_to_deliver', 'to_ship']] }, 1, 0] },
         },
         completedOrders: {
           $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] },

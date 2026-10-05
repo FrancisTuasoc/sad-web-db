@@ -2,6 +2,8 @@
 
 A complete, full-featured Burger Ordering and Billing Web Application built with an Express.js backend and a clean, responsive vanilla JavaScript/CSS frontend.
 
+Add-on quantities selected for new cart entries represent the total extras for that cart line, not extras per burger. Older saved cart lines retain their per-burger quantity and pricing.
+
 ---
 
 ## 📁 Project Directory Structure
@@ -33,7 +35,7 @@ casestudy-system/
     ├── js/                     # Modular client-side ES modules
     │   ├── api.js              # Fetch wrapper & token management
     │   ├── auth.js             # Authentication state, login, register, logout
-    │   ├── cart.js             # Cart management with localStorage fallback
+    │   ├── cart.js             # Server-backed cart management
     │   ├── checkout.js         # Multi-step checkout & payment processing
     │   ├── home.js             # Home page featured products & cart modal
     │   ├── menu.js             # Full menu catalog, live search & category filters
@@ -84,6 +86,12 @@ npm run dev
 ```
 
 The Express server serves the backend API at `http://localhost:5000/api` and statically serves the responsive `frontend/` at `http://localhost:5000/`.
+
+## Checkout and order status
+
+Checkout requires a fulfillment choice first, then contact details, and then a payment method supported for that fulfillment. Placing an order creates it as `pending`; admins see newest pending orders under **Orders Management** and can accept one to move pickup orders to `ready_for_pickup` or delivery orders to `ready_to_deliver`. Customers track pickup and delivery orders in separate tabs in their profile and confirm collection or receipt to complete them. Admin order lists refresh every 10 seconds.
+
+Customers can cancel only while an order is still `pending`. Cancellation and admin acceptance compete through an atomic status transition: whichever succeeds first wins. If acceptance wins, the customer is told that online cancellation is no longer available and must contact the shop immediately; staff should coordinate any cancellation, refund, or stock adjustment manually. Cancellation also restores reserved stock in the same MongoDB transaction, so the configured MongoDB deployment must support transactions (a replica set, including MongoDB Atlas).
 
 ---
 

@@ -1,12 +1,14 @@
 // Cart Management and Dynamic Rendering
 import { apiFetch } from './api.js';
 import { renderHeader, renderFooter, showToast, BURGER_PLACEHOLDER, escapeHtml, openModal, closeModal, updateCartBadge, getProductImageUrl } from './ui.js';
-import { requireAuth, getUser } from './auth.js';
-import { updateReceipt, isCheckoutAllowed } from './checkout.js';
+import { requireAuth } from './auth.js';
+import { updateReceipt } from './checkout.js';
 
 let cartItems = [];
 let checkedItemIds = new Set();
-let debounceSyncTimers = {};
+const debounceSyncTimers = new Map();
+const pendingQuantities = new Map();
+const quantitySyncPromises = new Map();
 let editingCartItem = null;
 let allAddons = [];
 let pendingCartDeletion = null;
@@ -16,19 +18,28 @@ export function getCheckedCartItems() {
 }
 
 export function hasStockIssue() {
-  for (const item of getCheckedCartItems()) {
+  const checkedItems = getCheckedCartItems();
+  const addonUsage = new Map();
+  for (const item of checkedItems) {
     if (!item.product || !item.product.isAvailable || item.product.stock < item.quantity) {
       return true;
     }
     if (item.addons && Array.isArray(item.addons)) {
       for (const a of item.addons) {
-        if (!a.product || !a.product.isAvailable || a.product.stock < a.qty * item.quantity) {
+        const addonQuantity = item.addonQuantityMode === 'per_order'
+          ? a.qty
+          : a.qty * item.quantity;
+        if (!a.product || !a.product.isAvailable) {
           return true;
         }
+        const addonId = String(a.product._id || a.product);
+        const current = addonUsage.get(addonId) || { quantity: 0, stock: a.product.stock };
+        current.quantity += addonQuantity;
+        addonUsage.set(addonId, current);
       }
     }
   }
-  return false;
+  return [...addonUsage.values()].some((addon) => addon.quantity > addon.stock);
 }
 
 export async function fetchCart() {
@@ -54,21 +65,6 @@ export async function fetchCart() {
     updateReceipt();
     updateCartBadge();
   } catch (err) {
-    // Check local storage fallback
-    try {
-      const localCart = JSON.parse(localStorage.getItem('cart') || '[]');
-      if (localCart.length > 0) {
-        cartItems = localCart;
-        if (checkedItemIds.size === 0) {
-          cartItems.forEach((item) => checkedItemIds.add(item._id));
-        }
-        renderCartLines();
-        updateReceipt();
-        updateCartBadge();
-        return;
-      }
-    } catch (e) {}
-
     container.innerHTML = `
       <div class="state-box">
         <h4 class="state-title">Unable to load your cart</h4>
@@ -100,6 +96,22 @@ export function renderCartLines() {
 
   const allChecked = cartItems.length > 0 && cartItems.every((item) => checkedItemIds.has(item._id));
   if (selectAllCb) selectAllCb.checked = allChecked;
+  const addonUsage = new Map();
+  for (const item of cartItems) {
+    for (const addon of item.addons || []) {
+      const addonId = String(addon.product && addon.product._id ? addon.product._id : addon.product);
+      const quantity = item.addonQuantityMode === 'per_order'
+        ? addon.qty
+        : addon.qty * item.quantity;
+      const current = addonUsage.get(addonId) || {
+        quantity: 0,
+        stock: addon.product && addon.product.stock,
+        name: addon.product && addon.product.name,
+      };
+      current.quantity += quantity;
+      addonUsage.set(addonId, current);
+    }
+  }
 
   container.innerHTML = cartItems
     .map((item) => {
@@ -128,18 +140,27 @@ export function renderCartLines() {
           const singleTotal = (aProd.price || 0) * (a.qty || 1);
           addonsPriceTotal += singleTotal;
 
-          if (aProd.stock < (a.qty || 1) * item.quantity) {
-            stockWarning += `<div class="text-danger" style="font-size:0.75rem;font-weight:700;">Add-on "${escapeHtml(aProd.name)}" has only ${aProd.stock} left!</div>`;
+          const addonQuantity = item.addonQuantityMode === 'per_order'
+            ? (a.qty || 1)
+            : (a.qty || 1) * item.quantity;
+          const totalAddonUsage = addonUsage.get(String(aProd._id || a.product));
+          if (totalAddonUsage && totalAddonUsage.quantity > aProd.stock) {
+            stockWarning += `<div class="text-danger" style="font-size:0.75rem;font-weight:700;">Your cart has ${totalAddonUsage.quantity} of "${escapeHtml(aProd.name)}", but only ${aProd.stock} are in stock.</div>`;
             isBlocked = true;
           }
 
-          return `+ ${escapeHtml(aProd.name || 'Add-on')} (x${a.qty || 1} • ₱${singleTotal.toFixed(2)})`;
+          const quantityLabel = item.addonQuantityMode === 'per_order'
+            ? `x${a.qty || 1} for order`
+            : `x${a.qty || 1} per item`;
+          return `+ ${escapeHtml(aProd.name || 'Add-on')} (${quantityLabel} • ₱${singleTotal.toFixed(2)})`;
         });
         addonsDisplay = `<div class="cart-item-addons-list">${addonStrs.join('<br>')}</div>`;
       }
 
-      const unitTotal = (prod.price || 0) + addonsPriceTotal;
-      const lineTotal = unitTotal * item.quantity;
+      const addonTotal = item.addonQuantityMode === 'per_order'
+        ? addonsPriceTotal
+        : addonsPriceTotal * item.quantity;
+      const lineTotal = (prod.price || 0) * item.quantity + addonTotal;
 
       return `
         <div class="cart-line-item ${isBlocked ? 'stock-warning-line' : ''}" data-line-id="${item._id}">
@@ -172,20 +193,68 @@ export function renderCartLines() {
 }
 
 // Debounced Server Synchronization for Quantity Changes
-function syncQuantityToServer(cartItemId, quantity) {
-  clearTimeout(debounceSyncTimers[cartItemId]);
-  debounceSyncTimers[cartItemId] = setTimeout(async () => {
-    try {
-      await apiFetch(`/cart/${cartItemId}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ quantity }),
-      });
-      updateCartBadge();
-    } catch (err) {
-      showToast(err.message, 'error');
-      fetchCart(); // Revert on failure
+async function syncQuantityToServer(cartItemId) {
+  const timer = debounceSyncTimers.get(cartItemId);
+  if (timer) clearTimeout(timer);
+  debounceSyncTimers.delete(cartItemId);
+
+  const inFlightSync = quantitySyncPromises.get(cartItemId);
+  if (inFlightSync) return inFlightSync;
+  if (!pendingQuantities.has(cartItemId)) return true;
+
+  const syncPromise = (async () => {
+    while (pendingQuantities.has(cartItemId)) {
+      const quantity = pendingQuantities.get(cartItemId);
+      pendingQuantities.delete(cartItemId);
+
+      try {
+        await apiFetch(`/cart/${cartItemId}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ quantity }),
+        });
+        updateCartBadge();
+      } catch (err) {
+        const pendingTimer = debounceSyncTimers.get(cartItemId);
+        if (pendingTimer) clearTimeout(pendingTimer);
+        debounceSyncTimers.delete(cartItemId);
+        pendingQuantities.delete(cartItemId);
+        showToast(err.message, 'error');
+        await fetchCart();
+        return false;
+      }
     }
-  }, 400);
+
+    return true;
+  })();
+
+  quantitySyncPromises.set(cartItemId, syncPromise);
+  try {
+    return await syncPromise;
+  } finally {
+    if (quantitySyncPromises.get(cartItemId) === syncPromise) {
+      quantitySyncPromises.delete(cartItemId);
+    }
+  }
+}
+
+function scheduleQuantitySync(cartItemId, quantity) {
+  const timer = debounceSyncTimers.get(cartItemId);
+  if (timer) clearTimeout(timer);
+  pendingQuantities.set(cartItemId, quantity);
+  debounceSyncTimers.set(cartItemId, setTimeout(() => {
+    syncQuantityToServer(cartItemId);
+  }, 400));
+}
+
+export async function flushPendingCartUpdates() {
+  const cartItemIds = new Set([
+    ...pendingQuantities.keys(),
+    ...quantitySyncPromises.keys(),
+  ]);
+  const results = await Promise.all(
+    [...cartItemIds].map((cartItemId) => syncQuantityToServer(cartItemId))
+  );
+  return results.every(Boolean);
 }
 
 function openCartDeleteConfirmation(deletion) {
@@ -226,6 +295,16 @@ async function confirmCartDeletion() {
   confirmButton.textContent = 'Removing...';
 
   try {
+    const itemIds = deletion.type === 'all'
+      ? [...pendingQuantities.keys()]
+      : [deletion.id];
+    for (const itemId of itemIds) {
+      const timer = debounceSyncTimers.get(itemId);
+      if (timer) clearTimeout(timer);
+      debounceSyncTimers.delete(itemId);
+      pendingQuantities.delete(itemId);
+    }
+
     const endpoint = deletion.type === 'all' ? '/cart' : `/cart/${deletion.id}`;
     const result = await apiFetch(endpoint, { method: 'DELETE' });
     if (!result.success) {
@@ -298,18 +377,21 @@ async function openEditAddonsModal(cartItemId) {
     .filter((a) => a.isAvailable && a.stock > 0)
     .map((addon) => {
       const isSelected = existingAddonMap.has(String(addon._id));
-      const currentQty = existingAddonMap.get(String(addon._id)) || 1;
+      const savedQty = existingAddonMap.get(String(addon._id)) || 1;
+      const currentQty = editingCartItem.addonQuantityMode === 'per_order'
+        ? savedQty
+        : savedQty * editingCartItem.quantity;
 
       return `
         <div class="addon-row" style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--color-border);font-size:0.88rem;">
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-            <input type="checkbox" class="edit-addon-checkbox" value="${addon._id}" data-price="${addon.price}" ${isSelected ? 'checked' : ''}>
+            <input type="checkbox" class="edit-addon-checkbox" value="${addon._id}" data-price="${addon.price}" data-stock="${addon.stock}" ${isSelected ? 'checked' : ''}>
             <span><strong>${escapeHtml(addon.name)}</strong> (+₱${addon.price.toFixed(2)})</span>
           </label>
           <div class="qty-stepper" style="transform:scale(0.85);transform-origin:right center;">
             <button type="button" class="stepper-btn edit-addon-minus" data-target="edit-addon-qty-${addon._id}">-</button>
             <span class="stepper-val" id="edit-addon-qty-${addon._id}">${currentQty}</span>
-            <button type="button" class="stepper-btn edit-addon-plus" data-target="edit-addon-qty-${addon._id}">+</button>
+            <button type="button" class="stepper-btn edit-addon-plus" data-target="edit-addon-qty-${addon._id}" data-stock="${addon.stock}">+</button>
           </div>
         </div>
       `;
@@ -334,7 +416,9 @@ async function openEditAddonsModal(cartItemId) {
       const elem = document.getElementById(btn.getAttribute('data-target'));
       if (elem) {
         let val = parseInt(elem.textContent, 10) || 1;
-        if (val < 10) elem.textContent = String(val + 1);
+        const stock = Number(btn.getAttribute('data-stock')) || 0;
+        if (val < stock) elem.textContent = String(val + 1);
+        else showToast(`Only ${stock} of this add-on are available.`, 'warning');
       }
     });
   });
@@ -364,7 +448,7 @@ async function saveEditedAddons() {
   try {
     await apiFetch(`/cart/${editingCartItem._id}`, {
       method: 'PATCH',
-      body: JSON.stringify({ addons: updatedAddons }),
+      body: JSON.stringify({ addons: updatedAddons, addonQuantityMode: 'per_order' }),
     });
 
     showToast('Add-ons updated!', 'success');
@@ -411,7 +495,7 @@ function setupCartListeners() {
         item.quantity -= 1;
         renderCartLines();
         updateReceipt();
-        syncQuantityToServer(lineId, item.quantity);
+        scheduleQuantitySync(lineId, item.quantity);
       }
       return;
     }
@@ -426,7 +510,7 @@ function setupCartListeners() {
           item.quantity += 1;
           renderCartLines();
           updateReceipt();
-          syncQuantityToServer(lineId, item.quantity);
+          scheduleQuantitySync(lineId, item.quantity);
         } else {
           showToast(`Cannot add more. Only ${item.product.stock} items left in stock.`, 'warning');
         }

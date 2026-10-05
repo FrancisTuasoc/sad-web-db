@@ -49,6 +49,11 @@ const orderItemSchema = new mongoose.Schema(
       type: [orderItemAddonSchema],
       default: [],
     },
+    addonQuantityMode: {
+      type: String,
+      enum: ['per_item', 'per_order'],
+      default: 'per_item',
+    },
     lineTotal: {
       type: Number,
       required: true,
@@ -133,7 +138,7 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'to_pickup', 'to_ship', 'completed', 'cancelled'],
+      enum: ['pending', 'ready_for_pickup', 'ready_to_deliver', 'completed', 'cancelled', 'to_pickup', 'to_ship'],
       default: 'pending',
       index: true,
     },

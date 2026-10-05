@@ -34,6 +34,11 @@ const cartItemSchema = new mongoose.Schema(
       type: [cartAddonSchema],
       default: [],
     },
+    addonQuantityMode: {
+      type: String,
+      enum: ['per_item', 'per_order'],
+      default: 'per_item',
+    },
     quantity: {
       type: Number,
       required: true,

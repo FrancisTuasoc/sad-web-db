@@ -1,6 +1,9 @@
 // Central API Fetch Wrapper
 
-const API_BASE_URL = 'https://sad-web-db.onrender.com';
+const isLocalDevelopment = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+const API_BASE_URL = isLocalDevelopment
+  ? 'http://localhost:5000'
+  : 'https://sad-web-db.onrender.com';
 
 export function apiUrl(endpoint) {
   return endpoint.startsWith('http')

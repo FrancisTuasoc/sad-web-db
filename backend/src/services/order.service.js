@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const CartItem = require('../models/CartItem');
 const Product = require('../models/Product');
@@ -6,6 +7,7 @@ const User = require('../models/User');
 const AppError = require('../utils/AppError');
 const { generateOrderNumber } = require('../utils/orderNumber');
 const { deductStockWithCompensation, restoreStockForOrder } = require('./stock.service');
+const { broadcastStock } = require('./events');
 
 async function getOrCreateSettings() {
   let settings = await Settings.findOne();
@@ -94,6 +96,7 @@ async function placeOrder({ userId, cartItemIds, fulfillment, paymentMethod, gca
 
     let addonsLinePrice = 0;
     const snapAddons = [];
+    const addonQuantityMode = line.addonQuantityMode || 'per_item';
 
     if (line.addons && Array.isArray(line.addons)) {
       for (const addonEntry of line.addons) {
@@ -101,7 +104,9 @@ async function placeOrder({ userId, cartItemIds, fulfillment, paymentMethod, gca
         if (!addonProd || !addonProd.isAvailable) {
           throw new AppError(`Add-on "${addonProd ? addonProd.name : 'Unknown'}" is currently not available.`, 400);
         }
-        const neededAddonQty = addonEntry.qty * line.quantity;
+        const neededAddonQty = addonQuantityMode === 'per_order'
+          ? addonEntry.qty
+          : addonEntry.qty * line.quantity;
         if (addonProd.stock < neededAddonQty) {
           throw new AppError(`Insufficient stock for add-on "${addonProd.name}". Only ${addonProd.stock} left.`, 400);
         }
@@ -112,7 +117,8 @@ async function placeOrder({ userId, cartItemIds, fulfillment, paymentMethod, gca
           needed: neededAddonQty,
         });
 
-        const singleAddonTotal = addonProd.price * addonEntry.qty;
+        const singleAddonTotal = addonProd.price * addonEntry.qty
+          * (addonQuantityMode === 'per_order' ? 1 : line.quantity);
         addonsLinePrice += singleAddonTotal;
 
         snapAddons.push({
@@ -124,7 +130,7 @@ async function placeOrder({ userId, cartItemIds, fulfillment, paymentMethod, gca
       }
     }
 
-    const lineTotal = (mainProd.price + addonsLinePrice) * line.quantity;
+    const lineTotal = mainProd.price * line.quantity + addonsLinePrice;
     subtotal += lineTotal;
 
     orderItems.push({
@@ -133,6 +139,7 @@ async function placeOrder({ userId, cartItemIds, fulfillment, paymentMethod, gca
       unitPrice: mainProd.price,
       quantity: line.quantity,
       addons: snapAddons,
+      addonQuantityMode,
       lineTotal,
     });
   }
@@ -210,32 +217,41 @@ async function cancelOrder(orderId, currentUser, role = 'customer') {
   if (role !== 'admin') {
     query.user = currentUser._id;
   }
+  const session = await mongoose.startSession();
+  let cancelledOrder = null;
+  let restoredProducts = [];
 
-  const order = await Order.findOne(query);
-  if (!order) {
-    throw new AppError('Order not found.', 404);
+  try {
+    await session.withTransaction(async () => {
+      const order = await Order.findOne(query).session(session);
+      if (!order) {
+        throw new AppError('Order not found.', 404);
+      }
+      if (order.status !== 'pending') {
+        throw new AppError('This order can no longer be cancelled because it has already been accepted or processed. Contact the shop for help.', 409);
+      }
+
+      restoredProducts = await restoreStockForOrder(order.items, session);
+      cancelledOrder = await Order.findOneAndUpdate(
+        { _id: order._id, status: 'pending' },
+        {
+          $set: { status: 'cancelled', cancelledBy: role === 'admin' ? 'admin' : 'customer' },
+          $push: { statusHistory: { status: 'cancelled', at: new Date() } },
+        },
+        { new: true, session }
+      );
+      if (!cancelledOrder) {
+        throw new AppError('This order was accepted before the cancellation completed. Contact the shop for help.', 409);
+      }
+    });
+  } finally {
+    await session.endSession();
   }
 
-  if (order.status === 'cancelled') {
-    throw new AppError('This order is already cancelled.', 400);
+  for (const product of restoredProducts) {
+    broadcastStock(product._id, product.stock, product.isAvailable);
   }
-  if (order.status === 'completed') {
-    throw new AppError('Completed orders cannot be cancelled.', 400);
-  }
-
-  if (role !== 'admin' && order.status !== 'pending') {
-    throw new AppError('Customers can only cancel orders that are still pending.', 400);
-  }
-
-  // Restore inventory
-  await restoreStockForOrder(order.items);
-
-  order.status = 'cancelled';
-  order.cancelledBy = role === 'admin' ? 'admin' : 'customer';
-  order.statusHistory.push({ status: 'cancelled', at: new Date() });
-  await order.save();
-
-  return order;
+  return cancelledOrder;
 }
 
 async function updateOrderStatus(orderId, nextStatus) {
@@ -244,38 +260,68 @@ async function updateOrderStatus(orderId, nextStatus) {
     throw new AppError('Order not found.', 404);
   }
 
-  if (order.status === 'cancelled' || order.status === 'completed') {
-    throw new AppError('A completed or cancelled order can no longer change status.', 400);
+  const expectedStatus = nextStatus === 'ready_for_pickup' || nextStatus === 'ready_to_deliver'
+    ? 'pending'
+    : nextStatus === 'completed' && order.fulfillment === 'pickup'
+      ? 'ready_for_pickup'
+      : null;
+  const expectedFulfillment = nextStatus === 'ready_for_pickup'
+    ? 'pickup'
+    : nextStatus === 'ready_to_deliver'
+      ? 'delivery'
+      : 'pickup';
+  if (!expectedStatus || order.status !== expectedStatus || order.fulfillment !== expectedFulfillment) {
+    throw new AppError(`Cannot change order status from ${order.status} to ${nextStatus}.`, 409);
   }
 
-  if (nextStatus === 'cancelled') {
-    return cancelOrder(orderId, null, 'admin');
-  }
-
-  // Allowed transitions
-  const validTransitions = {
-    pending: order.fulfillment === 'pickup' ? ['to_pickup'] : ['to_ship'],
-    to_pickup: ['completed'],
-    to_ship: ['completed'],
+  const update = {
+    $set: { status: nextStatus },
+    $push: { statusHistory: { status: nextStatus, at: new Date() } },
   };
+  if (
+    nextStatus === 'completed'
+    && order.paymentStatus === 'unpaid'
+    && ['cod', 'pay_at_shop'].includes(order.paymentMethod)
+  ) {
+    update.$set.paymentStatus = 'paid';
+  }
+  const updated = await Order.findOneAndUpdate(
+    { _id: order._id, status: expectedStatus, fulfillment: expectedFulfillment },
+    update,
+    { new: true }
+  );
+  if (!updated) {
+    throw new AppError('Another action updated this order first. Refresh the order and try again.', 409);
+  }
+  return updated;
+}
 
-  const allowed = validTransitions[order.status] || [];
-  if (!allowed.includes(nextStatus)) {
-    throw new AppError(`Cannot change order status from ${order.status} to ${nextStatus}.`, 400);
+async function completeOrder(orderId, userId) {
+  const order = await Order.findOne({ _id: orderId, user: userId });
+  if (!order) {
+    throw new AppError('Order not found.', 404);
+  }
+  const expectedStatus = order.fulfillment === 'pickup' ? 'ready_for_pickup' : 'ready_to_deliver';
+  if (order.status !== expectedStatus) {
+    throw new AppError('This order is not ready to be completed.', 409);
   }
 
-  order.status = nextStatus;
-  order.statusHistory.push({ status: nextStatus, at: new Date() });
-
-  // Completing a COD or pay_at_shop order auto-sets paymentStatus: 'paid'
-  if (nextStatus === 'completed') {
-    if (order.paymentMethod === 'cod' || order.paymentMethod === 'pay_at_shop') {
-      order.paymentStatus = 'paid';
-    }
+  const update = {
+    $set: { status: 'completed' },
+    $push: { statusHistory: { status: 'completed', at: new Date() } },
+  };
+  if (order.paymentStatus === 'unpaid' && ['cod', 'pay_at_shop'].includes(order.paymentMethod)) {
+    update.$set.paymentStatus = 'paid';
   }
-
-  await order.save();
-  return order;
+  const completed = await Order.findOneAndUpdate(
+    { _id: order._id, user: userId, status: expectedStatus, fulfillment: order.fulfillment },
+    update,
+    { new: true }
+  );
+  if (!completed) {
+    throw new AppError('Another action updated this order first. Refresh the order and try again.', 409);
+  }
+  return completed;
 }
 
 async function markOrderPaid(orderId) {
@@ -293,5 +339,6 @@ module.exports = {
   placeOrder,
   cancelOrder,
   updateOrderStatus,
+  completeOrder,
   markOrderPaid,
 };

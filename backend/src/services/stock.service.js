@@ -68,8 +68,9 @@ async function deductStockWithCompensation(itemsToDeduct) {
  * Restore stock when order is cancelled
  * orderItems: array of order items with addons
  */
-async function restoreStockForOrder(orderItems) {
+async function restoreStockForOrder(orderItems, session = null) {
   const aggregated = new Map();
+  const updatedProducts = [];
 
   for (const item of orderItems) {
     if (item.product) {
@@ -81,7 +82,9 @@ async function restoreStockForOrder(orderItems) {
       for (const addon of item.addons) {
         if (addon.product) {
           const aKey = String(addon.product);
-          const totalAddonQty = addon.qty * item.quantity;
+          const totalAddonQty = item.addonQuantityMode === 'per_order'
+            ? addon.qty
+            : addon.qty * item.quantity;
           aggregated.set(aKey, (aggregated.get(aKey) || 0) + totalAddonQty);
         }
       }
@@ -89,15 +92,23 @@ async function restoreStockForOrder(orderItems) {
   }
 
   for (const [prodId, qty] of aggregated.entries()) {
+    const updateOptions = { new: true };
+    if (session) updateOptions.session = session;
     const updated = await Product.findByIdAndUpdate(
       prodId,
       { $inc: { stock: qty } },
-      { new: true }
+      updateOptions
     );
     if (updated) {
-      broadcastStock(updated._id, updated.stock, updated.isAvailable);
+      updatedProducts.push(updated);
     }
   }
+  if (!session) {
+    for (const product of updatedProducts) {
+      broadcastStock(product._id, product.stock, product.isAvailable);
+    }
+  }
+  return updatedProducts;
 }
 
 module.exports = {

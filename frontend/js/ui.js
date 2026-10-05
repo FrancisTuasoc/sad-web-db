@@ -198,16 +198,8 @@ export async function updateCartBadge() {
       badge.classList.add('hidden');
     }
   } catch (err) {
-    // Keep local count or hide
-    try {
-      const localCart = JSON.parse(localStorage.getItem('cart') || '[]');
-      const count = localCart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-      badge.textContent = String(count);
-      if (count > 0) badge.classList.remove('hidden');
-      else badge.classList.add('hidden');
-    } catch (e) {
-      badge.classList.add('hidden');
-    }
+    badge.textContent = '0';
+    badge.classList.add('hidden');
   }
 }
 
@@ -313,8 +305,8 @@ export function renderHeader(activeNav = '') {
       mobileDrawer.innerHTML = `
         <a href="index.html">Home</a>
         <a href="menu.html">Menu</a>
-        <a href="index.html#about">About Us</a>
         <a href="index.html#featured">Featured Burgers</a>
+        <a href="index.html#about">About Us</a>
         <a href="index.html#contact">Contact &amp; Store Hours</a>
         <a href="cart.html">My Cart</a>
         <a href="profile.html">My Account &amp; Status</a>
@@ -325,8 +317,8 @@ export function renderHeader(activeNav = '') {
       mobileDrawer.innerHTML = `
         <a href="index.html">Home</a>
         <a href="menu.html">Menu</a>
-        <a href="index.html#about">About Us</a>
         <a href="index.html#featured">Featured Burgers</a>
+        <a href="index.html#about">About Us</a>
         <a href="index.html#contact">Contact &amp; Store Hours</a>
         <a href="cart.html">My Cart</a>
         <a href="login.html" style="color:var(--color-accent);font-weight:700;">Login / Register</a>

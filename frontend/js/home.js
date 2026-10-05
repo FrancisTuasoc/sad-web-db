@@ -11,16 +11,10 @@ export const DEFAULT_FEATURED_PRODUCTS = [
   { _id: 'prod-complete-bacon', name: 'Complete with Bacon', price: 72, category: { name: 'Complete' }, stock: 40, lowStockThreshold: 10, isAvailable: true, isFeatured: true, slug: 'complete-with-bacon', description: 'The ultimate monster burger: beef patty, ham, egg, cheese, slaw, and crispy bacon.' },
 ];
 
-export const DEFAULT_ADDONS = [
-  { _id: 'addon-patty', name: 'Add Patty', price: 15, stock: 100, isAvailable: true, isAddon: true },
-  { _id: 'addon-ham', name: 'Add Ham', price: 12, stock: 100, isAvailable: true, isAddon: true },
-  { _id: 'addon-slaw', name: 'Add Coleslaw', price: 3, stock: 100, isAvailable: true, isAddon: true },
-];
-
-let availableAddons = [...DEFAULT_ADDONS];
+let availableAddons = [];
 let selectedProduct = null;
 
-export function renderProductCard(product, isGuest = false) {
+export function renderProductCard(product, isGuest = false, canOrder = true) {
   const isAvailable = product.isAvailable && product.stock > 0;
   const isOutOfStock = product.stock <= 0;
   const isLowStock = product.stock > 0 && product.stock <= (product.lowStockThreshold || 10);
@@ -43,7 +37,9 @@ export function renderProductCard(product, isGuest = false) {
   const imgUrl = getProductImageUrl(product);
 
   let buttonHtml = '';
-  if (isGuest) {
+  if (!canOrder) {
+    buttonHtml = '<button type="button" class="btn btn-primary btn-sm" disabled>Unavailable</button>';
+  } else if (isGuest) {
     buttonHtml = `
       <button type="button" class="btn btn-primary btn-sm btn-add-to-cart" data-is-guest="true" data-product-id="${product._id}" ${!isAvailable ? 'disabled' : ''}>
         Login to order
@@ -115,8 +111,8 @@ async function loadFeaturedProducts() {
 
   try {
     const data = await apiFetch('/products?sort=featured');
+    availableAddons = Array.isArray(data && data.addons) ? data.addons : [];
     if (data && data.products && data.products.length > 0) {
-      availableAddons = data.addons || DEFAULT_ADDONS;
       const featured = data.products.filter((p) => !p.isAddon && p.isFeatured).slice(0, 4);
       if (featured.length > 0) {
         container.innerHTML = featured.map((p) => renderProductCard(p, isGuest)).join('');
@@ -124,11 +120,15 @@ async function loadFeaturedProducts() {
       }
     }
     // Fallback if empty array from server
-    container.innerHTML = DEFAULT_FEATURED_PRODUCTS.map((p) => renderProductCard(p, isGuest)).join('');
+    container.innerHTML = DEFAULT_FEATURED_PRODUCTS.map((p) => renderProductCard(p, isGuest, false)).join('');
   } catch (err) {
     // Seamless fallback to default featured products so menu is NEVER empty
-    container.innerHTML = DEFAULT_FEATURED_PRODUCTS.map((p) => renderProductCard(p, isGuest)).join('');
+    container.innerHTML = DEFAULT_FEATURED_PRODUCTS.map((p) => renderProductCard(p, isGuest, false)).join('');
   }
+}
+
+export function setAvailableAddons(addons) {
+  availableAddons = Array.isArray(addons) ? addons : [];
 }
 
 // Add to Cart Modal Flow
@@ -160,7 +160,7 @@ export function setupAddToCartModal() {
       addonsSum += price * miniQty;
     });
 
-    const total = (selectedProduct.price + addonsSum) * qty;
+    const total = selectedProduct.price * qty + addonsSum;
     const totalElem = document.getElementById('modal-line-total');
     if (totalElem) totalElem.textContent = `₱${total.toFixed(2)}`;
   }
@@ -212,6 +212,7 @@ export function setupAddToCartModal() {
             productId: selectedProduct._id,
             quantity: qty,
             addons: addonsPayload,
+            addonQuantityMode: 'per_order',
           }),
         });
 
@@ -219,25 +220,7 @@ export function setupAddToCartModal() {
         closeModal('add-to-cart-modal');
         updateCartBadge();
       } catch (err) {
-        // Fallback for offline / demo mode
-        try {
-          const localCart = JSON.parse(localStorage.getItem('cart') || '[]');
-          localCart.push({
-            _id: 'cart-' + Date.now(),
-            product: selectedProduct,
-            quantity: qty,
-            addons: addonsPayload.map((a) => {
-              const matched = availableAddons.find((ad) => ad._id === a.product) || { name: 'Add-on', price: 10 };
-              return { product: matched, qty: a.qty };
-            }),
-          });
-          localStorage.setItem('cart', JSON.stringify(localCart));
-          showToast(`Added ${selectedProduct.name} to your cart!`, 'success');
-          closeModal('add-to-cart-modal');
-          updateCartBadge();
-        } catch (localErr) {
-          showToast(err.message, 'error');
-        }
+        showToast(err.message, 'error');
       } finally {
         confirmBtn.disabled = false;
         confirmBtn.textContent = 'Confirm & Add to Cart';
@@ -285,22 +268,24 @@ export async function openAddToCartForProduct(productId, productObj = null) {
   // Populate addons
   const addonsListContainer = document.getElementById('modal-addons-list');
   if (addonsListContainer) {
-    const addonsToUse = availableAddons && availableAddons.length > 0 ? availableAddons : DEFAULT_ADDONS;
-    addonsListContainer.innerHTML = addonsToUse
+    const addonsToUse = availableAddons.filter((addon) => addon.isAvailable && addon.stock > 0);
+    addonsListContainer.innerHTML = addonsToUse.length
+      ? addonsToUse
       .map((addon) => `
         <div class="addon-row" style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--color-border);font-size:0.88rem;">
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-            <input type="checkbox" class="modal-addon-checkbox" value="${addon._id}" data-price="${addon.price}">
+            <input type="checkbox" class="modal-addon-checkbox" value="${addon._id}" data-price="${addon.price}" data-stock="${addon.stock}">
             <span><strong>${escapeHtml(addon.name)}</strong> (+₱${addon.price.toFixed(2)})</span>
           </label>
           <div class="qty-stepper" style="transform:scale(0.85);transform-origin:right center;">
             <button type="button" class="stepper-btn mini-addon-minus" data-target="addon-qty-${addon._id}">-</button>
             <span class="stepper-val" id="addon-qty-${addon._id}">1</span>
-            <button type="button" class="stepper-btn mini-addon-plus" data-target="addon-qty-${addon._id}">+</button>
+            <button type="button" class="stepper-btn mini-addon-plus" data-target="addon-qty-${addon._id}" data-stock="${addon.stock}">+</button>
           </div>
         </div>
       `)
-      .join('');
+      .join('')
+      : '<p class="text-muted">No add-ons are currently available.</p>';
 
     // Wire mini steppers and checkbox changes
     addonsListContainer.querySelectorAll('.modal-addon-checkbox').forEach((cb) => {
@@ -313,7 +298,7 @@ export async function openAddToCartForProduct(productId, productObj = null) {
           const miniVal = miniInput ? parseInt(miniInput.textContent, 10) || 1 : 1;
           addonsSum += price * miniVal;
         });
-        const lineTotal = (selectedProduct.price + addonsSum) * currentQty;
+        const lineTotal = selectedProduct.price * currentQty + addonsSum;
         document.getElementById('modal-line-total').textContent = `₱${lineTotal.toFixed(2)}`;
       });
     });
@@ -341,10 +326,13 @@ export async function openAddToCartForProduct(productId, productObj = null) {
         const elem = document.getElementById(targetId);
         if (elem) {
           let val = parseInt(elem.textContent, 10) || 1;
-          if (val < 10) {
+          const stock = Number(btn.getAttribute('data-stock')) || 0;
+          if (val < stock) {
             elem.textContent = String(val + 1);
             const cb = elem.closest('.addon-row').querySelector('.modal-addon-checkbox');
             if (cb.checked) cb.dispatchEvent(new Event('change'));
+          } else {
+            showToast(`Only ${stock} of this add-on are available.`, 'warning');
           }
         }
       });

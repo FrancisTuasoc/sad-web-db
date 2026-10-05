@@ -23,8 +23,8 @@
         <ul class="nav-links">
           <li><a href="index.html">Home</a></li>
           <li><a href="menu.html">Menu</a></li>
-          <li><a href="index.html#about">About</a></li>
           <li><a href="index.html#featured">Featured</a></li>
+          <li><a href="index.html#about">About</a></li>
           <li><a href="index.html#contact">Contact</a></li>
         </ul>
       </nav>
@@ -52,8 +52,8 @@
     <div id="mobile-drawer-menu" class="mobile-drawer">
       <a href="index.html">Home</a>
       <a href="menu.html">Menu</a>
-      <a href="index.html#about">About Us</a>
       <a href="index.html#featured">Featured Burgers</a>
+      <a href="index.html#about">About Us</a>
       <a href="index.html#contact">Contact & Store Hours</a>
       <a href="cart.html">My Cart</a>
       <a href="profile.html" style="color:var(--color-accent);font-weight:700;">My Profile</a>
@@ -94,15 +94,12 @@
             <h3 style="font-size:1.3rem;margin-bottom:16px;">Live Order Tracking</h3>
 
             <!-- Subtabs -->
-            <div class="tab-pill-group" style="grid-template-columns: 1fr 1fr 1fr;margin-bottom:20px;">
-              <button type="button" class="tab-pill status-subtab active" data-subtab="pending">
-                Pending Acceptance (<span id="subtab-pending-badge">0</span>)
+            <div class="tab-pill-group" style="grid-template-columns: 1fr 1fr;margin-bottom:20px;">
+              <button type="button" class="tab-pill status-subtab active" data-subtab="pickup">
+                Pick Up (<span id="subtab-pickup-badge">0</span>)
               </button>
-              <button type="button" class="tab-pill status-subtab" data-subtab="to_pickup">
-                To Pick Up (<span id="subtab-pickup-badge">0</span>)
-              </button>
-              <button type="button" class="tab-pill status-subtab" data-subtab="to_ship">
-                To Ship (<span id="subtab-ship-badge">0</span>)
+              <button type="button" class="tab-pill status-subtab" data-subtab="delivery">
+                Delivery (<span id="subtab-delivery-badge">0</span>)
               </button>
             </div>
 

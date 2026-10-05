@@ -2,11 +2,11 @@
 import { apiFetch } from './api.js';
 import { showToast, escapeHtml, BURGER_PLACEHOLDER } from './ui.js';
 import { getUser, setUser } from './auth.js';
-import { getCheckedCartItems, hasStockIssue, fetchCart } from './cart.js';
+import { getCheckedCartItems, hasStockIssue, fetchCart, flushPendingCartUpdates } from './cart.js';
 
 let publicSettings = null;
-let fulfillmentMethod = 'pickup'; // 'pickup' | 'delivery'
-let paymentMethod = 'gcash'; // 'gcash' | 'pay_at_shop' | 'cod'
+let fulfillmentMethod = null; // 'pickup' | 'delivery'
+let paymentMethod = null; // 'gcash' | 'pay_at_shop' | 'cod'
 let isChangingContact = false;
 
 export function isCheckoutAllowed() {
@@ -24,6 +24,42 @@ export async function loadCheckoutSettings() {
   } catch (err) {
     showToast('Failed to load store settings.', 'error');
   }
+}
+
+function showCheckoutStep(step) {
+  document.getElementById('checkout-step-contact')?.classList.toggle('hidden', step < 2);
+  document.getElementById('contact-step-actions')?.classList.toggle('hidden', step < 2);
+  document.getElementById('checkout-step-payment')?.classList.toggle('hidden', step < 3);
+  document.getElementById('payment-step-actions')?.classList.toggle('hidden', step < 3);
+  document.getElementById('continue-contact-btn')?.classList.toggle('hidden', step !== 1);
+  document.getElementById('place-order-btn')?.classList.toggle('hidden', step !== 3);
+  updateReceipt();
+}
+
+function validateContactDetails() {
+  const nameInput = document.getElementById('contact-name-input');
+  const phoneInput = document.getElementById('contact-phone-input');
+  const addressInput = document.getElementById('contact-address-input');
+  const fullName = nameInput?.value.trim() || '';
+  const phone = phoneInput?.value.trim() || '';
+  const address = addressInput?.value.trim() || '';
+
+  if (fullName.length < 2) {
+    showToast('Please enter your full name.', 'warning');
+    nameInput?.focus();
+    return false;
+  }
+  if (!/^(09\d{9}|\+639\d{9})$/.test(phone.replace(/[\s-]/g, ''))) {
+    showToast('Please enter a valid Philippine mobile number (e.g. 09171234567).', 'warning');
+    phoneInput?.focus();
+    return false;
+  }
+  if (fulfillmentMethod === 'delivery' && address.length < 5) {
+    showToast('Please provide your complete delivery address.', 'warning');
+    addressInput?.focus();
+    return false;
+  }
+  return true;
 }
 
 export function updateReceipt() {
@@ -51,12 +87,16 @@ export function updateReceipt() {
           const names = item.addons.map((a) => {
             const aPrice = (a.product ? a.product.price : 0) * (a.qty || 1);
             addonsSum += aPrice;
-            return `${a.product ? a.product.name : 'Add-on'} (x${a.qty || 1})`;
+            const quantityLabel = item.addonQuantityMode === 'per_order' ? 'for order' : 'per item';
+            return `${a.product ? a.product.name : 'Add-on'} (x${a.qty || 1} ${quantityLabel})`;
           });
           addonsText = `<div style="font-size:0.75rem;color:var(--color-text-muted);padding-left:8px;">${names.join(', ')}</div>`;
         }
 
-        const lineTotal = ((prod.price || 0) + addonsSum) * item.quantity;
+        const addonTotal = item.addonQuantityMode === 'per_order'
+          ? addonsSum
+          : addonsSum * item.quantity;
+        const lineTotal = (prod.price || 0) * item.quantity + addonTotal;
         subtotal += lineTotal;
 
         return `
@@ -107,7 +147,7 @@ export function updateReceipt() {
 
   const placeOrderBtn = document.getElementById('place-order-btn');
   if (placeOrderBtn) {
-    placeOrderBtn.disabled = checkedItems.length === 0 || stockIssue;
+    placeOrderBtn.disabled = checkedItems.length === 0 || stockIssue || !paymentMethod;
   }
 }
 
@@ -144,6 +184,13 @@ function renderPaymentOptions() {
 
   const container = document.getElementById('payment-methods-container');
   if (!container) return;
+
+  if (!fulfillmentMethod) {
+    container.innerHTML = '<p class="text-muted">Choose pickup or delivery first.</p>';
+    document.getElementById('gcash-payment-box')?.classList.add('hidden');
+    paymentMethod = null;
+    return;
+  }
 
   let optionsHtml = '';
 
@@ -191,9 +238,7 @@ function renderPaymentOptions() {
   // Ensure selected payment method is valid for the current fulfillment
   const availableValues = Array.from(container.querySelectorAll('input[name="payment_method"]')).map((el) => el.value);
   if (!availableValues.includes(paymentMethod)) {
-    paymentMethod = availableValues[0] || 'gcash';
-    const checkedRadio = container.querySelector(`input[value="${paymentMethod}"]`);
-    if (checkedRadio) checkedRadio.checked = true;
+    paymentMethod = null;
   }
 
   // GCash details box visibility
@@ -209,6 +254,9 @@ function renderPaymentOptions() {
       gcashBox.classList.add('hidden');
     }
   }
+  if (availableValues.length === 0) {
+    container.innerHTML = '<p class="text-muted">No payment methods are currently available for this order type. Please contact the shop.</p>';
+  }
 
   // Bind change events
   container.querySelectorAll('input[name="payment_method"]').forEach((radio) => {
@@ -217,6 +265,7 @@ function renderPaymentOptions() {
       if (gcashBox) {
         gcashBox.classList.toggle('hidden', paymentMethod !== 'gcash');
       }
+      updateReceipt();
     });
   });
 }
@@ -267,6 +316,17 @@ function initContactDetails() {
 }
 
 async function handlePlaceOrder() {
+  if (!fulfillmentMethod) {
+    showToast('Please choose pickup or delivery first.', 'warning');
+    showCheckoutStep(1);
+    return;
+  }
+  if (!paymentMethod) {
+    showToast('Please choose a payment method.', 'warning');
+    showCheckoutStep(3);
+    return;
+  }
+
   const checkedItems = getCheckedCartItems();
   if (checkedItems.length === 0) {
     showToast('Please select at least one item from your cart.', 'warning');
@@ -288,27 +348,12 @@ async function handlePlaceOrder() {
   const address = addressInput ? addressInput.value.trim() : '';
   const gcashReference = gcashRefInput ? gcashRefInput.value.trim() : '';
 
-  if (!fullName || fullName.length < 2) {
-    showToast('Please enter your full name.', 'warning');
-    if (nameInput) nameInput.focus();
-    return;
-  }
-
-  if (!phone) {
-    showToast('Please enter your phone number.', 'warning');
-    if (phoneInput) phoneInput.focus();
+  if (!validateContactDetails()) {
+    showCheckoutStep(2);
     return;
   }
 
   if (fulfillmentMethod === 'delivery') {
-    const phPhoneRegex = /^(09\d{9}|\+639\d{9})$/;
-    const cleanPhone = phone.replace(/[\s-]/g, '');
-    if (!phPhoneRegex.test(cleanPhone)) {
-      showToast('Please enter a valid Philippine mobile number (e.g. 09171234567).', 'warning');
-      if (phoneInput) phoneInput.focus();
-      return;
-    }
-
     if (!address || address.length < 5) {
       showToast('Please provide your complete delivery address.', 'warning');
       if (addressInput) addressInput.focus();
@@ -325,6 +370,29 @@ async function handlePlaceOrder() {
   }
 
   const placeOrderBtn = document.getElementById('place-order-btn');
+  if (placeOrderBtn) {
+    placeOrderBtn.disabled = true;
+    placeOrderBtn.textContent = 'Syncing Cart...';
+  }
+
+  try {
+    const cartSynced = await flushPendingCartUpdates();
+    if (!cartSynced) {
+      if (placeOrderBtn) {
+        placeOrderBtn.disabled = false;
+        placeOrderBtn.textContent = 'Place Order';
+      }
+      return;
+    }
+  } catch (err) {
+    showToast(err.message, 'error');
+    if (placeOrderBtn) {
+      placeOrderBtn.disabled = false;
+      placeOrderBtn.textContent = 'Place Order';
+    }
+    return;
+  }
+
   if (placeOrderBtn) {
     placeOrderBtn.disabled = true;
     placeOrderBtn.textContent = 'Processing Order...';
@@ -381,7 +449,8 @@ function showSuccessReceipt(order) {
       .map((item) => {
         let addonsStr = '';
         if (item.addons && item.addons.length > 0) {
-          addonsStr = `<div style="font-size:0.78rem;color:var(--color-text-muted);padding-left:10px;">${item.addons.map((a) => `+ ${escapeHtml(a.name)} (x${a.qty} @ ₱${a.price.toFixed(2)})`).join(', ')}</div>`;
+          const quantityLabel = item.addonQuantityMode === 'per_order' ? 'for order' : 'per item';
+          addonsStr = `<div style="font-size:0.78rem;color:var(--color-text-muted);padding-left:10px;">${item.addons.map((a) => `+ ${escapeHtml(a.name)} (x${a.qty} ${quantityLabel} @ ₱${a.price.toFixed(2)})`).join(', ')}</div>`;
         }
         return `
           <div style="display:flex;justify-content:space-between;padding:4px 0;">
@@ -404,7 +473,7 @@ function showSuccessReceipt(order) {
         </div>
         <h2 style="font-size:1.6rem;color:var(--color-brand);margin-bottom:6px;">Order Placed Successfully!</h2>
         <p class="text-muted" style="margin-bottom:20px;">
-          Thank you! Your order has been received and is being prepared.
+          Your order is pending admin acceptance. You can cancel it from your account while it is still pending.
         </p>
 
         <div class="printable-receipt" id="printable-order-receipt">
@@ -451,7 +520,7 @@ function showSuccessReceipt(order) {
             Print Receipt
           </button>
           <a href="profile.html?tab=status" class="btn btn-primary btn-sm">
-            Track Order in Status Tab
+            Track or Cancel Order
           </a>
         </div>
       </div>
@@ -470,6 +539,10 @@ export function setupCheckoutListeners() {
   const pickupTab = document.getElementById('tab-pickup');
   const deliveryTab = document.getElementById('tab-delivery');
   const placeOrderBtn = document.getElementById('place-order-btn');
+  const continueContactBtn = document.getElementById('continue-contact-btn');
+  const continuePaymentBtn = document.getElementById('continue-payment-btn');
+  const backFulfillmentBtn = document.getElementById('back-fulfillment-btn');
+  const backContactBtn = document.getElementById('back-contact-btn');
 
   if (pickupTab) {
     pickupTab.addEventListener('click', () => {
@@ -486,6 +559,30 @@ export function setupCheckoutListeners() {
       updateReceipt();
     });
   }
+
+  if (continueContactBtn) {
+    continueContactBtn.addEventListener('click', () => {
+      if (!fulfillmentMethod) {
+        showToast('Choose pickup or delivery to continue.', 'warning');
+        return;
+      }
+      showCheckoutStep(2);
+    });
+  }
+  if (continuePaymentBtn) {
+    continuePaymentBtn.addEventListener('click', () => {
+      if (!validateContactDetails()) return;
+      renderPaymentOptions();
+      showCheckoutStep(3);
+    });
+  }
+  if (backFulfillmentBtn) backFulfillmentBtn.addEventListener('click', () => showCheckoutStep(1));
+  if (backContactBtn) backContactBtn.addEventListener('click', () => showCheckoutStep(2));
+
+  ['contact-name-input', 'contact-phone-input', 'contact-address-input'].forEach((id) => {
+    const input = document.getElementById(id);
+    if (input) input.addEventListener('input', updateReceipt);
+  });
 
   if (placeOrderBtn) {
     placeOrderBtn.addEventListener('click', handlePlaceOrder);

@@ -13,6 +13,7 @@ router.use(requireAuth);
 const addCartSchema = z.object({
   productId: z.string().min(1, 'Product ID is required'),
   quantity: z.number().int().min(1, 'Quantity must be at least 1').default(1),
+  addonQuantityMode: z.enum(['per_item', 'per_order']).default('per_item'),
   addons: z
     .array(
       z.object({
@@ -26,6 +27,7 @@ const addCartSchema = z.object({
 
 const updateCartSchema = z.object({
   quantity: z.number().int().min(1, 'Quantity must be at least 1').optional(),
+  addonQuantityMode: z.enum(['per_item', 'per_order']).optional(),
   addons: z
     .array(
       z.object({
@@ -45,6 +47,53 @@ function serializeAddons(addons) {
     })
     .sort()
     .join('|');
+}
+
+function getAddonStockQuantity(addon, quantity, mode) {
+  return mode === 'per_order' ? addon.qty : addon.qty * quantity;
+}
+
+async function validateCartInventory({ userId, product, quantity, addons, addonQuantityMode, excludeCartItemId }) {
+  const filter = { user: userId };
+  if (excludeCartItemId) filter._id = { $ne: excludeCartItemId };
+
+  const existingItems = await CartItem.find(filter).populate('product').populate('addons.product');
+  const productId = String(product._id);
+  const existingProductQuantity = existingItems.reduce((total, item) => {
+    return item.product && String(item.product._id) === productId ? total + item.quantity : total;
+  }, 0);
+  if (existingProductQuantity + quantity > product.stock) {
+    throw new AppError(`Only ${product.stock} left in stock for ${product.name}.`, 400);
+  }
+
+  const addonUsage = new Map();
+  for (const item of existingItems) {
+    for (const addon of item.addons || []) {
+      const addonId = addon.product && addon.product._id ? String(addon.product._id) : String(addon.product);
+      const used = getAddonStockQuantity(addon, item.quantity, item.addonQuantityMode || 'per_item');
+      addonUsage.set(addonId, (addonUsage.get(addonId) || 0) + used);
+    }
+  }
+  for (const addon of addons) {
+    const addonId = String(addon.product);
+    const needed = getAddonStockQuantity(addon, quantity, addonQuantityMode);
+    addonUsage.set(addonId, (addonUsage.get(addonId) || 0) + needed);
+  }
+
+  const requestedAddonIds = new Set(addons.map((addon) => String(addon.product)));
+  if (requestedAddonIds.size === 0) return;
+  const addonProducts = await Product.find({ _id: { $in: [...requestedAddonIds] } });
+  const productsById = new Map(addonProducts.map((item) => [String(item._id), item]));
+  for (const addonId of requestedAddonIds) {
+    const needed = addonUsage.get(addonId) || 0;
+    const addonProduct = productsById.get(addonId);
+    if (!addonProduct || !addonProduct.isAvailable || !addonProduct.isAddon) {
+      throw new AppError('One of the selected add-ons is not available.', 400);
+    }
+    if (needed > addonProduct.stock) {
+      throw new AppError(`Only ${addonProduct.stock} left for add-on "${addonProduct.name}".`, 400);
+    }
+  }
 }
 
 // GET /api/cart
@@ -68,15 +117,11 @@ router.post(
   '/',
   validate(addCartSchema),
   asyncHandler(async (req, res) => {
-    const { productId, quantity, addons } = req.body;
+    const { productId, quantity, addons, addonQuantityMode } = req.body;
 
     const product = await Product.findById(productId);
     if (!product || !product.isAvailable) {
       throw new AppError('This product is currently not available.', 400);
-    }
-
-    if (product.stock < quantity) {
-      throw new AppError(`Only ${product.stock} left in stock for ${product.name}.`, 400);
     }
 
     // Validate addons
@@ -87,16 +132,20 @@ router.post(
         if (!addonProd || !addonProd.isAvailable || !addonProd.isAddon) {
           throw new AppError('One of the selected add-ons is not available.', 400);
         }
-        const neededQty = addonItem.qty * quantity;
-        if (addonProd.stock < neededQty) {
-          throw new AppError(`Only ${addonProd.stock} left for add-on "${addonProd.name}".`, 400);
-        }
         validatedAddons.push({
           product: addonProd._id,
           qty: addonItem.qty,
         });
       }
     }
+
+    await validateCartInventory({
+      userId: req.user._id,
+      product,
+      quantity,
+      addons: validatedAddons,
+      addonQuantityMode,
+    });
 
     const newAddonKey = serializeAddons(validatedAddons);
 
@@ -108,7 +157,10 @@ router.post(
 
     let matchedItem = null;
     for (const item of userCartItems) {
-      if (serializeAddons(item.addons) === newAddonKey) {
+      if (
+        (item.addonQuantityMode || 'per_item') === addonQuantityMode
+        && serializeAddons(item.addons) === newAddonKey
+      ) {
         matchedItem = item;
         break;
       }
@@ -116,10 +168,16 @@ router.post(
 
     if (matchedItem) {
       const newQty = matchedItem.quantity + quantity;
-      if (product.stock < newQty) {
-        throw new AppError(`Cannot add more. Only ${product.stock} items left in stock.`, 400);
-      }
       matchedItem.quantity = newQty;
+      if (addonQuantityMode === 'per_order') {
+        const mergedAddons = new Map(matchedItem.addons.map((addon) => [String(addon.product), addon]));
+        for (const addon of validatedAddons) {
+          const existing = mergedAddons.get(String(addon.product));
+          if (existing) existing.qty += addon.qty;
+          else mergedAddons.set(String(addon.product), { ...addon });
+        }
+        matchedItem.addons = [...mergedAddons.values()];
+      }
       await matchedItem.save();
       const populated = await CartItem.findById(matchedItem._id)
         .populate('product')
@@ -135,6 +193,7 @@ router.post(
       user: req.user._id,
       product: productId,
       addons: validatedAddons,
+      addonQuantityMode,
       quantity,
     });
 
@@ -165,12 +224,7 @@ router.patch(
       throw new AppError('Cart line not found.', 404);
     }
 
-    if (quantity !== undefined) {
-      if (cartItem.product.stock < quantity) {
-        throw new AppError(`Only ${cartItem.product.stock} left in stock.`, 400);
-      }
-      cartItem.quantity = quantity;
-    }
+    if (quantity !== undefined) cartItem.quantity = quantity;
 
     if (addons !== undefined) {
       const validatedAddons = [];
@@ -185,24 +239,17 @@ router.patch(
         });
       }
       cartItem.addons = validatedAddons;
-
-      // Check if updating addons causes it to match another cart line with the same product
-      const siblingItems = await CartItem.find({
-        user: req.user._id,
-        product: cartItem.product._id,
-        _id: { $ne: cartItem._id },
-      });
-
-      const currentKey = serializeAddons(validatedAddons);
-      for (const sibling of siblingItems) {
-        if (serializeAddons(sibling.addons) === currentKey) {
-          // Merge sibling into current and delete sibling
-          cartItem.quantity += sibling.quantity;
-          await CartItem.findByIdAndDelete(sibling._id);
-          break;
-        }
-      }
+      cartItem.addonQuantityMode = req.body.addonQuantityMode || 'per_order';
     }
+
+    await validateCartInventory({
+      userId: req.user._id,
+      product: cartItem.product,
+      quantity: cartItem.quantity,
+      addons: cartItem.addons,
+      addonQuantityMode: cartItem.addonQuantityMode || 'per_item',
+      excludeCartItemId: cartItem._id,
+    });
 
     await cartItem.save();
     const populated = await CartItem.findById(cartItem._id)

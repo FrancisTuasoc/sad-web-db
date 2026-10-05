@@ -5,7 +5,7 @@ const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 const validate = require('../middleware/validate');
 const { requireAuth } = require('../middleware/auth');
-const { placeOrder, cancelOrder } = require('../services/order.service');
+const { placeOrder, cancelOrder, completeOrder } = require('../services/order.service');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -17,7 +17,10 @@ const checkoutSchema = z.object({
   gcashReference: z.string().optional().default(''),
   contact: z.object({
     fullName: z.string().trim().min(2, 'Please provide your full name'),
-    phone: z.string().trim().min(7, 'Please provide a valid phone number'),
+    phone: z.string().trim().refine(
+      (phone) => /^(09\d{9}|\+639\d{9})$/.test(phone.replace(/[\s-]/g, '')),
+      'Please provide a valid Philippine mobile number'
+    ),
     address: z.string().trim().optional().default(''),
   }),
 }).refine((data) => {
@@ -30,15 +33,6 @@ const checkoutSchema = z.object({
 }, {
   message: 'Complete delivery address is required for delivery orders.',
   path: ['contact', 'address'],
-}).refine((data) => {
-  if (data.fulfillment === 'delivery') {
-    const phPhoneRegex = /^(09\d{9}|\+639\d{9})$/;
-    return phPhoneRegex.test(data.contact.phone.replace(/[\s-]/g, ''));
-  }
-  return true;
-}, {
-  message: 'Please enter a valid Philippine mobile number (e.g. 09171234567 or +639171234567).',
-  path: ['contact', 'phone'],
 });
 
 // POST /api/orders
@@ -74,7 +68,7 @@ router.get(
 
     if (status) {
       if (status === 'active') {
-        filter.status = { $in: ['pending', 'to_pickup', 'to_ship'] };
+        filter.status = { $in: ['pending', 'ready_for_pickup', 'ready_to_deliver', 'to_pickup', 'to_ship'] };
       } else if (status === 'history') {
         filter.status = { $in: ['completed', 'cancelled'] };
       } else {
@@ -123,6 +117,18 @@ router.patch(
     res.json({
       success: true,
       message: 'Order has been successfully cancelled.',
+      order,
+    });
+  })
+);
+
+router.patch(
+  '/:id/complete',
+  asyncHandler(async (req, res) => {
+    const order = await completeOrder(req.params.id, req.user._id);
+    res.json({
+      success: true,
+      message: 'Order marked as completed.',
       order,
     });
   })

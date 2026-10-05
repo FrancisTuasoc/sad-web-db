@@ -1,10 +1,10 @@
 // Customer Profile Controller
 import { apiFetch } from './api.js';
 import { renderHeader, renderFooter, showToast, escapeHtml, openModal, closeModal } from './ui.js';
-import { requireAuth, getUser, setUser, logout, resizeImageToDataUrl, renderAvatar } from './auth.js';
+import { requireAuth, getUser, setUser, resizeImageToDataUrl, renderAvatar } from './auth.js';
 
 let activeTab = 'status';
-let statusSubTab = 'pending';
+let statusSubTab = 'pickup';
 let historyFilter = 'all';
 let pollingTimer = null;
 
@@ -49,24 +49,13 @@ async function loadStatusOrders() {
     const allActive = res.orders || [];
 
     // Filter by subtab
-    const filtered = allActive.filter((o) => {
-      if (statusSubTab === 'pending') return o.status === 'pending';
-      if (statusSubTab === 'to_pickup') return o.status === 'to_pickup';
-      if (statusSubTab === 'to_ship') return o.status === 'to_ship';
-      return true;
-    });
+    const fulfillment = statusSubTab === 'pickup' ? 'pickup' : 'delivery';
+    const filtered = allActive.filter((order) => order.fulfillment === fulfillment);
 
-    // Subtab counts
-    const pendingCount = allActive.filter((o) => o.status === 'pending').length;
-    const toPickupCount = allActive.filter((o) => o.status === 'to_pickup').length;
-    const toShipCount = allActive.filter((o) => o.status === 'to_ship').length;
-
-    const pBadge = document.getElementById('subtab-pending-badge');
-    const puBadge = document.getElementById('subtab-pickup-badge');
-    const shBadge = document.getElementById('subtab-ship-badge');
-    if (pBadge) pBadge.textContent = String(pendingCount);
-    if (puBadge) puBadge.textContent = String(toPickupCount);
-    if (shBadge) shBadge.textContent = String(toShipCount);
+    const pickupBadge = document.getElementById('subtab-pickup-badge');
+    const deliveryBadge = document.getElementById('subtab-delivery-badge');
+    if (pickupBadge) pickupBadge.textContent = String(allActive.filter((order) => order.fulfillment === 'pickup').length);
+    if (deliveryBadge) deliveryBadge.textContent = String(allActive.filter((order) => order.fulfillment === 'delivery').length);
 
     if (filtered.length === 0) {
       container.innerHTML = `
@@ -75,7 +64,7 @@ async function loadStatusOrders() {
             <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
           </svg>
           <h4 class="state-title">No orders in this status</h4>
-          <p class="state-desc">You don't have any orders currently categorized under "${statusSubTab.replace('_', ' ')}".</p>
+          <p class="state-desc">You don't have any active ${fulfillment === 'pickup' ? 'pick-up' : 'delivery'} orders.</p>
         </div>
       `;
       return;
@@ -124,8 +113,11 @@ async function loadHistoryOrders() {
       <div class="state-box">
         <h4 class="state-title">Error loading order history</h4>
         <p class="state-desc">${escapeHtml(err.message)}</p>
+        <button id="retry-history-btn" class="btn btn-secondary btn-sm">Try Again</button>
       </div>
     `;
+    const btn = document.getElementById('retry-history-btn');
+    if (btn) btn.addEventListener('click', loadHistoryOrders);
   }
 }
 
@@ -143,9 +135,11 @@ function renderOrderCard(order, isLive = false) {
     .join(', ');
 
   const statusLabels = {
-    pending: 'Pending Acceptance',
-    to_pickup: 'Ready for Pickup',
-    to_ship: 'Out for Delivery',
+    pending: 'Pending Admin Acceptance',
+    ready_for_pickup: 'Ready for Pick Up',
+    ready_to_deliver: 'Ready to Deliver',
+    to_pickup: 'Ready for Pick Up',
+    to_ship: 'Ready to Deliver',
     completed: 'Completed',
     cancelled: 'Cancelled',
   };
@@ -157,10 +151,10 @@ function renderOrderCard(order, isLive = false) {
   let progressTracker = '';
   if (isLive && order.status !== 'cancelled') {
     const isStep1 = true;
-    const isStep2 = order.status === 'to_pickup' || order.status === 'to_ship' || order.status === 'completed';
+    const isStep2 = ['ready_for_pickup', 'ready_to_deliver', 'to_pickup', 'to_ship', 'completed'].includes(order.status);
     const isStep3 = order.status === 'completed';
 
-    const step2Label = order.fulfillment === 'pickup' ? 'Ready to Pick Up' : 'Out for Delivery';
+    const step2Label = order.fulfillment === 'pickup' ? 'Ready to Pick Up' : 'Ready to Deliver';
 
     progressTracker = `
       <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 16px;position:relative;">
@@ -189,8 +183,17 @@ function renderOrderCard(order, isLive = false) {
 
   if (isLive && order.status === 'pending') {
     actionsHtml += `
-      <button type="button" class="btn btn-danger btn-sm btn-cancel-order" data-order-id="${order._id}">
+      <button type="button" class="btn btn-danger btn-sm btn-cancel-order" title="Cancellation is available only until an admin accepts the order." data-order-id="${order._id}">
         Cancel Order
+      </button>
+    `;
+  }
+
+  if (isLive && (order.status === 'ready_for_pickup' || order.status === 'ready_to_deliver' || order.status === 'to_pickup' || order.status === 'to_ship')) {
+    const actionLabel = order.fulfillment === 'pickup' ? 'Order Picked Up' : 'Order Received';
+    actionsHtml += `
+      <button type="button" class="btn btn-primary btn-sm btn-complete-order" data-order-id="${order._id}">
+        ${actionLabel}
       </button>
     `;
   }
@@ -253,7 +256,8 @@ async function openOrderReceipt(orderId) {
       .map((item) => {
         let addonsStr = '';
         if (item.addons && item.addons.length > 0) {
-          addonsStr = `<div style="font-size:0.75rem;color:var(--color-text-muted);padding-left:10px;">${item.addons.map((a) => `+ ${escapeHtml(a.name)} (x${a.qty} @ ₱${a.price.toFixed(2)})`).join(', ')}</div>`;
+          const quantityLabel = item.addonQuantityMode === 'per_order' ? 'for order' : 'per item';
+          addonsStr = `<div style="font-size:0.75rem;color:var(--color-text-muted);padding-left:10px;">${item.addons.map((a) => `+ ${escapeHtml(a.name)} (x${a.qty} ${quantityLabel} @ ₱${a.price.toFixed(2)})`).join(', ')}</div>`;
         }
         return `
           <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.88rem;">
@@ -311,27 +315,54 @@ async function openOrderReceipt(orderId) {
 }
 
 // Cancel order handler
-async function handleCancelOrder(orderId) {
-  if (!confirm('Are you sure you want to cancel this order?')) return;
+async function handleCancelOrder(orderId, button) {
+  if (!confirm('Cancel this order while it is still waiting for admin acceptance? If the admin accepts first, cancellation will be blocked and you will need to contact the shop.')) return;
 
+  button.disabled = true;
+  button.textContent = 'Cancelling...';
   try {
     await apiFetch(`/orders/${orderId}/cancel`, { method: 'PATCH' });
     showToast('Order successfully cancelled.', 'info');
     loadStatusOrders();
   } catch (err) {
     showToast(err.message, 'error');
+    button.disabled = false;
+    button.textContent = 'Cancel Order';
+  }
+
+}
+
+async function handleCompleteOrder(orderId, button) {
+  const action = button.textContent.trim();
+  if (!confirm(`Confirm: ${action}?`)) return;
+  button.disabled = true;
+  button.textContent = 'Updating...';
+  try {
+    await apiFetch(`/orders/${orderId}/complete`, { method: 'PATCH' });
+    showToast('Order marked as completed. Thank you!', 'success');
+    loadStatusOrders();
+  } catch (err) {
+    showToast(err.message, 'error');
+    button.disabled = false;
+    button.textContent = action;
   }
 }
 
 // Buy again handler: re-adds available items to cart
-async function handleBuyAgain(orderId) {
+async function handleBuyAgain(orderId, button) {
+  button.disabled = true;
+  button.textContent = 'Adding...';
   try {
     const res = await apiFetch(`/orders/${orderId}`);
     const order = res.order;
 
     let addedCount = 0;
+    const failures = [];
     for (const item of order.items) {
-      if (!item.product) continue;
+      if (!item.product) {
+        failures.push(`${item.name}: no longer available`);
+        continue;
+      }
       const addonsPayload = (item.addons || [])
         .filter((a) => a.product)
         .map((a) => ({ product: a.product, qty: a.qty }));
@@ -343,24 +374,38 @@ async function handleBuyAgain(orderId) {
             productId: item.product,
             quantity: item.quantity,
             addons: addonsPayload,
+            addonQuantityMode: item.addonQuantityMode || 'per_item',
           }),
         });
         addedCount++;
-      } catch (e) {
-        // if item is out of stock, ignore or continue
+      } catch (err) {
+        failures.push(`${item.name}: ${err.message}`);
       }
     }
 
     if (addedCount > 0) {
-      showToast('Items from previous order re-added to your cart!', 'success');
+      showToast(
+        failures.length
+          ? `Added ${addedCount} item(s); some could not be added: ${failures.join('; ')}`
+          : 'Items from previous order re-added to your cart!',
+        failures.length ? 'warning' : 'success'
+      );
       setTimeout(() => {
         window.location.href = 'cart.html';
-      }, 700);
+      }, failures.length ? 1800 : 700);
     } else {
-      showToast('Items from this order are currently out of stock or unavailable.', 'warning');
+      showToast(
+        failures.length
+          ? `Could not add items from this order: ${failures.join('; ')}`
+          : 'Items from this order are currently out of stock or unavailable.',
+        'warning'
+      );
     }
   } catch (err) {
     showToast(err.message, 'error');
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Buy Again';
   }
 }
 
@@ -414,14 +459,20 @@ function setupProfileTabs() {
     const cancelBtn = e.target.closest('.btn-cancel-order');
     if (cancelBtn) {
       const orderId = cancelBtn.getAttribute('data-order-id');
-      handleCancelOrder(orderId);
+      handleCancelOrder(orderId, cancelBtn);
+      return;
+    }
+
+    const completeBtn = e.target.closest('.btn-complete-order');
+    if (completeBtn) {
+      handleCompleteOrder(completeBtn.getAttribute('data-order-id'), completeBtn);
       return;
     }
 
     const buyAgainBtn = e.target.closest('.btn-buy-again');
     if (buyAgainBtn) {
       const orderId = buyAgainBtn.getAttribute('data-order-id');
-      handleBuyAgain(orderId);
+      handleBuyAgain(orderId, buyAgainBtn);
       return;
     }
   });
@@ -569,7 +620,8 @@ function initProfile() {
   const params = new URLSearchParams(window.location.search);
   const requestedTab = params.get('tab');
   if (requestedTab) {
-    const tabBtn = document.querySelector(`.profile-nav-btn[data-tab="${requestedTab}"]`);
+    const tabBtn = [...document.querySelectorAll('.profile-nav-btn')]
+      .find((button) => button.getAttribute('data-tab') === requestedTab);
     if (tabBtn) tabBtn.click();
   } else {
     loadStatusOrders();
