@@ -1,53 +1,82 @@
 /* ========================================================
    BASE STYLES - CASESTUDY-SYSTEM (BURGER ORDERING & BILLING)
-   60-30-10 Color Scheme:
-   - 60% Neutral Base: #FBF8F3 (bg), #FFFFFF (cards), #E9E2D6 (borders)
-   - 30% Brand: #2A1E18 (charcoal-brown), #A4262C (brick red)
-   - 10% Accent: #F2A413 (golden mustard)
+   Shared warm-neutral, espresso, brick, and mustard design tokens.
    ======================================================== */
 
 :root {
-  --color-bg: #FBF8F3;
-  --color-surface: #FFFFFF;
-  --color-surface-alt: #F4EFEA;
-  --color-border: #E9E2D6;
-  --color-border-hover: #D5C9B7;
+  --color-bg: #fffaf3;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f5eee5;
+  --color-border: #e8dccd;
+  --color-border-hover: #d4c0a9;
 
-  --color-text-main: #2A1E18;
-  --color-text-muted: #6B5B52;
-  --color-text-light: #9B8B82;
-  --color-text-white: #FFFFFF;
+  --color-text-main: #281b14;
+  --color-text-muted: #65564c;
+  --color-text-light: #837368;
+  --color-text-white: #ffffff;
 
-  --color-brand: #2A1E18;
-  --color-brand-gradient: linear-gradient(135deg, #2A1E18 0%, #4A2C20 100%);
-  --color-brand-secondary: #A4262C;
-  --color-brand-secondary-hover: #881F24;
+  --color-brand: #2a1e18;
+  --color-brand-gradient: linear-gradient(135deg, #251710 0%, #482b1e 100%);
+  --color-brand-secondary: #98252a;
+  --color-brand-secondary-hover: #7e1d22;
 
-  --color-accent: #F2A413;
-  --color-accent-gradient: linear-gradient(180deg, #F6B02C 0%, #E8950C 100%);
-  --color-accent-hover: #E08F00;
-  --color-accent-text: #2A1E18;
+  --color-accent: #f2a413;
+  --color-accent-gradient: linear-gradient(135deg, #ffc75d 0%, #ee9e1b 100%);
+  --color-accent-hover: #d98508;
+  --color-accent-text: #281b14;
+  --color-accent-text-strong: #815100;
 
-  --color-success: #287D3C;
-  --color-success-bg: #E8F5E9;
-  --color-warning: #D97A07;
-  --color-warning-bg: #FEF3C7;
-  --color-danger: #A4262C;
-  --color-danger-bg: #FDE8E8;
-  --color-info: #1D6FB8;
-  --color-info-bg: #E1EFFE;
+  --color-success: #216b36;
+  --color-success-bg: #e9f5ec;
+  --color-warning: #965000;
+  --color-warning-bg: #fff2d1;
+  --color-danger: #98252a;
+  --color-danger-bg: #fcebec;
+  --color-info: #155a91;
+  --color-info-bg: #e8f2fb;
+
+  --color-neutral-50: #fffaf3;
+  --color-neutral-100: #f5eee5;
+  --color-neutral-200: #e8dccd;
+  --color-neutral-300: #d4c0a9;
+  --color-neutral-500: #837368;
+  --color-neutral-700: #65564c;
+  --color-neutral-900: #281b14;
 
   --font-heading: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-body: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 2rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
   --radius-full: 9999px;
 
-  --shadow-sm: 0 1px 2px rgba(42, 30, 24, 0.05);
-  --shadow-md: 0 4px 12px rgba(42, 30, 24, 0.08);
-  --shadow-lg: 0 10px 24px rgba(42, 30, 24, 0.12);
+  --shadow-sm: 0 2px 8px rgba(42, 30, 24, 0.05);
+  --shadow-md: 0 8px 22px rgba(42, 30, 24, 0.08);
+  --shadow-lg: 0 18px 48px rgba(42, 30, 24, 0.15);
+
+  --transition-fast: 150ms ease;
+  --transition-standard: 220ms ease;
+  --transition-slow: 300ms ease;
+  --z-header: 100;
+  --z-drawer: 105;
+  --z-modal: 1000;
 
   --header-height: 64px;
   --container-max: 1200px;
@@ -60,7 +89,7 @@
 }
 
 html {
-  font-size: 14px;
+  font-size: 16px;
   scroll-behavior: smooth;
 }
 
@@ -92,8 +121,8 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.25;
 }
 
-h1 { font-size: 2rem; }
-h2 { font-size: 1.6rem; }
+h1 { font-size: clamp(2rem, 4vw, 3.5rem); }
+h2 { font-size: clamp(1.5rem, 2.8vw, 2.25rem); }
 h3 { font-size: 1.25rem; }
 h4 { font-size: 1.05rem; }
 
@@ -147,7 +176,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   font-weight: 600;
   font-size: 0.9rem;
   padding: 8px 16px;
-  min-height: 40px;
+  min-height: 44px;
   border-radius: var(--radius-md);
   transition: all 0.15s ease-in-out;
   user-select: none;
@@ -158,7 +187,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   background: var(--color-accent-gradient);
   color: var(--color-accent-text);
   box-shadow: 0 2px 4px rgba(242, 164, 19, 0.25);
-  border: 1px solid #E08F00;
+  border: 1px solid #D98508;
 }
 .btn-primary:hover:not(:disabled) {
   filter: brightness(1.05);
@@ -190,16 +219,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .btn-danger {
   background: var(--color-danger);
   color: #fff;
-  border: 1px solid var(--color-danger-hover);
+  border: 1px solid var(--color-brand-secondary-hover);
 }
 .btn-danger:hover:not(:disabled) {
   background: var(--color-brand-secondary-hover);
 }
 
 .btn-sm {
-  padding: 4px 10px;
-  min-height: 32px;
-  font-size: 0.82rem;
+  padding: 6px 12px;
+  min-height: 44px;
+  font-size: 0.84rem;
 }
 
 .btn-lg {
@@ -209,8 +238,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 .btn-icon {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
   padding: 0;
   border-radius: var(--radius-md);
   display: inline-flex;
@@ -222,6 +252,19 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   opacity: 0.55;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+button:not(:disabled) {
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--color-info);
+  outline-offset: 3px;
 }
 
 /* Badges */
@@ -287,6 +330,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .text-right { text-align: right; }
 .text-muted { color: var(--color-text-muted); }
 .text-danger { color: var(--color-danger); }
-.text-accent { color: var(--color-accent); }
+.text-accent { color: var(--color-accent-text-strong); }
 .font-price { font-family: var(--font-heading); font-weight: 700; }
 .hidden { display: none !important; }
