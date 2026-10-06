@@ -63,8 +63,10 @@ export function renderAvatar(user, size = 32) {
     return `<div class="avatar-circle" style="width:${size}px;height:${size}px;background:#6B5B52;">?</div>`;
   }
 
-  if (user.avatarUrl && user.avatarUrl.trim().length > 0) {
-    return `<div class="avatar-circle" style="width:${size}px;height:${size}px;background-image:url('${user.avatarUrl}');background-size:cover;background-position:center;"></div>`;
+  const avatarUrl = user.avatarUrl && String(user.avatarUrl).trim();
+  if (avatarUrl && !avatarUrl.startsWith('gridfs:')) {
+    const safeUrl = avatarUrl.replace(/'/g, '%27');
+    return `<div class="avatar-circle" style="width:${size}px;height:${size}px;background-image:url('${safeUrl}');background-size:cover;background-position:center;background-repeat:no-repeat;"></div>`;
   }
 
   const initial = (user.username || user.email || 'U').charAt(0).toUpperCase();
@@ -86,43 +88,59 @@ export function requireAuth(targetRole = null) {
   return true;
 }
 
-export function resizeImageToDataUrl(file, maxDimension = 256, quality = 0.8) {
-  return new Promise((resolve, reject) => {
-    if (!file.type.startsWith('image/')) {
-      return reject(new Error('Please select an image file.'));
+export async function prepareAvatarFile(file) {
+  const maxSize = 20 * 1024 * 1024;
+  const extension = file.name.split('.').pop()?.toLowerCase();
+  const allowedTypes = {
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    webp: 'image/webp',
+  };
+  const mimeType = allowedTypes[extension];
+
+  if (!mimeType || (file.type && file.type !== mimeType)) {
+    throw new Error('Choose a JPG, PNG, or WebP photo.');
+  }
+  if (file.size > maxSize) {
+    throw new Error('Photo must be 20MB or smaller.');
+  }
+
+  let bitmap;
+  try {
+    bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  } catch (error) {
+    throw new Error('The selected photo could not be opened. Try another JPG, PNG, or WebP image.');
+  }
+
+  try {
+    const longestSide = Math.max(bitmap.width, bitmap.height);
+    if (longestSide <= 4096) {
+      return file.type === mimeType
+        ? file
+        : new File([file], file.name, { type: mimeType, lastModified: file.lastModified });
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        let width = img.width;
-        let height = img.height;
+    const scale = 4096 / longestSide;
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Photo processing is unavailable in this browser.');
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
 
-        if (width > height) {
-          if (width > maxDimension) {
-            height = Math.round((height * maxDimension) / width);
-            width = maxDimension;
-          }
-        } else {
-          if (height > maxDimension) {
-            width = Math.round((width * maxDimension) / height);
-            height = maxDimension;
-          }
-        }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        resolve(dataUrl);
-      };
-      img.onerror = () => reject(new Error('Failed to load selected image.'));
-      img.src = e.target.result;
-    };
-    reader.onerror = () => reject(new Error('Failed to read image file.'));
-    reader.readAsDataURL(file);
-  });
+    const quality = file.size > 8 * 1024 * 1024 ? 0.92 : 1;
+    const resizedBlob = await new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error('The selected photo could not be prepared. Please try again.'));
+      }, mimeType, quality);
+    });
+    if (resizedBlob.size > maxSize) {
+      throw new Error('Photo must be 20MB or smaller after resizing.');
+    }
+    return new File([resizedBlob], file.name, { type: mimeType, lastModified: file.lastModified });
+  } finally {
+    bitmap.close();
+  }
 }

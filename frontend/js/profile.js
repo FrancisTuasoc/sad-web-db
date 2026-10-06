@@ -1,30 +1,89 @@
 // Customer Profile Controller
-import { apiFetch } from './api.js';
+import { apiFetch, apiFetchBlob } from './api.js';
 import { renderHeader, renderFooter, showToast, escapeHtml, openModal, closeModal } from './ui.js';
-import { requireAuth, getUser, setUser, resizeImageToDataUrl, renderAvatar } from './auth.js';
+import { requireAuth, getUser, setUser, renderAvatar, logout } from './auth.js';
 
-let activeTab = 'status';
+let activeTab = 'overview';
 let statusSubTab = 'pickup';
 let historyFilter = 'all';
+let historyPage = 1;
+const HISTORY_PAGE_SIZE = 5;
 let pollingTimer = null;
+let currentProfile = null;
+let activeAvatarObjectUrl = null;
+
+function validateAvatarFile(file) {
+  const maxSize = 5 * 1024 * 1024;
+  const extension = file.name.split('.').pop()?.toLowerCase();
+  const allowedTypes = {
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    webp: 'image/webp',
+  };
+
+  if (!allowedTypes[extension] || file.type !== allowedTypes[extension]) {
+    throw new Error('Choose a JPG, PNG, or WebP photo.');
+  }
+  if (file.size > maxSize) {
+    throw new Error('Photo must be 5 MiB or smaller.');
+  }
+
+  return file;
+}
+
+function updateHeaderAvatar(avatarUrl) {
+  const avatar = document.querySelector('#header-user-slot .avatar-circle');
+  if (!avatar) return;
+  if (avatarUrl && !avatarUrl.startsWith('gridfs:')) {
+    avatar.style.backgroundImage = `url("${avatarUrl.replace(/"/g, '%22')}")`;
+    avatar.textContent = '';
+  }
+}
 
 async function loadProfileOverview() {
   try {
     const res = await apiFetch('/profile');
-    const p = res.profile;
+    let p = res.profile;
+    if (p.avatarUrl && p.avatarUrl.startsWith('gridfs:')) {
+      const imageBlob = await apiFetchBlob('/profile/avatar');
+      const nextAvatarObjectUrl = URL.createObjectURL(imageBlob);
+      if (activeAvatarObjectUrl) URL.revokeObjectURL(activeAvatarObjectUrl);
+      activeAvatarObjectUrl = nextAvatarObjectUrl;
+      p = { ...p, avatarUrl: nextAvatarObjectUrl };
+    } else if (activeAvatarObjectUrl) {
+      URL.revokeObjectURL(activeAvatarObjectUrl);
+      activeAvatarObjectUrl = null;
+    }
+    currentProfile = p;
+    updateHeaderAvatar(p.avatarUrl);
 
-    document.getElementById('overview-username').textContent = p.username;
-    document.getElementById('overview-email').textContent = p.email;
-    document.getElementById('overview-member-since').textContent = new Date(p.createdAt).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-    document.getElementById('overview-total-orders').textContent = String(p.totalOrders || 0);
+    const usernameEl = document.getElementById('overview-username');
+    const emailEl = document.getElementById('overview-email');
+    const memberSinceEl = document.getElementById('overview-member-since');
+    const totalOrdersEl = document.getElementById('overview-total-orders');
+    const statusBadgeEl = document.getElementById('overview-status-badge');
+
+    if (usernameEl) usernameEl.textContent = p.fullName || p.username || 'Customer';
+    if (emailEl) emailEl.textContent = p.email || 'No email available';
+    if (memberSinceEl) {
+      memberSinceEl.textContent = new Date(p.createdAt).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    }
+    if (totalOrdersEl) totalOrdersEl.textContent = String(p.totalOrders || 0);
+    if (statusBadgeEl) statusBadgeEl.textContent = p.status === 'suspended' ? 'Suspended' : 'Active';
 
     const avatarHolder = document.getElementById('overview-avatar-holder');
     if (avatarHolder) {
-      avatarHolder.innerHTML = renderAvatar(p, 80);
+      avatarHolder.innerHTML = renderAvatar(p, 150);
+    }
+
+    const profileButton = document.getElementById('profile-photo-button');
+    if (profileButton) {
+      profileButton.setAttribute('aria-label', `View profile photo for ${p.fullName || p.username || 'customer'}`);
     }
 
     // Prefill saved details tab
@@ -34,8 +93,326 @@ async function loadProfileOverview() {
     if (nameInput) nameInput.value = p.fullName || '';
     if (phoneInput) phoneInput.value = p.phone || '';
     if (addressInput) addressInput.value = p.address || '';
+
+    const usernameInput = document.getElementById('username-input');
+    if (usernameInput) usernameInput.value = p.username || '';
   } catch (err) {
     showToast('Failed to load profile details.', 'error');
+  }
+}
+
+function openUsernameModal() {
+  const modal = document.getElementById('username-modal');
+  if (!modal) return;
+  const usernameInput = document.getElementById('username-input');
+  if (usernameInput) {
+    usernameInput.value = (getUser()?.username || '').trim();
+    setTimeout(() => usernameInput.focus(), 50);
+  }
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeUsernameModal() {
+  const modal = document.getElementById('username-modal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+async function saveUsernameChange(event) {
+  event.preventDefault();
+  const input = document.getElementById('username-input');
+  if (!input) return;
+
+  const username = input.value.trim();
+  if (!username) {
+    showToast('Please enter a username.', 'warning');
+    input.focus();
+    return;
+  }
+
+  const submitButton = event.target.querySelector('button[type="submit"]');
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = 'Saving...';
+  }
+
+  try {
+    const res = await apiFetch('/customer/me/username', {
+      method: 'PATCH',
+      body: JSON.stringify({ username }),
+    });
+
+    if (res.user) {
+      const currentUser = getUser();
+      const nextUser = currentUser ? { ...currentUser, ...res.user } : res.user;
+      setUser(nextUser);
+    }
+
+    const target = document.getElementById('overview-username');
+    if (target) {
+      target.textContent = username;
+    }
+
+    showToast('Username updated successfully.', 'success');
+    closeUsernameModal();
+  } catch (err) {
+    showToast(err.message, 'error');
+  } finally {
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = 'Save';
+    }
+  }
+}
+
+function getCustomerInitials(nameOrEmail = '') {
+  const source = (nameOrEmail || '').trim();
+  if (!source) return 'C';
+  const parts = source.split(/\s+/).filter(Boolean);
+  if (parts.length > 1) {
+    return parts.slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join('').slice(0, 2);
+  }
+  return source.charAt(0).toUpperCase();
+}
+
+function isValidAvatarSource(url) {
+  if (!url || typeof url !== 'string') return false;
+  const normalized = url.trim();
+  return /^https?:\/\//i.test(normalized)
+    || /^data:image\//i.test(normalized)
+    || /^blob:/i.test(normalized);
+}
+
+function setAvatarModalContent(profile) {
+  const frame = document.getElementById('avatar-lightbox-frame');
+  if (!frame) return;
+  const name = profile.fullName || profile.username || 'Customer';
+  const caption = document.getElementById('avatar-lightbox-caption');
+  if (caption) caption.textContent = name;
+
+  const safeUrl = profile && profile.avatarUrl && String(profile.avatarUrl).trim() ? String(profile.avatarUrl).trim() : '';
+  if (isValidAvatarSource(safeUrl)) {
+    const img = document.createElement('img');
+    img.src = safeUrl;
+    img.alt = `${name} profile photo`;
+    img.onerror = () => {
+      const fallback = document.createElement('div');
+      fallback.className = 'avatar-fallback';
+      fallback.textContent = getCustomerInitials(profile.fullName || profile.username || profile.email || 'Customer');
+      frame.replaceChildren(fallback);
+    };
+    frame.replaceChildren(img);
+    return;
+  }
+
+  const fallback = document.createElement('div');
+  fallback.className = 'avatar-fallback';
+  fallback.textContent = getCustomerInitials(profile.fullName || profile.username || profile.email || 'Customer');
+  frame.replaceChildren(fallback);
+}
+
+let lastAvatarFocusElement = null;
+
+function openAvatarModal(profile) {
+  const modal = document.getElementById('avatar-lightbox');
+  if (!modal) return;
+
+  lastAvatarFocusElement = document.activeElement;
+  setAvatarModalContent(profile);
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+
+  const closeButton = document.getElementById('close-avatar-modal');
+  if (closeButton) closeButton.focus();
+}
+
+function closeAvatarModal() {
+  const modal = document.getElementById('avatar-lightbox');
+  if (!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  if (lastAvatarFocusElement) {
+    lastAvatarFocusElement.focus();
+  }
+}
+
+function formatOrderStatusLabel(status = '') {
+  if (!status) return 'Pending';
+  const map = {
+    pending: 'Pending',
+    processing: 'Processing',
+    ready_for_pickup: 'Ready for pickup',
+    ready_to_deliver: 'Ready to deliver',
+    to_pickup: 'To pick up',
+    to_ship: 'To ship',
+    shipped: 'Shipped',
+    completed: 'Completed',
+    delivered: 'Delivered',
+    cancelled: 'Cancelled',
+  };
+  return map[status] || status.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+async function loadCustomerStats() {
+  try {
+    const res = await apiFetch('/customer/kpis');
+    const stats = res.kpis || {};
+    const grid = document.getElementById('customer-kpi-grid');
+    if (!grid) return;
+
+    const cards = [
+      { label: 'Total orders', value: stats.totalOrders || 0, meta: 'All orders placed', icon: '🧾' },
+      { label: 'Pending orders', value: stats.pendingOrders || 0, meta: 'Waiting for action', icon: '⏳' },
+      { label: 'Delivered orders', value: stats.deliveredOrders || 0, meta: 'Completed deliveries', icon: '✅' },
+      { label: 'Total spent', value: `₱${Number(stats.totalSpent || 0).toFixed(2)}`, meta: 'Completed orders only', icon: '₱' },
+    ];
+
+    grid.innerHTML = cards.map((card) => `
+      <article class="customer-stat-card">
+        <div class="customer-stat-top">
+          <span class="customer-stat-label">${escapeHtml(card.label)}</span>
+          <span class="customer-stat-icon">${card.icon}</span>
+        </div>
+        <strong class="customer-stat-value">${escapeHtml(String(card.value))}</strong>
+        <span class="customer-stat-meta">${escapeHtml(card.meta)}</span>
+      </article>
+    `).join('');
+
+    const recentOrders = stats.recentOrders || [];
+    const recentList = document.getElementById('customer-recent-orders');
+    if (recentList) {
+      recentList.innerHTML = recentOrders.length
+        ? `
+          <div class="recent-orders-panel">
+            <div class="recent-orders-header">
+              <h4>Recent orders</h4>
+              <a href="profile.html?tab=history" class="recent-orders-link">View all</a>
+            </div>
+            <div class="recent-orders-list">
+              ${recentOrders.map((order) => {
+                const status = formatOrderStatusLabel(order.status || 'pending');
+                const safeStatusClass = (order.status || 'pending').toString().replace(/\s+/g, '_');
+                return `
+                  <div class="recent-order-item" tabindex="0">
+                    <div class="recent-order-main">
+                      <span class="recent-order-id">${escapeHtml(order.orderNumber || 'Order')}</span>
+                      <span class="recent-order-date">${new Date(order.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                    </div>
+                    <div class="recent-order-meta">
+                      <span class="badge badge-${escapeHtml(safeStatusClass)}">${escapeHtml(status)}</span>
+                      <strong class="recent-order-total">₱${Number(order.total || 0).toFixed(2)}</strong>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `
+        : '<div class="state-box"><h4 class="state-title">No recent orders</h4><p class="state-desc">You have not placed any orders yet.</p></div>';
+    }
+
+    const statusTotal = Number(stats.totalOrders || 0);
+    const totalEl = document.getElementById('customer-status-total');
+    if (totalEl) totalEl.textContent = String(statusTotal || 0);
+
+    const statusPills = document.getElementById('customer-status-pill-list');
+    const statusMeta = [
+      { key: 'pending', label: 'Pending', color: '#d98508' },
+      { key: 'ready_for_pickup', label: 'Ready Pick-up', color: '#155a91' },
+      { key: 'ready_to_deliver', label: 'Ready Delivery', color: '#155a91' },
+      { key: 'to_pickup', label: 'To Pick Up', color: '#d98508' },
+      { key: 'to_ship', label: 'To Ship', color: '#98252a' },
+      { key: 'completed', label: 'Completed', color: '#216b36' },
+      { key: 'cancelled', label: 'Cancelled', color: '#98252a' },
+    ];
+
+    if (statusPills) {
+      statusPills.innerHTML = statusMeta.map((item) => {
+        const count = stats.statusCounts?.[item.key] || 0;
+        return `
+          <button type="button" class="status-pill" data-status-filter="${item.key}" style="color:${item.color};">
+            <span class="status-dot" style="background:${item.color};"></span>
+            ${escapeHtml(item.label)} <span>${count}</span>
+          </button>
+        `;
+      }).join('');
+
+      statusPills.querySelectorAll('.status-pill').forEach((button) => {
+        button.addEventListener('click', async () => {
+          const selected = button.getAttribute('data-status-filter');
+          const current = selected === 'all' ? 'all' : selected;
+          statusSubTab = current === 'pending' ? 'pickup' : 'delivery';
+          const targetTab = document.querySelector('.profile-nav-btn[data-tab="status"]');
+          if (targetTab) targetTab.click();
+          if (current === 'all') {
+            await loadStatusOrders();
+            return;
+          }
+          try {
+            const res = await apiFetch(`/orders/mine?status=${encodeURIComponent(current)}`);
+            const container = document.getElementById('status-orders-container');
+            const orders = res.orders || [];
+            if (!container) return;
+            container.innerHTML = orders.length
+              ? orders.map((order) => renderOrderCard(order, true)).join('')
+              : '<div class="state-box"><h4 class="state-title">No matching orders</h4><p class="state-desc">There are no orders in this status.</p></div>';
+          } catch (err) {
+            showToast(err.message, 'error');
+          }
+        });
+      });
+    }
+
+    const tracker = document.getElementById('customer-mini-tracker');
+    if (tracker) {
+      const ordersRes = await apiFetch('/customer/orders?status=active&limit=1');
+      const activeOrders = ordersRes.orders || [];
+
+      if (!activeOrders.length) {
+        tracker.innerHTML = `
+          <div class="mini-tracker-title">Current active order</div>
+          <div class="mini-tracker-card">
+            <div class="mini-tracker-icon">✓</div>
+            <div class="mini-tracker-meta">
+              <strong>No active order</strong>
+              <span>Browse the menu to place one.</span>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const activeOrder = activeOrders[0];
+      const statusLabel = {
+        pending: 'Pending',
+        ready_for_pickup: 'Ready for pickup',
+        ready_to_deliver: 'Ready to deliver',
+        to_pickup: 'To pick up',
+        to_ship: 'To ship',
+      }[activeOrder.status] || activeOrder.status;
+
+      tracker.innerHTML = `
+        <div class="mini-tracker-title">Current active order</div>
+        <div class="mini-tracker-card">
+          <div class="mini-tracker-icon">${activeOrder.fulfillment === 'pickup' ? 'P' : 'D'}</div>
+          <div class="mini-tracker-meta">
+            <strong>#${escapeHtml(activeOrder.orderNumber)}</strong>
+            <span>${escapeHtml(statusLabel)} · ₱${Number(activeOrder.total || 0).toFixed(2)}</span>
+          </div>
+        </div>
+      `;
+    }
+  } catch (err) {
+    const grid = document.getElementById('customer-kpi-grid');
+    if (grid) {
+      grid.innerHTML = '<div class="state-box"><h4 class="state-title">Could not load dashboard</h4><p class="state-desc">Please refresh the page or try again.</p></div>';
+    }
   }
 }
 
@@ -98,6 +475,7 @@ async function loadHistoryOrders() {
     }
 
     if (orders.length === 0) {
+      historyPage = 1;
       container.innerHTML = `
         <div class="state-box">
           <h4 class="state-title">No past orders found</h4>
@@ -107,7 +485,30 @@ async function loadHistoryOrders() {
       return;
     }
 
-    container.innerHTML = orders.map((order) => renderOrderCard(order, false)).join('');
+    const pageCount = Math.ceil(orders.length / HISTORY_PAGE_SIZE);
+    historyPage = Math.min(Math.max(historyPage, 1), pageCount);
+    const startIndex = (historyPage - 1) * HISTORY_PAGE_SIZE;
+    const pageOrders = orders.slice(startIndex, startIndex + HISTORY_PAGE_SIZE);
+    const pagination = `
+      <nav class="history-pagination" aria-label="Order history pages">
+        <span class="history-page-summary">Showing ${startIndex + 1}–${Math.min(startIndex + HISTORY_PAGE_SIZE, orders.length)} of ${orders.length} orders</span>
+        <div class="history-page-controls">
+          <button type="button" class="btn btn-secondary btn-sm" data-history-page="${historyPage - 1}" ${historyPage === 1 ? 'disabled' : ''} aria-label="Previous page">Previous</button>
+          <span class="history-page-number" aria-live="polite">Page ${historyPage} of ${pageCount}</span>
+          <button type="button" class="btn btn-secondary btn-sm" data-history-page="${historyPage + 1}" ${historyPage === pageCount ? 'disabled' : ''} aria-label="Next page">Next</button>
+        </div>
+      </nav>
+    `;
+
+    container.innerHTML = `${pageOrders.map((order) => renderOrderCard(order, false)).join('')}${pagination}`;
+    container.querySelectorAll('[data-history-page]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const nextPage = Number(button.getAttribute('data-history-page'));
+        if (!Number.isInteger(nextPage) || nextPage < 1 || nextPage > pageCount || nextPage === historyPage) return;
+        historyPage = nextPage;
+        loadHistoryOrders();
+      });
+    });
   } catch (err) {
     container.innerHTML = `
       <div class="state-box">
@@ -443,6 +844,7 @@ function setupProfileTabs() {
   if (historySelect) {
     historySelect.addEventListener('change', (e) => {
       historyFilter = e.target.value;
+      historyPage = 1;
       loadHistoryOrders();
     });
   }
@@ -548,23 +950,27 @@ function setupProfileTabs() {
       if (!file) return;
 
       try {
-        const dataUrl = await resizeImageToDataUrl(file, 256, 0.8);
-        await apiFetch('/profile', {
-          method: 'PATCH',
-          body: JSON.stringify({ avatarUrl: dataUrl }),
+        const validFile = validateAvatarFile(file);
+        const formData = new FormData();
+        formData.append('photo', validFile, validFile.name);
+        const res = await apiFetch('/profile/avatar', {
+          method: 'POST',
+          body: formData,
         });
 
         const u = getUser();
         if (u) {
-          u.avatarUrl = dataUrl;
+          u.avatarUrl = res.avatarUrl;
           setUser(u);
         }
 
         showToast('Profile photo updated!', 'success');
-        loadProfileOverview();
         renderHeader('profile');
+        await loadProfileOverview();
       } catch (err) {
         showToast(err.message, 'error');
+      } finally {
+        avatarUploadInput.value = '';
       }
     });
   }
@@ -585,8 +991,8 @@ function setupProfileTabs() {
         }
 
         showToast('Profile photo removed. Letter avatar restored.', 'info');
-        loadProfileOverview();
         renderHeader('profile');
+        await loadProfileOverview();
       } catch (err) {
         showToast(err.message, 'error');
       }
@@ -604,6 +1010,83 @@ function setupProfileTabs() {
     });
   });
 
+  const profilePhotoButton = document.getElementById('profile-photo-button');
+  if (profilePhotoButton) {
+    profilePhotoButton.addEventListener('click', async () => {
+      try {
+        if (!currentProfile) {
+          const res = await apiFetch('/profile');
+          currentProfile = res.profile;
+        }
+        openAvatarModal(currentProfile);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+  }
+
+  const editUsernameButton = document.getElementById('edit-username-btn');
+  if (editUsernameButton) {
+    editUsernameButton.addEventListener('click', openUsernameModal);
+  }
+
+  const closeUsernameButton = document.getElementById('close-username-modal');
+  if (closeUsernameButton) closeUsernameButton.addEventListener('click', closeUsernameModal);
+
+  const cancelUsernameButton = document.getElementById('cancel-username-btn');
+  if (cancelUsernameButton) cancelUsernameButton.addEventListener('click', closeUsernameModal);
+
+  const usernameForm = document.getElementById('username-form');
+  if (usernameForm) usernameForm.addEventListener('submit', saveUsernameChange);
+
+  const closeAvatarButton = document.getElementById('close-avatar-modal');
+  if (closeAvatarButton) closeAvatarButton.addEventListener('click', closeAvatarModal);
+
+  const avatarModal = document.getElementById('avatar-lightbox');
+  if (avatarModal) {
+    avatarModal.addEventListener('click', (event) => {
+      if (event.target === avatarModal) closeAvatarModal();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (!avatarModal.classList.contains('open')) return;
+      if (event.key === 'Escape') {
+        closeAvatarModal();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = avatarModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      const items = Array.from(focusable).filter((el) => !el.disabled && el.offsetParent !== null);
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+  }
+
+  const usernameModal = document.getElementById('username-modal');
+  if (usernameModal) {
+    usernameModal.addEventListener('click', (event) => {
+      if (event.target === usernameModal) closeUsernameModal();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (!usernameModal.classList.contains('open')) return;
+      if (event.key === 'Escape') {
+        closeUsernameModal();
+      }
+    });
+  }
+
+  const logoutButton = document.getElementById('sidebar-logout-btn');
+  if (logoutButton) {
+    logoutButton.addEventListener('click', () => logout());
+  }
+
   // Modal close buttons
   const closeReceiptModal = document.getElementById('close-receipt-modal');
   if (closeReceiptModal) closeReceiptModal.addEventListener('click', () => closeModal('order-receipt-modal'));
@@ -615,6 +1098,7 @@ function initProfile() {
   renderFooter();
   setupProfileTabs();
   loadProfileOverview();
+  loadCustomerStats();
 
   // Check URL query for tab selection
   const params = new URLSearchParams(window.location.search);
@@ -624,7 +1108,9 @@ function initProfile() {
       .find((button) => button.getAttribute('data-tab') === requestedTab);
     if (tabBtn) tabBtn.click();
   } else {
-    loadStatusOrders();
+    const defaultTab = document.querySelector('.profile-nav-btn.active') || document.querySelector('.profile-nav-btn[data-tab="overview"]');
+    if (defaultTab) defaultTab.click();
+    else loadStatusOrders();
   }
 
   // 10-second polling for active order updates

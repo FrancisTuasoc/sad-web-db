@@ -14,10 +14,11 @@ export function apiUrl(endpoint) {
 export async function apiFetch(endpoint, options = {}) {
   const url = apiUrl(endpoint);
 
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(options.headers || {}),
-  };
+  const headers = { ...(options.headers || {}) };
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  if (!isFormData && options.body !== undefined && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   const token = localStorage.getItem('token');
   if (token) {
@@ -60,4 +61,38 @@ export async function apiFetch(endpoint, options = {}) {
   }
 
   return data;
+}
+
+export async function apiFetchBlob(endpoint) {
+  const headers = {};
+  const token = localStorage.getItem('token');
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  let response;
+  try {
+    response = await fetch(apiUrl(endpoint), { headers });
+  } catch (err) {
+    throw new Error("Can't reach the server. Check your connection.");
+  }
+
+  if (response.status === 401) {
+    if (token) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'login.html?expired=1';
+    }
+    throw new Error('Please log in again to view your profile photo.');
+  }
+  if (!response.ok) {
+    let message = 'Could not load your profile photo.';
+    try {
+      const data = await response.json();
+      if (data.message) message = data.message;
+    } catch (err) {
+      // Keep the user-facing error generic if the server response is not JSON.
+    }
+    throw new Error(message);
+  }
+
+  return response.blob();
 }

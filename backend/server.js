@@ -17,18 +17,38 @@ const categoriesRoutes = require('./src/routes/categories.routes');
 const cartRoutes = require('./src/routes/cart.routes');
 const ordersRoutes = require('./src/routes/orders.routes');
 const profileRoutes = require('./src/routes/profile.routes');
+const customerAccountRoutes = require('./src/routes/customerAccount.routes');
 const streamRoutes = require('./src/routes/stream.routes');
 const settingsRoutes = require('./src/routes/settings.routes');
 const adminRoutes = require('./src/routes/admin.routes');
 
 const app = express();
+app.disable('x-powered-by');
 
-const allowedOrigins = [FRONTEND_URL, 'http://localhost:5500', 'http://127.0.0.1:5500'];
+const normalizeOrigin = (value) => {
+  if (!value) return value;
+
+  try {
+    return new URL(value).origin;
+  } catch (error) {
+    return value.replace(/\/$/, '');
+  }
+};
+
+const allowedOrigins = new Set([
+  normalizeOrigin(FRONTEND_URL),
+  'http://localhost:5000',
+  'http://127.0.0.1:5000',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+].map((origin) => normalizeOrigin(origin)));
 
 // Middleware
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    const normalizedOrigin = origin ? normalizeOrigin(origin) : null;
+
+    if (!origin || allowedOrigins.has(normalizedOrigin)) {
       callback(null, true);
       return;
     }
@@ -37,8 +57,14 @@ app.use(cors({
   },
   credentials: true,
 }));
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // Static frontend serving
 const frontendPath = path.join(__dirname, '../frontend');
@@ -51,6 +77,7 @@ app.use('/api/categories', categoriesRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/customer', customerAccountRoutes);
 app.use('/api/stream', streamRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/admin', adminRoutes);

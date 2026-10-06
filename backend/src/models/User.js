@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { isValidGmailAddress } = require('../utils/accountValidation');
+const { deleteAvatarForUser } = require('../services/avatarStorage');
 
 const userSchema = new mongoose.Schema(
   {
@@ -70,5 +71,34 @@ const userSchema = new mongoose.Schema(
     },
   }
 );
+
+userSchema.post('findOneAndDelete', async function (user) {
+  if (user) await deleteAvatarForUser(user);
+});
+
+userSchema.post('deleteOne', { document: true, query: false }, async function () {
+  await deleteAvatarForUser(this);
+});
+
+userSchema.pre('deleteOne', { document: false, query: true }, async function () {
+  this._avatarUserForCleanup = await this.model.findOne(this.getFilter()).select('avatarUrl').lean();
+});
+
+userSchema.post('deleteOne', { document: false, query: true }, async function (result) {
+  if (result.deletedCount && this._avatarUserForCleanup) {
+    await deleteAvatarForUser(this._avatarUserForCleanup);
+  }
+});
+
+userSchema.pre('deleteMany', async function () {
+  this._avatarsForCleanup = await this.model.find(this.getFilter()).select('avatarUrl').lean();
+});
+
+userSchema.post('deleteMany', async function (result) {
+  if (!result.deletedCount || !this._avatarsForCleanup) return;
+  for (const user of this._avatarsForCleanup) {
+    await deleteAvatarForUser(user);
+  }
+});
 
 module.exports = mongoose.model('User', userSchema);

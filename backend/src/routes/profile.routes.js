@@ -1,26 +1,156 @@
 const express = require('express');
+const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
 const { z } = require('zod');
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
+const path = require('path');
 
 const User = require('../models/User');
 const Order = require('../models/Order');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 const validate = require('../middleware/validate');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireAdmin } = require('../middleware/auth');
+const {
+  AVATAR_MAX_BYTES,
+  AVATAR_REQUEST_LIMIT,
+  AVATAR_STORAGE_CAP_BYTES,
+  acquireAvatarUserLock,
+  deleteAvatarByUrl,
+  getAvatarStorageUsage,
+  releaseAvatarUserLock,
+  releaseAvatarBytes,
+  reserveAvatarBytes,
+} = require('../services/avatarStorage');
 
 const router = express.Router();
+
+const AVATAR_MIME_TYPES = new Map([
+  ['image/jpeg', ['.jpg', '.jpeg']],
+  ['image/png', ['.png']],
+  ['image/webp', ['.webp']],
+]);
+
+function parseAvatarMultipart(body, contentType) {
+  const boundaryMatch = /boundary=(?:"([^"]+)"|([^;]+))/i.exec(contentType || '');
+  const boundary = boundaryMatch && (boundaryMatch[1] || boundaryMatch[2]).trim();
+  if (!boundary || boundary.length > 70 || !Buffer.isBuffer(body)) {
+    throw new AppError('Please choose a valid JPG, PNG, or WebP photo.', 400);
+  }
+
+  const delimiter = Buffer.from(`--${boundary}`);
+  let cursor = body.indexOf(delimiter);
+  let photo = null;
+  let partCount = 0;
+
+  while (cursor !== -1) {
+    cursor += delimiter.length;
+    if (body.subarray(cursor, cursor + 2).equals(Buffer.from('--'))) break;
+    if (body.subarray(cursor, cursor + 2).equals(Buffer.from('\r\n'))) cursor += 2;
+
+    const headersEnd = body.indexOf(Buffer.from('\r\n\r\n'), cursor);
+    if (headersEnd === -1) {
+      throw new AppError('The photo upload could not be read. Please try again.', 400);
+    }
+
+    const headers = body.subarray(cursor, headersEnd).toString('utf8');
+    const disposition = /content-disposition:\s*form-data;([^\r\n]+)/i.exec(headers);
+    const nameMatch = disposition && /(?:^|;)\s*name="([^"]*)"/i.exec(disposition[1]);
+    const filenameMatch = disposition && /(?:^|;)\s*filename="([^"]*)"/i.exec(disposition[1]);
+    const contentTypeMatch = /content-type:\s*([^\r\n]+)/i.exec(headers);
+    const dataStart = headersEnd + 4;
+    const nextDelimiter = body.indexOf(Buffer.concat([Buffer.from('\r\n'), delimiter]), dataStart);
+
+    if (nextDelimiter === -1) {
+      throw new AppError('The photo upload could not be read. Please try again.', 400);
+    }
+
+    partCount += 1;
+    if (nameMatch && nameMatch[1] === 'photo' && filenameMatch) {
+      if (photo) throw new AppError('Upload one photo at a time.', 400);
+      photo = {
+        filename: path.basename(filenameMatch[1]),
+        contentType: (contentTypeMatch ? contentTypeMatch[1] : '').trim().toLowerCase(),
+        buffer: body.subarray(dataStart, nextDelimiter),
+      };
+    } else {
+      throw new AppError('Unexpected upload data. Please choose a photo and try again.', 400);
+    }
+
+    cursor = nextDelimiter + 2;
+  }
+
+  if (partCount !== 1 || !photo || !photo.buffer.length) {
+    throw new AppError('Please choose a photo to upload.', 400);
+  }
+  if (photo.buffer.length > AVATAR_MAX_BYTES) {
+    throw new AppError('Photo must be 5 MiB or smaller.', 413);
+  }
+
+  const extension = path.extname(photo.filename).toLowerCase();
+  const allowedExtensions = AVATAR_MIME_TYPES.get(photo.contentType);
+  if (!allowedExtensions || !allowedExtensions.includes(extension)) {
+    throw new AppError('Choose a JPG, PNG, or WebP photo.', 400);
+  }
+
+  const bytes = photo.buffer;
+  const validSignature = photo.contentType === 'image/jpeg'
+    ? bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff
+    : photo.contentType === 'image/png'
+      ? bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+      : bytes.length >= 12
+        && bytes.toString('ascii', 0, 4) === 'RIFF'
+        && bytes.toString('ascii', 8, 12) === 'WEBP';
+
+  if (!validSignature) {
+    throw new AppError('The selected file is not a valid JPG, PNG, or WebP image.', 400);
+  }
+
+  return photo;
+}
+
+const avatarRateLimitHandler = (req, res, next) => {
+  next(new AppError('You have reached the photo upload limit. Please try again in an hour.', 429));
+};
+
+const unauthenticatedAvatarUploadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => `ip:${ipKeyGenerator(req.ip)}`,
+  skip: (req) => Boolean(req.get('authorization')),
+  handler: avatarRateLimitHandler,
+});
+
+const avatarUploadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => (req.user ? `user:${req.user._id}` : `ip:${ipKeyGenerator(req.ip)}`),
+  handler: avatarRateLimitHandler,
+});
+
+router.use((req, res, next) => {
+  if (req.method === 'POST' && req.path === '/avatar') {
+    return unauthenticatedAvatarUploadLimiter(req, res, next);
+  }
+  return next();
+});
 router.use(requireAuth);
 
-const updateProfileSchema = z.object({
-  fullName: z.string().trim().max(100).optional(),
-  phone: z.string().trim().max(20).optional(),
-  address: z.string().trim().max(300).optional(),
-  avatarUrl: z
-    .string()
-    .max(450000, 'Profile image size exceeds the 300KB limit')
-    .optional(),
-});
+const updateProfileSchema = z
+  .object({
+    fullName: z.string().trim().max(100).optional(),
+    phone: z.string().trim().max(20).optional(),
+    address: z.string().trim().max(300).optional(),
+    avatarUrl: z
+      .string()
+      .max(450000, 'Profile image size exceeds the 300KB limit')
+      .optional(),
+  })
+  .strict();
 
 const changePasswordSchema = z
   .object({
@@ -32,6 +162,7 @@ const changePasswordSchema = z
       .regex(/[0-9]/, 'Password must contain at least one number'),
     confirmPassword: z.string(),
   })
+  .strict()
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: 'New passwords do not match',
     path: ['confirmPassword'],
@@ -63,6 +194,119 @@ router.get(
   })
 );
 
+// POST /api/profile/avatar - multipart/form-data field "photo"
+router.post(
+  '/avatar',
+  avatarUploadLimiter,
+  express.raw({ type: 'multipart/form-data', limit: AVATAR_REQUEST_LIMIT }),
+  asyncHandler(async (req, res) => {
+    const photo = parseAvatarMultipart(req.body, req.headers['content-type']);
+    if (!mongoose.connection.db) {
+      throw new AppError('Photo uploads are temporarily unavailable. Please try again.', 503);
+    }
+
+    const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'customerAvatars' });
+    const lockToken = await acquireAvatarUserLock(req.user._id);
+    let reservedBytes = false;
+    let uploadedAvatarUrl = '';
+    let userSaved = false;
+    let responseAvatarUrl = '';
+    let upload;
+    try {
+      const user = await User.findById(req.user._id);
+      if (!user) throw new AppError('Your account could not be found.', 404);
+      const previousAvatarUrl = user.avatarUrl;
+
+      await reserveAvatarBytes(photo.buffer.length);
+      reservedBytes = true;
+
+      upload = bucket.openUploadStream(photo.filename, {
+        contentType: photo.contentType,
+        metadata: { userId: user._id.toString() },
+      });
+
+      try {
+        await new Promise((resolve, reject) => {
+          upload.once('error', reject);
+          upload.once('finish', resolve);
+          upload.end(photo.buffer);
+        });
+      } catch (error) {
+        await upload.abort();
+        throw error;
+      }
+
+      uploadedAvatarUrl = `gridfs:${upload.id.toString()}`;
+      user.avatarUrl = uploadedAvatarUrl;
+      await user.save();
+      userSaved = true;
+      reservedBytes = false;
+
+      await deleteAvatarByUrl(previousAvatarUrl);
+      responseAvatarUrl = user.avatarUrl;
+    } catch (error) {
+      if (uploadedAvatarUrl && !userSaved) {
+        await deleteAvatarByUrl(uploadedAvatarUrl);
+      } else if (reservedBytes) {
+        await releaseAvatarBytes(photo.buffer.length);
+      }
+      throw error;
+    } finally {
+      await releaseAvatarUserLock(req.user._id, lockToken);
+    }
+    res.json({
+      success: true,
+      message: 'Profile photo updated successfully.',
+      avatarUrl: responseAvatarUrl,
+    });
+  })
+);
+
+// Admin-only usage report for the avatar bucket's file payload storage.
+router.get(
+  '/avatar/storage',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const usage = await getAvatarStorageUsage();
+    res.json({
+      success: true,
+      usage: {
+        ...usage,
+        capBytes: AVATAR_STORAGE_CAP_BYTES,
+        capMiB: AVATAR_STORAGE_CAP_BYTES / (1024 * 1024),
+        usedPercent: Number(((usage.usedBytes / AVATAR_STORAGE_CAP_BYTES) * 100).toFixed(2)),
+      },
+    });
+  })
+);
+
+// GET /api/profile/avatar - authenticated stream for the current user's photo
+router.get(
+  '/avatar',
+  asyncHandler(async (req, res, next) => {
+    const user = await User.findById(req.user._id).select('avatarUrl');
+    if (!user || !user.avatarUrl || !user.avatarUrl.startsWith('gridfs:')) {
+      throw new AppError('No profile photo is available.', 404);
+    }
+
+    const fileId = user.avatarUrl.slice('gridfs:'.length);
+    if (!mongoose.isValidObjectId(fileId) || !mongoose.connection.db) {
+      throw new AppError('Profile photo could not be found.', 404);
+    }
+
+    const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'customerAvatars' });
+    const id = new mongoose.Types.ObjectId(fileId);
+    const files = await bucket.find({ _id: id, 'metadata.userId': user._id.toString() }).toArray();
+    if (!files.length) throw new AppError('Profile photo could not be found.', 404);
+
+    res.setHeader('Content-Type', AVATAR_MIME_TYPES.has(files[0].contentType) ? files[0].contentType : 'application/octet-stream');
+    res.setHeader('Cache-Control', 'private, no-store');
+    const stream = bucket.openDownloadStream(id);
+    stream.once('error', next);
+    stream.pipe(res);
+  })
+);
+
 // PATCH /api/profile
 router.patch(
   '/',
@@ -73,9 +317,13 @@ router.patch(
     if (req.body.fullName !== undefined) user.fullName = req.body.fullName;
     if (req.body.phone !== undefined) user.phone = req.body.phone;
     if (req.body.address !== undefined) user.address = req.body.address;
+    const previousAvatar = user.avatarUrl;
     if (req.body.avatarUrl !== undefined) user.avatarUrl = req.body.avatarUrl;
 
     await user.save();
+    if (req.body.avatarUrl !== undefined && req.body.avatarUrl !== previousAvatar) {
+      await deleteAvatarByUrl(previousAvatar);
+    }
 
     res.json({
       success: true,
