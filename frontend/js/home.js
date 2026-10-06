@@ -113,7 +113,7 @@ async function loadFeaturedProducts() {
     const data = await apiFetch('/products?sort=featured');
     availableAddons = Array.isArray(data && data.addons) ? data.addons : [];
     if (data && data.products && data.products.length > 0) {
-      const featured = data.products.filter((p) => !p.isAddon && p.isFeatured).slice(0, 4);
+      const featured = data.products.filter((p) => !p.isAddon && p.isFeatured);
       if (featured.length > 0) {
         container.innerHTML = featured.map((p) => renderProductCard(p, isGuest)).join('');
         return;
