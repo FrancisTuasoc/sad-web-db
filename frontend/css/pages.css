@@ -4202,6 +4202,110 @@ body.theme-dark .customer-sidebar .logout-button {
   line-height: 1.5;
 }
 
+.cart-action-button,
+.cart-clear-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.cart-action-button svg,
+.cart-clear-button svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+}
+
+.cart-action-button {
+  border-color: #eadbc8;
+  background: #fffaf2;
+  color: var(--color-brand-secondary);
+}
+
+.cart-action-button:hover {
+  border-color: #dfc6a7;
+  background: #fff2dc;
+  color: var(--color-brand);
+}
+
+.cart-action-remove,
+.cart-clear-button {
+  border-color: #f0d4d2;
+  background: #fff7f6;
+  color: #a52b31;
+}
+
+.cart-action-remove:hover,
+.cart-clear-button:hover {
+  border-color: #e5b4b5;
+  background: #ffeded;
+  color: #861c23;
+}
+
+.cart-action-button:focus-visible,
+.cart-clear-button:focus-visible {
+  outline: 3px solid rgba(152, 37, 42, 0.22);
+  outline-offset: 2px;
+}
+
+.cart-clear-button {
+  min-height: 36px;
+  padding: 7px 12px;
+}
+
+.payment-info-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 13px 14px;
+  border: 1px solid #f0d39a;
+  border-radius: var(--radius-md);
+  background: #fff8e8;
+  color: #76500f;
+  font-size: 0.83rem;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.payment-info-notice > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+.payment-info-notice strong {
+  color: #674207;
+  font-size: 0.87rem;
+}
+
+.payment-info-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffedc5;
+  color: #986008;
+}
+
+.payment-info-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
 .receipt-sidebar {
   border-color: #eadbc8;
   box-shadow: 0 12px 34px rgba(71, 43, 30, 0.08);
@@ -4475,6 +4579,22 @@ body.theme-dark .customer-sidebar .logout-button {
 .checkout-modal .saved-details-box {
   margin-bottom: 12px;
   border-radius: var(--radius-md);
+}
+
+.saved-contact-summary-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.saved-contact-summary-content > div {
+  min-width: 0;
+}
+
+.checkout-change-contact-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .checkout-modal .payment-option-label {
@@ -5317,6 +5437,11 @@ body > main > .modal-card h2 {
   .checkout-modal-body {
     padding: 16px 18px 20px;
   }
+
+  .saved-contact-summary-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -5359,6 +5484,46 @@ body.theme-dark .checkout-modal .payment-option-label {
 
 body.theme-dark .checkout-modal .payment-option-label:hover {
   background: var(--color-surface);
+}
+
+body.theme-dark .cart-action-button {
+  border-color: var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text-main);
+}
+
+body.theme-dark .cart-action-button:hover {
+  border-color: var(--color-brand-secondary);
+  background: var(--color-surface);
+}
+
+body.theme-dark .cart-action-remove,
+body.theme-dark .cart-clear-button {
+  border-color: rgba(248, 113, 113, 0.35);
+  background: rgba(127, 29, 29, 0.2);
+  color: #fca5a5;
+}
+
+body.theme-dark .cart-action-remove:hover,
+body.theme-dark .cart-clear-button:hover {
+  border-color: rgba(248, 113, 113, 0.6);
+  background: rgba(127, 29, 29, 0.35);
+  color: #fecaca;
+}
+
+body.theme-dark .payment-info-notice {
+  border-color: rgba(234, 179, 8, 0.4);
+  background: rgba(120, 82, 12, 0.2);
+  color: #f3d58f;
+}
+
+body.theme-dark .payment-info-notice strong {
+  color: #ffe6a8;
+}
+
+body.theme-dark .payment-info-icon {
+  background: rgba(234, 179, 8, 0.18);
+  color: #f3c65f;
 }
 
 body.theme-dark .checkout-modal .form-input,

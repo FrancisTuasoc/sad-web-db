@@ -50,15 +50,10 @@ export async function fetchCart() {
     const data = await apiFetch('/cart');
     cartItems = data.items || [];
 
-    // Pre-check all items by default on initial load
-    if (checkedItemIds.size === 0 && cartItems.length > 0) {
-      cartItems.forEach((item) => checkedItemIds.add(item._id));
-    } else {
-      // Remove stale checked IDs
-      const currentIds = new Set(cartItems.map((c) => c._id));
-      for (const id of checkedItemIds) {
-        if (!currentIds.has(id)) checkedItemIds.delete(id);
-      }
+    // Keep only explicit selections that still exist in the cart.
+    const currentIds = new Set(cartItems.map((item) => item._id));
+    for (const id of checkedItemIds) {
+      if (!currentIds.has(id)) checkedItemIds.delete(id);
     }
 
     renderCartLines();
@@ -95,7 +90,11 @@ export function renderCartLines() {
   if (cartContent) cartContent.classList.remove('hidden');
 
   const allChecked = cartItems.length > 0 && cartItems.every((item) => checkedItemIds.has(item._id));
-  if (selectAllCb) selectAllCb.checked = allChecked;
+  const someChecked = cartItems.some((item) => checkedItemIds.has(item._id));
+  if (selectAllCb) {
+    selectAllCb.checked = allChecked;
+    selectAllCb.indeterminate = someChecked && !allChecked;
+  }
   const addonUsage = new Map();
   for (const item of cartItems) {
     for (const addon of item.addons || []) {
@@ -174,8 +173,18 @@ export function renderCartLines() {
             ${addonsDisplay}
             ${stockWarning}
             <div class="cart-item-actions">
-              <button type="button" class="btn-link-action btn-edit-addons" data-line-id="${item._id}">Edit add-ons</button>
-              <button type="button" class="btn-link-action btn-remove-line" data-line-id="${item._id}" style="color:var(--color-danger);">Remove</button>
+              <button type="button" class="cart-action-button btn-edit-addons" data-line-id="${item._id}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/>
+                </svg>
+                Edit add-ons
+              </button>
+              <button type="button" class="cart-action-button cart-action-remove btn-remove-line" data-line-id="${item._id}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/>
+                </svg>
+                Remove
+              </button>
             </div>
           </div>
           <div class="cart-item-right">
@@ -479,7 +488,10 @@ function setupCartListeners() {
       }
       const selectAllCb = document.getElementById('select-all-checkbox');
       if (selectAllCb) {
-        selectAllCb.checked = cartItems.length > 0 && cartItems.every((item) => checkedItemIds.has(item._id));
+        const allChecked = cartItems.length > 0 && cartItems.every((item) => checkedItemIds.has(item._id));
+        const someChecked = cartItems.some((item) => checkedItemIds.has(item._id));
+        selectAllCb.checked = allChecked;
+        selectAllCb.indeterminate = someChecked && !allChecked;
       }
       updateReceipt();
     }

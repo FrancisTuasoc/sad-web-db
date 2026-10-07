@@ -481,14 +481,19 @@ function initContactDetails() {
     if (summaryBox) {
       summaryBox.classList.remove('hidden');
       summaryBox.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="saved-contact-summary-content">
           <div>
             <div style="font-size:0.78rem;color:var(--color-text-muted);margin-bottom:3px;">Saved account details</div>
             <strong>${escapeHtml([firstName, lastName].join(' '))}</strong>
             <div style="font-size:0.82rem;color:var(--color-text-muted);">${escapeHtml(user.contactEmail || user.email)} &bull; ${escapeHtml(user.phone)}</div>
             ${formatContactAddress({ ...addressFields, address: user.address }) ? `<div style="font-size:0.82rem;color:var(--color-text-muted);margin-top:2px;">${escapeHtml(formatContactAddress({ ...addressFields, address: user.address }))}</div>` : ''}
           </div>
-          <button type="button" id="change-contact-btn" class="btn-link-action" style="font-size:0.8rem;">Change for this order</button>
+          <button type="button" id="change-contact-btn" class="cart-action-button checkout-change-contact-button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/>
+            </svg>
+            Change for this order
+          </button>
         </div>
       `;
       const changeBtn = document.getElementById('change-contact-btn');
