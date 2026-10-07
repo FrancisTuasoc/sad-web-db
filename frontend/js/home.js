@@ -113,8 +113,15 @@ async function loadStoreInfo() {
       if (heroTaglineElem && typeof s.tagline === 'string') heroTaglineElem.textContent = s.tagline;
       if (aboutStoreName && typeof s.storeName === 'string') aboutStoreName.textContent = s.storeName;
       if (contactAddress && typeof s.address === 'string') contactAddress.textContent = s.address;
-      if (contactPhone && typeof s.phone === 'string') contactPhone.textContent = s.phone;
-      if (contactEmail && typeof s.email === 'string') contactEmail.textContent = s.email;
+      if (contactPhone && typeof s.phone === 'string') {
+        contactPhone.textContent = s.phone;
+        const phoneLink = s.phone.replace(/[^\d+]/g, '');
+        if (/^\+?\d+$/.test(phoneLink)) contactPhone.href = `tel:${phoneLink}`;
+      }
+      if (contactEmail && typeof s.email === 'string') {
+        contactEmail.textContent = s.email;
+        contactEmail.href = `mailto:${encodeURI(s.email)}`;
+      }
       renderBusinessHours(contactHours, s.businessHours);
       return s;
     }
@@ -142,7 +149,7 @@ async function loadFeaturedProducts() {
     if (data && Array.isArray(data.products)) {
       const featured = data.products.filter((p) => !p.isAddon && p.isFeatured);
       if (featured.length > 0) {
-        container.innerHTML = featured.map((p) => renderProductCard(p, isGuest)).join('');
+        container.innerHTML = featured.slice(0, 4).map((p) => renderProductCard(p, isGuest)).join('');
       } else {
         container.innerHTML = '<div class="state-box" style="grid-column:1/-1;"><h3 class="state-title">No featured items right now</h3><p class="state-desc">Browse the full menu to see what is available.</p><a href="menu.html" class="btn btn-secondary btn-sm">View Menu</a></div>';
       }

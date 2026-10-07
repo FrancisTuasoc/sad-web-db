@@ -322,11 +322,8 @@ async function loadCustomerStats() {
         : '<div class="state-box"><h4 class="state-title">No recent orders</h4><p class="state-desc">You have not placed any orders yet.</p></div>';
     }
 
-    const statusTotal = Number(stats.totalOrders || 0);
-    const totalEl = document.getElementById('customer-status-total');
-    if (totalEl) totalEl.textContent = String(statusTotal || 0);
-
     const statusPills = document.getElementById('customer-status-pill-list');
+    const statusCounts = stats.statusCounts || {};
     const statusMeta = [
       { key: 'pending', label: 'Pending', color: '#d98508' },
       { key: 'ready_for_pickup', label: 'Ready Pick-up', color: '#155a91' },
@@ -336,10 +333,16 @@ async function loadCustomerStats() {
       { key: 'completed', label: 'Completed', color: '#216b36' },
       { key: 'cancelled', label: 'Cancelled', color: '#98252a' },
     ];
+    const statusTotal = statusMeta.reduce(
+      (total, item) => total + (Number(statusCounts[item.key]) || 0),
+      0
+    );
+    const totalEl = document.getElementById('customer-status-total');
+    if (totalEl) totalEl.textContent = String(statusTotal);
 
     if (statusPills) {
       statusPills.innerHTML = statusMeta.map((item) => {
-        const count = stats.statusCounts?.[item.key] || 0;
+        const count = statusCounts[item.key] || 0;
         return `
           <button type="button" class="status-pill" data-status-filter="${item.key}" style="color:${item.color};">
             <span class="status-dot" style="background:${item.color};"></span>

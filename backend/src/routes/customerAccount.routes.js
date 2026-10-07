@@ -211,6 +211,10 @@ router.get(
 
 router.get('/kpis', asyncHandler(async (req, res) => {
   const userId = req.user._id;
+  const statusCountFields = Object.fromEntries(statusValues.map((status) => [
+    `status_${status}`,
+    { $sum: { $cond: [{ $eq: ['$status', status] }, 1, 0] } },
+  ]));
 
   const [summary] = await Order.aggregate([
     { $match: { user: userId } },
@@ -221,6 +225,7 @@ router.get('/kpis', asyncHandler(async (req, res) => {
         pendingOrders: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
         deliveredOrders: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] } },
         totalSpent: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, '$total', 0] } },
+        ...statusCountFields,
       },
     },
   ]);
@@ -229,6 +234,10 @@ router.get('/kpis', asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .limit(5)
     .lean();
+  const statusCounts = Object.fromEntries(statusValues.map((status) => [
+    status,
+    Number(summary?.[`status_${status}`] || 0),
+  ]));
 
   res.json({
     success: true,
@@ -237,6 +246,7 @@ router.get('/kpis', asyncHandler(async (req, res) => {
       pendingOrders: Number(summary?.pendingOrders || 0),
       deliveredOrders: Number(summary?.deliveredOrders || 0),
       totalSpent: Number(summary?.totalSpent || 0),
+      statusCounts,
       recentOrders: recentOrders.map((order) => ({
         _id: order._id,
         orderNumber: order.orderNumber,
