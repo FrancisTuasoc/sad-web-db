@@ -16,7 +16,7 @@
   <header class="site-header" style="background:#1F1511;">
     <div class="container header-container">
       <div style="display:flex;align-items:center;gap:12px;">
-        <button type="button" id="admin-toggle-sidebar-btn" class="btn btn-secondary btn-sm" aria-label="Toggle navigation drawer">
+        <button type="button" id="admin-toggle-sidebar-btn" class="btn btn-secondary btn-sm" aria-label="Collapse navigation" aria-controls="admin-sidebar" aria-expanded="true" title="Collapse navigation">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
         <a href="admin.html" class="brand-logo" style="text-decoration:none;">
@@ -39,29 +39,29 @@
   <div class="admin-layout">
     <!-- Left Sidebar -->
     <aside class="admin-sidebar" id="admin-sidebar">
-      <button type="button" class="admin-nav-item active" data-section="dashboard">
+      <button type="button" class="admin-nav-item active" data-section="dashboard" aria-label="Dashboard" title="Dashboard">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        Dashboard
+        <span class="admin-nav-label">Dashboard</span>
       </button>
-      <button type="button" class="admin-nav-item" data-section="orders">
+      <button type="button" class="admin-nav-item" data-section="orders" aria-label="Orders Management" title="Orders Management">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-        Orders Management <span id="admin-pending-count" class="badge badge-pending hidden" style="margin-left:6px;">0</span>
+        <span class="admin-nav-label">Orders Management</span><span id="admin-pending-count" class="badge badge-pending hidden" aria-live="polite">0</span>
       </button>
-      <button type="button" class="admin-nav-item" data-section="menu">
+      <button type="button" class="admin-nav-item" data-section="menu" aria-label="Menu and inventory" title="Menu and inventory">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        Menu & Add-ons
+        <span class="admin-nav-label">Menu & Add-ons</span>
       </button>
-      <button type="button" class="admin-nav-item" data-section="categories">
+      <button type="button" class="admin-nav-item" data-section="categories" aria-label="Categories" title="Categories">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        Categories
+        <span class="admin-nav-label">Categories</span>
       </button>
-      <button type="button" class="admin-nav-item" data-section="customers">
+      <button type="button" class="admin-nav-item" data-section="customers" aria-label="Customers" title="Customers">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Customers
+        <span class="admin-nav-label">Customers</span>
       </button>
-      <button type="button" class="admin-nav-item" data-section="settings">
+      <button type="button" class="admin-nav-item" data-section="settings" aria-label="Store Settings" title="Store Settings">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Store Settings
+        <span class="admin-nav-label">Store Settings</span>
       </button>
     </aside>
 
@@ -69,33 +69,64 @@
     <main class="admin-main">
       <!-- SECTION 1: DASHBOARD -->
       <div id="section-dashboard" class="admin-section">
-        <h2 style="font-size:1.6rem;margin-bottom:20px;">Operations Dashboard</h2>
+        <section class="admin-welcome-card" aria-labelledby="admin-greeting">
+          <div class="admin-welcome-copy">
+            <span class="admin-eyebrow">STORE OVERVIEW</span>
+            <h1 id="admin-greeting">Welcome back, <span id="admin-greeting-name">Admin</span></h1>
+            <p>Your store at a glance. Completed sales are counted by the time each order was fulfilled.</p>
+            <div class="admin-live-status"><span class="admin-live-dot"></span> Live overview <span class="admin-status-divider">·</span> Auto-refreshes every 10 seconds</div>
+          </div>
+          <div class="admin-welcome-actions">
+            <span id="dashboard-last-updated" class="admin-last-updated" aria-live="polite">Loading dashboard…</span>
+            <button type="button" id="dashboard-refresh-btn" class="btn btn-secondary admin-refresh-btn" aria-label="Refresh dashboard metrics">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M4 17v-5h5"/><path d="M5.64 9A7 7 0 0 1 18 6.5L20 12M4 12l2 5.5A7 7 0 0 0 18.36 15"/></svg>
+              Refresh
+            </button>
+            <button type="button" id="dashboard-view-orders-btn" class="btn btn-primary">
+              Review orders
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+          </div>
+          <svg class="admin-welcome-art" viewBox="0 0 200 200" fill="none" aria-hidden="true"><circle cx="100" cy="100" r="83" stroke="currentColor" stroke-width="1.5"/><circle cx="100" cy="100" r="61" stroke="currentColor" stroke-width="1.5"/><path d="M47 111h106M58 94h84M69 77h62M60 128c8 17 24 28 40 28s32-11 40-28" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><circle cx="100" cy="100" r="7" fill="currentColor"/></svg>
+        </section>
 
         <!-- KPI Stat Cards -->
         <div class="stats-grid">
-          <div class="stat-card">
-            <span class="stat-title">Total Revenue (Completed)</span>
+          <div class="stat-card stat-card-revenue">
+            <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17 9 11l4 4 8-9"/><path d="M15 6h6v6"/></svg></span>
+            <span class="stat-title">Lifetime revenue</span>
             <span class="stat-value" id="stat-total-revenue">₱0.00</span>
+            <span class="stat-detail">Completed orders only</span>
           </div>
           <div class="stat-card">
-            <span class="stat-title">Total Orders</span>
+            <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg></span>
+            <span class="stat-title">All orders</span>
             <span class="stat-value" id="stat-total-orders">0</span>
+            <span class="stat-detail">Includes every order status</span>
           </div>
-          <div class="stat-card" style="border-left:4px solid #D97A07;">
-            <span class="stat-title">Pending Orders</span>
-            <span class="stat-value" id="stat-pending-orders" style="color:#B45309;">0</span>
+          <div class="stat-card stat-card-pending">
+            <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+            <span class="stat-title">Awaiting acceptance</span>
+            <span class="stat-value" id="stat-pending-orders">0</span>
+            <span class="stat-detail">Needs your attention</span>
           </div>
-          <div class="stat-card" style="border-left:4px solid #287D3C;">
-            <span class="stat-title">Completed Orders</span>
-            <span class="stat-value" id="stat-completed-orders" style="color:#166534;">0</span>
+          <div class="stat-card stat-card-completed">
+            <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg></span>
+            <span class="stat-title">Completed orders</span>
+            <span class="stat-value" id="stat-completed-orders">0</span>
+            <span class="stat-detail">Successfully fulfilled</span>
           </div>
-          <div class="stat-card" style="border-left:4px solid #A4262C;">
-            <span class="stat-title">Cancelled Orders</span>
-            <span class="stat-value" id="stat-cancelled-orders" style="color:#991B1B;">0</span>
+          <div class="stat-card stat-card-cancelled">
+            <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6m0-6-6 6"/></svg></span>
+            <span class="stat-title">Cancelled orders</span>
+            <span class="stat-value" id="stat-cancelled-orders">0</span>
+            <span class="stat-detail">Not included in revenue</span>
           </div>
           <div class="stat-card">
-            <span class="stat-title">Registered Customers</span>
+            <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+            <span class="stat-title">Customers</span>
             <span class="stat-value" id="stat-total-customers">0</span>
+            <span class="stat-detail">Registered customer accounts</span>
           </div>
         </div>
 
@@ -104,7 +135,7 @@
           <div>
             <h4 id="sales-toggle-label" style="font-size:1.05rem;margin-bottom:4px;">Today's Sales</h4>
             <div style="font-size:0.85rem;color:var(--color-text-muted);">
-              Completed Volume: <strong id="sales-toggle-count">0 orders</strong> &bull; Total: <strong id="sales-toggle-revenue" style="color:var(--color-brand);font-size:1.1rem;">₱0.00</strong>
+              <span id="sales-toggle-count">0 completed orders</span> &bull; Revenue: <strong id="sales-toggle-revenue" style="color:var(--color-brand);font-size:1.1rem;">₱0.00</strong>
             </div>
           </div>
           <div class="tab-pill-group" style="margin:0;grid-template-columns:repeat(3, auto);">
@@ -145,7 +176,10 @@
           </div>
 
           <div class="step-card">
-            <h4 style="font-size:1.05rem;margin-bottom:12px;">Recent Orders</h4>
+            <div class="admin-recent-orders-header">
+              <h4 style="font-size:1.05rem;margin-bottom:12px;">Recent Orders</h4>
+              <button type="button" id="dashboard-view-all-orders-btn" class="btn btn-secondary btn-sm">View all</button>
+            </div>
             <div class="table-wrap">
               <table class="admin-table">
                 <thead>
@@ -329,13 +363,16 @@
         <form id="store-settings-form">
           <!-- Master Switch & Store Info -->
           <div class="step-card" style="margin-bottom:20px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--color-border);margin-bottom:16px;">
+            <div class="admin-settings-header">
               <h4 style="font-size:1.1rem;margin:0;">Store Information & Master Switch</h4>
-              <label style="display:flex;align-items:center;gap:8px;font-weight:700;cursor:pointer;">
-                <input type="checkbox" id="settings-accepting-orders" style="width:18px;height:18px;">
-                <span style="color:var(--color-brand-secondary);">Accepting Orders (Online)</span>
+              <label class="admin-ordering-toggle" for="settings-accepting-orders">
+                <input type="checkbox" id="settings-accepting-orders" role="switch" aria-describedby="settings-accepting-orders-help">
+                <span>Accept online orders</span>
               </label>
             </div>
+            <p id="settings-accepting-orders-help" class="admin-ordering-status" aria-live="polite">
+              Online ordering status will update after you save store settings.
+            </p>
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
               <div class="form-group">
@@ -421,6 +458,7 @@
           <!-- Business Hours -->
           <div class="step-card" style="margin-bottom:20px;">
             <h4 style="font-size:1.1rem;margin-bottom:14px;">Business Operating Hours</h4>
+            <p class="admin-settings-hint">This weekly schedule is displayed on the customer storefront. Online order acceptance is controlled separately by the master switch above.</p>
             <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;">
               <!-- Mon - Sun blocks -->
               <div style="background:#fff;padding:10px;border:1px solid var(--color-border);border-radius:4px;">

@@ -61,6 +61,7 @@
   </header>
 
   <main>
+    <div id="menu-ordering-notice" class="store-availability-notice hidden" role="status" aria-live="polite"></div>
     <!-- Sticky Menu Toolbar -->
     <section class="menu-toolbar">
       <div class="container toolbar-flex">
@@ -152,15 +153,15 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-col">
-          <h4 style="font-size:1.15rem;color:var(--color-accent);">casestudy-system</h4>
-          <p>Flavor on Wheels - Freshly Grilled Everyday</p>
+          <h4 id="footer-store-name" style="font-size:1.15rem;color:var(--color-accent);">casestudy-system</h4>
+          <p id="footer-store-tagline">Flavor on Wheels - Freshly Grilled Everyday</p>
           <p style="margin-top:12px;font-size:0.85rem;">
             Serving handcrafted hot burgers, specialty sandwiches, footlongs, and sizzling sides with premium local ingredients.
           </p>
         </div>
         <div class="footer-col">
           <h4>Store Hours</h4>
-          <ul class="footer-hours-list">
+          <ul class="footer-hours-list" id="footer-hours-list">
             <li><span>Mon - Fri</span> <span>9:00 AM - 9:00 PM</span></li>
             <li><span>Saturday</span> <span>9:00 AM - 10:00 PM</span></li>
             <li><span>Sunday</span> <span>10:00 AM - 8:00 PM</span></li>
@@ -168,8 +169,8 @@
         </div>
         <div class="footer-col">
           <h4>Contact &amp; Location</h4>
-          <p><strong>Address:</strong><br>123 Main Street, City Center</p>
-          <p style="margin-top:8px;"><strong>Phone:</strong><br>+63 912 345 6789</p>
+          <p><strong>Address:</strong><br><span id="footer-store-address">123 Main Street, City Center</span></p>
+          <p style="margin-top:8px;"><strong>Phone:</strong><br><span id="footer-store-phone">+63 912 345 6789</span></p>
         </div>
       </div>
       <div class="footer-bottom">

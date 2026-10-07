@@ -5,24 +5,41 @@ import { getUser, setUser } from './auth.js';
 import { getCheckedCartItems, hasStockIssue, fetchCart, flushPendingCartUpdates } from './cart.js';
 
 let publicSettings = null;
+let checkoutSettingsLoaded = false;
 let fulfillmentMethod = null; // 'pickup' | 'delivery'
 let paymentMethod = null; // 'gcash' | 'pay_at_shop' | 'cod'
 let isChangingContact = false;
+let selectedCartSubtotal = 0;
 
 export function isCheckoutAllowed() {
   const checked = getCheckedCartItems();
-  return checked.length > 0 && !hasStockIssue();
+  return checkoutSettingsLoaded
+    && Boolean(publicSettings && publicSettings.acceptingOrders)
+    && checked.length > 0
+    && !hasStockIssue()
+    && (!publicSettings.minimumOrder || selectedCartSubtotal >= publicSettings.minimumOrder);
 }
 
 export async function loadCheckoutSettings() {
   try {
     const res = await apiFetch('/settings/public');
     publicSettings = res.settings;
+    checkoutSettingsLoaded = true;
+    if (
+      (fulfillmentMethod === 'pickup' && !publicSettings.pickupEnabled)
+      || (fulfillmentMethod === 'delivery' && !publicSettings.deliveryEnabled)
+    ) {
+      fulfillmentMethod = null;
+      paymentMethod = null;
+    }
     renderFulfillmentOptions();
     renderPaymentOptions();
     updateReceipt();
   } catch (err) {
-    showToast('Failed to load store settings.', 'error');
+    checkoutSettingsLoaded = false;
+    publicSettings = null;
+    showToast(`Failed to load store settings: ${err.message}`, 'error');
+    updateReceipt();
   }
 }
 
@@ -117,7 +134,9 @@ export function updateReceipt() {
 
   let deliveryFee = 0;
   if (fulfillmentMethod === 'delivery' && publicSettings) {
-    deliveryFee = publicSettings.deliveryFee || 30;
+    deliveryFee = Number.isFinite(Number(publicSettings.deliveryFee))
+      ? Number(publicSettings.deliveryFee)
+      : 30;
     if (deliveryRow) deliveryRow.classList.remove('hidden');
     if (deliveryFeeElem) deliveryFeeElem.textContent = `₱${deliveryFee.toFixed(2)}`;
   } else {
@@ -125,6 +144,7 @@ export function updateReceipt() {
   }
 
   const grandTotal = subtotal + deliveryFee;
+  selectedCartSubtotal = subtotal;
   if (totalElem) totalElem.textContent = `₱${grandTotal.toFixed(2)}`;
 
   // Exact amount for GCash
@@ -142,12 +162,54 @@ export function updateReceipt() {
   }
 
   if (checkoutBtn) {
-    checkoutBtn.disabled = checkedItems.length === 0 || stockIssue;
+    checkoutBtn.disabled = checkedItems.length === 0 || stockIssue || !isCheckoutAllowed();
   }
+
+  const storeAcceptingOrders = checkoutSettingsLoaded
+    && Boolean(publicSettings && publicSettings.acceptingOrders);
+  const hasFulfillmentOption = Boolean(
+    publicSettings && (publicSettings.pickupEnabled || publicSettings.deliveryEnabled)
+  );
+  const orderingAvailable = storeAcceptingOrders && hasFulfillmentOption;
+  const storeNotice = document.getElementById('checkout-store-notice');
+  if (storeNotice) {
+    storeNotice.classList.toggle('hidden', orderingAvailable);
+    storeNotice.textContent = !checkoutSettingsLoaded
+      ? 'Online ordering availability could not be confirmed. Please try again later.'
+      : !storeAcceptingOrders
+        ? 'Online ordering is temporarily paused. You can keep your cart and check back later; existing orders are not affected.'
+        : 'Online ordering is temporarily unavailable because pickup and delivery are both disabled.';
+  }
+
+  const minimumOrder = Number(publicSettings && publicSettings.minimumOrder) || 0;
+  const minimumNotice = document.getElementById('checkout-minimum-notice');
+  const belowMinimum = orderingAvailable
+    && checkedItems.length > 0
+    && minimumOrder > 0
+    && subtotal < minimumOrder;
+  if (minimumNotice) {
+    minimumNotice.classList.toggle('hidden', !belowMinimum);
+    minimumNotice.textContent = belowMinimum
+      ? `Your selected items total ₱${subtotal.toFixed(2)}. Add ₱${(minimumOrder - subtotal).toFixed(2)} more to meet the ₱${minimumOrder.toFixed(2)} minimum order.`
+      : '';
+  }
+
+  const pickupTab = document.getElementById('tab-pickup');
+  const deliveryTab = document.getElementById('tab-delivery');
+  const continueContactBtn = document.getElementById('continue-contact-btn');
+  const continuePaymentBtn = document.getElementById('continue-payment-btn');
+  if (pickupTab) pickupTab.disabled = !orderingAvailable || !publicSettings || !publicSettings.pickupEnabled;
+  if (deliveryTab) deliveryTab.disabled = !orderingAvailable || !publicSettings || !publicSettings.deliveryEnabled;
+  if (continueContactBtn) continueContactBtn.disabled = !orderingAvailable;
+  if (continuePaymentBtn) continuePaymentBtn.disabled = !orderingAvailable;
 
   const placeOrderBtn = document.getElementById('place-order-btn');
   if (placeOrderBtn) {
-    placeOrderBtn.disabled = checkedItems.length === 0 || stockIssue || !paymentMethod;
+    placeOrderBtn.disabled = checkedItems.length === 0
+      || stockIssue
+      || !paymentMethod
+      || !orderingAvailable
+      || belowMinimum;
   }
 }
 
@@ -161,11 +223,13 @@ function renderFulfillmentOptions() {
   if (pickupTab) {
     pickupTab.classList.toggle('active', fulfillmentMethod === 'pickup');
     pickupTab.style.display = publicSettings.pickupEnabled ? 'block' : 'none';
+    pickupTab.disabled = !publicSettings.acceptingOrders || !publicSettings.pickupEnabled;
   }
 
   if (deliveryTab) {
     deliveryTab.classList.toggle('active', fulfillmentMethod === 'delivery');
     deliveryTab.style.display = publicSettings.deliveryEnabled ? 'block' : 'none';
+    deliveryTab.disabled = !publicSettings.acceptingOrders || !publicSettings.deliveryEnabled;
   }
 
   if (addressGroup) {
@@ -248,8 +312,8 @@ function renderPaymentOptions() {
       gcashBox.classList.remove('hidden');
       const gName = document.getElementById('gcash-account-name');
       const gNum = document.getElementById('gcash-account-number');
-      if (gName) gName.textContent = publicSettings.gcashName || 'Burger Shop HQ';
-      if (gNum) gNum.textContent = publicSettings.gcashNumber || '09171234567';
+      if (gName) gName.textContent = publicSettings.gcashName || 'Not provided';
+      if (gNum) gNum.textContent = publicSettings.gcashNumber || 'Not provided';
     } else {
       gcashBox.classList.add('hidden');
     }
@@ -316,6 +380,15 @@ function initContactDetails() {
 }
 
 async function handlePlaceOrder() {
+  if (!isCheckoutAllowed()) {
+    const minimumOrder = Number(publicSettings && publicSettings.minimumOrder) || 0;
+    if (minimumOrder > selectedCartSubtotal) {
+      showToast(`Your selected items must total at least ₱${minimumOrder.toFixed(2)}.`, 'warning');
+    } else {
+      showToast('Online ordering is currently unavailable. Please check the store status and try again later.', 'warning');
+    }
+    return;
+  }
   if (!fulfillmentMethod) {
     showToast('Please choose pickup or delivery first.', 'warning');
     showCheckoutStep(1);
@@ -478,7 +551,7 @@ function showSuccessReceipt(order) {
 
         <div class="printable-receipt" id="printable-order-receipt">
           <div style="text-align:center;padding-bottom:12px;border-bottom:1px dashed var(--color-border);margin-bottom:12px;">
-            <h3 style="font-size:1.1rem;margin-bottom:2px;">BURGER SHOP</h3>
+            <h3 style="font-size:1.1rem;margin-bottom:2px;">${escapeHtml(publicSettings && typeof publicSettings.storeName === 'string' ? publicSettings.storeName : 'Burger Shop')}</h3>
             <p style="font-size:0.8rem;color:var(--color-text-muted);margin:0;">Official Order Receipt</p>
             <p style="font-weight:700;color:var(--color-brand-secondary);margin-top:6px;font-size:1rem;">Order #${escapeHtml(order.orderNumber)}</p>
             <p style="font-size:0.78rem;color:var(--color-text-light);">${new Date(order.createdAt).toLocaleString()}</p>

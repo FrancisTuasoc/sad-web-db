@@ -3,7 +3,7 @@ import { apiFetch } from './api.js';
 import { renderHeader, renderFooter, showToast, escapeHtml } from './ui.js';
 import { isLoggedIn } from './auth.js';
 import { stockStream } from './stock-stream.js';
-import { renderProductCard, setupAddToCartModal, attachProductGridListeners, setAvailableAddons } from './home.js';
+import { renderProductCard, setupAddToCartModal, attachProductGridListeners, setAvailableAddons, setOnlineOrderingEnabled } from './home.js';
 
 export const ALL_MENU_PRODUCTS = [
   // Burgers
@@ -181,13 +181,35 @@ async function loadProducts() {
   }
 }
 
+async function loadOrderingSettings() {
+  const notice = document.getElementById('menu-ordering-notice');
+  try {
+    const res = await apiFetch('/settings/public');
+    const onlineOrderingEnabled = Boolean(res.settings && res.settings.acceptingOrders);
+    setOnlineOrderingEnabled(onlineOrderingEnabled);
+    if (notice) {
+      notice.classList.toggle('hidden', onlineOrderingEnabled);
+      notice.textContent = onlineOrderingEnabled
+        ? ''
+        : 'Online ordering is temporarily paused. You can still browse the menu; please check back later.';
+    }
+  } catch (err) {
+    setOnlineOrderingEnabled(false);
+    if (notice) {
+      notice.classList.remove('hidden');
+      notice.textContent = 'Online ordering availability could not be confirmed. Please try again later.';
+    }
+    showToast(`Unable to confirm online ordering availability: ${err.message}`, 'error');
+  }
+}
+
 function initMenu() {
   renderHeader('menu');
   renderFooter();
   setupAddToCartModal();
   attachProductGridListeners('menu-grid', (id) => liveProducts.find((p) => p._id === id));
   loadCategories();
-  loadProducts();
+  loadOrderingSettings().then(loadProducts);
   stockStream.init();
 
   // Search input with debounce

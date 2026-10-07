@@ -105,30 +105,21 @@ class StockStream {
     cards.forEach((card) => {
       const badge = card.querySelector('.stock-badge');
       const addBtn = card.querySelector('.btn-add-to-cart');
-      const priceText = card.querySelector('.card-price');
-
       card.setAttribute('data-stock', stock);
       card.setAttribute('data-available', String(isAvailable));
 
+      const orderingAllowed = card.getAttribute('data-ordering-allowed') === 'true';
       if (!isAvailable) {
         card.classList.add('unavailable');
         if (badge) {
           badge.className = 'badge badge-out-stock stock-badge';
           badge.textContent = 'Not Available';
         }
-        if (addBtn) {
-          addBtn.disabled = true;
-          addBtn.textContent = 'Unavailable';
-        }
       } else if (stock <= 0) {
         card.classList.add('unavailable');
         if (badge) {
           badge.className = 'badge badge-out-stock stock-badge';
           badge.textContent = 'Out of Stock';
-        }
-        if (addBtn) {
-          addBtn.disabled = true;
-          addBtn.textContent = 'Out of Stock';
         }
       } else {
         card.classList.remove('unavailable');
@@ -142,13 +133,23 @@ class StockStream {
             badge.textContent = `${stock} left`;
           }
         }
-        if (addBtn) {
+      }
+
+      if (addBtn) {
+        if (!orderingAllowed) {
+          addBtn.disabled = true;
+          addBtn.textContent = 'Ordering Paused';
+        } else if (!isAvailable) {
+          addBtn.disabled = true;
+          addBtn.textContent = 'Unavailable';
+        } else if (stock <= 0) {
+          addBtn.disabled = true;
+          addBtn.textContent = 'Out of Stock';
+        } else {
           addBtn.disabled = false;
-          if (addBtn.getAttribute('data-is-guest') === 'true') {
-            addBtn.textContent = 'Login to order';
-          } else {
-            addBtn.textContent = 'Add to Cart';
-          }
+          addBtn.textContent = addBtn.getAttribute('data-is-guest') === 'true'
+            ? 'Login to order'
+            : 'Add to Cart';
         }
       }
     });

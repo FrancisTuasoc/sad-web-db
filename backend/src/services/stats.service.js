@@ -1,5 +1,66 @@
 const Order = require('../models/Order');
 const User = require('../models/User');
+const STORE_TIME_ZONE = 'Asia/Manila';
+
+const completedAtExpression = {
+  $ifNull: [
+    {
+      $arrayElemAt: [
+        {
+          $map: {
+            input: {
+              $filter: {
+                input: { $ifNull: ['$statusHistory', []] },
+                as: 'entry',
+                cond: { $eq: ['$$entry.status', 'completed'] },
+              },
+            },
+            as: 'completion',
+            in: '$$completion.at',
+          },
+        },
+        -1,
+      ],
+    },
+    '$createdAt',
+  ],
+};
+
+function getCompletedSalesSince(startDate) {
+  return Order.aggregate([
+    { $match: { status: 'completed' } },
+    { $set: { completedAt: completedAtExpression } },
+    { $match: { completedAt: { $gte: startDate } } },
+    { $group: { _id: null, count: { $sum: 1 }, revenue: { $sum: '$total' } } },
+  ]);
+}
+
+function getStartOfDayInTimeZone(date, timeZone) {
+  const dateTimeParts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hourCycle: 'h23',
+  }).formatToParts(date).reduce((parts, part) => {
+    if (part.type !== 'literal') parts[part.type] = Number(part.value);
+    return parts;
+  }, {});
+
+  const localTimeAsUtc = Date.UTC(
+    dateTimeParts.year,
+    dateTimeParts.month - 1,
+    dateTimeParts.day,
+    dateTimeParts.hour,
+    dateTimeParts.minute,
+    dateTimeParts.second
+  );
+  const offset = localTimeAsUtc - Math.floor(date.getTime() / 1000) * 1000;
+  return new Date(Date.UTC(dateTimeParts.year, dateTimeParts.month - 1, dateTimeParts.day) - offset);
+}
 
 async function getDashboardStats() {
   const [orderCounts] = await Order.aggregate([
@@ -44,23 +105,14 @@ async function getDashboardStats() {
 
   // Sales timeframes (completed orders)
   const now = new Date();
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfDay = getStartOfDayInTimeZone(now, STORE_TIME_ZONE);
   const startOfWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const startOfMonth = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-  const [dailySales] = await Order.aggregate([
-    { $match: { status: 'completed', createdAt: { $gte: startOfDay } } },
-    { $group: { _id: null, count: { $sum: 1 }, revenue: { $sum: '$total' } } },
-  ]);
-
-  const [weeklySales] = await Order.aggregate([
-    { $match: { status: 'completed', createdAt: { $gte: startOfWeek } } },
-    { $group: { _id: null, count: { $sum: 1 }, revenue: { $sum: '$total' } } },
-  ]);
-
-  const [monthlySales] = await Order.aggregate([
-    { $match: { status: 'completed', createdAt: { $gte: startOfMonth } } },
-    { $group: { _id: null, count: { $sum: 1 }, revenue: { $sum: '$total' } } },
+  const [[dailySales], [weeklySales], [monthlySales]] = await Promise.all([
+    getCompletedSalesSince(startOfDay),
+    getCompletedSalesSince(startOfWeek),
+    getCompletedSalesSince(startOfMonth),
   ]);
 
   stats.sales = {
@@ -79,13 +131,15 @@ async function getDashboardStats() {
   };
 
   // Revenue by date for the last 30 days
-  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAgo = new Date(startOfDay.getTime() - 29 * 24 * 60 * 60 * 1000);
   const revenueHistory = await Order.aggregate([
-    { $match: { status: 'completed', createdAt: { $gte: thirtyDaysAgo } } },
+    { $match: { status: 'completed' } },
+    { $set: { completedAt: completedAtExpression } },
+    { $match: { completedAt: { $gte: thirtyDaysAgo } } },
     {
       $group: {
         _id: {
-          $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
+          $dateToString: { format: '%Y-%m-%d', date: '$completedAt', timezone: STORE_TIME_ZONE },
         },
         revenue: { $sum: '$total' },
         orders: { $sum: 1 },
@@ -132,4 +186,5 @@ async function getDashboardStats() {
 
 module.exports = {
   getDashboardStats,
+  getStartOfDayInTimeZone,
 };

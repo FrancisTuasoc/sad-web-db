@@ -144,3 +144,29 @@ export async function prepareAvatarFile(file) {
     bitmap.close();
   }
 }
+
+export async function resizeImageToDataUrl(file, maxDimension = 600, quality = 0.8) {
+  if (!file || !Number.isFinite(maxDimension) || maxDimension < 1 || !Number.isFinite(quality) || quality < 0 || quality > 1) {
+    throw new Error('Choose a valid image and image size.');
+  }
+
+  let bitmap;
+  try {
+    bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  } catch (error) {
+    throw new Error('The selected image could not be opened. Choose another image file.');
+  }
+
+  try {
+    const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Image processing is unavailable in this browser.');
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/webp', quality);
+  } finally {
+    bitmap.close();
+  }
+}

@@ -385,10 +385,63 @@ export async function renderFooter() {
     const res = await apiFetch('/settings/public');
     if (res && res.settings) {
       const s = res.settings;
-      const storeNameElem = footerElem.querySelector('h4');
-      if (storeNameElem && s.storeName) storeNameElem.textContent = s.storeName;
+      const values = {
+        'footer-store-name': s.storeName,
+        'footer-store-tagline': s.tagline,
+        'footer-store-address': s.address,
+        'footer-store-phone': s.phone,
+      };
+      Object.entries(values).forEach(([id, value]) => {
+        const element = footerElem.querySelector(`#${id}`);
+        if (element && typeof value === 'string') element.textContent = value;
+      });
+      renderBusinessHours(footerElem.querySelector('#footer-hours-list'), s.businessHours);
     }
   } catch (e) {
     // Keep existing static footer markup
   }
+}
+
+export function renderBusinessHours(container, businessHours) {
+  if (!container || !businessHours) return;
+
+  const days = [
+    ['monday', 'Monday'],
+    ['tuesday', 'Tuesday'],
+    ['wednesday', 'Wednesday'],
+    ['thursday', 'Thursday'],
+    ['friday', 'Friday'],
+    ['saturday', 'Saturday'],
+    ['sunday', 'Sunday'],
+  ];
+  const defaultHours = {
+    monday: { open: '09:00', close: '21:00' },
+    tuesday: { open: '09:00', close: '21:00' },
+    wednesday: { open: '09:00', close: '21:00' },
+    thursday: { open: '09:00', close: '21:00' },
+    friday: { open: '09:00', close: '22:00' },
+    saturday: { open: '09:00', close: '22:00' },
+    sunday: { open: '10:00', close: '20:00' },
+  };
+  const formatTime = (time) => {
+    const match = /^(\d{2}):(\d{2})$/.exec(time || '');
+    if (!match) return time || '—';
+    const hour = Number(match[1]);
+    const minutes = match[2];
+    const period = hour < 12 ? 'AM' : 'PM';
+    return `${hour % 12 || 12}:${minutes} ${period}`;
+  };
+
+  container.replaceChildren(...days.map(([key, label]) => {
+    const hours = businessHours[key] || defaultHours[key];
+    const row = document.createElement('li');
+    const day = document.createElement('span');
+    const time = document.createElement('span');
+    day.textContent = label;
+    time.textContent = hours.closed
+      ? 'Closed'
+      : `${formatTime(hours.open || defaultHours[key].open)} – ${formatTime(hours.close || defaultHours[key].close)}`;
+    row.append(day, time);
+    return row;
+  }));
 }

@@ -1,12 +1,13 @@
 // Admin Dashboard & Operations Controller
 import { apiFetch } from './api.js';
-import { showToast, escapeHtml, openModal, closeModal, BURGER_PLACEHOLDER, getProductImageUrl, setupBackToTop } from './ui.js';
+import { showToast, escapeHtml, openModal, closeModal, getProductImageUrl, setupBackToTop } from './ui.js';
 import { requireAuth, getUser, resizeImageToDataUrl } from './auth.js';
 
 let activeSection = 'dashboard';
 let dashboardStats = null;
 let currentSalesView = 'daily'; // 'daily' | 'weekly' | 'monthly'
 let currentChartDays = 14;
+let dashboardRefreshPending = false;
 
 // Pagination and filters state for Orders
 let ordersFilter = {
@@ -43,6 +44,7 @@ function setupAdminNavigation() {
       // Close mobile sidebar if open
       const sidebar = document.getElementById('admin-sidebar');
       if (sidebar) sidebar.classList.remove('open-mobile');
+      updateSidebarToggleState();
 
       // Refresh target section
       switch (activeSection) {
@@ -60,30 +62,67 @@ function setupAdminNavigation() {
   const sidebar = document.getElementById('admin-sidebar');
   if (toggleSidebarBtn && sidebar) {
     toggleSidebarBtn.addEventListener('click', () => {
-      sidebar.classList.toggle('open-mobile');
+      const adminLayout = document.querySelector('.admin-layout');
+      if (window.matchMedia('(max-width: 900px)').matches) {
+        sidebar.classList.toggle('open-mobile');
+      } else if (adminLayout) {
+        adminLayout.classList.toggle('is-sidebar-collapsed');
+      }
+      updateSidebarToggleState();
     });
   }
+
+  window.addEventListener('resize', updateSidebarToggleState);
+}
+
+function updateSidebarToggleState() {
+  const toggleButton = document.getElementById('admin-toggle-sidebar-btn');
+  const sidebar = document.getElementById('admin-sidebar');
+  const adminLayout = document.querySelector('.admin-layout');
+  if (!toggleButton || !sidebar || !adminLayout) return;
+
+  const isMobile = window.matchMedia('(max-width: 900px)').matches;
+  const isExpanded = isMobile
+    ? sidebar.classList.contains('open-mobile')
+    : !adminLayout.classList.contains('is-sidebar-collapsed');
+  const actionLabel = isExpanded ? 'Collapse navigation' : 'Expand navigation';
+  toggleButton.setAttribute('aria-expanded', String(isExpanded));
+  toggleButton.setAttribute('aria-label', isMobile
+    ? `${isExpanded ? 'Close' : 'Open'} navigation drawer`
+    : actionLabel);
+  toggleButton.title = isMobile
+    ? `${isExpanded ? 'Close' : 'Open'} navigation drawer`
+    : actionLabel;
 }
 
 // ---------------- 1. DASHBOARD & CHARTS ----------------
 async function loadDashboardStats() {
+  if (dashboardRefreshPending) return;
+  dashboardRefreshPending = true;
+  const refreshButton = document.getElementById('dashboard-refresh-btn');
+  if (refreshButton) {
+    refreshButton.disabled = true;
+    refreshButton.setAttribute('aria-busy', 'true');
+    refreshButton.classList.add('is-refreshing');
+  }
+
   try {
     const res = await apiFetch('/admin/stats');
     dashboardStats = res.stats;
 
     // Stat cards
-    document.getElementById('stat-total-revenue').textContent = `₱${Number(dashboardStats.totalRevenue).toFixed(2)}`;
+    document.getElementById('stat-total-revenue').textContent = formatPeso(dashboardStats.totalRevenue);
     document.getElementById('stat-total-orders').textContent = String(dashboardStats.totalOrders);
     document.getElementById('stat-pending-orders').textContent = String(dashboardStats.pendingOrders);
-    const pendingBadge = document.getElementById('admin-pending-count');
-    if (pendingBadge) {
-      pendingBadge.textContent = String(dashboardStats.pendingOrders);
-      pendingBadge.classList.toggle('hidden', dashboardStats.pendingOrders === 0);
-    }
+    updatePendingOrderBadge(dashboardStats.pendingOrders);
     document.getElementById('stat-completed-orders').textContent = String(dashboardStats.completedOrders);
     document.getElementById('stat-cancelled-orders').textContent = String(dashboardStats.cancelledOrders);
     document.getElementById('stat-total-customers').textContent = String(dashboardStats.totalCustomers);
 
+    const updatedAt = document.getElementById('dashboard-last-updated');
+    if (updatedAt) {
+      updatedAt.textContent = `Updated ${new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(new Date())}`;
+    }
     renderSalesToggleData();
     renderRevenueBarChart();
     renderStatusDonutChart();
@@ -91,7 +130,67 @@ async function loadDashboardStats() {
     renderRecentOrders();
   } catch (err) {
     showToast('Failed to load dashboard metrics: ' + err.message, 'error');
+  } finally {
+    dashboardRefreshPending = false;
+    if (refreshButton) {
+      refreshButton.disabled = false;
+      refreshButton.setAttribute('aria-busy', 'false');
+      refreshButton.classList.remove('is-refreshing');
+    }
   }
+}
+
+function updatePendingOrderBadge(count) {
+  const pendingBadge = document.getElementById('admin-pending-count');
+  if (!pendingBadge) return;
+
+  const pendingCount = Number.isFinite(Number(count)) ? Math.max(0, Number(count)) : 0;
+  pendingBadge.textContent = String(pendingCount);
+  pendingBadge.classList.toggle('hidden', pendingCount === 0);
+  const ordersButton = pendingBadge.closest('.admin-nav-item');
+  if (ordersButton) {
+    ordersButton.setAttribute(
+      'aria-label',
+      pendingCount === 1 ? 'Orders Management, 1 order awaiting acceptance'
+        : `Orders Management, ${pendingCount} orders awaiting acceptance`
+    );
+  }
+}
+
+function updateOnlineOrderingSummary(isAccepting, saved = false) {
+  const summary = document.getElementById('settings-accepting-orders-help');
+  if (!summary) return;
+
+  if (isAccepting) {
+    summary.textContent = saved
+      ? 'Online ordering is on. Customers can place new orders.'
+      : 'Online ordering will be on after you save. Customers can then place new orders.';
+    summary.classList.toggle('is-unsaved', !saved);
+  } else {
+    summary.textContent = saved
+      ? 'Online ordering is off. New customer orders are blocked; existing orders are not affected.'
+      : 'Online ordering will be off after you save. New customer orders will be blocked; existing orders will not be affected.';
+    summary.classList.toggle('is-unsaved', !saved);
+  }
+}
+
+function formatPeso(value) {
+  return new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+    minimumFractionDigits: 2,
+  }).format(Number(value));
+}
+
+function getStoreDateKey(date) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Manila',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
 }
 
 function renderSalesToggleData() {
@@ -103,8 +202,8 @@ function renderSalesToggleData() {
 
   const titles = { daily: "Today's Sales", weekly: 'Last 7 Days Sales', monthly: 'Last 30 Days Sales' };
   if (labelElem) labelElem.textContent = titles[currentSalesView];
-  if (countElem) countElem.textContent = `${data.count} order(s)`;
-  if (revElem) revElem.textContent = `₱${Number(data.revenue).toFixed(2)}`;
+  if (countElem) countElem.textContent = `${data.count} completed ${data.count === 1 ? 'order' : 'orders'}`;
+  if (revElem) revElem.textContent = formatPeso(data.revenue);
 }
 
 // Inline SVG Revenue Bar Chart
@@ -112,39 +211,48 @@ function renderRevenueBarChart() {
   const container = document.getElementById('revenue-chart-container');
   if (!container || !dashboardStats || !dashboardStats.revenueHistory) return;
 
-  const history = dashboardStats.revenueHistory.slice(-currentChartDays);
-  if (history.length === 0) {
-    container.innerHTML = '<p class="text-muted text-center" style="padding:40px 0;">No completed sales data in this period.</p>';
-    return;
-  }
-
-  const maxRevenue = Math.max(...history.map((h) => h.revenue), 100);
-  const chartHeight = 160;
-  const chartWidth = 500;
-  const barWidth = Math.min(32, Math.floor((chartWidth - 40) / history.length) - 6);
+  const historyByDate = new Map(dashboardStats.revenueHistory.map((item) => [item._id, item]));
+  const today = new Date(`${getStoreDateKey(new Date())}T00:00:00Z`);
+  today.setUTCDate(today.getUTCDate() - currentChartDays + 1);
+  const history = Array.from({ length: currentChartDays }, (_, index) => {
+    const date = new Date(today);
+    date.setUTCDate(today.getUTCDate() + index);
+    const key = date.toISOString().slice(0, 10);
+    return historyByDate.get(key) || { _id: key, revenue: 0, orders: 0 };
+  });
+  const chartHeight = 190;
+  const chartWidth = 600;
+  const chartTop = 18;
+  const chartBottom = 158;
+  const slotWidth = (chartWidth - 48) / history.length;
+  const barWidth = Math.max(2, Math.min(22, slotWidth - 4));
+  const maxRevenue = Math.max(...history.map((item) => item.revenue), 1);
 
   const bars = history
     .map((item, idx) => {
-      const height = (item.revenue / maxRevenue) * (chartHeight - 30);
-      const x = 30 + idx * (barWidth + 8);
-      const y = chartHeight - height - 20;
-      const dateLabel = item._id ? item._id.slice(5) : '';
+      const height = item.revenue > 0 ? Math.max(2, (item.revenue / maxRevenue) * (chartBottom - chartTop)) : 0;
+      const x = 32 + idx * slotWidth + (slotWidth - barWidth) / 2;
+      const y = chartBottom - height;
+      const dateLabel = item._id.slice(5);
+      const labelInterval = currentChartDays === 14 ? 2 : 5;
 
       return `
         <g class="chart-bar-group">
-          <rect x="${x}" y="${y}" width="${barWidth}" height="${height}" rx="3" fill="#F2A413" opacity="0.9">
-            <title>${item._id}: ₱${item.revenue.toFixed(2)} (${item.orders} orders)</title>
+          <rect x="${x}" y="${y}" width="${barWidth}" height="${height}" rx="4" fill="url(#revenue-bar-fill)" opacity="${item.revenue ? '0.95' : '0.2'}">
+            <title>${item._id}: ${formatPeso(item.revenue)} (${item.orders} completed ${item.orders === 1 ? 'order' : 'orders'})</title>
           </rect>
-          <text x="${x + barWidth / 2}" y="${chartHeight - 5}" font-size="9" text-anchor="middle" fill="#6B5B52">${dateLabel}</text>
+          ${idx % labelInterval === 0 || idx === history.length - 1 ? `<text x="${x + barWidth / 2}" y="${chartHeight - 8}" font-size="10" text-anchor="middle" fill="#706259">${dateLabel}</text>` : ''}
         </g>
       `;
     })
     .join('');
 
   container.innerHTML = `
-    <svg viewBox="0 0 ${chartWidth} ${chartHeight}" style="width:100%;height:auto;overflow:visible;">
-      <!-- Grid line -->
-      <line x1="20" y1="${chartHeight - 20}" x2="${chartWidth}" y2="${chartHeight - 20}" stroke="#E9E2D6" stroke-width="1"/>
+    <svg class="admin-revenue-chart" viewBox="0 0 ${chartWidth} ${chartHeight}" role="img" aria-label="Completed revenue over the last ${currentChartDays} days">
+      <defs><linearGradient id="revenue-bar-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#4f46e5"/></linearGradient></defs>
+      <line x1="24" y1="${chartTop}" x2="${chartWidth - 12}" y2="${chartTop}" stroke="#f0e8df" stroke-width="1"/>
+      <line x1="24" y1="${(chartTop + chartBottom) / 2}" x2="${chartWidth - 12}" y2="${(chartTop + chartBottom) / 2}" stroke="#f0e8df" stroke-width="1"/>
+      <line x1="24" y1="${chartBottom}" x2="${chartWidth - 12}" y2="${chartBottom}" stroke="#e8dccd" stroke-width="1"/>
       ${bars}
     </svg>
   `;
@@ -156,25 +264,30 @@ function renderStatusDonutChart() {
   if (!container || !dashboardStats || !dashboardStats.statusComparison) return;
 
   const { completed, cancelled, pending, inProgress } = dashboardStats.statusComparison;
-  const total = (completed + cancelled + pending + inProgress) || 1;
-
-  const completedPct = Math.round((completed / total) * 100);
-  const cancelledPct = Math.round((cancelled / total) * 100);
-  const otherPct = 100 - completedPct - cancelledPct;
+  const active = pending + inProgress;
+  const total = completed + cancelled + active;
+  const completedPct = total ? (completed / total) * 100 : 0;
+  const cancelledPct = total ? (cancelled / total) * 100 : 0;
+  const activePct = total ? (active / total) * 100 : 0;
+  const completedOffset = 0;
+  const cancelledOffset = -completedPct;
+  const activeOffset = -(completedPct + cancelledPct);
 
   container.innerHTML = `
-    <div style="display:flex;align-items:center;gap:16px;">
-      <svg width="100" height="100" viewBox="0 0 36 36" style="transform:rotate(-90deg);flex-shrink:0;">
-        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#E9E2D6" stroke-width="3.5" />
-        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#287D3C" stroke-width="3.5"
-                stroke-dasharray="${completedPct} ${100 - completedPct}" stroke-dashoffset="0" />
-        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#A4262C" stroke-width="3.5"
-                stroke-dasharray="${cancelledPct} ${100 - cancelledPct}" stroke-dashoffset="-${completedPct}" />
-      </svg>
-      <div style="font-size:0.85rem;line-height:1.6;">
-        <div><span style="display:inline-block;width:10px;height:10px;background:#287D3C;border-radius:2px;margin-right:6px;"></span>Completed: <strong>${completed}</strong> (${completedPct}%)</div>
-        <div><span style="display:inline-block;width:10px;height:10px;background:#A4262C;border-radius:2px;margin-right:6px;"></span>Cancelled: <strong>${cancelled}</strong> (${cancelledPct}%)</div>
-        <div><span style="display:inline-block;width:10px;height:10px;background:#E9E2D6;border-radius:2px;margin-right:6px;"></span>Active/Pending: <strong>${pending + inProgress}</strong></div>
+    <div class="admin-fulfillment-chart">
+      <div class="admin-donut-wrap">
+        <svg class="admin-donut" viewBox="0 0 36 36" role="img" aria-label="${total} total orders: ${completed} completed, ${cancelled} cancelled, ${active} active or pending">
+          <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#eee7df" stroke-width="3.8"/>
+          <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#10b981" stroke-width="3.8" stroke-dasharray="${completedPct} ${100 - completedPct}" stroke-dashoffset="${completedOffset}"/>
+          <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#fb7185" stroke-width="3.8" stroke-dasharray="${cancelledPct} ${100 - cancelledPct}" stroke-dashoffset="${cancelledOffset}"/>
+          <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#818cf8" stroke-width="3.8" stroke-dasharray="${activePct} ${100 - activePct}" stroke-dashoffset="${activeOffset}"/>
+        </svg>
+        <span class="admin-donut-total">${total}<small>orders</small></span>
+      </div>
+      <div class="admin-donut-legend">
+        <div><span class="admin-legend-dot is-completed"></span><span>Completed</span><strong>${completed}</strong><small>${completedPct.toFixed(1)}%</small></div>
+        <div><span class="admin-legend-dot is-cancelled"></span><span>Cancelled</span><strong>${cancelled}</strong><small>${cancelledPct.toFixed(1)}%</small></div>
+        <div><span class="admin-legend-dot is-active"></span><span>Active / pending</span><strong>${active}</strong><small>${activePct.toFixed(1)}%</small></div>
       </div>
     </div>
   `;
@@ -198,9 +311,9 @@ function renderTopItems() {
           <span style="width:20px;height:20px;border-radius:50%;background:var(--color-surface-alt);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;">${idx + 1}</span>
           <span style="font-weight:600;">${escapeHtml(item._id)}</span>
         </div>
-        <div style="text-align:right;">
+        <div class="admin-top-item-metrics">
           <strong>${item.totalQty} sold</strong>
-          <div style="font-size:0.75rem;color:var(--color-text-muted);">₱${item.totalSales.toFixed(2)}</div>
+          <div>${formatPeso(item.totalSales)}</div>
         </div>
       </div>
     `)
@@ -256,8 +369,7 @@ async function loadAdminOrders() {
     const { orders, pagination } = res;
     const pendingBadge = document.getElementById('admin-pending-count');
     if (pendingBadge) {
-      pendingBadge.textContent = String(pendingRes.pagination.total);
-      pendingBadge.classList.toggle('hidden', pendingRes.pagination.total === 0);
+      updatePendingOrderBadge(pendingRes.pagination.total);
     }
 
     const pageIndicator = document.getElementById('orders-pagination-info');
@@ -453,7 +565,7 @@ async function loadAdminMenu() {
           <tr style="${rowClass}">
             <td>
               <div style="display:flex;align-items:center;gap:10px;">
-                <img src="${escapeHtml(imgUrl)}" style="width:40px;height:40px;border-radius:4px;object-fit:cover;" onerror="if(window.handleImageError){window.handleImageError(this);}else{this.onerror=null;this.src='${BURGER_PLACEHOLDER}';}">
+                <img src="${escapeHtml(imgUrl)}" style="width:40px;height:40px;border-radius:4px;object-fit:cover;" onerror="window.handleImageError(this)">
                 <div>
                   <strong>${escapeHtml(p.name)}</strong>
                   ${p.isAddon ? '<span class="badge" style="background:#E0E7FF;color:#3730A3;margin-left:4px;">Add-on</span>' : ''}
@@ -679,9 +791,12 @@ async function loadAdminSettings() {
 
     // Switches
     document.getElementById('settings-accepting-orders').checked = Boolean(s.acceptingOrders);
+    updateOnlineOrderingSummary(Boolean(s.acceptingOrders), true);
     document.getElementById('settings-delivery-enabled').checked = Boolean(s.deliveryEnabled);
     document.getElementById('settings-pickup-enabled').checked = Boolean(s.pickupEnabled);
-    document.getElementById('settings-delivery-fee').value = s.deliveryFee || 30;
+    document.getElementById('settings-delivery-fee').value = Number.isFinite(Number(s.deliveryFee))
+      ? Number(s.deliveryFee)
+      : 30;
     document.getElementById('settings-min-order').value = s.minimumOrder || 0;
 
     // Payment methods
@@ -718,6 +833,18 @@ async function loadAdminSettings() {
 
 // ---------------- GLOBAL EVENT ATTACHMENTS ----------------
 function attachAdminEventListeners() {
+  const dashboardRefreshButton = document.getElementById('dashboard-refresh-btn');
+  if (dashboardRefreshButton) dashboardRefreshButton.addEventListener('click', loadDashboardStats);
+
+  const openOrdersSection = () => {
+    const ordersNavButton = document.querySelector('.admin-nav-item[data-section="orders"]');
+    if (ordersNavButton) ordersNavButton.click();
+  };
+  ['dashboard-view-orders-btn', 'dashboard-view-all-orders-btn'].forEach((id) => {
+    const button = document.getElementById(id);
+    if (button) button.addEventListener('click', openOrdersSection);
+  });
+
   document.addEventListener('click', (event) => {
     const closeButton = event.target.closest('[data-modal-close]');
     if (closeButton) {
@@ -922,12 +1049,14 @@ function attachAdminEventListeners() {
     const toggleAvailBtn = e.target.closest('.btn-toggle-availability');
     if (toggleAvailBtn) {
       const pid = toggleAvailBtn.getAttribute('data-product-id');
+      toggleAvailBtn.disabled = true;
       try {
-        await apiFetch(`/admin/products/${pid}/availability`, { method: 'PATCH' });
-        showToast('Item availability updated', 'info');
-        loadAdminMenu();
+        const res = await apiFetch(`/admin/products/${pid}/availability`, { method: 'PATCH' });
+        await loadAdminMenu();
+        showToast(`${res.product.name} ${res.product.isAvailable ? 'enabled' : 'disabled'} for ordering`, 'success');
       } catch (err) {
         showToast(err.message, 'error');
+        toggleAvailBtn.disabled = false;
       }
       return;
     }
@@ -1133,6 +1262,13 @@ function attachAdminEventListeners() {
   // Store Settings Form Submission
   const settingsForm = document.getElementById('store-settings-form');
   if (settingsForm) {
+    const onlineOrderingToggle = document.getElementById('settings-accepting-orders');
+    if (onlineOrderingToggle) {
+      onlineOrderingToggle.addEventListener('change', () => {
+        updateOnlineOrderingSummary(onlineOrderingToggle.checked);
+      });
+    }
+
     settingsForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -1169,6 +1305,7 @@ function attachAdminEventListeners() {
           method: 'PATCH',
           body: JSON.stringify(payload),
         });
+        updateOnlineOrderingSummary(payload.acceptingOrders, true);
         showToast('Store settings saved successfully!', 'success');
       } catch (err) {
         showToast(err.message, 'error');
@@ -1238,6 +1375,11 @@ function attachAdminEventListeners() {
 // ---------------- INITIALIZE ADMIN ----------------
 function initAdmin() {
   if (!requireAuth('admin')) return;
+  const adminUser = getUser();
+  const greetingName = document.getElementById('admin-greeting-name');
+  if (greetingName && adminUser) {
+    greetingName.textContent = adminUser.fullName || adminUser.username || 'Admin';
+  }
   setupBackToTop();
   setupAdminNavigation();
   attachAdminEventListeners();

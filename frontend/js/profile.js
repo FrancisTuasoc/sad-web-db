@@ -12,6 +12,11 @@ let pollingTimer = null;
 let currentProfile = null;
 let activeAvatarObjectUrl = null;
 
+function getStoreName() {
+  const storeName = document.getElementById('footer-store-name');
+  return storeName ? storeName.textContent.trim() : 'Burger Shop';
+}
+
 function validateAvatarFile(file) {
   const maxSize = 5 * 1024 * 1024;
   const extension = file.name.split('.').pop()?.toLowerCase();
@@ -674,7 +679,7 @@ async function openOrderReceipt(orderId) {
 
     body.innerHTML = `
       <div style="text-align:center;padding-bottom:12px;border-bottom:1px dashed var(--color-border);margin-bottom:12px;">
-        <h4 style="font-size:1.1rem;margin:0;">BURGER SHOP</h4>
+        <h4 style="font-size:1.1rem;margin:0;">${escapeHtml(getStoreName())}</h4>
         <p style="font-size:0.8rem;color:var(--color-text-muted);margin:0;">Customer Receipt</p>
         <div style="font-weight:700;color:var(--color-brand-secondary);margin-top:6px;">Order #${escapeHtml(order.orderNumber)}</div>
         <div style="font-size:0.75rem;color:var(--color-text-light);">${new Date(order.createdAt).toLocaleString()}</div>

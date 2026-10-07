@@ -1,6 +1,6 @@
 // Home Page Controller
 import { apiFetch } from './api.js';
-import { renderHeader, renderFooter, showToast, BURGER_PLACEHOLDER, escapeHtml, openModal, closeModal, updateCartBadge, getProductImageUrl } from './ui.js';
+import { renderHeader, renderFooter, renderBusinessHours, showToast, BURGER_PLACEHOLDER, escapeHtml, openModal, closeModal, updateCartBadge, getProductImageUrl } from './ui.js';
 import { isLoggedIn } from './auth.js';
 import { stockStream } from './stock-stream.js';
 
@@ -13,6 +13,11 @@ export const DEFAULT_FEATURED_PRODUCTS = [
 
 let availableAddons = [];
 let selectedProduct = null;
+let onlineOrderingEnabled = false;
+
+export function setOnlineOrderingEnabled(enabled) {
+  onlineOrderingEnabled = Boolean(enabled);
+}
 
 export function renderProductCard(product, isGuest = false, canOrder = true) {
   const isAvailable = product.isAvailable && product.stock > 0;
@@ -37,7 +42,10 @@ export function renderProductCard(product, isGuest = false, canOrder = true) {
   const imgUrl = getProductImageUrl(product);
 
   let buttonHtml = '';
-  if (!canOrder) {
+  const canPlaceOrder = canOrder && onlineOrderingEnabled;
+  if (!onlineOrderingEnabled) {
+    buttonHtml = '<button type="button" class="btn btn-primary btn-sm" disabled>Ordering Paused</button>';
+  } else if (!canOrder) {
     buttonHtml = '<button type="button" class="btn btn-primary btn-sm" disabled>Unavailable</button>';
   } else if (isGuest) {
     buttonHtml = `
@@ -58,7 +66,8 @@ export function renderProductCard(product, isGuest = false, canOrder = true) {
              data-product-id="${product._id}" 
              data-stock="${product.stock}" 
              data-threshold="${product.lowStockThreshold || 10}"
-             data-available="${product.isAvailable}">
+             data-available="${product.isAvailable}"
+             data-ordering-allowed="${canPlaceOrder}">
       <div class="card-img-wrap">
         <span class="card-badge-pos badge ${badgeClass} stock-badge">${badgeText}</span>
         <img src="${escapeHtml(imgUrl)}" 
@@ -84,23 +93,41 @@ async function loadStoreInfo() {
     const res = await apiFetch('/settings/public');
     if (res && res.settings) {
       const s = res.settings;
+      setOnlineOrderingEnabled(s.acceptingOrders);
+      const orderingNotice = document.getElementById('home-ordering-notice');
+      if (orderingNotice) {
+        orderingNotice.classList.toggle('hidden', onlineOrderingEnabled);
+        orderingNotice.textContent = onlineOrderingEnabled
+          ? ''
+          : 'Online ordering is temporarily paused. You can still browse the menu; please check back later.';
+      }
       const heroTitleElem = document.getElementById('hero-store-name');
       const heroTaglineElem = document.getElementById('hero-tagline');
       const aboutStoreName = document.getElementById('about-store-name');
       const contactAddress = document.getElementById('contact-address');
       const contactPhone = document.getElementById('contact-phone');
       const contactEmail = document.getElementById('contact-email');
+      const contactHours = document.getElementById('contact-hours');
 
-      if (heroTitleElem && s.storeName) heroTitleElem.textContent = s.storeName;
-      if (heroTaglineElem && s.tagline) heroTaglineElem.textContent = s.tagline;
-      if (aboutStoreName && s.storeName) aboutStoreName.textContent = s.storeName;
-      if (contactAddress && s.address) contactAddress.textContent = s.address;
-      if (contactPhone && s.phone) contactPhone.textContent = s.phone;
-      if (contactEmail && s.email) contactEmail.textContent = s.email;
+      if (heroTitleElem && typeof s.storeName === 'string') heroTitleElem.textContent = s.storeName;
+      if (heroTaglineElem && typeof s.tagline === 'string') heroTaglineElem.textContent = s.tagline;
+      if (aboutStoreName && typeof s.storeName === 'string') aboutStoreName.textContent = s.storeName;
+      if (contactAddress && typeof s.address === 'string') contactAddress.textContent = s.address;
+      if (contactPhone && typeof s.phone === 'string') contactPhone.textContent = s.phone;
+      if (contactEmail && typeof s.email === 'string') contactEmail.textContent = s.email;
+      renderBusinessHours(contactHours, s.businessHours);
+      return s;
     }
   } catch (err) {
     // Keep defaults
   }
+  setOnlineOrderingEnabled(false);
+  const orderingNotice = document.getElementById('home-ordering-notice');
+  if (orderingNotice) {
+    orderingNotice.classList.remove('hidden');
+    orderingNotice.textContent = 'Online ordering availability could not be confirmed. Please try again later.';
+  }
+  return null;
 }
 
 async function loadFeaturedProducts() {
@@ -112,15 +139,16 @@ async function loadFeaturedProducts() {
   try {
     const data = await apiFetch('/products?sort=featured');
     availableAddons = Array.isArray(data && data.addons) ? data.addons : [];
-    if (data && data.products && data.products.length > 0) {
+    if (data && Array.isArray(data.products)) {
       const featured = data.products.filter((p) => !p.isAddon && p.isFeatured);
       if (featured.length > 0) {
         container.innerHTML = featured.map((p) => renderProductCard(p, isGuest)).join('');
-        return;
+      } else {
+        container.innerHTML = '<div class="state-box" style="grid-column:1/-1;"><h3 class="state-title">No featured items right now</h3><p class="state-desc">Browse the full menu to see what is available.</p><a href="menu.html" class="btn btn-secondary btn-sm">View Menu</a></div>';
       }
+      return;
     }
-    // Fallback if empty array from server
-    container.innerHTML = DEFAULT_FEATURED_PRODUCTS.map((p) => renderProductCard(p, isGuest, false)).join('');
+    throw new Error('The featured menu response was invalid.');
   } catch (err) {
     // Seamless fallback to default featured products so menu is NEVER empty
     container.innerHTML = DEFAULT_FEATURED_PRODUCTS.map((p) => renderProductCard(p, isGuest, false)).join('');
@@ -371,8 +399,7 @@ function initHome() {
   renderHeader('home');
   setupHomeSectionNavigation();
   renderFooter();
-  loadStoreInfo();
-  loadFeaturedProducts();
+  loadStoreInfo().then(() => loadFeaturedProducts());
   setupAddToCartModal();
   attachProductGridListeners('featured-grid', (id) => DEFAULT_FEATURED_PRODUCTS.find((p) => p._id === id));
   stockStream.init();
