@@ -78,6 +78,17 @@
 
       <!-- Active Cart & Checkout Layout -->
       <div id="cart-content-wrapper">
+        <div class="cart-page-intro" id="cart-page-intro">
+          <div>
+            <p class="cart-page-eyebrow">Freshly made, just for you</p>
+            <h1>Your shopping cart</h1>
+            <p class="cart-page-description">Review your picks and get your order started.</p>
+          </div>
+          <div class="cart-intro-art" aria-hidden="true">
+            <img src="assets/items/burger-hero-transparent.png" alt="">
+            <span class="cart-intro-badge">Grilled fresh</span>
+          </div>
+        </div>
         <div class="cart-layout" id="cart-layout-container">
           <!-- Left: Cart Items List -->
           <div class="cart-box">
@@ -96,9 +107,20 @@
             </div>
           </div>
 
-          <!-- Right: Order Receipt & Checkout Step Panel -->
+          <!-- Right: Compact order receipt -->
           <div class="receipt-sidebar">
-            <h3 class="receipt-title">Order Receipt</h3>
+            <div class="receipt-heading">
+              <span class="receipt-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 3h14v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L5 21V3Z"/>
+                  <path d="M9 8h6M9 12h6M9 16h3"/>
+                </svg>
+              </span>
+              <div>
+                <h2 class="receipt-title">Order summary</h2>
+                <p class="receipt-caption">Your selected items</p>
+              </div>
+            </div>
 
             <div id="receipt-stock-warning" class="hidden" style="background:#FDE8E8;border:1px solid #F8B4B4;border-radius:var(--radius-sm);padding:8px 10px;margin-bottom:12px;font-size:0.82rem;color:#9B1C1C;">
               <strong>Stock Warning:</strong> One or more selected items exceed current kitchen stock. Please adjust quantities to proceed.
@@ -125,101 +147,120 @@
               </div>
             </div>
 
-            <!-- Checkout Steps -->
-            <div class="checkout-panel">
-              <div id="checkout-store-notice" class="store-availability-notice hidden" role="status" aria-live="polite"></div>
-              <div id="checkout-minimum-notice" class="checkout-requirement-notice hidden" role="status" aria-live="polite"></div>
-              <!-- Step 1: Fulfillment -->
-              <div class="step-card" id="checkout-step-fulfillment">
-                <div class="step-card-header">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                  1. Fulfillment Method
-                </div>
-                <div class="tab-pill-group">
-                  <button type="button" class="tab-pill active" id="tab-pickup">Pickup (Free)</button>
-                  <button type="button" class="tab-pill" id="tab-delivery">Delivery</button>
-                </div>
-              </div>
-              <button type="button" id="continue-contact-btn" class="btn btn-primary btn-sm" style="width:100%;margin:0 0 8px;">
-                Continue
-              </button>
-
-              <!-- Step 2: Contact & Address -->
-              <div class="step-card hidden" id="checkout-step-contact">
-                <div class="step-card-header">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                  2. Contact &amp; Delivery Info
-                </div>
-
-                <!-- Saved Summary (prefilled) -->
-                <div id="saved-contact-summary" class="saved-details-box hidden"></div>
-
-                <!-- Input form -->
-                <div id="contact-form-fields">
-                  <div class="form-group" style="margin-bottom:8px;">
-                    <label class="form-label" for="contact-name-input">Full Name <span class="req">*</span></label>
-                    <input type="text" id="contact-name-input" class="form-input" placeholder="e.g. Juan Dela Cruz">
-                  </div>
-                  <div class="form-group" style="margin-bottom:8px;">
-                    <label class="form-label" for="contact-phone-input">Phone Number (PH) <span class="req">*</span></label>
-                    <input type="tel" id="contact-phone-input" class="form-input" placeholder="09171234567 or +639171234567">
-                  </div>
-                  <div class="form-group hidden" id="contact-address-group" style="margin-bottom:0;">
-                    <label class="form-label" for="contact-address-input">Complete Delivery Address <span class="req">*</span></label>
-                    <textarea id="contact-address-input" class="form-textarea" placeholder="House/Unit #, Street, Barangay, Landmark"></textarea>
-                  </div>
-                </div>
-              </div>
-              <div id="contact-step-actions" class="hidden" style="display:flex;gap:8px;margin-bottom:8px;">
-                <button type="button" id="back-fulfillment-btn" class="btn btn-secondary btn-sm" style="flex:1;">Back</button>
-                <button type="button" id="continue-payment-btn" class="btn btn-primary btn-sm" style="flex:1;">Continue to Payment</button>
-              </div>
-
-              <!-- Step 3: Payment Method -->
-              <div class="step-card hidden" id="checkout-step-payment">
-                <div class="step-card-header">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                  3. Payment Method
-                </div>
-                <div class="payment-options-grid" id="payment-methods-container">
-                  <!-- Rendered dynamically -->
-                </div>
-
-                <!-- GCash Details Section -->
-                <div id="gcash-payment-box" class="gcash-qr-box hidden">
-                  <div style="font-weight:700;color:#1D6FB8;margin-bottom:4px;">Scan &amp; Pay via GCash</div>
-                  <div class="qr-image-holder">
-                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140' width='140' height='140'%3E%3Crect width='140' height='140' fill='%23F0F7FF' stroke='%231D6FB8' stroke-dasharray='4 4'/%3E%3Ctext x='70' y='65' font-family='sans-serif' font-size='11' font-weight='700' fill='%231D6FB8' text-anchor='middle'%3EGCash QR Code%3C/text%3E%3Ctext x='70' y='85' font-family='sans-serif' font-size='9' fill='%236B5B52' text-anchor='middle'%3EWill appear here%3C/text%3E%3C/svg%3E" alt="GCash QR Code">
-                  </div>
-                  <div style="font-size:0.82rem;margin-bottom:6px;">
-                    Account Name: <strong id="gcash-account-name">casestudy-system HQ</strong><br>
-                    Account No: <strong id="gcash-account-number">09171234567</strong>
-                  </div>
-                  <div style="background:#FEF3C7;padding:6px;border-radius:4px;font-size:0.8rem;margin-bottom:10px;">
-                    Send exact amount: <strong id="gcash-exact-amount">₱0.00</strong>
-                  </div>
-                  <div class="form-group" style="margin-bottom:0;text-align:left;">
-                    <label class="form-label" for="gcash-reference-input" style="font-size:0.8rem;">
-                      GCash Reference No. (13 digits) <span class="req">*</span>
-                    </label>
-                    <input type="text" id="gcash-reference-input" class="form-input" maxlength="13" placeholder="e.g. 1002938475821">
-                  </div>
-                </div>
-              </div>
-              <div id="payment-step-actions" class="hidden" style="display:flex;gap:8px;margin:8px 0;">
-                <button type="button" id="back-contact-btn" class="btn btn-secondary btn-sm" style="flex:1;">Back</button>
-              </div>
-
-              <!-- Submit Order Button -->
-              <button type="button" id="place-order-btn" class="btn btn-primary btn-lg hidden" style="width:100%;margin-top:8px;">
-                Place Order
-              </button>
+            <div id="checkout-store-notice" class="store-availability-notice hidden" role="status" aria-live="polite"></div>
+            <div id="checkout-minimum-notice" class="checkout-requirement-notice hidden" role="status" aria-live="polite"></div>
+            <div class="receipt-checkout-note">
+              <span aria-hidden="true">✦</span>
+              Made fresh when you order
             </div>
+            <button type="button" id="open-checkout-btn" class="btn btn-primary btn-lg receipt-checkout-btn" disabled>
+              Continue to checkout
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6"/>
+              </svg>
+            </button>
+            <p class="receipt-secure-note">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+              </svg>
+              Your order details are confirmed in the next step.
+            </p>
           </div>
         </div>
       </div>
     </div>
   </main>
+
+  <div id="checkout-modal" class="modal-overlay checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkout-modal-title" aria-describedby="checkout-modal-description" aria-hidden="true">
+    <div class="modal-card checkout-modal-card">
+      <div class="modal-header checkout-modal-header">
+        <div>
+          <p class="checkout-modal-eyebrow">Almost there</p>
+          <h2 id="checkout-modal-title">Complete your order</h2>
+          <p id="checkout-modal-description">Choose how you’d like to receive your order.</p>
+        </div>
+        <button type="button" class="modal-close" id="close-checkout-modal" aria-label="Close checkout">&times;</button>
+      </div>
+      <div class="modal-body checkout-modal-body">
+        <div class="checkout-panel">
+          <div class="checkout-step-indicator" aria-label="Checkout progress">
+            <span class="checkout-step-dot active" data-checkout-progress="1">1</span>
+            <span class="checkout-step-line"></span>
+            <span class="checkout-step-dot" data-checkout-progress="2">2</span>
+            <span class="checkout-step-line"></span>
+            <span class="checkout-step-dot" data-checkout-progress="3">3</span>
+          </div>
+
+          <div class="step-card" id="checkout-step-fulfillment">
+            <div class="step-card-header">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              1. Fulfillment Method
+            </div>
+            <div class="tab-pill-group">
+              <button type="button" class="tab-pill active" id="tab-pickup">Pickup (Free)</button>
+              <button type="button" class="tab-pill" id="tab-delivery">Delivery</button>
+            </div>
+          </div>
+          <button type="button" id="continue-contact-btn" class="btn btn-primary btn-sm checkout-next-btn">Continue</button>
+
+          <div class="step-card hidden" id="checkout-step-contact">
+            <div class="step-card-header">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              2. Contact &amp; Delivery Info
+            </div>
+            <div id="saved-contact-summary" class="saved-details-box hidden"></div>
+            <div id="contact-form-fields">
+              <div class="form-group" style="margin-bottom:8px;">
+                <label class="form-label" for="contact-name-input">Full Name <span class="req">*</span></label>
+                <input type="text" id="contact-name-input" class="form-input" placeholder="e.g. Juan Dela Cruz">
+              </div>
+              <div class="form-group" style="margin-bottom:8px;">
+                <label class="form-label" for="contact-phone-input">Phone Number (PH) <span class="req">*</span></label>
+                <input type="tel" id="contact-phone-input" class="form-input" placeholder="09171234567 or +639171234567">
+              </div>
+              <div class="form-group hidden" id="contact-address-group" style="margin-bottom:0;">
+                <label class="form-label" for="contact-address-input">Complete Delivery Address <span class="req">*</span></label>
+                <textarea id="contact-address-input" class="form-textarea" placeholder="House/Unit #, Street, Barangay, Landmark"></textarea>
+              </div>
+            </div>
+          </div>
+          <div id="contact-step-actions" class="checkout-step-actions hidden">
+            <button type="button" id="back-fulfillment-btn" class="btn btn-secondary btn-sm">Back</button>
+            <button type="button" id="continue-payment-btn" class="btn btn-primary btn-sm">Continue to Payment</button>
+          </div>
+
+          <div class="step-card hidden" id="checkout-step-payment">
+            <div class="step-card-header">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              3. Payment Method
+            </div>
+            <div class="payment-options-grid" id="payment-methods-container"></div>
+            <div id="gcash-payment-box" class="gcash-qr-box hidden">
+              <div style="font-weight:700;color:#1D6FB8;margin-bottom:4px;">Scan &amp; Pay via GCash</div>
+              <div class="qr-image-holder">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140' width='140' height='140'%3E%3Crect width='140' height='140' fill='%23F0F7FF' stroke='%231D6FB8' stroke-dasharray='4 4'/%3E%3Ctext x='70' y='65' font-family='sans-serif' font-size='11' font-weight='700' fill='%231D6FB8' text-anchor='middle'%3EGCash QR Code%3C/text%3E%3Ctext x='70' y='85' font-family='sans-serif' font-size='9' fill='%236B5B52' text-anchor='middle'%3EWill appear here%3C/text%3E%3C/svg%3E" alt="GCash QR Code">
+              </div>
+              <div style="font-size:0.82rem;margin-bottom:6px;">
+                Account Name: <strong id="gcash-account-name">casestudy-system HQ</strong><br>
+                Account No: <strong id="gcash-account-number">09171234567</strong>
+              </div>
+              <div class="gcash-exact-amount">
+                Send exact amount: <strong id="gcash-exact-amount">₱0.00</strong>
+              </div>
+              <div class="form-group" style="margin-bottom:0;text-align:left;">
+                <label class="form-label" for="gcash-reference-input">GCash Reference No. (13 digits) <span class="req">*</span></label>
+                <input type="text" id="gcash-reference-input" class="form-input" maxlength="13" placeholder="e.g. 1002938475821">
+              </div>
+            </div>
+          </div>
+          <div id="payment-step-actions" class="checkout-step-actions hidden">
+            <button type="button" id="back-contact-btn" class="btn btn-secondary btn-sm">Back</button>
+          </div>
+          <button type="button" id="place-order-btn" class="btn btn-primary btn-lg hidden checkout-place-order-btn">Place Order</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div id="cart-delete-confirm-modal" class="modal-overlay" role="alertdialog" aria-modal="true" aria-labelledby="cart-delete-confirm-title" aria-describedby="cart-delete-confirm-message">
     <div class="modal-card">

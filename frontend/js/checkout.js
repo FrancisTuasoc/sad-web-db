@@ -1,6 +1,6 @@
 // Checkout Controller & Order Placement Flow
 import { apiFetch } from './api.js';
-import { showToast, escapeHtml, BURGER_PLACEHOLDER } from './ui.js';
+import { showToast, escapeHtml, BURGER_PLACEHOLDER, openModal, closeModal } from './ui.js';
 import { getUser, setUser } from './auth.js';
 import { getCheckedCartItems, hasStockIssue, fetchCart, flushPendingCartUpdates } from './cart.js';
 
@@ -10,6 +10,7 @@ let fulfillmentMethod = null; // 'pickup' | 'delivery'
 let paymentMethod = null; // 'gcash' | 'pay_at_shop' | 'cod'
 let isChangingContact = false;
 let selectedCartSubtotal = 0;
+let checkoutModalReturnFocus = null;
 
 export function isCheckoutAllowed() {
   const checked = getCheckedCartItems();
@@ -50,7 +51,39 @@ function showCheckoutStep(step) {
   document.getElementById('payment-step-actions')?.classList.toggle('hidden', step < 3);
   document.getElementById('continue-contact-btn')?.classList.toggle('hidden', step !== 1);
   document.getElementById('place-order-btn')?.classList.toggle('hidden', step !== 3);
+  document.querySelectorAll('[data-checkout-progress]').forEach((indicator) => {
+    const indicatorStep = Number(indicator.getAttribute('data-checkout-progress'));
+    indicator.classList.toggle('active', indicatorStep === step);
+    indicator.classList.toggle('completed', indicatorStep < step);
+    indicator.setAttribute('aria-label', `Step ${indicatorStep} of 3`);
+    if (indicatorStep === step) indicator.setAttribute('aria-current', 'step');
+    else indicator.removeAttribute('aria-current');
+  });
   updateReceipt();
+}
+
+function closeCheckoutModal(restoreFocus = true) {
+  const modal = document.getElementById('checkout-modal');
+  if (!modal) return;
+  closeModal('checkout-modal');
+  modal.setAttribute('aria-hidden', 'true');
+  if (restoreFocus && checkoutModalReturnFocus instanceof HTMLElement) {
+    checkoutModalReturnFocus.focus();
+  }
+}
+
+function openCheckoutModal() {
+  if (!isCheckoutAllowed()) {
+    updateReceipt();
+    return;
+  }
+  const modal = document.getElementById('checkout-modal');
+  if (!modal) return;
+  checkoutModalReturnFocus = document.getElementById('open-checkout-btn');
+  modal.setAttribute('aria-hidden', 'false');
+  openModal('checkout-modal');
+  showCheckoutStep(1);
+  document.getElementById('close-checkout-modal')?.focus();
 }
 
 function validateContactDetails() {
@@ -161,16 +194,19 @@ export function updateReceipt() {
     }
   }
 
-  if (checkoutBtn) {
-    checkoutBtn.disabled = checkedItems.length === 0 || stockIssue || !isCheckoutAllowed();
-  }
-
   const storeAcceptingOrders = checkoutSettingsLoaded
     && Boolean(publicSettings && publicSettings.acceptingOrders);
   const hasFulfillmentOption = Boolean(
     publicSettings && (publicSettings.pickupEnabled || publicSettings.deliveryEnabled)
   );
   const orderingAvailable = storeAcceptingOrders && hasFulfillmentOption;
+  if (checkoutBtn) {
+    checkoutBtn.disabled = checkedItems.length === 0
+      || stockIssue
+      || !isCheckoutAllowed()
+      || !orderingAvailable;
+  }
+
   const storeNotice = document.getElementById('checkout-store-notice');
   if (storeNotice) {
     storeNotice.classList.toggle('hidden', orderingAvailable);
@@ -511,6 +547,8 @@ async function handlePlaceOrder() {
 }
 
 function showSuccessReceipt(order) {
+  closeCheckoutModal(false);
+  document.getElementById('cart-page-intro')?.classList.add('hidden');
   const cartLayout = document.getElementById('cart-layout-container');
   const successContainer = document.getElementById('order-success-screen');
 
@@ -609,6 +647,9 @@ function showSuccessReceipt(order) {
 }
 
 export function setupCheckoutListeners() {
+  const checkoutBtn = document.getElementById('open-checkout-btn');
+  const checkoutModal = document.getElementById('checkout-modal');
+  const closeCheckoutBtn = document.getElementById('close-checkout-modal');
   const pickupTab = document.getElementById('tab-pickup');
   const deliveryTab = document.getElementById('tab-delivery');
   const placeOrderBtn = document.getElementById('place-order-btn');
@@ -616,6 +657,36 @@ export function setupCheckoutListeners() {
   const continuePaymentBtn = document.getElementById('continue-payment-btn');
   const backFulfillmentBtn = document.getElementById('back-fulfillment-btn');
   const backContactBtn = document.getElementById('back-contact-btn');
+
+  if (checkoutBtn) checkoutBtn.addEventListener('click', openCheckoutModal);
+  if (closeCheckoutBtn) closeCheckoutBtn.addEventListener('click', () => closeCheckoutModal());
+  if (checkoutModal) {
+    checkoutModal.addEventListener('click', (event) => {
+      if (event.target === checkoutModal) closeCheckoutModal();
+    });
+  }
+  document.addEventListener('keydown', (event) => {
+    if (!checkoutModal || !checkoutModal.classList.contains('open')) return;
+    if (event.key === 'Escape') {
+      closeCheckoutModal();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+
+    const focusable = Array.from(checkoutModal.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    )).filter((element) => element.getClientRects().length > 0);
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (!checkoutModal.contains(document.activeElement) || (event.shiftKey && document.activeElement === first)) {
+      event.preventDefault();
+      (event.shiftKey ? last : first).focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
 
   if (pickupTab) {
     pickupTab.addEventListener('click', () => {
