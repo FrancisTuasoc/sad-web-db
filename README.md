@@ -93,6 +93,8 @@ Checkout opens in a responsive dialog from the compact cart summary. It requires
 
 Customers can cancel only while an order is still `pending`. Cancellation and admin acceptance compete through an atomic status transition: whichever succeeds first wins. If acceptance wins, the customer is told that online cancellation is no longer available and must contact the shop immediately; staff should coordinate any cancellation, refund, or stock adjustment manually. Cancellation also restores reserved stock in the same MongoDB transaction, so the configured MongoDB deployment must support transactions (a replica set, including MongoDB Atlas).
 
+For pickup orders paid at the shop, admins start preparation after confirming the customer has arrived, then mark the order ready once cooking is complete. Customers must arrive within one hour of placing the order; overdue pending orders are automatically cancelled and reserved stock is restored. Admins can also cancel pending customer orders from the order management drawer.
+
 ## Admin dashboard metrics
 
 Lifetime revenue includes completed orders only; cancelled and still-active orders are excluded. The all-orders, pending, completed, and cancelled cards count their correspondingly labelled statuses, while customers counts registered customer accounts. Daily sales use the Asia/Manila calendar day; weekly and monthly sales cover the previous 7 and 30 rolling days. Sales and chart buckets use the order's recorded completion time, not its creation time. For older completed orders without a completion entry in their status history, the dashboard uses the order creation time.

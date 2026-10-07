@@ -9,6 +9,9 @@ checkEnv();
 const { connectDB } = require('./src/config/db');
 const { ensureAdminAndSettings } = require('./src/seed/seed');
 const errorHandler = require('./src/middleware/errorHandler');
+const { expirePayAtShopOrders } = require('./src/services/order.service');
+
+const ORDER_EXPIRY_SWEEP_INTERVAL_MS = 60 * 1000;
 
 // Route imports
 const authRoutes = require('./src/routes/auth.routes');
@@ -103,6 +106,24 @@ async function startServer() {
   } catch (seedErr) {
     console.error('[SEED CHECK WARNING]', seedErr.message);
   }
+
+  let expirySweepRunning = false;
+  const runOrderExpirySweep = async () => {
+    if (expirySweepRunning) return;
+    expirySweepRunning = true;
+    try {
+      const cancelledCount = await expirePayAtShopOrders();
+      if (cancelledCount > 0) {
+        console.log(`[ORDER EXPIRY] Automatically cancelled ${cancelledCount} overdue pay-at-shop order(s).`);
+      }
+    } catch (error) {
+      console.error('[ORDER EXPIRY ERROR]', error);
+    } finally {
+      expirySweepRunning = false;
+    }
+  };
+  await runOrderExpirySweep();
+  setInterval(runOrderExpirySweep, ORDER_EXPIRY_SWEEP_INTERVAL_MS);
 
   const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n============================================================`);

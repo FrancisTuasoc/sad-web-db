@@ -127,6 +127,11 @@ const orderSchema = new mongoose.Schema(
       enum: ['unpaid', 'paid'],
       default: 'unpaid',
     },
+    arrivalDeadline: {
+      type: Date,
+      default: null,
+      index: true,
+    },
     gcashReference: {
       type: String,
       default: '',
@@ -153,7 +158,7 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'ready_for_pickup', 'ready_to_deliver', 'completed', 'cancelled', 'to_pickup', 'to_ship'],
+      enum: ['pending', 'preparing', 'ready_for_pickup', 'ready_to_deliver', 'completed', 'cancelled', 'to_pickup', 'to_ship'],
       default: 'pending',
       index: true,
     },

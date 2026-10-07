@@ -75,6 +75,7 @@ export async function loadCheckoutSettings() {
 }
 
 function showCheckoutStep(step) {
+  document.getElementById('checkout-step-fulfillment')?.classList.toggle('hidden', step !== 1);
   document.getElementById('checkout-step-contact')?.classList.toggle('hidden', step < 2);
   document.getElementById('contact-step-actions')?.classList.toggle('hidden', step < 2);
   document.getElementById('checkout-step-payment')?.classList.toggle('hidden', step < 3);
@@ -369,6 +370,7 @@ function renderPaymentOptions() {
   if (!fulfillmentMethod) {
     container.innerHTML = '<p class="text-muted">Choose pickup or delivery first.</p>';
     document.getElementById('gcash-payment-box')?.classList.add('hidden');
+    document.getElementById('pay-at-shop-arrival-note')?.classList.add('hidden');
     paymentMethod = null;
     return;
   }
@@ -435,6 +437,8 @@ function renderPaymentOptions() {
       gcashBox.classList.add('hidden');
     }
   }
+  document.getElementById('pay-at-shop-arrival-note')
+    ?.classList.toggle('hidden', paymentMethod !== 'pay_at_shop');
   if (availableValues.length === 0) {
     container.innerHTML = '<p class="text-muted">No payment methods are currently available for this order type. Please contact the shop.</p>';
   }
@@ -446,6 +450,8 @@ function renderPaymentOptions() {
       if (gcashBox) {
         gcashBox.classList.toggle('hidden', paymentMethod !== 'gcash');
       }
+      document.getElementById('pay-at-shop-arrival-note')
+        ?.classList.toggle('hidden', paymentMethod !== 'pay_at_shop');
       updateReceipt();
     });
   });
@@ -676,82 +682,110 @@ function showSuccessReceipt(order) {
 
     const itemsSummary = order.items
       .map((item) => {
-        let addonsStr = '';
-        if (item.addons && item.addons.length > 0) {
-          const quantityLabel = item.addonQuantityMode === 'per_order' ? 'for order' : 'per item';
-          addonsStr = `<div style="font-size:0.78rem;color:var(--color-text-muted);padding-left:10px;">${item.addons.map((a) => `+ ${escapeHtml(a.name)} (x${a.qty} ${quantityLabel} @ ₱${a.price.toFixed(2)})`).join(', ')}</div>`;
-        }
+        const addons = item.addons && item.addons.length > 0
+          ? `<ul class="receipt-item-addons">${item.addons.map((addon) => {
+            const quantityLabel = item.addonQuantityMode === 'per_order' ? 'for order' : 'per item';
+            return `<li>+ ${escapeHtml(addon.name)} · x${addon.qty} ${quantityLabel} · ₱${addon.price.toFixed(2)}</li>`;
+          }).join('')}</ul>`
+          : '';
         return `
-          <div style="display:flex;justify-content:space-between;padding:4px 0;">
-            <div>
-              <strong>${escapeHtml(item.name)}</strong> &times; ${item.quantity}
-              ${addonsStr}
+          <div class="receipt-item">
+            <div class="receipt-item-description">
+              <strong>${escapeHtml(item.name)}</strong>
+              <span>Quantity ${item.quantity}</span>
+              ${addons}
             </div>
-            <span>₱${item.lineTotal.toFixed(2)}</span>
+            <strong class="receipt-item-price">₱${item.lineTotal.toFixed(2)}</strong>
           </div>
         `;
       })
       .join('');
+    const createdAt = new Date(order.createdAt);
+    const totalLabel = order.paymentStatus === 'unpaid' && order.paymentMethod === 'pay_at_shop'
+      ? 'Total due at pickup'
+      : order.paymentStatus === 'unpaid' && order.paymentMethod === 'cod'
+        ? 'Total due on delivery'
+        : 'Total amount';
 
     successContainer.innerHTML = `
       <div class="order-success-card">
-        <div style="width:56px;height:56px;border-radius:50%;background:#DCFCE7;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
+        <div class="order-success-heading">
+          <div class="order-success-icon" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <p class="order-success-eyebrow">Order confirmed</p>
+          <h2>Thanks for your order!</h2>
+          <p class="order-success-message">
+            ${order.paymentMethod === 'pay_at_shop'
+    ? 'We will start preparing your order when you arrive at the shop. Please arrive within 1 hour of placing your order; otherwise, it will be cancelled automatically.'
+    : 'Your order is pending admin acceptance. You can cancel it from your account while it is still pending.'}
+          </p>
+          <div class="order-success-reference">
+            <span>Order number</span>
+            <strong>#${escapeHtml(order.orderNumber)}</strong>
+            <time datetime="${escapeHtml(order.createdAt)}">${createdAt.toLocaleString()}</time>
+          </div>
         </div>
-        <h2 style="font-size:1.6rem;color:var(--color-brand);margin-bottom:6px;">Order Placed Successfully!</h2>
-        <p class="text-muted" style="margin-bottom:20px;">
-          Your order is pending admin acceptance. You can cancel it from your account while it is still pending.
-        </p>
 
         <div class="printable-receipt" id="printable-order-receipt">
-          <div style="text-align:center;padding-bottom:12px;border-bottom:1px dashed var(--color-border);margin-bottom:12px;">
-            <h3 style="font-size:1.1rem;margin-bottom:2px;">${escapeHtml(publicSettings && typeof publicSettings.storeName === 'string' ? publicSettings.storeName : 'Burger Shop')}</h3>
-            <p style="font-size:0.8rem;color:var(--color-text-muted);margin:0;">Official Order Receipt</p>
-            <p style="font-weight:700;color:var(--color-brand-secondary);margin-top:6px;font-size:1rem;">Order #${escapeHtml(order.orderNumber)}</p>
-            <p style="font-size:0.78rem;color:var(--color-text-light);">${new Date(order.createdAt).toLocaleString()}</p>
+          <div class="receipt-document-header">
+            <div class="receipt-store-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h16l-1.2 10H5.2L4 10Z"/><path d="M3 10 5 4h14l2 6M9 20v-6h6v6M8 7v2M12 7v2M16 7v2"/></svg>
+            </div>
+            <div class="receipt-store-name">
+              <span class="receipt-document-eyebrow">Official order receipt</span>
+              <h3>${escapeHtml(publicSettings && typeof publicSettings.storeName === 'string' ? publicSettings.storeName : 'Burger Shop')}</h3>
+            </div>
+            <div class="receipt-document-number">
+              <span>Order</span>
+              <strong>#${escapeHtml(order.orderNumber)}</strong>
+            </div>
           </div>
 
-          <div style="margin-bottom:12px;">
-            <div style="font-weight:600;font-size:0.85rem;margin-bottom:4px;">Customer Details:</div>
-            <div><strong>Name:</strong> ${escapeHtml(order.contact.fullName)}</div>
-            <div><strong>Email:</strong> ${escapeHtml(order.contact.email || '')}</div>
-            <div><strong>Phone:</strong> ${escapeHtml(order.contact.phone)}</div>
-            ${order.fulfillment === 'delivery' ? `<div><strong>Delivery Address:</strong> ${escapeHtml(order.contact.address)}</div>` : ''}
-            <div><strong>Fulfillment:</strong> ${order.fulfillment.toUpperCase()}</div>
-            <div><strong>Payment Method:</strong> ${order.paymentMethod.toUpperCase().replace(/_/g, ' ')} (${order.paymentStatus.toUpperCase()})</div>
-            ${order.gcashReference ? `<div><strong>GCash Ref:</strong> ${escapeHtml(order.gcashReference)}</div>` : ''}
+          <div class="receipt-meta">
+            <span><small>Placed</small><strong>${createdAt.toLocaleString()}</strong></span>
+            <span><small>Fulfillment</small><strong>${escapeHtml(order.fulfillment.toUpperCase())}</strong></span>
+            <span><small>Payment</small><strong>${escapeHtml(order.paymentMethod.toUpperCase().replace(/_/g, ' '))} · ${escapeHtml(order.paymentStatus.toUpperCase())}</strong></span>
           </div>
 
-          <div style="border-top:1px dashed var(--color-border);padding-top:8px;margin-bottom:12px;">
-            <div style="font-weight:600;font-size:0.85rem;margin-bottom:6px;">Ordered Items:</div>
+          <section class="receipt-customer">
+            <h4>Customer details</h4>
+            <div class="receipt-customer-grid">
+              <div><span>Name</span><strong>${escapeHtml(order.contact.fullName)}</strong></div>
+              <div><span>Phone</span><strong>${escapeHtml(order.contact.phone)}</strong></div>
+              ${order.contact.email ? `<div><span>Email</span><strong>${escapeHtml(order.contact.email)}</strong></div>` : ''}
+              ${order.fulfillment === 'delivery' ? `<div class="receipt-address"><span>Delivery address</span><strong>${escapeHtml(order.contact.address)}</strong></div>` : ''}
+              ${order.gcashReference ? `<div><span>GCash reference</span><strong>${escapeHtml(order.gcashReference)}</strong></div>` : ''}
+            </div>
+          </section>
+
+          <section class="receipt-items">
+            <h4>Order summary</h4>
             ${itemsSummary}
-          </div>
+          </section>
 
-          <div style="border-top:1px dashed var(--color-border);padding-top:8px;display:flex;flex-direction:column;gap:4px;">
-            <div style="display:flex;justify-content:space-between;">
-              <span>Subtotal:</span> <span>₱${order.subtotal.toFixed(2)}</span>
-            </div>
+          <div class="receipt-totals">
+            <div><span>Subtotal</span><strong>₱${order.subtotal.toFixed(2)}</strong></div>
             ${order.deliveryFee > 0 ? `
-              <div style="display:flex;justify-content:space-between;">
-                <span>Delivery Fee:</span> <span>₱${order.deliveryFee.toFixed(2)}</span>
-              </div>
+              <div><span>Delivery fee</span><strong>₱${order.deliveryFee.toFixed(2)}</strong></div>
             ` : ''}
-            <div style="display:flex;justify-content:space-between;font-weight:800;font-size:1.15rem;padding-top:6px;border-top:1px solid var(--color-border);color:var(--color-brand);">
-              <span>Total Amount:</span> <span>₱${order.total.toFixed(2)}</span>
+            <div class="receipt-grand-total">
+              <span>${totalLabel}</span>
+              <strong>₱${order.total.toFixed(2)}</strong>
             </div>
           </div>
+          <p class="receipt-thank-you">Thank you for choosing us. We hope you enjoy every bite!</p>
+          <span class="receipt-print-date">Printed ${new Date().toLocaleString()}</span>
         </div>
 
-        <div style="display:flex;gap:12px;justify-content:center;margin-top:24px;flex-wrap:wrap;">
-          <button type="button" id="print-receipt-btn" class="btn btn-secondary btn-sm">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-            Print Receipt
+        <div class="receipt-actions">
+          <button type="button" id="print-receipt-btn" class="btn btn-secondary">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Print receipt
           </button>
-          <a href="profile.html?tab=status" class="btn btn-primary btn-sm">
-            Track or Cancel Order
-          </a>
+          <a href="profile.html?tab=status" class="btn btn-primary">Track your order</a>
         </div>
       </div>
     `;

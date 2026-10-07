@@ -13,7 +13,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const validate = require('../middleware/validate');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 const { getDashboardStats } = require('../services/stats.service');
-const { updateOrderStatus, markOrderPaid } = require('../services/order.service');
+const { cancelOrder, updateOrderStatus, markOrderPaid } = require('../services/order.service');
 const { broadcastStock } = require('../services/events');
 
 const router = express.Router();
@@ -127,13 +127,25 @@ router.get(
 
 router.patch(
   '/orders/:id/status',
-  validate(z.object({ status: z.enum(['ready_for_pickup', 'ready_to_deliver', 'completed']) })),
+  validate(z.object({ status: z.enum(['preparing', 'ready_for_pickup', 'ready_to_deliver', 'completed']) })),
   asyncHandler(async (req, res) => {
     const updated = await updateOrderStatus(req.params.id, req.body.status);
     res.json({
       success: true,
       message: `Order status updated to ${req.body.status}`,
       order: updated,
+    });
+  })
+);
+
+router.patch(
+  '/orders/:id/cancel',
+  asyncHandler(async (req, res) => {
+    const order = await cancelOrder(req.params.id, req.user, 'admin');
+    res.json({
+      success: true,
+      message: 'Order has been successfully cancelled.',
+      order,
     });
   })
 );

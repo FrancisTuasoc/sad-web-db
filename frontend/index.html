@@ -246,41 +246,52 @@
   </main>
 
   <!-- Add to Cart Modal -->
-  <div id="add-to-cart-modal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 id="modal-product-name">Add to Cart</h3>
-        <button type="button" class="modal-close" id="modal-close-btn">&times;</button>
+  <div id="add-to-cart-modal" class="modal-overlay add-to-cart-modal" role="dialog" aria-modal="true" aria-labelledby="modal-product-name" aria-hidden="true">
+    <div class="modal-card add-to-cart-card">
+      <div class="modal-header add-to-cart-header">
+        <div>
+          <p class="add-to-cart-eyebrow">Make it yours</p>
+          <h2 id="modal-product-name">Add to Cart</h2>
+          <p>Choose your quantity and any extras.</p>
+        </div>
+        <button type="button" class="modal-close" id="modal-close-btn" aria-label="Close item options">&times;</button>
       </div>
-      <div class="modal-body">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--color-border);">
-          <div>
-            <div style="font-size:0.8rem;color:var(--color-text-muted);">Base Price</div>
-            <div id="modal-product-price" class="font-price" style="font-size:1.3rem;color:var(--color-brand);">₱0.00</div>
+      <div class="modal-body add-to-cart-body">
+        <div class="add-to-cart-product">
+          <div class="add-to-cart-product-art">
+            <img id="modal-product-image" alt="">
           </div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span style="font-size:0.85rem;font-weight:600;">Quantity:</span>
-            <div class="qty-stepper">
-              <button type="button" class="stepper-btn" id="modal-qty-minus">-</button>
-              <span class="stepper-val" id="modal-qty-val">1</span>
-              <button type="button" class="stepper-btn" id="modal-qty-plus">+</button>
+          <div class="add-to-cart-product-details">
+            <span class="add-to-cart-label">Base price</span>
+            <div id="modal-product-price" class="add-to-cart-base-price">₱0.00</div>
+            <div class="add-to-cart-quantity">
+              <span id="modal-qty-label">Quantity</span>
+              <div class="qty-stepper" aria-labelledby="modal-qty-label">
+                <button type="button" class="stepper-btn" id="modal-qty-minus" aria-label="Decrease quantity">−</button>
+                <span class="stepper-val" id="modal-qty-val" aria-live="polite">1</span>
+                <button type="button" class="stepper-btn" id="modal-qty-plus" aria-label="Increase quantity">+</button>
+              </div>
             </div>
           </div>
         </div>
 
-        <div style="margin-bottom:12px;">
-          <h4 style="font-size:0.95rem;margin-bottom:8px;">Customize with Add-ons (quantity for this order):</h4>
-          <div id="modal-addons-list">
-            <!-- Addons checkboxes rendered dynamically -->
+        <section class="add-to-cart-addons" aria-labelledby="modal-addons-title">
+          <div class="add-to-cart-section-heading">
+            <div>
+              <h3 id="modal-addons-title">Add something extra</h3>
+              <p>Optional add-ons for this order</p>
+            </div>
+            <span class="add-to-cart-optional">OPTIONAL</span>
           </div>
-        </div>
+          <div id="modal-addons-list"></div>
+        </section>
 
-        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--color-surface-alt);padding:12px;border-radius:var(--radius-md);margin-top:16px;">
-          <span style="font-weight:700;">Line Total:</span>
-          <span id="modal-line-total" class="font-price" style="font-size:1.3rem;color:var(--color-brand);">₱0.00</span>
+        <div class="add-to-cart-total">
+          <div><span class="add-to-cart-label">Your item total</span><span class="add-to-cart-total-caption">Including selected extras</span></div>
+          <span id="modal-line-total" aria-live="polite">₱0.00</span>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer add-to-cart-footer">
         <button type="button" class="btn btn-secondary btn-sm" id="modal-cancel-btn">Cancel</button>
         <button type="button" class="btn btn-primary btn-sm" id="modal-confirm-btn">Confirm &amp; Add to Cart</button>
       </div>

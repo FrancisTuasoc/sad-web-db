@@ -299,6 +299,15 @@ export async function openAddToCartForProduct(productId, productObj = null) {
   document.getElementById('modal-product-name').textContent = selectedProduct.name;
   document.getElementById('modal-product-price').textContent = `₱${Number(selectedProduct.price).toFixed(2)}`;
   document.getElementById('modal-qty-val').textContent = '1';
+  const productImage = document.getElementById('modal-product-image');
+  if (productImage) {
+    productImage.alt = selectedProduct.name;
+    productImage.onerror = () => {
+      productImage.onerror = null;
+      productImage.src = BURGER_PLACEHOLDER;
+    };
+    productImage.src = getProductImageUrl(selectedProduct);
+  }
 
   // Populate addons
   const addonsListContainer = document.getElementById('modal-addons-list');
@@ -307,15 +316,15 @@ export async function openAddToCartForProduct(productId, productObj = null) {
     addonsListContainer.innerHTML = addonsToUse.length
       ? addonsToUse
       .map((addon) => `
-        <div class="addon-row" style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--color-border);font-size:0.88rem;">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-            <input type="checkbox" class="modal-addon-checkbox" value="${addon._id}" data-price="${addon.price}" data-stock="${addon.stock}">
-            <span><strong>${escapeHtml(addon.name)}</strong> (+₱${addon.price.toFixed(2)})</span>
+        <div class="addon-row">
+          <label class="addon-choice" for="modal-addon-${addon._id}">
+            <input type="checkbox" id="modal-addon-${addon._id}" class="modal-addon-checkbox" value="${addon._id}" data-price="${addon.price}" data-stock="${addon.stock}">
+            <span><strong>${escapeHtml(addon.name)}</strong><small>+₱${addon.price.toFixed(2)}</small></span>
           </label>
-          <div class="qty-stepper" style="transform:scale(0.85);transform-origin:right center;">
-            <button type="button" class="stepper-btn mini-addon-minus" data-target="addon-qty-${addon._id}">-</button>
+          <div class="qty-stepper addon-qty-stepper">
+            <button type="button" class="stepper-btn mini-addon-minus" data-target="addon-qty-${addon._id}" aria-label="Decrease ${escapeHtml(addon.name)} quantity">−</button>
             <span class="stepper-val" id="addon-qty-${addon._id}">1</span>
-            <button type="button" class="stepper-btn mini-addon-plus" data-target="addon-qty-${addon._id}" data-stock="${addon.stock}">+</button>
+            <button type="button" class="stepper-btn mini-addon-plus" data-target="addon-qty-${addon._id}" data-stock="${addon.stock}" aria-label="Increase ${escapeHtml(addon.name)} quantity">+</button>
           </div>
         </div>
       `)

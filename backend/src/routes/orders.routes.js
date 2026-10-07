@@ -47,7 +47,7 @@ router.get(
 
     if (status) {
       if (status === 'active') {
-        filter.status = { $in: ['pending', 'ready_for_pickup', 'ready_to_deliver', 'to_pickup', 'to_ship'] };
+        filter.status = { $in: ['pending', 'preparing', 'ready_for_pickup', 'ready_to_deliver', 'to_pickup', 'to_ship'] };
       } else if (status === 'history') {
         filter.status = { $in: ['completed', 'cancelled'] };
       } else {

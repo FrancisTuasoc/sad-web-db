@@ -157,6 +157,7 @@ export function openModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {
     modal.classList.add('open');
+    if (modal.hasAttribute('aria-hidden')) modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
   }
 }
@@ -165,6 +166,7 @@ export function closeModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {
     modal.classList.remove('open');
+    if (modal.hasAttribute('aria-hidden')) modal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
   }
 }

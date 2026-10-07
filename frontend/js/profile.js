@@ -276,6 +276,7 @@ function formatOrderStatusLabel(status = '') {
   if (!status) return 'Pending';
   const map = {
     pending: 'Pending',
+    preparing: 'Being prepared',
     processing: 'Processing',
     ready_for_pickup: 'Ready for pickup',
     ready_to_deliver: 'Ready to deliver',
@@ -354,6 +355,7 @@ async function loadCustomerStats() {
     const statusCounts = stats.statusCounts || {};
     const statusMeta = [
       { key: 'pending', label: 'Pending', color: '#d98508' },
+      { key: 'preparing', label: 'Being Prepared', color: '#155a91' },
       { key: 'ready_for_pickup', label: 'Ready Pick-up', color: '#155a91' },
       { key: 'ready_to_deliver', label: 'Ready Delivery', color: '#155a91' },
       { key: 'to_pickup', label: 'To Pick Up', color: '#d98508' },
@@ -426,6 +428,7 @@ async function loadCustomerStats() {
       const activeOrder = activeOrders[0];
       const statusLabel = {
         pending: 'Pending',
+        preparing: 'Being prepared',
         ready_for_pickup: 'Ready for pickup',
         ready_to_deliver: 'Ready to deliver',
         to_pickup: 'To pick up',
@@ -572,6 +575,7 @@ function renderOrderCard(order, isLive = false) {
 
   const statusLabels = {
     pending: 'Pending Admin Acceptance',
+    preparing: 'Being Prepared',
     ready_for_pickup: 'Ready for Pick Up',
     ready_to_deliver: 'Ready to Deliver',
     to_pickup: 'Ready for Pick Up',
@@ -587,10 +591,12 @@ function renderOrderCard(order, isLive = false) {
   let progressTracker = '';
   if (isLive && order.status !== 'cancelled') {
     const isStep1 = true;
-    const isStep2 = ['ready_for_pickup', 'ready_to_deliver', 'to_pickup', 'to_ship', 'completed'].includes(order.status);
+    const isStep2 = ['preparing', 'ready_for_pickup', 'ready_to_deliver', 'to_pickup', 'to_ship', 'completed'].includes(order.status);
     const isStep3 = order.status === 'completed';
 
-    const step2Label = order.fulfillment === 'pickup' ? 'Ready to Pick Up' : 'Ready to Deliver';
+    const step2Label = order.status === 'preparing'
+      ? 'Being Prepared'
+      : order.fulfillment === 'pickup' ? 'Ready to Pick Up' : 'Ready to Deliver';
 
     progressTracker = `
       <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 16px;position:relative;">
@@ -662,6 +668,14 @@ function renderOrderCard(order, isLive = false) {
       <div class="order-items-snippet">
         <strong>Items:</strong> ${itemsSnippet}
       </div>
+      ${order.paymentMethod === 'pay_at_shop' && ['pending', 'preparing'].includes(order.status)
+    ? `<p style="margin:8px 0 0;font-size:0.84rem;font-weight:600;color:var(--color-warning);">${order.status === 'preparing'
+      ? 'Your order is being prepared. Please pay at the shop when you pick it up.'
+      : 'Please arrive at the shop within 1 hour of placing your order. We will prepare it when you arrive; otherwise, it will be cancelled automatically.'}</p>`
+    : ''}
+      ${order.cancelledBy === 'system'
+    ? '<p style="margin:8px 0 0;font-size:0.84rem;color:var(--color-danger);">Automatically cancelled because the 1-hour arrival window expired.</p>'
+    : ''}
 
       <div class="order-card-footer" style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px dashed var(--color-border);">
         <div>

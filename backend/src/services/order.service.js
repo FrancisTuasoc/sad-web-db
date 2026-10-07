@@ -9,6 +9,9 @@ const { generateOrderNumber } = require('../utils/orderNumber');
 const { deductStockWithCompensation, restoreStockForOrder } = require('./stock.service');
 const { broadcastStock } = require('./events');
 
+const PAY_AT_SHOP_ARRIVAL_WINDOW_MS = 60 * 60 * 1000;
+const EXPIRY_SWEEP_BATCH_SIZE = 100;
+
 async function getOrCreateSettings() {
   let settings = await Settings.findOne();
   if (!settings) {
@@ -182,6 +185,9 @@ async function placeOrder({ userId, cartItemIds, fulfillment, paymentMethod, gca
     fulfillment,
     paymentMethod,
     paymentStatus: 'unpaid',
+    arrivalDeadline: paymentMethod === 'pay_at_shop'
+      ? new Date(Date.now() + PAY_AT_SHOP_ARRIVAL_WINDOW_MS)
+      : null,
     gcashReference: paymentMethod === 'gcash' ? gcashReference.trim() : '',
     contact: {
       fullName,
@@ -248,9 +254,9 @@ async function placeOrder({ userId, cartItemIds, fulfillment, paymentMethod, gca
   return order;
 }
 
-async function cancelOrder(orderId, currentUser, role = 'customer') {
+async function cancelOrder(orderId, currentUser, role = 'customer', now = new Date()) {
   const query = { _id: orderId };
-  if (role !== 'admin') {
+  if (role === 'customer') {
     query.user = currentUser._id;
   }
   const session = await mongoose.startSession();
@@ -266,13 +272,32 @@ async function cancelOrder(orderId, currentUser, role = 'customer') {
       if (order.status !== 'pending') {
         throw new AppError('This order can no longer be cancelled because it has already been accepted or processed. Contact the shop for help.', 409);
       }
+      const cancelledAt = now;
+      if (
+        role === 'system'
+        && (
+          order.paymentMethod !== 'pay_at_shop'
+          || !order.arrivalDeadline
+          || order.arrivalDeadline > cancelledAt
+        )
+      ) {
+        return;
+      }
 
       restoredProducts = await restoreStockForOrder(order.items, session);
+      const cancellationQuery = { _id: order._id, status: 'pending' };
+      if (role === 'system') {
+        cancellationQuery.paymentMethod = 'pay_at_shop';
+        cancellationQuery.arrivalDeadline = { $lte: cancelledAt };
+      }
       cancelledOrder = await Order.findOneAndUpdate(
-        { _id: order._id, status: 'pending' },
+        cancellationQuery,
         {
-          $set: { status: 'cancelled', cancelledBy: role === 'admin' ? 'admin' : 'customer' },
-          $push: { statusHistory: { status: 'cancelled', at: new Date() } },
+          $set: {
+            status: 'cancelled',
+            cancelledBy: role === 'system' ? 'system' : role === 'admin' ? 'admin' : 'customer',
+          },
+          $push: { statusHistory: { status: 'cancelled', at: cancelledAt } },
         },
         { new: true, session }
       );
@@ -290,22 +315,50 @@ async function cancelOrder(orderId, currentUser, role = 'customer') {
   return cancelledOrder;
 }
 
+async function expirePayAtShopOrders(now = new Date()) {
+  const expiredOrders = await Order.find({
+    status: 'pending',
+    paymentMethod: 'pay_at_shop',
+    arrivalDeadline: { $lte: now },
+  })
+    .select('_id')
+    .sort({ arrivalDeadline: 1 })
+    .limit(EXPIRY_SWEEP_BATCH_SIZE);
+
+  let cancelledCount = 0;
+  for (const order of expiredOrders) {
+    try {
+      const cancelled = await cancelOrder(order._id, null, 'system', now);
+      if (cancelled) cancelledCount += 1;
+    } catch (error) {
+      if (error.statusCode === 404 || error.statusCode === 409) continue;
+      throw error;
+    }
+  }
+  return cancelledCount;
+}
+
 async function updateOrderStatus(orderId, nextStatus) {
   const order = await Order.findById(orderId);
   if (!order) {
     throw new AppError('Order not found.', 404);
   }
 
-  const expectedStatus = nextStatus === 'ready_for_pickup' || nextStatus === 'ready_to_deliver'
-    ? 'pending'
-    : nextStatus === 'completed' && order.fulfillment === 'pickup'
-      ? 'ready_for_pickup'
-      : null;
-  const expectedFulfillment = nextStatus === 'ready_for_pickup'
-    ? 'pickup'
-    : nextStatus === 'ready_to_deliver'
-      ? 'delivery'
-      : 'pickup';
+  let expectedStatus = null;
+  let expectedFulfillment = null;
+  if (nextStatus === 'preparing' && order.paymentMethod === 'pay_at_shop') {
+    expectedStatus = 'pending';
+    expectedFulfillment = 'pickup';
+  } else if (nextStatus === 'ready_for_pickup') {
+    expectedStatus = order.paymentMethod === 'pay_at_shop' ? 'preparing' : 'pending';
+    expectedFulfillment = 'pickup';
+  } else if (nextStatus === 'ready_to_deliver') {
+    expectedStatus = 'pending';
+    expectedFulfillment = 'delivery';
+  } else if (nextStatus === 'completed' && order.fulfillment === 'pickup') {
+    expectedStatus = 'ready_for_pickup';
+    expectedFulfillment = 'pickup';
+  }
   if (!expectedStatus || order.status !== expectedStatus || order.fulfillment !== expectedFulfillment) {
     throw new AppError(`Cannot change order status from ${order.status} to ${nextStatus}.`, 409);
   }
@@ -374,6 +427,7 @@ module.exports = {
   getOrCreateSettings,
   placeOrder,
   cancelOrder,
+  expirePayAtShopOrders,
   updateOrderStatus,
   completeOrder,
   markOrderPaid,

@@ -445,6 +445,7 @@ async function loadAdminOrders() {
 function statusLabel(status) {
   return ({
     pending: 'PENDING ACCEPTANCE',
+    preparing: 'PREPARING',
     ready_for_pickup: 'READY FOR PICKUP',
     ready_to_deliver: 'READY TO DELIVER',
     to_pickup: 'READY FOR PICKUP',
@@ -483,11 +484,24 @@ async function openOrderDrawer(orderId) {
     // Action buttons based on status
     let actionButtons = '';
     if (order.status === 'pending') {
-      const nextStatus = order.fulfillment === 'pickup' ? 'ready_for_pickup' : 'ready_to_deliver';
-      const nextLabel = order.fulfillment === 'pickup' ? 'Accept & Mark Ready for Pickup' : 'Accept & Mark Ready for Delivery';
+      const nextStatus = order.paymentMethod === 'pay_at_shop'
+        ? 'preparing'
+        : order.fulfillment === 'pickup' ? 'ready_for_pickup' : 'ready_to_deliver';
+      const nextLabel = order.paymentMethod === 'pay_at_shop'
+        ? 'Customer Arrived — Start Preparing'
+        : order.fulfillment === 'pickup' ? 'Accept & Mark Ready for Pickup' : 'Accept & Mark Ready for Delivery';
       actionButtons += `
         <button type="button" class="btn btn-primary btn-sm btn-action-status" data-order-id="${order._id}" data-status="${nextStatus}">
           ${nextLabel}
+        </button>
+        <button type="button" class="btn btn-danger btn-sm btn-action-cancel" data-order-id="${order._id}">
+          Cancel Order
+        </button>
+      `;
+    } else if (order.status === 'preparing') {
+      actionButtons += `
+        <button type="button" class="btn btn-primary btn-sm btn-action-status" data-order-id="${order._id}" data-status="ready_for_pickup">
+          Mark Ready for Pickup
         </button>
       `;
     } else if (order.status === 'ready_for_pickup' || order.status === 'to_pickup') {
@@ -527,6 +541,9 @@ async function openOrderDrawer(orderId) {
         ${order.fulfillment === 'delivery' ? `<div><strong>Address:</strong> ${escapeHtml(order.contact.address)}</div>` : ''}
         <div><strong>Fulfillment:</strong> ${order.fulfillment.toUpperCase()}</div>
         <div><strong>Payment Method:</strong> ${order.paymentMethod.toUpperCase().replace(/_/g, ' ')}</div>
+        ${order.paymentMethod === 'pay_at_shop' && order.arrivalDeadline && order.status === 'pending'
+    ? `<div><strong>Customer arrival deadline:</strong> ${new Date(order.arrivalDeadline).toLocaleString()}</div><div style="color:var(--color-warning);font-weight:600;">Start preparing only after the customer arrives.</div>`
+    : ''}
         ${order.gcashReference ? `<div style="background:#E1EFFE;padding:6px;border-radius:4px;margin-top:6px;"><strong>GCash Reference No:</strong> ${escapeHtml(order.gcashReference)}</div>` : ''}
       </div>
 
@@ -1036,6 +1053,25 @@ function attachAdminEventListeners() {
       } catch (err) {
         showToast(err.message, 'error');
         statusActionBtn.disabled = false;
+        loadAdminOrders();
+      }
+      return;
+    }
+
+    const cancelActionBtn = e.target.closest('.btn-action-cancel');
+    if (cancelActionBtn) {
+      const orderId = cancelActionBtn.getAttribute('data-order-id');
+      if (!confirm('Cancel this pending customer order? Reserved stock will be returned.')) return;
+      cancelActionBtn.disabled = true;
+      try {
+        await apiFetch(`/admin/orders/${orderId}/cancel`, { method: 'PATCH' });
+        showToast('Order successfully cancelled.', 'info');
+        closeModal('order-drawer-modal');
+        loadAdminOrders();
+        loadDashboardStats();
+      } catch (err) {
+        showToast(err.message, 'error');
+        cancelActionBtn.disabled = false;
         loadAdminOrders();
       }
       return;

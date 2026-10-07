@@ -17,7 +17,7 @@ router.use((req, res, next) => {
   next();
 });
 
-const statusValues = ['pending', 'ready_for_pickup', 'ready_to_deliver', 'completed', 'cancelled', 'to_pickup', 'to_ship'];
+const statusValues = ['pending', 'preparing', 'ready_for_pickup', 'ready_to_deliver', 'completed', 'cancelled', 'to_pickup', 'to_ship'];
 const queryStatusSchema = z.enum(['all', 'active', 'history', ...statusValues]);
 const customerOrdersQuerySchema = z
   .object({
@@ -75,7 +75,7 @@ function escapeRegex(value) {
 function getStatusFilter(status) {
   if (!status || status === 'all') return {};
   if (status === 'active') {
-    return { status: { $in: ['pending', 'ready_for_pickup', 'ready_to_deliver', 'to_pickup', 'to_ship'] } };
+    return { status: { $in: ['pending', 'preparing', 'ready_for_pickup', 'ready_to_deliver', 'to_pickup', 'to_ship'] } };
   }
   if (status === 'history') {
     return { status: { $in: ['completed', 'cancelled'] } };
@@ -146,7 +146,7 @@ router.get(
           pendingOrders: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
           activeOrders: {
             $sum: {
-              $cond: [{ $in: ['$status', ['pending', 'ready_for_pickup', 'ready_to_deliver', 'to_pickup', 'to_ship']] }, 1, 0],
+              $cond: [{ $in: ['$status', ['pending', 'preparing', 'ready_for_pickup', 'ready_to_deliver', 'to_pickup', 'to_ship']] }, 1, 0],
             },
           },
           completedOrders: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] } },

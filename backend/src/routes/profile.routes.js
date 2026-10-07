@@ -164,6 +164,7 @@ const updateProfileSchema = z
       .max(450000, 'Profile image size exceeds the 300KB limit')
       .optional(),
   })
+  .strict()
   .superRefine((data, ctx) => {
     const addressFields = ['street', 'barangay', 'city', 'province', 'postalCode'];
     if (addressFields.some((field) => data[field] !== undefined && data[field] !== '')) {
@@ -177,8 +178,7 @@ const updateProfileSchema = z
         }
       }
     }
-  })
-  .strict();
+  });
 
 const changePasswordSchema = z
   .object({
