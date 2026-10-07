@@ -1,46 +1,25 @@
 const express = require('express');
-const { z } = require('zod');
 const Order = require('../models/Order');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 const validate = require('../middleware/validate');
+const checkoutSchema = require('../utils/checkoutValidation');
 const { requireAuth } = require('../middleware/auth');
 const { placeOrder, cancelOrder, completeOrder } = require('../services/order.service');
 
 const router = express.Router();
 router.use(requireAuth);
 
-const checkoutSchema = z.object({
-  cartItemIds: z.array(z.string()).min(1, 'Please select at least one item to checkout'),
-  fulfillment: z.enum(['pickup', 'delivery']),
-  paymentMethod: z.enum(['gcash', 'pay_at_shop', 'cod']),
-  gcashReference: z.string().optional().default(''),
-  contact: z.object({
-    fullName: z.string().trim().min(2, 'Please provide your full name'),
-    phone: z.string().trim().refine(
-      (phone) => /^(09\d{9}|\+639\d{9})$/.test(phone.replace(/[\s-]/g, '')),
-      'Please provide a valid Philippine mobile number'
-    ),
-    address: z.string().trim().optional().default(''),
-  }),
-}).refine((data) => {
-  if (data.fulfillment === 'delivery') {
-    if (!data.contact.address || data.contact.address.trim().length < 5) {
-      return false;
-    }
-  }
-  return true;
-}, {
-  message: 'Complete delivery address is required for delivery orders.',
-  path: ['contact', 'address'],
-});
-
 // POST /api/orders
 router.post(
   '/',
   validate(checkoutSchema),
   asyncHandler(async (req, res) => {
-    const { cartItemIds, fulfillment, paymentMethod, gcashReference, contact } = req.body;
+    const { cartItemIds, fulfillment, paymentMethod, gcashReference } = req.body;
+    const contact = {
+      ...req.body.contact,
+      email: req.body.contact.email || req.user.email,
+    };
 
     const order = await placeOrder({
       userId: req.user._id,

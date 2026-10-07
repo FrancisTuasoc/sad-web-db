@@ -49,10 +49,55 @@ const userSchema = new mongoose.Schema(
       default: '',
       trim: true,
     },
+    contactEmail: {
+      type: String,
+      default: '',
+      lowercase: true,
+      trim: true,
+    },
+    firstName: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     fullName: {
       type: String,
       default: '',
       trim: true,
+    },
+    street: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    barangay: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    city: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    province: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    postalCode: {
+      type: String,
+      default: '',
+      trim: true,
+      validate: {
+        validator: (postalCode) => !postalCode || /^\d{4}$/.test(postalCode),
+        message: 'Postal code must contain exactly 4 digits',
+      },
     },
     address: {
       type: String,

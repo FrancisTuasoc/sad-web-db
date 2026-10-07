@@ -72,6 +72,7 @@ router.get(
       query.$or = [
         { orderNumber: { $regex: s, $options: 'i' } },
         { 'contact.fullName': { $regex: s, $options: 'i' } },
+        { 'contact.email': { $regex: s, $options: 'i' } },
         { 'contact.phone': { $regex: s, $options: 'i' } },
         { gcashReference: { $regex: s, $options: 'i' } },
       ];
@@ -418,6 +419,9 @@ router.get(
       query.$or = [
         { username: { $regex: s, $options: 'i' } },
         { email: { $regex: s, $options: 'i' } },
+        { contactEmail: { $regex: s, $options: 'i' } },
+        { firstName: { $regex: s, $options: 'i' } },
+        { lastName: { $regex: s, $options: 'i' } },
         { fullName: { $regex: s, $options: 'i' } },
         { phone: { $regex: s, $options: 'i' } },
       ];
@@ -440,8 +444,16 @@ router.get(
         _id: c._id,
         username: c.username,
         email: c.email,
+        contactEmail: c.contactEmail || c.email,
+        firstName: c.firstName,
+        lastName: c.lastName,
         fullName: c.fullName,
         phone: c.phone,
+        street: c.street,
+        barangay: c.barangay,
+        city: c.city,
+        province: c.province,
+        postalCode: c.postalCode,
         address: c.address,
         status: c.status,
         createdAt: c.createdAt,

@@ -75,6 +75,29 @@ function setupAdminNavigation() {
   window.addEventListener('resize', updateSidebarToggleState);
 }
 
+function setupAdminTheme() {
+  const themeToggle = document.getElementById('admin-theme-toggle');
+  const themeIcon = document.querySelector('.admin-theme-icon');
+  if (!themeToggle || !themeIcon) return;
+
+  const applyTheme = (theme) => {
+    const isDark = theme === 'dark';
+    document.body.classList.toggle('theme-dark', isDark);
+    themeToggle.setAttribute('aria-pressed', String(isDark));
+    const action = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+    themeToggle.setAttribute('aria-label', action);
+    themeToggle.title = action;
+    themeIcon.textContent = isDark ? '☀️' : '🌙';
+  };
+
+  applyTheme(localStorage.getItem('profile-theme') || 'light');
+  themeToggle.addEventListener('click', () => {
+    const nextTheme = document.body.classList.contains('theme-dark') ? 'light' : 'dark';
+    localStorage.setItem('profile-theme', nextTheme);
+    applyTheme(nextTheme);
+  });
+}
+
 function updateSidebarToggleState() {
   const toggleButton = document.getElementById('admin-toggle-sidebar-btn');
   const sidebar = document.getElementById('admin-sidebar');
@@ -397,6 +420,7 @@ async function loadAdminOrders() {
             </td>
             <td>
               <div>${escapeHtml(o.contact.fullName)}</div>
+              <div style="font-size:0.75rem;color:var(--color-text-muted);">${escapeHtml(o.contact.email || '')}</div>
               <div style="font-size:0.75rem;color:var(--color-text-muted);">${escapeHtml(o.contact.phone)}</div>
             </td>
             <td>${new Date(o.createdAt).toLocaleDateString()}</td>
@@ -498,6 +522,7 @@ async function openOrderDrawer(orderId) {
       <div class="step-card" style="margin-bottom:16px;">
         <h5 style="margin-bottom:6px;font-size:0.9rem;">Customer Information</h5>
         <div><strong>Name:</strong> ${escapeHtml(order.contact.fullName)}</div>
+        ${order.contact.email ? `<div><strong>Email:</strong> ${escapeHtml(order.contact.email)}</div>` : ''}
         <div><strong>Phone:</strong> ${escapeHtml(order.contact.phone)}</div>
         ${order.fulfillment === 'delivery' ? `<div><strong>Address:</strong> ${escapeHtml(order.contact.address)}</div>` : ''}
         <div><strong>Fulfillment:</strong> ${order.fulfillment.toUpperCase()}</div>
@@ -761,7 +786,7 @@ async function openCustomerHistoryModal(customerId) {
     body.innerHTML = `
       <div style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--color-border);">
         <h4 style="font-size:1.1rem;margin-bottom:2px;">${escapeHtml(customer.fullName || customer.username)}</h4>
-        <div style="font-size:0.85rem;color:var(--color-text-muted);">${escapeHtml(customer.email)} &bull; ${escapeHtml(customer.phone || 'No phone')}</div>
+        <div style="font-size:0.85rem;color:var(--color-text-muted);">${escapeHtml(customer.contactEmail || customer.email)} &bull; ${escapeHtml(customer.phone || 'No phone')}</div>
         <div style="font-size:0.8rem;color:var(--color-text-light);margin-top:2px;">Member since: ${new Date(customer.createdAt).toLocaleDateString()}</div>
       </div>
       <div>
@@ -1375,6 +1400,7 @@ function attachAdminEventListeners() {
 // ---------------- INITIALIZE ADMIN ----------------
 function initAdmin() {
   if (!requireAuth('admin')) return;
+  setupAdminTheme();
   const adminUser = getUser();
   const greetingName = document.getElementById('admin-greeting-name');
   if (greetingName && adminUser) {

@@ -12,6 +12,36 @@ let isChangingContact = false;
 let selectedCartSubtotal = 0;
 let checkoutModalReturnFocus = null;
 
+const CONTACT_ADDRESS_FIELDS = ['street', 'barangay', 'city', 'province', 'postalCode'];
+
+function splitSavedName(user) {
+  const savedParts = String(user.fullName || '').trim().split(/\s+/).filter(Boolean);
+  return {
+    firstName: user.firstName || savedParts.shift() || '',
+    lastName: user.lastName || savedParts.join(' '),
+  };
+}
+
+function formatContactAddress(contact) {
+  const parts = CONTACT_ADDRESS_FIELDS.map((field) => contact[field]).filter(Boolean);
+  return parts.length ? parts.join(', ') : (contact.address || '');
+}
+
+function getAddressFields(prefix) {
+  return Object.fromEntries(CONTACT_ADDRESS_FIELDS.map((field) => [
+    field,
+    document.getElementById(`${prefix}-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`)?.value.trim() || '',
+  ]));
+}
+
+function setAddressRequired(required) {
+  CONTACT_ADDRESS_FIELDS.forEach((field) => {
+    const inputId = `contact-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`;
+    const input = document.getElementById(inputId);
+    if (input) input.required = required;
+  });
+}
+
 export function isCheckoutAllowed() {
   const checked = getCheckedCartItems();
   return checkoutSettingsLoaded
@@ -72,11 +102,38 @@ function closeCheckoutModal(restoreFocus = true) {
   }
 }
 
-function openCheckoutModal() {
+async function openCheckoutModal() {
   if (!isCheckoutAllowed()) {
     updateReceipt();
     return;
   }
+
+  const currentUser = getUser();
+  if (currentUser) {
+    try {
+      const res = await apiFetch('/profile');
+      const latestUser = getUser() || currentUser;
+      setUser({
+        ...latestUser,
+        contactEmail: res.profile.contactEmail || res.profile.email,
+        firstName: res.profile.firstName,
+        lastName: res.profile.lastName,
+        fullName: res.profile.fullName,
+        phone: res.profile.phone,
+        street: res.profile.street,
+        barangay: res.profile.barangay,
+        city: res.profile.city,
+        province: res.profile.province,
+        postalCode: res.profile.postalCode,
+        address: res.profile.address,
+      });
+    } catch (err) {
+      showToast(`Failed to load your saved contact details: ${err.message}`, 'error');
+      return;
+    }
+  }
+
+  initContactDetails();
   const modal = document.getElementById('checkout-modal');
   if (!modal) return;
   checkoutModalReturnFocus = document.getElementById('open-checkout-btn');
@@ -87,16 +144,28 @@ function openCheckoutModal() {
 }
 
 function validateContactDetails() {
-  const nameInput = document.getElementById('contact-name-input');
+  const firstNameInput = document.getElementById('contact-first-name-input');
+  const lastNameInput = document.getElementById('contact-last-name-input');
+  const emailInput = document.getElementById('contact-email-input');
   const phoneInput = document.getElementById('contact-phone-input');
-  const addressInput = document.getElementById('contact-address-input');
-  const fullName = nameInput?.value.trim() || '';
+  const firstName = firstNameInput?.value.trim() || '';
+  const lastName = lastNameInput?.value.trim() || '';
+  const email = emailInput?.value.trim().toLowerCase() || '';
   const phone = phoneInput?.value.trim() || '';
-  const address = addressInput?.value.trim() || '';
 
-  if (fullName.length < 2) {
-    showToast('Please enter your full name.', 'warning');
-    nameInput?.focus();
+  if (!firstName) {
+    showToast('Please enter your first name.', 'warning');
+    firstNameInput?.focus();
+    return false;
+  }
+  if (!lastName) {
+    showToast('Please enter your last name.', 'warning');
+    lastNameInput?.focus();
+    return false;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showToast('Please enter a valid email address.', 'warning');
+    emailInput?.focus();
     return false;
   }
   if (!/^(09\d{9}|\+639\d{9})$/.test(phone.replace(/[\s-]/g, ''))) {
@@ -104,10 +173,21 @@ function validateContactDetails() {
     phoneInput?.focus();
     return false;
   }
-  if (fulfillmentMethod === 'delivery' && address.length < 5) {
-    showToast('Please provide your complete delivery address.', 'warning');
-    addressInput?.focus();
-    return false;
+  if (fulfillmentMethod === 'delivery') {
+    const address = getAddressFields('contact');
+    for (const field of CONTACT_ADDRESS_FIELDS) {
+      if (!address[field]) {
+        const inputId = `contact-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`;
+        showToast(`Please enter your ${field === 'postalCode' ? '4-digit postal code' : field}.`, 'warning');
+        document.getElementById(inputId)?.focus();
+        return false;
+      }
+    }
+    if (!/^\d{4}$/.test(address.postalCode)) {
+      showToast('Your postal code must contain exactly 4 digits.', 'warning');
+      document.getElementById('contact-postal-code-input')?.focus();
+      return false;
+    }
   }
   return true;
 }
@@ -275,6 +355,7 @@ function renderFulfillmentOptions() {
       addressGroup.classList.add('hidden');
     }
   }
+  setAddressRequired(fulfillmentMethod === 'delivery');
 
   renderPaymentOptions();
 }
@@ -374,11 +455,21 @@ function initContactDetails() {
   const user = getUser();
   const summaryBox = document.getElementById('saved-contact-summary');
   const formBox = document.getElementById('contact-form-fields');
-  const nameInput = document.getElementById('contact-name-input');
+  const firstNameInput = document.getElementById('contact-first-name-input');
+  const lastNameInput = document.getElementById('contact-last-name-input');
+  const emailInput = document.getElementById('contact-email-input');
   const phoneInput = document.getElementById('contact-phone-input');
-  const addressInput = document.getElementById('contact-address-input');
+  const addressFields = user ? Object.fromEntries(CONTACT_ADDRESS_FIELDS.map((field) => [field, user[field] || ''])) : {};
+  const { firstName, lastName } = user ? splitSavedName(user) : { firstName: '', lastName: '' };
 
-  const hasSaved = user && user.fullName && user.phone;
+  const hasSaved = user
+    && firstName
+    && lastName
+    && (user.contactEmail || user.email)
+    && user.phone
+    && (fulfillmentMethod !== 'delivery'
+      || CONTACT_ADDRESS_FIELDS.every((field) => addressFields[field])
+        && /^\d{4}$/.test(addressFields.postalCode));
 
   if (hasSaved && !isChangingContact) {
     if (summaryBox) {
@@ -386,10 +477,12 @@ function initContactDetails() {
       summaryBox.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
           <div>
-            <strong>${escapeHtml(user.fullName)}</strong> &bull; ${escapeHtml(user.phone)}
-            ${user.address ? `<div style="font-size:0.82rem;color:var(--color-text-muted);margin-top:2px;">${escapeHtml(user.address)}</div>` : ''}
+            <div style="font-size:0.78rem;color:var(--color-text-muted);margin-bottom:3px;">Saved account details</div>
+            <strong>${escapeHtml([firstName, lastName].join(' '))}</strong>
+            <div style="font-size:0.82rem;color:var(--color-text-muted);">${escapeHtml(user.contactEmail || user.email)} &bull; ${escapeHtml(user.phone)}</div>
+            ${formatContactAddress({ ...addressFields, address: user.address }) ? `<div style="font-size:0.82rem;color:var(--color-text-muted);margin-top:2px;">${escapeHtml(formatContactAddress({ ...addressFields, address: user.address }))}</div>` : ''}
           </div>
-          <button type="button" id="change-contact-btn" class="btn-link-action" style="font-size:0.8rem;">Change</button>
+          <button type="button" id="change-contact-btn" class="btn-link-action" style="font-size:0.8rem;">Change for this order</button>
         </div>
       `;
       const changeBtn = document.getElementById('change-contact-btn');
@@ -401,16 +494,32 @@ function initContactDetails() {
       }
     }
     if (formBox) formBox.classList.add('hidden');
-    if (nameInput) nameInput.value = user.fullName || '';
+    if (firstNameInput) firstNameInput.value = firstName;
+    if (lastNameInput) lastNameInput.value = lastName;
+    if (emailInput) emailInput.value = user.contactEmail || user.email || '';
     if (phoneInput) phoneInput.value = user.phone || '';
-    if (addressInput) addressInput.value = user.address || '';
+    CONTACT_ADDRESS_FIELDS.forEach((field) => {
+      const inputId = `contact-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`;
+      const input = document.getElementById(inputId);
+      if (input) input.value = addressFields[field]
+        || (field === 'street' && fulfillmentMethod === 'delivery' ? user.address || '' : '');
+    });
   } else {
     if (summaryBox) summaryBox.classList.add('hidden');
     if (formBox) formBox.classList.remove('hidden');
     if (user) {
-      if (nameInput && !nameInput.value) nameInput.value = user.fullName || '';
+      if (firstNameInput && !firstNameInput.value) firstNameInput.value = firstName;
+      if (lastNameInput && !lastNameInput.value) lastNameInput.value = lastName;
+      if (emailInput && !emailInput.value) emailInput.value = user.contactEmail || user.email || '';
       if (phoneInput && !phoneInput.value) phoneInput.value = user.phone || '';
-      if (addressInput && !addressInput.value) addressInput.value = user.address || '';
+      CONTACT_ADDRESS_FIELDS.forEach((field) => {
+        const inputId = `contact-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`;
+        const input = document.getElementById(inputId);
+        if (input && !input.value) {
+          input.value = addressFields[field]
+            || (field === 'street' && fulfillmentMethod === 'delivery' ? user.address || '' : '');
+        }
+      });
     }
   }
 }
@@ -447,27 +556,24 @@ async function handlePlaceOrder() {
     return;
   }
 
-  const nameInput = document.getElementById('contact-name-input');
+  const firstNameInput = document.getElementById('contact-first-name-input');
+  const lastNameInput = document.getElementById('contact-last-name-input');
+  const emailInput = document.getElementById('contact-email-input');
   const phoneInput = document.getElementById('contact-phone-input');
-  const addressInput = document.getElementById('contact-address-input');
   const gcashRefInput = document.getElementById('gcash-reference-input');
 
-  const fullName = nameInput ? nameInput.value.trim() : '';
+  const firstName = firstNameInput ? firstNameInput.value.trim() : '';
+  const lastName = lastNameInput ? lastNameInput.value.trim() : '';
+  const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
   const phone = phoneInput ? phoneInput.value.trim() : '';
-  const address = addressInput ? addressInput.value.trim() : '';
+  const addressFields = getAddressFields('contact');
+  const fullName = [firstName, lastName].filter(Boolean).join(' ');
+  const address = formatContactAddress(addressFields);
   const gcashReference = gcashRefInput ? gcashRefInput.value.trim() : '';
 
   if (!validateContactDetails()) {
     showCheckoutStep(2);
     return;
-  }
-
-  if (fulfillmentMethod === 'delivery') {
-    if (!address || address.length < 5) {
-      showToast('Please provide your complete delivery address.', 'warning');
-      if (addressInput) addressInput.focus();
-      return;
-    }
   }
 
   if (paymentMethod === 'gcash') {
@@ -514,9 +620,13 @@ async function handlePlaceOrder() {
       paymentMethod,
       gcashReference: paymentMethod === 'gcash' ? gcashReference : '',
       contact: {
+        firstName,
+        lastName,
         fullName,
+        email,
         phone,
-        address: fulfillmentMethod === 'delivery' ? address : '',
+        ...addressFields,
+        address,
       },
     };
 
@@ -530,11 +640,19 @@ async function handlePlaceOrder() {
     // Update stored user details locally
     const currentUser = getUser();
     if (currentUser) {
+      currentUser.firstName = firstName;
+      currentUser.lastName = lastName;
       currentUser.fullName = fullName;
+      currentUser.contactEmail = email;
       currentUser.phone = phone;
-      if (fulfillmentMethod === 'delivery') currentUser.address = address;
+      CONTACT_ADDRESS_FIELDS.forEach((field) => {
+        if (addressFields[field]) currentUser[field] = addressFields[field];
+      });
+      if (address) currentUser.address = address;
       setUser(currentUser);
     }
+    isChangingContact = false;
+    initContactDetails();
 
     showSuccessReceipt(order);
   } catch (err) {
@@ -598,6 +716,7 @@ function showSuccessReceipt(order) {
           <div style="margin-bottom:12px;">
             <div style="font-weight:600;font-size:0.85rem;margin-bottom:4px;">Customer Details:</div>
             <div><strong>Name:</strong> ${escapeHtml(order.contact.fullName)}</div>
+            <div><strong>Email:</strong> ${escapeHtml(order.contact.email || '')}</div>
             <div><strong>Phone:</strong> ${escapeHtml(order.contact.phone)}</div>
             ${order.fulfillment === 'delivery' ? `<div><strong>Delivery Address:</strong> ${escapeHtml(order.contact.address)}</div>` : ''}
             <div><strong>Fulfillment:</strong> ${order.fulfillment.toUpperCase()}</div>
@@ -692,6 +811,7 @@ export function setupCheckoutListeners() {
     pickupTab.addEventListener('click', () => {
       fulfillmentMethod = 'pickup';
       renderFulfillmentOptions();
+      initContactDetails();
       updateReceipt();
     });
   }
@@ -700,6 +820,7 @@ export function setupCheckoutListeners() {
     deliveryTab.addEventListener('click', () => {
       fulfillmentMethod = 'delivery';
       renderFulfillmentOptions();
+      initContactDetails();
       updateReceipt();
     });
   }
@@ -723,7 +844,13 @@ export function setupCheckoutListeners() {
   if (backFulfillmentBtn) backFulfillmentBtn.addEventListener('click', () => showCheckoutStep(1));
   if (backContactBtn) backContactBtn.addEventListener('click', () => showCheckoutStep(2));
 
-  ['contact-name-input', 'contact-phone-input', 'contact-address-input'].forEach((id) => {
+  [
+    'contact-first-name-input',
+    'contact-last-name-input',
+    'contact-email-input',
+    'contact-phone-input',
+    ...CONTACT_ADDRESS_FIELDS.map((field) => `contact-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`),
+  ].forEach((id) => {
     const input = document.getElementById(id);
     if (input) input.addEventListener('input', updateReceipt);
   });

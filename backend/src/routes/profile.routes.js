@@ -142,13 +142,41 @@ router.use(requireAuth);
 
 const updateProfileSchema = z
   .object({
-    fullName: z.string().trim().max(100).optional(),
-    phone: z.string().trim().max(20).optional(),
-    address: z.string().trim().max(300).optional(),
+    firstName: z.string().trim().max(60).optional(),
+    lastName: z.string().trim().max(60).optional(),
+    contactEmail: z.string().trim().email().max(254).optional(),
+    fullName: z.string().trim().max(121).optional(),
+    phone: z.string().trim().max(20).refine(
+      (phone) => !phone || /^(09\d{9}|\+639\d{9})$/.test(phone.replace(/[\s-]/g, '')),
+      'Please provide a valid Philippine mobile number'
+    ).optional(),
+    street: z.string().trim().max(120).optional(),
+    barangay: z.string().trim().max(100).optional(),
+    city: z.string().trim().max(100).optional(),
+    province: z.string().trim().max(100).optional(),
+    postalCode: z.string().trim().refine(
+      (postalCode) => !postalCode || /^\d{4}$/.test(postalCode),
+      'Postal code must contain exactly 4 digits'
+    ).optional(),
+    address: z.string().trim().max(600).optional(),
     avatarUrl: z
       .string()
       .max(450000, 'Profile image size exceeds the 300KB limit')
       .optional(),
+  })
+  .superRefine((data, ctx) => {
+    const addressFields = ['street', 'barangay', 'city', 'province', 'postalCode'];
+    if (addressFields.some((field) => data[field] !== undefined && data[field] !== '')) {
+      for (const field of addressFields) {
+        if (!data[field]) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [field],
+            message: 'Complete every delivery address field.',
+          });
+        }
+      }
+    }
   })
   .strict();
 
@@ -185,7 +213,15 @@ router.get(
         status: user.status,
         avatarUrl: user.avatarUrl,
         phone: user.phone,
+        contactEmail: user.contactEmail || user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
         fullName: user.fullName,
+        street: user.street,
+        barangay: user.barangay,
+        city: user.city,
+        province: user.province,
+        postalCode: user.postalCode,
         address: user.address,
         createdAt: user.createdAt,
         totalOrders,
@@ -314,9 +350,29 @@ router.patch(
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id);
 
-    if (req.body.fullName !== undefined) user.fullName = req.body.fullName;
+    if (req.body.firstName !== undefined) user.firstName = req.body.firstName;
+    if (req.body.lastName !== undefined) user.lastName = req.body.lastName;
+    if (req.body.firstName !== undefined || req.body.lastName !== undefined) {
+      user.fullName = [user.firstName, user.lastName].filter(Boolean).join(' ');
+    } else if (req.body.fullName !== undefined) {
+      user.fullName = req.body.fullName;
+    }
+    if (req.body.contactEmail !== undefined) user.contactEmail = req.body.contactEmail;
     if (req.body.phone !== undefined) user.phone = req.body.phone;
-    if (req.body.address !== undefined) user.address = req.body.address;
+    const addressFields = ['street', 'barangay', 'city', 'province', 'postalCode'];
+    const hasAddressValues = addressFields.some((field) => req.body[field]);
+    if (hasAddressValues) {
+      for (const field of addressFields) {
+        if (req.body[field] !== undefined) user[field] = req.body[field];
+      }
+    }
+    if (req.body.address !== undefined) {
+      user.address = req.body.address;
+    } else if (hasAddressValues) {
+      user.address = [user.street, user.barangay, user.city, user.province, user.postalCode]
+        .filter(Boolean)
+        .join(', ');
+    }
     const previousAvatar = user.avatarUrl;
     if (req.body.avatarUrl !== undefined) user.avatarUrl = req.body.avatarUrl;
 

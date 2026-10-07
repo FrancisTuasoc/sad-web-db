@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/pages.css">
 </head>
-<body>
+<body class="profile-page">
   <!-- Header with static markup fallback -->
   <header id="site-header" class="site-header">
     <div class="container header-container">
@@ -30,6 +30,14 @@
       </nav>
 
       <div class="header-actions">
+        <div class="profile-header-controls">
+          <button type="button" id="profile-sidebar-toggle" class="profile-control-button" aria-label="Collapse account sidebar" aria-controls="profile-sidebar" aria-expanded="true" title="Collapse account sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <button type="button" id="profile-theme-toggle" class="profile-control-button profile-theme-toggle" aria-label="Switch to dark mode" aria-pressed="false" title="Switch to dark mode">
+            <span class="profile-theme-icon" aria-hidden="true">🌙</span>
+          </button>
+        </div>
         <a href="cart.html" id="header-cart-btn" class="cart-btn" aria-label="View Shopping Cart">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="9" cy="21" r="1"></circle>
@@ -62,33 +70,36 @@
 
   <main>
     <div class="container">
+      <button type="button" id="profile-sidebar-backdrop" class="profile-sidebar-backdrop hidden" aria-label="Close account navigation"></button>
       <div class="profile-layout customer-area">
         <!-- Profile Navigation -->
-        <aside class="profile-nav customer-sidebar">
+        <aside class="profile-nav customer-sidebar" id="profile-sidebar">
           <div class="customer-sidebar-header">
             <p class="eyebrow">Account</p>
             <h2>My account</h2>
           </div>
-          <button type="button" class="profile-nav-btn" data-tab="status">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            Order Status
-          </button>
-          <button type="button" class="profile-nav-btn active" data-tab="overview">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Overview
-          </button>
-          <button type="button" class="profile-nav-btn" data-tab="history">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            Order History
-          </button>
-          <button type="button" class="profile-nav-btn" data-tab="details">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            Saved Details
-          </button>
-          <button type="button" class="profile-nav-btn" data-tab="security">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            Security
-          </button>
+          <nav class="profile-sidebar-nav" aria-label="Account sections">
+            <button type="button" class="profile-nav-btn" data-tab="status" aria-label="Order Status" title="Order Status">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>Order Status</span>
+            </button>
+            <button type="button" class="profile-nav-btn active" data-tab="overview" aria-label="Overview" title="Overview">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Overview</span>
+            </button>
+            <button type="button" class="profile-nav-btn" data-tab="history" aria-label="Order History" title="Order History">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <span>Order History</span>
+            </button>
+            <button type="button" class="profile-nav-btn" data-tab="details" aria-label="Saved Details" title="Saved Details">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>Saved Details</span>
+            </button>
+            <button type="button" class="profile-nav-btn" data-tab="security" aria-label="Security" title="Security">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span>Security</span>
+            </button>
+          </nav>
 
           <div class="customer-status-panel" aria-live="polite">
             <div class="panel-header">
@@ -99,7 +110,10 @@
             <div class="mini-tracker" id="customer-mini-tracker"></div>
           </div>
 
-          <button type="button" id="sidebar-logout-btn" class="btn btn-secondary logout-button">Logout</button>
+          <button type="button" id="sidebar-logout-btn" class="btn btn-secondary logout-button" title="Logout">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>Logout</span>
+          </button>
         </aside>
 
         <!-- Profile Tab Content -->
@@ -187,17 +201,53 @@
               <div><p class="eyebrow">Faster checkout</p><h3>Saved Details</h3><p>Your contact and delivery details are ready for your next order.</p></div>
             </div>
             <form id="saved-details-form" class="account-form-card">
-              <div class="form-group">
-                <label class="form-label" for="profile-fullname-input">Full Name</label>
-                <input type="text" id="profile-fullname-input" class="form-input" placeholder="Juan Dela Cruz">
+              <p class="contact-section-heading">Name</p>
+              <div class="contact-fields-grid">
+                <div class="form-group">
+                  <label class="form-label contact-field-label" for="profile-first-name-input">First Name <span class="req">*</span></label>
+                  <input type="text" id="profile-first-name-input" class="form-input" placeholder="Enter your first name" autocomplete="given-name" required maxlength="60">
+                </div>
+                <div class="form-group">
+                  <label class="form-label contact-field-label" for="profile-last-name-input">Last Name <span class="req">*</span></label>
+                  <input type="text" id="profile-last-name-input" class="form-input" placeholder="Enter your last name" autocomplete="family-name" required maxlength="60">
+                </div>
+              </div>
+              <p class="contact-section-heading">Contact Information</p>
+              <div class="contact-fields-grid">
+                <div class="form-group">
+                  <label class="form-label contact-field-label" for="profile-contact-email-input">Email Address <span class="req">*</span></label>
+                  <input type="email" id="profile-contact-email-input" class="form-input" placeholder="name@example.com" autocomplete="email" required maxlength="254">
+                </div>
+                <div class="form-group">
+                  <label class="form-label contact-field-label" for="profile-phone-input">Phone Number (PH) <span class="req">*</span></label>
+                  <input type="tel" id="profile-phone-input" class="form-input" placeholder="09171234567" autocomplete="tel" required>
+                </div>
               </div>
               <div class="form-group">
-                <label class="form-label" for="profile-phone-input">Phone Number (PH)</label>
-                <input type="tel" id="profile-phone-input" class="form-input" placeholder="09171234567">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="profile-address-input">Default Delivery Address</label>
-                <textarea id="profile-address-input" class="form-textarea" placeholder="Complete address for local deliveries"></textarea>
+                <p class="contact-section-heading">Delivery Address</p>
+                <p id="profile-existing-address-note" class="text-muted hidden" style="font-size:0.82rem;"></p>
+                <div class="contact-fields-grid">
+                  <div class="form-group">
+                    <label class="form-label contact-field-label" for="profile-street-input">Street / House No.</label>
+                    <input type="text" id="profile-street-input" class="form-input" placeholder="House number and street" autocomplete="street-address" maxlength="120">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label contact-field-label" for="profile-barangay-input">Barangay</label>
+                    <input type="text" id="profile-barangay-input" class="form-input" placeholder="Enter your barangay" maxlength="100">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label contact-field-label" for="profile-city-input">City / Municipality</label>
+                    <input type="text" id="profile-city-input" class="form-input" placeholder="Enter your city or municipality" autocomplete="address-level2" maxlength="100">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label contact-field-label" for="profile-province-input">State / Province</label>
+                    <input type="text" id="profile-province-input" class="form-input" placeholder="Enter your state or province" autocomplete="address-level1" maxlength="100">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label contact-field-label" for="profile-postal-code-input">Postal Code (4 digits)</label>
+                    <input type="text" id="profile-postal-code-input" class="form-input" placeholder="e.g. 1000" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="postal-code">
+                  </div>
+                </div>
               </div>
               <button type="submit" class="btn btn-primary btn-sm">Save Changes</button>
             </form>

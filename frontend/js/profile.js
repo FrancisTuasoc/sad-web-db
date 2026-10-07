@@ -12,6 +12,14 @@ let pollingTimer = null;
 let currentProfile = null;
 let activeAvatarObjectUrl = null;
 
+function splitProfileName(profile) {
+  const savedParts = String(profile.fullName || '').trim().split(/\s+/).filter(Boolean);
+  return {
+    firstName: profile.firstName || savedParts.shift() || '',
+    lastName: profile.lastName || savedParts.join(' '),
+  };
+}
+
 function getStoreName() {
   const storeName = document.getElementById('footer-store-name');
   return storeName ? storeName.textContent.trim() : 'Burger Shop';
@@ -92,12 +100,29 @@ async function loadProfileOverview() {
     }
 
     // Prefill saved details tab
-    const nameInput = document.getElementById('profile-fullname-input');
+    const { firstName, lastName } = splitProfileName(p);
+    const firstNameInput = document.getElementById('profile-first-name-input');
+    const lastNameInput = document.getElementById('profile-last-name-input');
+    const contactEmailInput = document.getElementById('profile-contact-email-input');
     const phoneInput = document.getElementById('profile-phone-input');
-    const addressInput = document.getElementById('profile-address-input');
-    if (nameInput) nameInput.value = p.fullName || '';
+    if (firstNameInput) firstNameInput.value = firstName;
+    if (lastNameInput) lastNameInput.value = lastName;
+    if (contactEmailInput) contactEmailInput.value = p.contactEmail || p.email || '';
     if (phoneInput) phoneInput.value = p.phone || '';
-    if (addressInput) addressInput.value = p.address || '';
+    const addressFields = ['street', 'barangay', 'city', 'province', 'postalCode'];
+    const hasStructuredAddress = addressFields.some((field) => p[field]);
+    const legacyAddressNote = document.getElementById('profile-existing-address-note');
+    if (legacyAddressNote) {
+      legacyAddressNote.classList.toggle('hidden', !p.address || hasStructuredAddress);
+      legacyAddressNote.textContent = p.address && !hasStructuredAddress
+        ? `Your currently saved address is: ${p.address}. Fill in all address fields to replace it with the structured format.`
+        : '';
+    }
+    for (const field of addressFields) {
+      const inputId = `profile-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`;
+      const input = document.getElementById(inputId);
+      if (input) input.value = p[field] || '';
+    }
 
     const usernameInput = document.getElementById('username-input');
     if (usernameInput) usernameInput.value = p.username || '';
@@ -303,6 +328,7 @@ async function loadCustomerStats() {
               ${recentOrders.map((order) => {
                 const status = formatOrderStatusLabel(order.status || 'pending');
                 const safeStatusClass = (order.status || 'pending').toString().replace(/\s+/g, '_');
+                const isFinalStatus = ['completed', 'cancelled'].includes(order.status);
                 return `
                   <div class="recent-order-item" tabindex="0">
                     <div class="recent-order-main">
@@ -310,7 +336,9 @@ async function loadCustomerStats() {
                       <span class="recent-order-date">${new Date(order.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     </div>
                     <div class="recent-order-meta">
-                      <span class="badge badge-${escapeHtml(safeStatusClass)}">${escapeHtml(status)}</span>
+                      <span class="recent-order-status${isFinalStatus ? ' recent-order-final-status' : ''}">
+                        <span class="badge badge-${escapeHtml(safeStatusClass)}">${escapeHtml(status)}</span>
+                      </span>
                       <strong class="recent-order-total">₱${Number(order.total || 0).toFixed(2)}</strong>
                     </div>
                   </div>
@@ -356,8 +384,7 @@ async function loadCustomerStats() {
           const selected = button.getAttribute('data-status-filter');
           const current = selected === 'all' ? 'all' : selected;
           statusSubTab = current === 'pending' ? 'pickup' : 'delivery';
-          const targetTab = document.querySelector('.profile-nav-btn[data-tab="status"]');
-          if (targetTab) targetTab.click();
+          setProfileTab('status');
           if (current === 'all') {
             await loadStatusOrders();
             return;
@@ -690,6 +717,7 @@ async function openOrderReceipt(orderId) {
 
       <div style="font-size:0.85rem;line-height:1.5;margin-bottom:12px;">
         <div><strong>Name:</strong> ${escapeHtml(order.contact.fullName)}</div>
+        ${order.contact.email ? `<div><strong>Email:</strong> ${escapeHtml(order.contact.email)}</div>` : ''}
         <div><strong>Phone:</strong> ${escapeHtml(order.contact.phone)}</div>
         ${order.fulfillment === 'delivery' ? `<div><strong>Address:</strong> ${escapeHtml(order.contact.address)}</div>` : ''}
         <div><strong>Fulfillment:</strong> ${order.fulfillment.toUpperCase()}</div>
@@ -819,20 +847,33 @@ async function handleBuyAgain(orderId, button) {
 }
 
 // Setup Event Listeners
+function setProfileTab(tab) {
+  const tabButton = Array.from(document.querySelectorAll('.profile-nav-btn'))
+    .find((button) => button.getAttribute('data-tab') === tab);
+  if (!tabButton) return;
+
+  activeTab = tab;
+  document.querySelectorAll('.profile-nav-btn').forEach((button) => {
+    button.classList.toggle('active', button === tabButton);
+    if (button === tabButton) button.setAttribute('aria-current', 'page');
+    else button.removeAttribute('aria-current');
+  });
+  document.querySelectorAll('.profile-tab-section').forEach((section) => section.classList.add('hidden'));
+  document.getElementById(`tab-section-${activeTab}`)?.classList.remove('hidden');
+
+  if (activeTab === 'status') loadStatusOrders();
+  if (activeTab === 'history') loadHistoryOrders();
+}
+
 function setupProfileTabs() {
-  const tabs = document.querySelectorAll('.profile-nav-btn');
-  tabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      tabs.forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
-      activeTab = tab.getAttribute('data-tab');
-
-      document.querySelectorAll('.profile-tab-section').forEach((sec) => sec.classList.add('hidden'));
-      const activeSec = document.getElementById(`tab-section-${activeTab}`);
-      if (activeSec) activeSec.classList.remove('hidden');
-
-      if (activeTab === 'status') loadStatusOrders();
-      if (activeTab === 'history') loadHistoryOrders();
+  document.querySelectorAll('.profile-nav-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+      setProfileTab(button.getAttribute('data-tab'));
+      if (window.matchMedia('(max-width: 900px)').matches) {
+        document.getElementById('profile-sidebar')?.classList.remove('open-mobile');
+        document.getElementById('profile-sidebar-backdrop')?.classList.add('hidden');
+        updateProfileSidebarToggle();
+      }
     });
   });
 
@@ -892,31 +933,58 @@ function setupProfileTabs() {
   if (savedDetailsForm) {
     savedDetailsForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const fullName = document.getElementById('profile-fullname-input').value.trim();
+      const firstName = document.getElementById('profile-first-name-input').value.trim();
+      const lastName = document.getElementById('profile-last-name-input').value.trim();
+      const contactEmail = document.getElementById('profile-contact-email-input').value.trim().toLowerCase();
       const phone = document.getElementById('profile-phone-input').value.trim();
-      const address = document.getElementById('profile-address-input').value.trim();
+      const addressFields = Object.fromEntries(['street', 'barangay', 'city', 'province', 'postalCode'].map((field) => {
+        const inputId = `profile-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`;
+        return [field, document.getElementById(inputId).value.trim()];
+      }));
 
-      if (phone) {
-        const phPhoneRegex = /^(09\d{9}|\+639\d{9})$/;
-        if (!phPhoneRegex.test(phone.replace(/[\s-]/g, ''))) {
-          showToast('Please enter a valid Philippine mobile number (e.g. 09171234567).', 'warning');
-          return;
-        }
+      const phPhoneRegex = /^(09\d{9}|\+639\d{9})$/;
+      if (!phPhoneRegex.test(phone.replace(/[\s-]/g, ''))) {
+        showToast('Please enter a valid Philippine mobile number (e.g. 09171234567).', 'warning');
+        return;
+      }
+      const hasAddress = Object.values(addressFields).some(Boolean);
+      if (hasAddress && Object.values(addressFields).some((value) => !value)) {
+        showToast('Complete every delivery address field, including your 4-digit postal code.', 'warning');
+        return;
+      }
+      if (addressFields.postalCode && !/^\d{4}$/.test(addressFields.postalCode)) {
+        showToast('Postal code must contain exactly 4 digits.', 'warning');
+        document.getElementById('profile-postal-code-input').focus();
+        return;
       }
 
       try {
         await apiFetch('/profile', {
           method: 'PATCH',
-          body: JSON.stringify({ fullName, phone, address }),
+          body: JSON.stringify({
+            firstName,
+            lastName,
+            contactEmail,
+            phone,
+            ...addressFields,
+          }),
         });
         showToast('Saved details updated successfully!', 'success');
         const u = getUser();
         if (u) {
-          u.fullName = fullName;
+          u.firstName = firstName;
+          u.lastName = lastName;
+          u.fullName = [firstName, lastName].filter(Boolean).join(' ');
+          u.contactEmail = contactEmail;
           u.phone = phone;
-          u.address = address;
+          if (hasAddress) {
+            Object.assign(u, addressFields);
+            u.address = Object.values(addressFields).filter(Boolean).join(', ');
+          }
           setUser(u);
         }
+        const overviewName = document.getElementById('overview-username');
+        if (overviewName) overviewName.textContent = [firstName, lastName].filter(Boolean).join(' ');
       } catch (err) {
         showToast(err.message, 'error');
       }
@@ -1095,9 +1163,87 @@ function setupProfileTabs() {
     logoutButton.addEventListener('click', () => logout());
   }
 
+  setupProfileSidebar();
+  setupProfileTheme();
+
   // Modal close buttons
   const closeReceiptModal = document.getElementById('close-receipt-modal');
   if (closeReceiptModal) closeReceiptModal.addEventListener('click', () => closeModal('order-receipt-modal'));
+}
+
+function setupProfileTheme() {
+  const themeToggle = document.getElementById('profile-theme-toggle');
+  const themeIcon = document.querySelector('.profile-theme-icon');
+  if (!themeToggle || !themeIcon) return;
+
+  const applyTheme = (theme) => {
+    const isDark = theme === 'dark';
+    document.body.classList.toggle('theme-dark', isDark);
+    themeToggle.setAttribute('aria-pressed', String(isDark));
+    const action = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+    themeToggle.setAttribute('aria-label', action);
+    themeToggle.title = action;
+    themeIcon.textContent = isDark ? '☀️' : '🌙';
+  };
+
+  applyTheme(localStorage.getItem('profile-theme') || 'light');
+  themeToggle.addEventListener('click', () => {
+    const nextTheme = document.body.classList.contains('theme-dark') ? 'light' : 'dark';
+    localStorage.setItem('profile-theme', nextTheme);
+    applyTheme(nextTheme);
+  });
+}
+
+function setupProfileSidebar() {
+  const toggle = document.getElementById('profile-sidebar-toggle');
+  const layout = document.querySelector('.profile-layout');
+  const sidebar = document.getElementById('profile-sidebar');
+  const backdrop = document.getElementById('profile-sidebar-backdrop');
+  if (!toggle || !layout || !sidebar || !backdrop) return;
+
+  toggle.addEventListener('click', () => {
+    if (window.matchMedia('(max-width: 900px)').matches) {
+      sidebar.classList.toggle('open-mobile');
+      backdrop.classList.toggle('hidden', !sidebar.classList.contains('open-mobile'));
+    } else {
+      layout.classList.toggle('is-sidebar-collapsed');
+    }
+    updateProfileSidebarToggle();
+  });
+
+  backdrop.addEventListener('click', () => {
+    sidebar.classList.remove('open-mobile');
+    backdrop.classList.add('hidden');
+    updateProfileSidebarToggle();
+  });
+
+  window.addEventListener('resize', updateProfileSidebarToggle);
+  updateProfileSidebarToggle();
+}
+
+function updateProfileSidebarToggle() {
+  const toggle = document.getElementById('profile-sidebar-toggle');
+  const layout = document.querySelector('.profile-layout');
+  const sidebar = document.getElementById('profile-sidebar');
+  const backdrop = document.getElementById('profile-sidebar-backdrop');
+  if (!toggle || !layout || !sidebar) return;
+
+  const isMobile = window.matchMedia('(max-width: 900px)').matches;
+  if (isMobile) {
+    layout.classList.remove('is-sidebar-collapsed');
+  } else {
+    sidebar.classList.remove('open-mobile');
+    backdrop?.classList.add('hidden');
+  }
+  const isExpanded = isMobile
+    ? sidebar.classList.contains('open-mobile')
+    : !layout.classList.contains('is-sidebar-collapsed');
+  const action = isMobile
+    ? `${isExpanded ? 'Close' : 'Open'} account navigation`
+    : `${isExpanded ? 'Collapse' : 'Expand'} account sidebar`;
+  toggle.setAttribute('aria-expanded', String(isExpanded));
+  toggle.setAttribute('aria-label', action);
+  toggle.title = action;
 }
 
 function initProfile() {
@@ -1112,13 +1258,9 @@ function initProfile() {
   const params = new URLSearchParams(window.location.search);
   const requestedTab = params.get('tab');
   if (requestedTab) {
-    const tabBtn = [...document.querySelectorAll('.profile-nav-btn')]
-      .find((button) => button.getAttribute('data-tab') === requestedTab);
-    if (tabBtn) tabBtn.click();
+    setProfileTab(requestedTab);
   } else {
-    const defaultTab = document.querySelector('.profile-nav-btn.active') || document.querySelector('.profile-nav-btn[data-tab="overview"]');
-    if (defaultTab) defaultTab.click();
-    else loadStatusOrders();
+    setProfileTab('overview');
   }
 
   // 10-second polling for active order updates

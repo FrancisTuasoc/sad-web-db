@@ -208,19 +208,55 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               2. Contact &amp; Delivery Info
             </div>
+            <p class="text-muted" style="font-size:0.8rem;margin:0 0 10px;">New or changed details are saved to your account when you place this order. You can also edit them in Profile &gt; Saved Details.</p>
             <div id="saved-contact-summary" class="saved-details-box hidden"></div>
             <div id="contact-form-fields">
-              <div class="form-group" style="margin-bottom:8px;">
-                <label class="form-label" for="contact-name-input">Full Name <span class="req">*</span></label>
-                <input type="text" id="contact-name-input" class="form-input" placeholder="e.g. Juan Dela Cruz">
+              <p class="contact-section-heading">Name</p>
+              <div class="contact-fields-grid">
+                <div class="form-group">
+                  <label class="form-label contact-field-label" for="contact-first-name-input">First Name <span class="req">*</span></label>
+                  <input type="text" id="contact-first-name-input" class="form-input" placeholder="Enter your first name" autocomplete="given-name" required maxlength="60">
+                </div>
+                <div class="form-group">
+                  <label class="form-label contact-field-label" for="contact-last-name-input">Last Name <span class="req">*</span></label>
+                  <input type="text" id="contact-last-name-input" class="form-input" placeholder="Enter your last name" autocomplete="family-name" required maxlength="60">
+                </div>
               </div>
-              <div class="form-group" style="margin-bottom:8px;">
-                <label class="form-label" for="contact-phone-input">Phone Number (PH) <span class="req">*</span></label>
-                <input type="tel" id="contact-phone-input" class="form-input" placeholder="09171234567 or +639171234567">
+              <p class="contact-section-heading">Contact Information</p>
+              <div class="contact-fields-grid">
+                <div class="form-group">
+                  <label class="form-label contact-field-label" for="contact-email-input">Email Address <span class="req">*</span></label>
+                  <input type="email" id="contact-email-input" class="form-input" placeholder="name@example.com" autocomplete="email" required maxlength="254">
+                </div>
+                <div class="form-group">
+                  <label class="form-label contact-field-label" for="contact-phone-input">Phone Number (PH) <span class="req">*</span></label>
+                  <input type="tel" id="contact-phone-input" class="form-input" placeholder="09171234567 or +639171234567" autocomplete="tel" required>
+                </div>
               </div>
-              <div class="form-group hidden" id="contact-address-group" style="margin-bottom:0;">
-                <label class="form-label" for="contact-address-input">Complete Delivery Address <span class="req">*</span></label>
-                <textarea id="contact-address-input" class="form-textarea" placeholder="House/Unit #, Street, Barangay, Landmark"></textarea>
+              <div class="form-group hidden" id="contact-address-group">
+                <p class="contact-section-heading">Delivery Address</p>
+                <div class="contact-fields-grid">
+                  <div class="form-group">
+                    <label class="form-label contact-field-label" for="contact-street-input">Street / House No. <span class="req">*</span></label>
+                    <input type="text" id="contact-street-input" class="form-input" placeholder="House number and street" autocomplete="street-address" maxlength="120">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label contact-field-label" for="contact-barangay-input">Barangay <span class="req">*</span></label>
+                    <input type="text" id="contact-barangay-input" class="form-input" placeholder="Enter your barangay" maxlength="100">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label contact-field-label" for="contact-city-input">City / Municipality <span class="req">*</span></label>
+                    <input type="text" id="contact-city-input" class="form-input" placeholder="Enter your city or municipality" autocomplete="address-level2" maxlength="100">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label contact-field-label" for="contact-province-input">State / Province <span class="req">*</span></label>
+                    <input type="text" id="contact-province-input" class="form-input" placeholder="Enter your state or province" autocomplete="address-level1" maxlength="100">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label contact-field-label" for="contact-postal-code-input">Postal Code (4 digits) <span class="req">*</span></label>
+                    <input type="text" id="contact-postal-code-input" class="form-input" placeholder="e.g. 1000" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="postal-code">
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -133,7 +133,22 @@ const orderSchema = new mongoose.Schema(
     },
     contact: {
       fullName: { type: String, required: true },
+      firstName: { type: String, default: '' },
+      lastName: { type: String, default: '' },
+      email: { type: String, default: '' },
       phone: { type: String, required: true },
+      street: { type: String, default: '' },
+      barangay: { type: String, default: '' },
+      city: { type: String, default: '' },
+      province: { type: String, default: '' },
+      postalCode: {
+        type: String,
+        default: '',
+        validate: {
+          validator: (postalCode) => !postalCode || /^\d{4}$/.test(postalCode),
+          message: 'Postal code must contain exactly 4 digits',
+        },
+      },
       address: { type: String, default: '' },
     },
     status: {

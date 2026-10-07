@@ -150,6 +150,16 @@ async function placeOrder({ userId, cartItemIds, fulfillment, paymentMethod, gca
 
   const deliveryFee = fulfillment === 'delivery' ? settings.deliveryFee : 0;
   const total = subtotal + deliveryFee;
+  const savedNameParts = String(contact.fullName || '').trim().split(/\s+/).filter(Boolean);
+  const firstName = contact.firstName || savedNameParts.shift() || '';
+  const lastName = contact.lastName || savedNameParts.join(' ');
+  const fullName = [firstName, lastName].filter(Boolean).join(' ') || String(contact.fullName || '').trim();
+  const addressParts = ['street', 'barangay', 'city', 'province', 'postalCode']
+    .map((field) => contact[field] && contact[field].trim())
+    .filter(Boolean);
+  const address = addressParts.length
+    ? addressParts.join(', ')
+    : (contact.address ? contact.address.trim() : '');
 
   // Perform atomic stock deduction with compensation rollback
   await deductStockWithCompensation(itemsToDeduct);
@@ -174,9 +184,17 @@ async function placeOrder({ userId, cartItemIds, fulfillment, paymentMethod, gca
     paymentStatus: 'unpaid',
     gcashReference: paymentMethod === 'gcash' ? gcashReference.trim() : '',
     contact: {
-      fullName: contact.fullName.trim(),
+      fullName,
+      firstName,
+      lastName,
+      email: contact.email ? contact.email.trim().toLowerCase() : '',
       phone: contact.phone.trim(),
-      address: contact.address ? contact.address.trim() : '',
+      street: contact.street ? contact.street.trim() : '',
+      barangay: contact.barangay ? contact.barangay.trim() : '',
+      city: contact.city ? contact.city.trim() : '',
+      province: contact.province ? contact.province.trim() : '',
+      postalCode: contact.postalCode ? contact.postalCode.trim() : '',
+      address,
     },
     status: 'pending',
     statusHistory: [{ status: 'pending', at: new Date() }],
@@ -192,17 +210,35 @@ async function placeOrder({ userId, cartItemIds, fulfillment, paymentMethod, gca
   const user = await User.findById(userId);
   if (user) {
     let userChanged = false;
-    if (contact.fullName && user.fullName !== contact.fullName.trim()) {
-      user.fullName = contact.fullName.trim();
+    if (firstName && user.firstName !== firstName) {
+      user.firstName = firstName;
+      userChanged = true;
+    }
+    if (lastName && user.lastName !== lastName) {
+      user.lastName = lastName;
+      userChanged = true;
+    }
+    if (fullName && user.fullName !== fullName) {
+      user.fullName = fullName;
+      userChanged = true;
+    }
+    if (contact.email && user.contactEmail !== contact.email.trim().toLowerCase()) {
+      user.contactEmail = contact.email.trim().toLowerCase();
       userChanged = true;
     }
     if (contact.phone && user.phone !== contact.phone.trim()) {
       user.phone = contact.phone.trim();
       userChanged = true;
     }
-    if (fulfillment === 'delivery' && contact.address && user.address !== contact.address.trim()) {
-      user.address = contact.address.trim();
+    if ((fulfillment === 'delivery' || addressParts.length > 0) && user.address !== address) {
+      user.address = address;
       userChanged = true;
+    }
+    for (const field of ['street', 'barangay', 'city', 'province', 'postalCode']) {
+      if (contact[field] && user[field] !== contact[field].trim()) {
+        user[field] = contact[field].trim();
+        userChanged = true;
+      }
     }
     if (userChanged) {
       await user.save();
