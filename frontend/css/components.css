@@ -292,7 +292,7 @@
 .site-footer {
   background: var(--color-brand);
   color: #D5C9B7;
-  padding: 36px 0 20px;
+  padding: 28px 0 18px;
   border-top: 3px solid var(--color-accent);
   margin-top: auto;
 }
@@ -300,8 +300,8 @@
 .footer-grid {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
-  gap: 32px;
-  margin-bottom: 24px;
+  gap: 24px;
+  margin-bottom: 18px;
 }
 
 .footer-col h4 {
@@ -482,7 +482,7 @@
 
 /* ---------------- Form Elements ---------------- */
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   position: relative;
 }
 
@@ -490,7 +490,7 @@
   display: block;
   font-weight: 600;
   font-size: 0.85rem;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   color: var(--color-text-main);
 }
 
@@ -500,7 +500,7 @@
 
 .form-input, .form-select, .form-textarea {
   width: 100%;
-  padding: 9px 12px;
+  padding: 8px 10px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);

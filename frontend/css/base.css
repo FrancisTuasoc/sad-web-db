@@ -163,7 +163,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   width: 100%;
   max-width: var(--container-max);
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 12px;
 }
 
 /* Base Buttons */
