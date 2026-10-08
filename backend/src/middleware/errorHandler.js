@@ -7,17 +7,23 @@ const errorHandler = (err, req, res, next) => {
 
   if (statusCode === 413 || err.type === 'entity.too.large') {
     statusCode = 413;
-    message = req.path === '/avatar' || req.path.endsWith('/profile/avatar')
-      ? 'Photo must be 5 MiB or smaller.'
-      : 'Request body is too large.';
+    message =
+      req.path === '/avatar' || req.path.endsWith('/profile/avatar')
+        ? 'Photo must be 5 MiB or smaller.'
+        : 'Request body is too large.';
   }
 
-  if (statusCode === 429 && (req.path === '/avatar' || req.path.endsWith('/profile/avatar'))) {
-    message = 'You have reached the photo upload limit. Please try again in an hour.';
+  if (
+    statusCode === 429 &&
+    (req.path === '/avatar' || req.path.endsWith('/profile/avatar'))
+  ) {
+    message =
+      'You have reached the photo upload limit. Please try again in an hour.';
   }
 
   if (statusCode === 507) {
-    message = 'Avatar storage is full. Please contact the administrator before uploading another photo.';
+    message =
+      'Avatar storage is full. Please contact the administrator before uploading another photo.';
   }
 
   // Handle Mongoose CastError (e.g. invalid ObjectId)

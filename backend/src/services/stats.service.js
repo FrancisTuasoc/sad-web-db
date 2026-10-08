@@ -1,39 +1,8 @@
-const Order = require('../models/Order');
-const User = require('../models/User');
+const { query } = require('../config/db');
+const orderRepository = require('../repositories/orderRepository');
+const userRepository = require('../repositories/userRepository');
+
 const STORE_TIME_ZONE = 'Asia/Manila';
-
-const completedAtExpression = {
-  $ifNull: [
-    {
-      $arrayElemAt: [
-        {
-          $map: {
-            input: {
-              $filter: {
-                input: { $ifNull: ['$statusHistory', []] },
-                as: 'entry',
-                cond: { $eq: ['$$entry.status', 'completed'] },
-              },
-            },
-            as: 'completion',
-            in: '$$completion.at',
-          },
-        },
-        -1,
-      ],
-    },
-    '$createdAt',
-  ],
-};
-
-function getCompletedSalesSince(startDate) {
-  return Order.aggregate([
-    { $match: { status: 'completed' } },
-    { $set: { completedAt: completedAtExpression } },
-    { $match: { completedAt: { $gte: startDate } } },
-    { $group: { _id: null, count: { $sum: 1 }, revenue: { $sum: '$total' } } },
-  ]);
-}
 
 function getStartOfDayInTimeZone(date, timeZone) {
   const dateTimeParts = new Intl.DateTimeFormat('en-US', {
@@ -45,10 +14,12 @@ function getStartOfDayInTimeZone(date, timeZone) {
     minute: 'numeric',
     second: 'numeric',
     hourCycle: 'h23',
-  }).formatToParts(date).reduce((parts, part) => {
-    if (part.type !== 'literal') parts[part.type] = Number(part.value);
-    return parts;
-  }, {});
+  })
+    .formatToParts(date)
+    .reduce((parts, part) => {
+      if (part.type !== 'literal') parts[part.type] = Number(part.value);
+      return parts;
+    }, {});
 
   const localTimeAsUtc = Date.UTC(
     dateTimeParts.year,
@@ -59,95 +30,93 @@ function getStartOfDayInTimeZone(date, timeZone) {
     dateTimeParts.second
   );
   const offset = localTimeAsUtc - Math.floor(date.getTime() / 1000) * 1000;
-  return new Date(Date.UTC(dateTimeParts.year, dateTimeParts.month - 1, dateTimeParts.day) - offset);
+  return new Date(
+    Date.UTC(dateTimeParts.year, dateTimeParts.month - 1, dateTimeParts.day) -
+      offset
+  );
+}
+
+async function getCompletedSalesSince(startDate) {
+  const sql = `
+    SELECT 
+      COUNT(*)::int as count,
+      COALESCE(SUM(total), 0)::numeric as revenue
+    FROM orders
+    WHERE status = 'completed' AND updated_at >= $1
+  `;
+  const res = await query(sql, [startDate]);
+  return {
+    count: res.rows[0].count,
+    revenue: Number(res.rows[0].revenue),
+  };
 }
 
 async function getDashboardStats() {
-  const [orderCounts] = await Order.aggregate([
-    {
-      $group: {
-        _id: null,
-        totalOrders: { $sum: 1 },
-        pendingOrders: {
-          $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] },
-        },
-        toPickupOrders: {
-          $sum: { $cond: [{ $in: ['$status', ['preparing', 'ready_for_pickup', 'to_pickup']] }, 1, 0] },
-        },
-        toShipOrders: {
-          $sum: { $cond: [{ $in: ['$status', ['ready_to_deliver', 'to_ship']] }, 1, 0] },
-        },
-        completedOrders: {
-          $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] },
-        },
-        cancelledOrders: {
-          $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] },
-        },
-        totalRevenue: {
-          $sum: { $cond: [{ $eq: ['$status', 'completed'] }, '$total', 0] },
-        },
-      },
-    },
-  ]);
+  const countsSql = `
+    SELECT 
+      COUNT(*)::int as total_orders,
+      COUNT(*) FILTER (WHERE status = 'pending')::int as pending_orders,
+      COUNT(*) FILTER (WHERE status IN ('preparing', 'ready_for_pickup', 'to_pickup'))::int as to_pickup_orders,
+      COUNT(*) FILTER (WHERE status IN ('ready_to_deliver', 'to_ship'))::int as to_ship_orders,
+      COUNT(*) FILTER (WHERE status = 'completed')::int as completed_orders,
+      COUNT(*) FILTER (WHERE status = 'cancelled')::int as cancelled_orders,
+      COALESCE(SUM(total) FILTER (WHERE status = 'completed'), 0)::numeric as total_revenue
+    FROM orders
+  `;
+  const countsRes = await query(countsSql);
+  const orderCounts = countsRes.rows[0];
 
-  const totalCustomers = await User.countDocuments({ role: 'customer' });
+  const totalCustomers = await userRepository.count({ role: 'customer' });
 
   const stats = {
-    totalOrders: orderCounts ? orderCounts.totalOrders : 0,
-    pendingOrders: orderCounts ? orderCounts.pendingOrders : 0,
-    toPickupOrders: orderCounts ? orderCounts.toPickupOrders : 0,
-    toShipOrders: orderCounts ? orderCounts.toShipOrders : 0,
-    completedOrders: orderCounts ? orderCounts.completedOrders : 0,
-    cancelledOrders: orderCounts ? orderCounts.cancelledOrders : 0,
-    totalRevenue: orderCounts ? orderCounts.totalRevenue : 0,
+    totalOrders: orderCounts.total_orders || 0,
+    pendingOrders: orderCounts.pending_orders || 0,
+    toPickupOrders: orderCounts.to_pickup_orders || 0,
+    toShipOrders: orderCounts.to_ship_orders || 0,
+    completedOrders: orderCounts.completed_orders || 0,
+    cancelledOrders: orderCounts.cancelled_orders || 0,
+    totalRevenue: Number(orderCounts.total_revenue || 0),
     totalCustomers,
   };
 
-  // Sales timeframes (completed orders)
+  // Sales timeframes
   const now = new Date();
   const startOfDay = getStartOfDayInTimeZone(now, STORE_TIME_ZONE);
   const startOfWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const startOfMonth = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-  const [[dailySales], [weeklySales], [monthlySales]] = await Promise.all([
+  const [dailySales, weeklySales, monthlySales] = await Promise.all([
     getCompletedSalesSince(startOfDay),
     getCompletedSalesSince(startOfWeek),
     getCompletedSalesSince(startOfMonth),
   ]);
 
   stats.sales = {
-    daily: {
-      count: dailySales ? dailySales.count : 0,
-      revenue: dailySales ? dailySales.revenue : 0,
-    },
-    weekly: {
-      count: weeklySales ? weeklySales.count : 0,
-      revenue: weeklySales ? weeklySales.revenue : 0,
-    },
-    monthly: {
-      count: monthlySales ? monthlySales.count : 0,
-      revenue: monthlySales ? monthlySales.revenue : 0,
-    },
+    daily: dailySales,
+    weekly: weeklySales,
+    monthly: monthlySales,
   };
 
   // Revenue by date for the last 30 days
-  const thirtyDaysAgo = new Date(startOfDay.getTime() - 29 * 24 * 60 * 60 * 1000);
-  const revenueHistory = await Order.aggregate([
-    { $match: { status: 'completed' } },
-    { $set: { completedAt: completedAtExpression } },
-    { $match: { completedAt: { $gte: thirtyDaysAgo } } },
-    {
-      $group: {
-        _id: {
-          $dateToString: { format: '%Y-%m-%d', date: '$completedAt', timezone: STORE_TIME_ZONE },
-        },
-        revenue: { $sum: '$total' },
-        orders: { $sum: 1 },
-      },
-    },
-    { $sort: { _id: 1 } },
-  ]);
-  stats.revenueHistory = revenueHistory;
+  const thirtyDaysAgo = new Date(
+    startOfDay.getTime() - 29 * 24 * 60 * 60 * 1000
+  );
+  const revenueHistorySql = `
+    SELECT 
+      TO_CHAR(updated_at AT TIME ZONE 'Asia/Manila', 'YYYY-MM-DD') as date_str,
+      COALESCE(SUM(total), 0)::numeric as revenue,
+      COUNT(*)::int as orders
+    FROM orders
+    WHERE status = 'completed' AND updated_at >= $1
+    GROUP BY date_str
+    ORDER BY date_str ASC
+  `;
+  const revRes = await query(revenueHistorySql, [thirtyDaysAgo]);
+  stats.revenueHistory = revRes.rows.map((row) => ({
+    _id: row.date_str,
+    revenue: Number(row.revenue),
+    orders: row.orders,
+  }));
 
   // Completed vs Cancelled comparison
   stats.statusComparison = {
@@ -158,27 +127,27 @@ async function getDashboardStats() {
   };
 
   // Top 5 most ordered items
-  const topItems = await Order.aggregate([
-    { $match: { status: { $ne: 'cancelled' } } },
-    { $unwind: '$items' },
-    {
-      $group: {
-        _id: '$items.name',
-        totalQty: { $sum: '$items.quantity' },
-        totalSales: { $sum: '$items.lineTotal' },
-      },
-    },
-    { $sort: { totalQty: -1 } },
-    { $limit: 5 },
-  ]);
-  stats.topItems = topItems;
+  const topItemsSql = `
+    SELECT 
+      oi.name as _id,
+      SUM(oi.quantity)::int as total_qty,
+      SUM(oi.line_total)::numeric as total_sales
+    FROM order_items oi
+    JOIN orders o ON oi.order_id = o.id
+    WHERE o.status != 'cancelled'
+    GROUP BY oi.name
+    ORDER BY total_qty DESC
+    LIMIT 5
+  `;
+  const topRes = await query(topItemsSql);
+  stats.topItems = topRes.rows.map((r) => ({
+    _id: r._id,
+    totalQty: r.total_qty,
+    totalSales: Number(r.total_sales),
+  }));
 
   // Recent 8 orders
-  const recentOrders = await Order.find()
-    .sort({ createdAt: -1 })
-    .limit(8)
-    .select('orderNumber contact total fulfillment paymentMethod status paymentStatus createdAt');
-
+  const recentOrders = await orderRepository.find({}, { limit: 8 });
   stats.recentOrders = recentOrders;
 
   return stats;

@@ -1,8 +1,14 @@
 // Authentication and User State Management
 
 const AVATAR_PALETTE = [
-  '#A4262C', '#D97706', '#2563EB', '#059669',
-  '#7C3AED', '#DB2777', '#4B5563', '#EA580C',
+  '#A4262C',
+  '#D97706',
+  '#2563EB',
+  '#059669',
+  '#7C3AED',
+  '#DB2777',
+  '#4B5563',
+  '#EA580C',
 ];
 
 export function getToken() {
@@ -110,7 +116,9 @@ export async function prepareAvatarFile(file) {
   try {
     bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
   } catch (error) {
-    throw new Error('The selected photo could not be opened. Try another JPG, PNG, or WebP image.');
+    throw new Error(
+      'The selected photo could not be opened. Try another JPG, PNG, or WebP image.'
+    );
   }
 
   try {
@@ -118,7 +126,10 @@ export async function prepareAvatarFile(file) {
     if (longestSide <= 4096) {
       return file.type === mimeType
         ? file
-        : new File([file], file.name, { type: mimeType, lastModified: file.lastModified });
+        : new File([file], file.name, {
+            type: mimeType,
+            lastModified: file.lastModified,
+          });
     }
 
     const scale = 4096 / longestSide;
@@ -126,27 +137,51 @@ export async function prepareAvatarFile(file) {
     canvas.width = Math.round(bitmap.width * scale);
     canvas.height = Math.round(bitmap.height * scale);
     const context = canvas.getContext('2d');
-    if (!context) throw new Error('Photo processing is unavailable in this browser.');
+    if (!context)
+      throw new Error('Photo processing is unavailable in this browser.');
     context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
 
     const quality = file.size > 8 * 1024 * 1024 ? 0.92 : 1;
     const resizedBlob = await new Promise((resolve, reject) => {
-      canvas.toBlob((blob) => {
-        if (blob) resolve(blob);
-        else reject(new Error('The selected photo could not be prepared. Please try again.'));
-      }, mimeType, quality);
+      canvas.toBlob(
+        (blob) => {
+          if (blob) resolve(blob);
+          else
+            reject(
+              new Error(
+                'The selected photo could not be prepared. Please try again.'
+              )
+            );
+        },
+        mimeType,
+        quality
+      );
     });
     if (resizedBlob.size > maxSize) {
       throw new Error('Photo must be 20MB or smaller after resizing.');
     }
-    return new File([resizedBlob], file.name, { type: mimeType, lastModified: file.lastModified });
+    return new File([resizedBlob], file.name, {
+      type: mimeType,
+      lastModified: file.lastModified,
+    });
   } finally {
     bitmap.close();
   }
 }
 
-export async function resizeImageToDataUrl(file, maxDimension = 600, quality = 0.8) {
-  if (!file || !Number.isFinite(maxDimension) || maxDimension < 1 || !Number.isFinite(quality) || quality < 0 || quality > 1) {
+export async function resizeImageToDataUrl(
+  file,
+  maxDimension = 600,
+  quality = 0.8
+) {
+  if (
+    !file ||
+    !Number.isFinite(maxDimension) ||
+    maxDimension < 1 ||
+    !Number.isFinite(quality) ||
+    quality < 0 ||
+    quality > 1
+  ) {
     throw new Error('Choose a valid image and image size.');
   }
 
@@ -154,16 +189,22 @@ export async function resizeImageToDataUrl(file, maxDimension = 600, quality = 0
   try {
     bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
   } catch (error) {
-    throw new Error('The selected image could not be opened. Choose another image file.');
+    throw new Error(
+      'The selected image could not be opened. Choose another image file.'
+    );
   }
 
   try {
-    const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+    const scale = Math.min(
+      1,
+      maxDimension / Math.max(bitmap.width, bitmap.height)
+    );
     const canvas = document.createElement('canvas');
     canvas.width = Math.max(1, Math.round(bitmap.width * scale));
     canvas.height = Math.max(1, Math.round(bitmap.height * scale));
     const context = canvas.getContext('2d');
-    if (!context) throw new Error('Image processing is unavailable in this browser.');
+    if (!context)
+      throw new Error('Image processing is unavailable in this browser.');
     context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
     return canvas.toDataURL('image/webp', quality);
   } finally {

@@ -1,8 +1,19 @@
 // Checkout Controller & Order Placement Flow
 import { apiFetch } from './api.js';
-import { showToast, escapeHtml, BURGER_PLACEHOLDER, openModal, closeModal } from './ui.js';
+import {
+  showToast,
+  escapeHtml,
+  BURGER_PLACEHOLDER,
+  openModal,
+  closeModal,
+} from './ui.js';
 import { getUser, setUser } from './auth.js';
-import { getCheckedCartItems, hasStockIssue, fetchCart, flushPendingCartUpdates } from './cart.js';
+import {
+  getCheckedCartItems,
+  hasStockIssue,
+  fetchCart,
+  flushPendingCartUpdates,
+} from './cart.js';
 
 let publicSettings = null;
 let checkoutSettingsLoaded = false;
@@ -12,10 +23,19 @@ let isChangingContact = false;
 let selectedCartSubtotal = 0;
 let checkoutModalReturnFocus = null;
 
-const CONTACT_ADDRESS_FIELDS = ['street', 'barangay', 'city', 'province', 'postalCode'];
+const CONTACT_ADDRESS_FIELDS = [
+  'street',
+  'barangay',
+  'city',
+  'province',
+  'postalCode',
+];
 
 function splitSavedName(user) {
-  const savedParts = String(user.fullName || '').trim().split(/\s+/).filter(Boolean);
+  const savedParts = String(user.fullName || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
   return {
     firstName: user.firstName || savedParts.shift() || '',
     lastName: user.lastName || savedParts.join(' '),
@@ -23,15 +43,23 @@ function splitSavedName(user) {
 }
 
 function formatContactAddress(contact) {
-  const parts = CONTACT_ADDRESS_FIELDS.map((field) => contact[field]).filter(Boolean);
-  return parts.length ? parts.join(', ') : (contact.address || '');
+  const parts = CONTACT_ADDRESS_FIELDS.map((field) => contact[field]).filter(
+    Boolean
+  );
+  return parts.length ? parts.join(', ') : contact.address || '';
 }
 
 function getAddressFields(prefix) {
-  return Object.fromEntries(CONTACT_ADDRESS_FIELDS.map((field) => [
-    field,
-    document.getElementById(`${prefix}-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`)?.value.trim() || '',
-  ]));
+  return Object.fromEntries(
+    CONTACT_ADDRESS_FIELDS.map((field) => [
+      field,
+      document
+        .getElementById(
+          `${prefix}-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`
+        )
+        ?.value.trim() || '',
+    ])
+  );
 }
 
 function setAddressRequired(required) {
@@ -44,11 +72,14 @@ function setAddressRequired(required) {
 
 export function isCheckoutAllowed() {
   const checked = getCheckedCartItems();
-  return checkoutSettingsLoaded
-    && Boolean(publicSettings && publicSettings.acceptingOrders)
-    && checked.length > 0
-    && !hasStockIssue()
-    && (!publicSettings.minimumOrder || selectedCartSubtotal >= publicSettings.minimumOrder);
+  return (
+    checkoutSettingsLoaded &&
+    Boolean(publicSettings && publicSettings.acceptingOrders) &&
+    checked.length > 0 &&
+    !hasStockIssue() &&
+    (!publicSettings.minimumOrder ||
+      selectedCartSubtotal >= publicSettings.minimumOrder)
+  );
 }
 
 export async function loadCheckoutSettings() {
@@ -57,8 +88,8 @@ export async function loadCheckoutSettings() {
     publicSettings = res.settings;
     checkoutSettingsLoaded = true;
     if (
-      (fulfillmentMethod === 'pickup' && !publicSettings.pickupEnabled)
-      || (fulfillmentMethod === 'delivery' && !publicSettings.deliveryEnabled)
+      (fulfillmentMethod === 'pickup' && !publicSettings.pickupEnabled) ||
+      (fulfillmentMethod === 'delivery' && !publicSettings.deliveryEnabled)
     ) {
       fulfillmentMethod = null;
       paymentMethod = null;
@@ -75,15 +106,31 @@ export async function loadCheckoutSettings() {
 }
 
 function showCheckoutStep(step) {
-  document.getElementById('checkout-step-fulfillment')?.classList.toggle('hidden', step !== 1);
-  document.getElementById('checkout-step-contact')?.classList.toggle('hidden', step < 2);
-  document.getElementById('contact-step-actions')?.classList.toggle('hidden', step < 2);
-  document.getElementById('checkout-step-payment')?.classList.toggle('hidden', step < 3);
-  document.getElementById('payment-step-actions')?.classList.toggle('hidden', step < 3);
-  document.getElementById('continue-contact-btn')?.classList.toggle('hidden', step !== 1);
-  document.getElementById('place-order-btn')?.classList.toggle('hidden', step !== 3);
+  document
+    .getElementById('checkout-step-fulfillment')
+    ?.classList.toggle('hidden', step !== 1);
+  document
+    .getElementById('checkout-step-contact')
+    ?.classList.toggle('hidden', step < 2);
+  document
+    .getElementById('contact-step-actions')
+    ?.classList.toggle('hidden', step < 2);
+  document
+    .getElementById('checkout-step-payment')
+    ?.classList.toggle('hidden', step < 3);
+  document
+    .getElementById('payment-step-actions')
+    ?.classList.toggle('hidden', step < 3);
+  document
+    .getElementById('continue-contact-btn')
+    ?.classList.toggle('hidden', step !== 1);
+  document
+    .getElementById('place-order-btn')
+    ?.classList.toggle('hidden', step !== 3);
   document.querySelectorAll('[data-checkout-progress]').forEach((indicator) => {
-    const indicatorStep = Number(indicator.getAttribute('data-checkout-progress'));
+    const indicatorStep = Number(
+      indicator.getAttribute('data-checkout-progress')
+    );
     indicator.classList.toggle('active', indicatorStep === step);
     indicator.classList.toggle('completed', indicatorStep < step);
     indicator.setAttribute('aria-label', `Step ${indicatorStep} of 3`);
@@ -129,7 +176,10 @@ async function openCheckoutModal() {
         address: res.profile.address,
       });
     } catch (err) {
-      showToast(`Failed to load your saved contact details: ${err.message}`, 'error');
+      showToast(
+        `Failed to load your saved contact details: ${err.message}`,
+        'error'
+      );
       return;
     }
   }
@@ -170,7 +220,10 @@ function validateContactDetails() {
     return false;
   }
   if (!/^(09\d{9}|\+639\d{9})$/.test(phone.replace(/[\s-]/g, ''))) {
-    showToast('Please enter a valid Philippine mobile number (e.g. 09171234567).', 'warning');
+    showToast(
+      'Please enter a valid Philippine mobile number (e.g. 09171234567).',
+      'warning'
+    );
     phoneInput?.focus();
     return false;
   }
@@ -179,7 +232,10 @@ function validateContactDetails() {
     for (const field of CONTACT_ADDRESS_FIELDS) {
       if (!address[field]) {
         const inputId = `contact-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`;
-        showToast(`Please enter your ${field === 'postalCode' ? '4-digit postal code' : field}.`, 'warning');
+        showToast(
+          `Please enter your ${field === 'postalCode' ? '4-digit postal code' : field}.`,
+          'warning'
+        );
         document.getElementById(inputId)?.focus();
         return false;
       }
@@ -207,7 +263,8 @@ export function updateReceipt() {
   let itemsHtml = '';
 
   if (checkedItems.length === 0) {
-    itemsHtml = '<p class="text-muted" style="font-size:0.85rem;">No items selected.</p>';
+    itemsHtml =
+      '<p class="text-muted" style="font-size:0.85rem;">No items selected.</p>';
   } else {
     itemsHtml = checkedItems
       .map((item) => {
@@ -218,15 +275,17 @@ export function updateReceipt() {
           const names = item.addons.map((a) => {
             const aPrice = (a.product ? a.product.price : 0) * (a.qty || 1);
             addonsSum += aPrice;
-            const quantityLabel = item.addonQuantityMode === 'per_order' ? 'for order' : 'per item';
+            const quantityLabel =
+              item.addonQuantityMode === 'per_order' ? 'for order' : 'per item';
             return `${a.product ? a.product.name : 'Add-on'} (x${a.qty || 1} ${quantityLabel})`;
           });
           addonsText = `<div style="font-size:0.75rem;color:var(--color-text-muted);padding-left:8px;">${names.join(', ')}</div>`;
         }
 
-        const addonTotal = item.addonQuantityMode === 'per_order'
-          ? addonsSum
-          : addonsSum * item.quantity;
+        const addonTotal =
+          item.addonQuantityMode === 'per_order'
+            ? addonsSum
+            : addonsSum * item.quantity;
         const lineTotal = (prod.price || 0) * item.quantity + addonTotal;
         subtotal += lineTotal;
 
@@ -252,7 +311,8 @@ export function updateReceipt() {
       ? Number(publicSettings.deliveryFee)
       : 30;
     if (deliveryRow) deliveryRow.classList.remove('hidden');
-    if (deliveryFeeElem) deliveryFeeElem.textContent = `₱${deliveryFee.toFixed(2)}`;
+    if (deliveryFeeElem)
+      deliveryFeeElem.textContent = `₱${deliveryFee.toFixed(2)}`;
   } else {
     if (deliveryRow) deliveryRow.classList.add('hidden');
   }
@@ -263,7 +323,8 @@ export function updateReceipt() {
 
   // Exact amount for GCash
   const gcashAmountElem = document.getElementById('gcash-exact-amount');
-  if (gcashAmountElem) gcashAmountElem.textContent = `₱${grandTotal.toFixed(2)}`;
+  if (gcashAmountElem)
+    gcashAmountElem.textContent = `₱${grandTotal.toFixed(2)}`;
 
   // Stock warning
   const stockIssue = hasStockIssue();
@@ -275,17 +336,20 @@ export function updateReceipt() {
     }
   }
 
-  const storeAcceptingOrders = checkoutSettingsLoaded
-    && Boolean(publicSettings && publicSettings.acceptingOrders);
+  const storeAcceptingOrders =
+    checkoutSettingsLoaded &&
+    Boolean(publicSettings && publicSettings.acceptingOrders);
   const hasFulfillmentOption = Boolean(
-    publicSettings && (publicSettings.pickupEnabled || publicSettings.deliveryEnabled)
+    publicSettings &&
+    (publicSettings.pickupEnabled || publicSettings.deliveryEnabled)
   );
   const orderingAvailable = storeAcceptingOrders && hasFulfillmentOption;
   if (checkoutBtn) {
-    checkoutBtn.disabled = checkedItems.length === 0
-      || stockIssue
-      || !isCheckoutAllowed()
-      || !orderingAvailable;
+    checkoutBtn.disabled =
+      checkedItems.length === 0 ||
+      stockIssue ||
+      !isCheckoutAllowed() ||
+      !orderingAvailable;
   }
 
   const storeNotice = document.getElementById('checkout-store-notice');
@@ -298,12 +362,14 @@ export function updateReceipt() {
         : 'Online ordering is temporarily unavailable because pickup and delivery are both disabled.';
   }
 
-  const minimumOrder = Number(publicSettings && publicSettings.minimumOrder) || 0;
+  const minimumOrder =
+    Number(publicSettings && publicSettings.minimumOrder) || 0;
   const minimumNotice = document.getElementById('checkout-minimum-notice');
-  const belowMinimum = orderingAvailable
-    && checkedItems.length > 0
-    && minimumOrder > 0
-    && subtotal < minimumOrder;
+  const belowMinimum =
+    orderingAvailable &&
+    checkedItems.length > 0 &&
+    minimumOrder > 0 &&
+    subtotal < minimumOrder;
   if (minimumNotice) {
     minimumNotice.classList.toggle('hidden', !belowMinimum);
     minimumNotice.textContent = belowMinimum
@@ -315,18 +381,23 @@ export function updateReceipt() {
   const deliveryTab = document.getElementById('tab-delivery');
   const continueContactBtn = document.getElementById('continue-contact-btn');
   const continuePaymentBtn = document.getElementById('continue-payment-btn');
-  if (pickupTab) pickupTab.disabled = !orderingAvailable || !publicSettings || !publicSettings.pickupEnabled;
-  if (deliveryTab) deliveryTab.disabled = !orderingAvailable || !publicSettings || !publicSettings.deliveryEnabled;
+  if (pickupTab)
+    pickupTab.disabled =
+      !orderingAvailable || !publicSettings || !publicSettings.pickupEnabled;
+  if (deliveryTab)
+    deliveryTab.disabled =
+      !orderingAvailable || !publicSettings || !publicSettings.deliveryEnabled;
   if (continueContactBtn) continueContactBtn.disabled = !orderingAvailable;
   if (continuePaymentBtn) continuePaymentBtn.disabled = !orderingAvailable;
 
   const placeOrderBtn = document.getElementById('place-order-btn');
   if (placeOrderBtn) {
-    placeOrderBtn.disabled = checkedItems.length === 0
-      || stockIssue
-      || !paymentMethod
-      || !orderingAvailable
-      || belowMinimum;
+    placeOrderBtn.disabled =
+      checkedItems.length === 0 ||
+      stockIssue ||
+      !paymentMethod ||
+      !orderingAvailable ||
+      belowMinimum;
   }
 }
 
@@ -340,13 +411,17 @@ function renderFulfillmentOptions() {
   if (pickupTab) {
     pickupTab.classList.toggle('active', fulfillmentMethod === 'pickup');
     pickupTab.style.display = publicSettings.pickupEnabled ? 'block' : 'none';
-    pickupTab.disabled = !publicSettings.acceptingOrders || !publicSettings.pickupEnabled;
+    pickupTab.disabled =
+      !publicSettings.acceptingOrders || !publicSettings.pickupEnabled;
   }
 
   if (deliveryTab) {
     deliveryTab.classList.toggle('active', fulfillmentMethod === 'delivery');
-    deliveryTab.style.display = publicSettings.deliveryEnabled ? 'block' : 'none';
-    deliveryTab.disabled = !publicSettings.acceptingOrders || !publicSettings.deliveryEnabled;
+    deliveryTab.style.display = publicSettings.deliveryEnabled
+      ? 'block'
+      : 'none';
+    deliveryTab.disabled =
+      !publicSettings.acceptingOrders || !publicSettings.deliveryEnabled;
   }
 
   if (addressGroup) {
@@ -368,9 +443,12 @@ function renderPaymentOptions() {
   if (!container) return;
 
   if (!fulfillmentMethod) {
-    container.innerHTML = '<p class="text-muted">Choose pickup or delivery first.</p>';
+    container.innerHTML =
+      '<p class="text-muted">Choose pickup or delivery first.</p>';
     document.getElementById('gcash-payment-box')?.classList.add('hidden');
-    document.getElementById('pay-at-shop-arrival-note')?.classList.add('hidden');
+    document
+      .getElementById('pay-at-shop-arrival-note')
+      ?.classList.add('hidden');
     paymentMethod = null;
     return;
   }
@@ -419,7 +497,9 @@ function renderPaymentOptions() {
   container.innerHTML = optionsHtml;
 
   // Ensure selected payment method is valid for the current fulfillment
-  const availableValues = Array.from(container.querySelectorAll('input[name="payment_method"]')).map((el) => el.value);
+  const availableValues = Array.from(
+    container.querySelectorAll('input[name="payment_method"]')
+  ).map((el) => el.value);
   if (!availableValues.includes(paymentMethod)) {
     paymentMethod = null;
   }
@@ -437,24 +517,29 @@ function renderPaymentOptions() {
       gcashBox.classList.add('hidden');
     }
   }
-  document.getElementById('pay-at-shop-arrival-note')
+  document
+    .getElementById('pay-at-shop-arrival-note')
     ?.classList.toggle('hidden', paymentMethod !== 'pay_at_shop');
   if (availableValues.length === 0) {
-    container.innerHTML = '<p class="text-muted">No payment methods are currently available for this order type. Please contact the shop.</p>';
+    container.innerHTML =
+      '<p class="text-muted">No payment methods are currently available for this order type. Please contact the shop.</p>';
   }
 
   // Bind change events
-  container.querySelectorAll('input[name="payment_method"]').forEach((radio) => {
-    radio.addEventListener('change', () => {
-      paymentMethod = radio.value;
-      if (gcashBox) {
-        gcashBox.classList.toggle('hidden', paymentMethod !== 'gcash');
-      }
-      document.getElementById('pay-at-shop-arrival-note')
-        ?.classList.toggle('hidden', paymentMethod !== 'pay_at_shop');
-      updateReceipt();
+  container
+    .querySelectorAll('input[name="payment_method"]')
+    .forEach((radio) => {
+      radio.addEventListener('change', () => {
+        paymentMethod = radio.value;
+        if (gcashBox) {
+          gcashBox.classList.toggle('hidden', paymentMethod !== 'gcash');
+        }
+        document
+          .getElementById('pay-at-shop-arrival-note')
+          ?.classList.toggle('hidden', paymentMethod !== 'pay_at_shop');
+        updateReceipt();
+      });
     });
-  });
 }
 
 function initContactDetails() {
@@ -465,17 +550,24 @@ function initContactDetails() {
   const lastNameInput = document.getElementById('contact-last-name-input');
   const emailInput = document.getElementById('contact-email-input');
   const phoneInput = document.getElementById('contact-phone-input');
-  const addressFields = user ? Object.fromEntries(CONTACT_ADDRESS_FIELDS.map((field) => [field, user[field] || ''])) : {};
-  const { firstName, lastName } = user ? splitSavedName(user) : { firstName: '', lastName: '' };
+  const addressFields = user
+    ? Object.fromEntries(
+        CONTACT_ADDRESS_FIELDS.map((field) => [field, user[field] || ''])
+      )
+    : {};
+  const { firstName, lastName } = user
+    ? splitSavedName(user)
+    : { firstName: '', lastName: '' };
 
-  const hasSaved = user
-    && firstName
-    && lastName
-    && (user.contactEmail || user.email)
-    && user.phone
-    && (fulfillmentMethod !== 'delivery'
-      || CONTACT_ADDRESS_FIELDS.every((field) => addressFields[field])
-        && /^\d{4}$/.test(addressFields.postalCode));
+  const hasSaved =
+    user &&
+    firstName &&
+    lastName &&
+    (user.contactEmail || user.email) &&
+    user.phone &&
+    (fulfillmentMethod !== 'delivery' ||
+      (CONTACT_ADDRESS_FIELDS.every((field) => addressFields[field]) &&
+        /^\d{4}$/.test(addressFields.postalCode)));
 
   if (hasSaved && !isChangingContact) {
     if (summaryBox) {
@@ -512,23 +604,32 @@ function initContactDetails() {
     CONTACT_ADDRESS_FIELDS.forEach((field) => {
       const inputId = `contact-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`;
       const input = document.getElementById(inputId);
-      if (input) input.value = addressFields[field]
-        || (field === 'street' && fulfillmentMethod === 'delivery' ? user.address || '' : '');
+      if (input)
+        input.value =
+          addressFields[field] ||
+          (field === 'street' && fulfillmentMethod === 'delivery'
+            ? user.address || ''
+            : '');
     });
   } else {
     if (summaryBox) summaryBox.classList.add('hidden');
     if (formBox) formBox.classList.remove('hidden');
     if (user) {
-      if (firstNameInput && !firstNameInput.value) firstNameInput.value = firstName;
+      if (firstNameInput && !firstNameInput.value)
+        firstNameInput.value = firstName;
       if (lastNameInput && !lastNameInput.value) lastNameInput.value = lastName;
-      if (emailInput && !emailInput.value) emailInput.value = user.contactEmail || user.email || '';
+      if (emailInput && !emailInput.value)
+        emailInput.value = user.contactEmail || user.email || '';
       if (phoneInput && !phoneInput.value) phoneInput.value = user.phone || '';
       CONTACT_ADDRESS_FIELDS.forEach((field) => {
         const inputId = `contact-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`;
         const input = document.getElementById(inputId);
         if (input && !input.value) {
-          input.value = addressFields[field]
-            || (field === 'street' && fulfillmentMethod === 'delivery' ? user.address || '' : '');
+          input.value =
+            addressFields[field] ||
+            (field === 'street' && fulfillmentMethod === 'delivery'
+              ? user.address || ''
+              : '');
         }
       });
     }
@@ -537,11 +638,18 @@ function initContactDetails() {
 
 async function handlePlaceOrder() {
   if (!isCheckoutAllowed()) {
-    const minimumOrder = Number(publicSettings && publicSettings.minimumOrder) || 0;
+    const minimumOrder =
+      Number(publicSettings && publicSettings.minimumOrder) || 0;
     if (minimumOrder > selectedCartSubtotal) {
-      showToast(`Your selected items must total at least ₱${minimumOrder.toFixed(2)}.`, 'warning');
+      showToast(
+        `Your selected items must total at least ₱${minimumOrder.toFixed(2)}.`,
+        'warning'
+      );
     } else {
-      showToast('Online ordering is currently unavailable. Please check the store status and try again later.', 'warning');
+      showToast(
+        'Online ordering is currently unavailable. Please check the store status and try again later.',
+        'warning'
+      );
     }
     return;
   }
@@ -563,7 +671,10 @@ async function handlePlaceOrder() {
   }
 
   if (hasStockIssue()) {
-    showToast('Some items in your cart exceed available stock. Please adjust quantities.', 'error');
+    showToast(
+      'Some items in your cart exceed available stock. Please adjust quantities.',
+      'error'
+    );
     return;
   }
 
@@ -589,7 +700,10 @@ async function handlePlaceOrder() {
 
   if (paymentMethod === 'gcash') {
     if (!gcashReference || !/^\d{13}$/.test(gcashReference)) {
-      showToast('Please enter a valid 13-digit GCash reference number.', 'warning');
+      showToast(
+        'Please enter a valid 13-digit GCash reference number.',
+        'warning'
+      );
       if (gcashRefInput) gcashRefInput.focus();
       return;
     }
@@ -687,12 +801,18 @@ function showSuccessReceipt(order) {
 
     const itemsSummary = order.items
       .map((item) => {
-        const addons = item.addons && item.addons.length > 0
-          ? `<ul class="receipt-item-addons">${item.addons.map((addon) => {
-            const quantityLabel = item.addonQuantityMode === 'per_order' ? 'for order' : 'per item';
-            return `<li>+ ${escapeHtml(addon.name)} · x${addon.qty} ${quantityLabel} · ₱${addon.price.toFixed(2)}</li>`;
-          }).join('')}</ul>`
-          : '';
+        const addons =
+          item.addons && item.addons.length > 0
+            ? `<ul class="receipt-item-addons">${item.addons
+                .map((addon) => {
+                  const quantityLabel =
+                    item.addonQuantityMode === 'per_order'
+                      ? 'for order'
+                      : 'per item';
+                  return `<li>+ ${escapeHtml(addon.name)} · x${addon.qty} ${quantityLabel} · ₱${addon.price.toFixed(2)}</li>`;
+                })
+                .join('')}</ul>`
+            : '';
         return `
           <div class="receipt-item">
             <div class="receipt-item-description">
@@ -706,11 +826,12 @@ function showSuccessReceipt(order) {
       })
       .join('');
     const createdAt = new Date(order.createdAt);
-    const totalLabel = order.paymentStatus === 'unpaid' && order.paymentMethod === 'pay_at_shop'
-      ? 'Total due at pickup'
-      : order.paymentStatus === 'unpaid' && order.paymentMethod === 'cod'
-        ? 'Total due on delivery'
-        : 'Total amount';
+    const totalLabel =
+      order.paymentStatus === 'unpaid' && order.paymentMethod === 'pay_at_shop'
+        ? 'Total due at pickup'
+        : order.paymentStatus === 'unpaid' && order.paymentMethod === 'cod'
+          ? 'Total due on delivery'
+          : 'Total amount';
 
     successContainer.innerHTML = `
       <div class="order-success-card">
@@ -723,9 +844,11 @@ function showSuccessReceipt(order) {
           <p class="order-success-eyebrow">Order confirmed</p>
           <h2>Thanks for your order!</h2>
           <p class="order-success-message">
-            ${order.paymentMethod === 'pay_at_shop'
-    ? 'We will start preparing your order when you arrive at the shop. Please arrive within 1 hour of placing your order; otherwise, it will be cancelled automatically.'
-    : 'Your order is pending admin acceptance. You can cancel it from your account while it is still pending.'}
+            ${
+              order.paymentMethod === 'pay_at_shop'
+                ? 'We will start preparing your order when you arrive at the shop. Please arrive within 1 hour of placing your order; otherwise, it will be cancelled automatically.'
+                : 'Your order is pending admin acceptance. You can cancel it from your account while it is still pending.'
+            }
           </p>
           <div class="order-success-reference">
             <span>Order number</span>
@@ -773,9 +896,13 @@ function showSuccessReceipt(order) {
 
           <div class="receipt-totals">
             <div><span>Subtotal</span><strong>₱${order.subtotal.toFixed(2)}</strong></div>
-            ${order.deliveryFee > 0 ? `
+            ${
+              order.deliveryFee > 0
+                ? `
               <div><span>Delivery fee</span><strong>₱${order.deliveryFee.toFixed(2)}</strong></div>
-            ` : ''}
+            `
+                : ''
+            }
             <div class="receipt-grand-total">
               <span>${totalLabel}</span>
               <strong>₱${order.total.toFixed(2)}</strong>
@@ -817,7 +944,8 @@ export function setupCheckoutListeners() {
   const backContactBtn = document.getElementById('back-contact-btn');
 
   if (checkoutBtn) checkoutBtn.addEventListener('click', openCheckoutModal);
-  if (closeCheckoutBtn) closeCheckoutBtn.addEventListener('click', () => closeCheckoutModal());
+  if (closeCheckoutBtn)
+    closeCheckoutBtn.addEventListener('click', () => closeCheckoutModal());
   if (checkoutModal) {
     checkoutModal.addEventListener('click', (event) => {
       if (event.target === checkoutModal) closeCheckoutModal();
@@ -831,13 +959,18 @@ export function setupCheckoutListeners() {
     }
     if (event.key !== 'Tab') return;
 
-    const focusable = Array.from(checkoutModal.querySelectorAll(
-      'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
-    )).filter((element) => element.getClientRects().length > 0);
+    const focusable = Array.from(
+      checkoutModal.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    ).filter((element) => element.getClientRects().length > 0);
     if (focusable.length === 0) return;
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
-    if (!checkoutModal.contains(document.activeElement) || (event.shiftKey && document.activeElement === first)) {
+    if (
+      !checkoutModal.contains(document.activeElement) ||
+      (event.shiftKey && document.activeElement === first)
+    ) {
       event.preventDefault();
       (event.shiftKey ? last : first).focus();
     } else if (!event.shiftKey && document.activeElement === last) {
@@ -880,15 +1013,20 @@ export function setupCheckoutListeners() {
       showCheckoutStep(3);
     });
   }
-  if (backFulfillmentBtn) backFulfillmentBtn.addEventListener('click', () => showCheckoutStep(1));
-  if (backContactBtn) backContactBtn.addEventListener('click', () => showCheckoutStep(2));
+  if (backFulfillmentBtn)
+    backFulfillmentBtn.addEventListener('click', () => showCheckoutStep(1));
+  if (backContactBtn)
+    backContactBtn.addEventListener('click', () => showCheckoutStep(2));
 
   [
     'contact-first-name-input',
     'contact-last-name-input',
     'contact-email-input',
     'contact-phone-input',
-    ...CONTACT_ADDRESS_FIELDS.map((field) => `contact-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`),
+    ...CONTACT_ADDRESS_FIELDS.map(
+      (field) =>
+        `contact-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`
+    ),
   ].forEach((id) => {
     const input = document.getElementById(id);
     if (input) input.addEventListener('input', updateReceipt);

@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const userRepository = require('../repositories/userRepository');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 const { JWT_SECRET } = require('../config/env');
@@ -19,16 +19,28 @@ const requireAuth = asyncHandler(async (req, res, next) => {
   try {
     decoded = jwt.verify(token, JWT_SECRET);
   } catch (err) {
-    return next(new AppError('Your session has expired. Please log in again.', 401));
+    return next(
+      new AppError('Your session has expired. Please log in again.', 401)
+    );
   }
 
-  const user = await User.findById(decoded.id);
+  const UUID_REGEX =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!decoded.id || !UUID_REGEX.test(decoded.id)) {
+    return next(
+      new AppError('Your session has expired. Please log in again.', 401)
+    );
+  }
+
+  const user = await userRepository.findById(decoded.id);
   if (!user) {
     return next(new AppError('Account not found or session invalid.', 401));
   }
 
   if (user.status === 'suspended') {
-    return next(new AppError('Your account is suspended. Please contact the shop.', 403));
+    return next(
+      new AppError('Your account is suspended. Please contact the shop.', 403)
+    );
   }
 
   req.user = user;

@@ -1,6 +1,13 @@
 // Customer Profile Controller
 import { apiFetch, apiFetchBlob } from './api.js';
-import { renderHeader, renderFooter, showToast, escapeHtml, openModal, closeModal } from './ui.js';
+import {
+  renderHeader,
+  renderFooter,
+  showToast,
+  escapeHtml,
+  openModal,
+  closeModal,
+} from './ui.js';
 import { requireAuth, getUser, setUser, renderAvatar, logout } from './auth.js';
 
 let activeTab = 'overview';
@@ -13,7 +20,10 @@ let currentProfile = null;
 let activeAvatarObjectUrl = null;
 
 function splitProfileName(profile) {
-  const savedParts = String(profile.fullName || '').trim().split(/\s+/).filter(Boolean);
+  const savedParts = String(profile.fullName || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
   return {
     firstName: profile.firstName || savedParts.shift() || '',
     lastName: profile.lastName || savedParts.join(' '),
@@ -77,17 +87,23 @@ async function loadProfileOverview() {
     const totalOrdersEl = document.getElementById('overview-total-orders');
     const statusBadgeEl = document.getElementById('overview-status-badge');
 
-    if (usernameEl) usernameEl.textContent = p.fullName || p.username || 'Customer';
+    if (usernameEl)
+      usernameEl.textContent = p.fullName || p.username || 'Customer';
     if (emailEl) emailEl.textContent = p.email || 'No email available';
     if (memberSinceEl) {
-      memberSinceEl.textContent = new Date(p.createdAt).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
+      memberSinceEl.textContent = new Date(p.createdAt).toLocaleDateString(
+        undefined,
+        {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }
+      );
     }
     if (totalOrdersEl) totalOrdersEl.textContent = String(p.totalOrders || 0);
-    if (statusBadgeEl) statusBadgeEl.textContent = p.status === 'suspended' ? 'Suspended' : 'Active';
+    if (statusBadgeEl)
+      statusBadgeEl.textContent =
+        p.status === 'suspended' ? 'Suspended' : 'Active';
 
     const avatarHolder = document.getElementById('overview-avatar-holder');
     if (avatarHolder) {
@@ -96,27 +112,45 @@ async function loadProfileOverview() {
 
     const profileButton = document.getElementById('profile-photo-button');
     if (profileButton) {
-      profileButton.setAttribute('aria-label', `View profile photo for ${p.fullName || p.username || 'customer'}`);
+      profileButton.setAttribute(
+        'aria-label',
+        `View profile photo for ${p.fullName || p.username || 'customer'}`
+      );
     }
 
     // Prefill saved details tab
     const { firstName, lastName } = splitProfileName(p);
     const firstNameInput = document.getElementById('profile-first-name-input');
     const lastNameInput = document.getElementById('profile-last-name-input');
-    const contactEmailInput = document.getElementById('profile-contact-email-input');
+    const contactEmailInput = document.getElementById(
+      'profile-contact-email-input'
+    );
     const phoneInput = document.getElementById('profile-phone-input');
     if (firstNameInput) firstNameInput.value = firstName;
     if (lastNameInput) lastNameInput.value = lastName;
-    if (contactEmailInput) contactEmailInput.value = p.contactEmail || p.email || '';
+    if (contactEmailInput)
+      contactEmailInput.value = p.contactEmail || p.email || '';
     if (phoneInput) phoneInput.value = p.phone || '';
-    const addressFields = ['street', 'barangay', 'city', 'province', 'postalCode'];
+    const addressFields = [
+      'street',
+      'barangay',
+      'city',
+      'province',
+      'postalCode',
+    ];
     const hasStructuredAddress = addressFields.some((field) => p[field]);
-    const legacyAddressNote = document.getElementById('profile-existing-address-note');
+    const legacyAddressNote = document.getElementById(
+      'profile-existing-address-note'
+    );
     if (legacyAddressNote) {
-      legacyAddressNote.classList.toggle('hidden', !p.address || hasStructuredAddress);
-      legacyAddressNote.textContent = p.address && !hasStructuredAddress
-        ? `Your currently saved address is: ${p.address}. Fill in all address fields to replace it with the structured format.`
-        : '';
+      legacyAddressNote.classList.toggle(
+        'hidden',
+        !p.address || hasStructuredAddress
+      );
+      legacyAddressNote.textContent =
+        p.address && !hasStructuredAddress
+          ? `Your currently saved address is: ${p.address}. Fill in all address fields to replace it with the structured format.`
+          : '';
     }
     for (const field of addressFields) {
       const inputId = `profile-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`;
@@ -204,7 +238,11 @@ function getCustomerInitials(nameOrEmail = '') {
   if (!source) return 'C';
   const parts = source.split(/\s+/).filter(Boolean);
   if (parts.length > 1) {
-    return parts.slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join('').slice(0, 2);
+    return parts
+      .slice(0, 2)
+      .map((part) => part.charAt(0).toUpperCase())
+      .join('')
+      .slice(0, 2);
   }
   return source.charAt(0).toUpperCase();
 }
@@ -212,9 +250,11 @@ function getCustomerInitials(nameOrEmail = '') {
 function isValidAvatarSource(url) {
   if (!url || typeof url !== 'string') return false;
   const normalized = url.trim();
-  return /^https?:\/\//i.test(normalized)
-    || /^data:image\//i.test(normalized)
-    || /^blob:/i.test(normalized);
+  return (
+    /^https?:\/\//i.test(normalized) ||
+    /^data:image\//i.test(normalized) ||
+    /^blob:/i.test(normalized)
+  );
 }
 
 function setAvatarModalContent(profile) {
@@ -224,7 +264,10 @@ function setAvatarModalContent(profile) {
   const caption = document.getElementById('avatar-lightbox-caption');
   if (caption) caption.textContent = name;
 
-  const safeUrl = profile && profile.avatarUrl && String(profile.avatarUrl).trim() ? String(profile.avatarUrl).trim() : '';
+  const safeUrl =
+    profile && profile.avatarUrl && String(profile.avatarUrl).trim()
+      ? String(profile.avatarUrl).trim()
+      : '';
   if (isValidAvatarSource(safeUrl)) {
     const img = document.createElement('img');
     img.src = safeUrl;
@@ -232,7 +275,9 @@ function setAvatarModalContent(profile) {
     img.onerror = () => {
       const fallback = document.createElement('div');
       fallback.className = 'avatar-fallback';
-      fallback.textContent = getCustomerInitials(profile.fullName || profile.username || profile.email || 'Customer');
+      fallback.textContent = getCustomerInitials(
+        profile.fullName || profile.username || profile.email || 'Customer'
+      );
       frame.replaceChildren(fallback);
     };
     frame.replaceChildren(img);
@@ -241,7 +286,9 @@ function setAvatarModalContent(profile) {
 
   const fallback = document.createElement('div');
   fallback.className = 'avatar-fallback';
-  fallback.textContent = getCustomerInitials(profile.fullName || profile.username || profile.email || 'Customer');
+  fallback.textContent = getCustomerInitials(
+    profile.fullName || profile.username || profile.email || 'Customer'
+  );
   frame.replaceChildren(fallback);
 }
 
@@ -287,7 +334,10 @@ function formatOrderStatusLabel(status = '') {
     delivered: 'Delivered',
     cancelled: 'Cancelled',
   };
-  return map[status] || status.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return (
+    map[status] ||
+    status.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
+  );
 }
 
 async function loadCustomerStats() {
@@ -298,13 +348,35 @@ async function loadCustomerStats() {
     if (!grid) return;
 
     const cards = [
-      { label: 'Total orders', value: stats.totalOrders || 0, meta: 'All orders placed', icon: '🧾' },
-      { label: 'Pending orders', value: stats.pendingOrders || 0, meta: 'Waiting for action', icon: '⏳' },
-      { label: 'Delivered orders', value: stats.deliveredOrders || 0, meta: 'Completed deliveries', icon: '✅' },
-      { label: 'Total spent', value: `₱${Number(stats.totalSpent || 0).toFixed(2)}`, meta: 'Completed orders only', icon: '₱' },
+      {
+        label: 'Total orders',
+        value: stats.totalOrders || 0,
+        meta: 'All orders placed',
+        icon: '🧾',
+      },
+      {
+        label: 'Pending orders',
+        value: stats.pendingOrders || 0,
+        meta: 'Waiting for action',
+        icon: '⏳',
+      },
+      {
+        label: 'Delivered orders',
+        value: stats.deliveredOrders || 0,
+        meta: 'Completed deliveries',
+        icon: '✅',
+      },
+      {
+        label: 'Total spent',
+        value: `₱${Number(stats.totalSpent || 0).toFixed(2)}`,
+        meta: 'Completed orders only',
+        icon: '₱',
+      },
     ];
 
-    grid.innerHTML = cards.map((card) => `
+    grid.innerHTML = cards
+      .map(
+        (card) => `
       <article class="customer-stat-card">
         <div class="customer-stat-top">
           <span class="customer-stat-label">${escapeHtml(card.label)}</span>
@@ -313,7 +385,9 @@ async function loadCustomerStats() {
         <strong class="customer-stat-value">${escapeHtml(String(card.value))}</strong>
         <span class="customer-stat-meta">${escapeHtml(card.meta)}</span>
       </article>
-    `).join('');
+    `
+      )
+      .join('');
 
     const recentOrders = stats.recentOrders || [];
     const recentList = document.getElementById('customer-recent-orders');
@@ -326,11 +400,18 @@ async function loadCustomerStats() {
               <a href="profile.html?tab=history" class="recent-orders-link">View all</a>
             </div>
             <div class="recent-orders-list">
-              ${recentOrders.map((order) => {
-                const status = formatOrderStatusLabel(order.status || 'pending');
-                const safeStatusClass = (order.status || 'pending').toString().replace(/\s+/g, '_');
-                const isFinalStatus = ['completed', 'cancelled'].includes(order.status);
-                return `
+              ${recentOrders
+                .map((order) => {
+                  const status = formatOrderStatusLabel(
+                    order.status || 'pending'
+                  );
+                  const safeStatusClass = (order.status || 'pending')
+                    .toString()
+                    .replace(/\s+/g, '_');
+                  const isFinalStatus = ['completed', 'cancelled'].includes(
+                    order.status
+                  );
+                  return `
                   <div class="recent-order-item" tabindex="0">
                     <div class="recent-order-main">
                       <span class="recent-order-id">${escapeHtml(order.orderNumber || 'Order')}</span>
@@ -344,7 +425,8 @@ async function loadCustomerStats() {
                     </div>
                   </div>
                 `;
-              }).join('')}
+                })
+                .join('')}
             </div>
           </div>
         `
@@ -371,15 +453,17 @@ async function loadCustomerStats() {
     if (totalEl) totalEl.textContent = String(statusTotal);
 
     if (statusPills) {
-      statusPills.innerHTML = statusMeta.map((item) => {
-        const count = statusCounts[item.key] || 0;
-        return `
+      statusPills.innerHTML = statusMeta
+        .map((item) => {
+          const count = statusCounts[item.key] || 0;
+          return `
           <button type="button" class="status-pill" data-status-filter="${item.key}" style="color:${item.color};">
             <span class="status-dot" style="background:${item.color};"></span>
             ${escapeHtml(item.label)} <span>${count}</span>
           </button>
         `;
-      }).join('');
+        })
+        .join('');
 
       statusPills.querySelectorAll('.status-pill').forEach((button) => {
         button.addEventListener('click', async () => {
@@ -392,8 +476,12 @@ async function loadCustomerStats() {
             return;
           }
           try {
-            const res = await apiFetch(`/orders/mine?status=${encodeURIComponent(current)}`);
-            const container = document.getElementById('status-orders-container');
+            const res = await apiFetch(
+              `/orders/mine?status=${encodeURIComponent(current)}`
+            );
+            const container = document.getElementById(
+              'status-orders-container'
+            );
             const orders = res.orders || [];
             if (!container) return;
             container.innerHTML = orders.length
@@ -408,7 +496,9 @@ async function loadCustomerStats() {
 
     const tracker = document.getElementById('customer-mini-tracker');
     if (tracker) {
-      const ordersRes = await apiFetch('/customer/orders?status=active&limit=1');
+      const ordersRes = await apiFetch(
+        '/customer/orders?status=active&limit=1'
+      );
       const activeOrders = ordersRes.orders || [];
 
       if (!activeOrders.length) {
@@ -426,14 +516,15 @@ async function loadCustomerStats() {
       }
 
       const activeOrder = activeOrders[0];
-      const statusLabel = {
-        pending: 'Pending',
-        preparing: 'Being prepared',
-        ready_for_pickup: 'Ready for pickup',
-        ready_to_deliver: 'Ready to deliver',
-        to_pickup: 'To pick up',
-        to_ship: 'To ship',
-      }[activeOrder.status] || activeOrder.status;
+      const statusLabel =
+        {
+          pending: 'Pending',
+          preparing: 'Being prepared',
+          ready_for_pickup: 'Ready for pickup',
+          ready_to_deliver: 'Ready to deliver',
+          to_pickup: 'To pick up',
+          to_ship: 'To ship',
+        }[activeOrder.status] || activeOrder.status;
 
       tracker.innerHTML = `
         <div class="mini-tracker-title">Current active order</div>
@@ -449,7 +540,8 @@ async function loadCustomerStats() {
   } catch (err) {
     const grid = document.getElementById('customer-kpi-grid');
     if (grid) {
-      grid.innerHTML = '<div class="state-box"><h4 class="state-title">Could not load dashboard</h4><p class="state-desc">Please refresh the page or try again.</p></div>';
+      grid.innerHTML =
+        '<div class="state-box"><h4 class="state-title">Could not load dashboard</h4><p class="state-desc">Please refresh the page or try again.</p></div>';
     }
   }
 }
@@ -465,12 +557,20 @@ async function loadStatusOrders() {
 
     // Filter by subtab
     const fulfillment = statusSubTab === 'pickup' ? 'pickup' : 'delivery';
-    const filtered = allActive.filter((order) => order.fulfillment === fulfillment);
+    const filtered = allActive.filter(
+      (order) => order.fulfillment === fulfillment
+    );
 
     const pickupBadge = document.getElementById('subtab-pickup-badge');
     const deliveryBadge = document.getElementById('subtab-delivery-badge');
-    if (pickupBadge) pickupBadge.textContent = String(allActive.filter((order) => order.fulfillment === 'pickup').length);
-    if (deliveryBadge) deliveryBadge.textContent = String(allActive.filter((order) => order.fulfillment === 'delivery').length);
+    if (pickupBadge)
+      pickupBadge.textContent = String(
+        allActive.filter((order) => order.fulfillment === 'pickup').length
+      );
+    if (deliveryBadge)
+      deliveryBadge.textContent = String(
+        allActive.filter((order) => order.fulfillment === 'delivery').length
+      );
 
     if (filtered.length === 0) {
       container.innerHTML = `
@@ -485,7 +585,9 @@ async function loadStatusOrders() {
       return;
     }
 
-    container.innerHTML = filtered.map((order) => renderOrderCard(order, true)).join('');
+    container.innerHTML = filtered
+      .map((order) => renderOrderCard(order, true))
+      .join('');
   } catch (err) {
     container.innerHTML = `
       <div class="state-box">
@@ -542,7 +644,13 @@ async function loadHistoryOrders() {
     container.querySelectorAll('[data-history-page]').forEach((button) => {
       button.addEventListener('click', () => {
         const nextPage = Number(button.getAttribute('data-history-page'));
-        if (!Number.isInteger(nextPage) || nextPage < 1 || nextPage > pageCount || nextPage === historyPage) return;
+        if (
+          !Number.isInteger(nextPage) ||
+          nextPage < 1 ||
+          nextPage > pageCount ||
+          nextPage === historyPage
+        )
+          return;
         historyPage = nextPage;
         loadHistoryOrders();
       });
@@ -591,12 +699,22 @@ function renderOrderCard(order, isLive = false) {
   let progressTracker = '';
   if (isLive && order.status !== 'cancelled') {
     const isStep1 = true;
-    const isStep2 = ['preparing', 'ready_for_pickup', 'ready_to_deliver', 'to_pickup', 'to_ship', 'completed'].includes(order.status);
+    const isStep2 = [
+      'preparing',
+      'ready_for_pickup',
+      'ready_to_deliver',
+      'to_pickup',
+      'to_ship',
+      'completed',
+    ].includes(order.status);
     const isStep3 = order.status === 'completed';
 
-    const step2Label = order.status === 'preparing'
-      ? 'Being Prepared'
-      : order.fulfillment === 'pickup' ? 'Ready to Pick Up' : 'Ready to Deliver';
+    const step2Label =
+      order.status === 'preparing'
+        ? 'Being Prepared'
+        : order.fulfillment === 'pickup'
+          ? 'Ready to Pick Up'
+          : 'Ready to Deliver';
 
     progressTracker = `
       <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 16px;position:relative;">
@@ -631,8 +749,15 @@ function renderOrderCard(order, isLive = false) {
     `;
   }
 
-  if (isLive && (order.status === 'ready_for_pickup' || order.status === 'ready_to_deliver' || order.status === 'to_pickup' || order.status === 'to_ship')) {
-    const actionLabel = order.fulfillment === 'pickup' ? 'Order Picked Up' : 'Order Received';
+  if (
+    isLive &&
+    (order.status === 'ready_for_pickup' ||
+      order.status === 'ready_to_deliver' ||
+      order.status === 'to_pickup' ||
+      order.status === 'to_ship')
+  ) {
+    const actionLabel =
+      order.fulfillment === 'pickup' ? 'Order Picked Up' : 'Order Received';
     actionsHtml += `
       <button type="button" class="btn btn-primary btn-sm btn-complete-order" data-order-id="${order._id}">
         ${actionLabel}
@@ -668,14 +793,21 @@ function renderOrderCard(order, isLive = false) {
       <div class="order-items-snippet">
         <strong>Items:</strong> ${itemsSnippet}
       </div>
-      ${order.paymentMethod === 'pay_at_shop' && ['pending', 'preparing'].includes(order.status)
-    ? `<p style="margin:8px 0 0;font-size:0.84rem;font-weight:600;color:var(--color-warning);">${order.status === 'preparing'
-      ? 'Your order is being prepared. Please pay at the shop when you pick it up.'
-      : 'Please arrive at the shop within 1 hour of placing your order. We will prepare it when you arrive; otherwise, it will be cancelled automatically.'}</p>`
-    : ''}
-      ${order.cancelledBy === 'system'
-    ? '<p style="margin:8px 0 0;font-size:0.84rem;color:var(--color-danger);">Automatically cancelled because the 1-hour arrival window expired.</p>'
-    : ''}
+      ${
+        order.paymentMethod === 'pay_at_shop' &&
+        ['pending', 'preparing'].includes(order.status)
+          ? `<p style="margin:8px 0 0;font-size:0.84rem;font-weight:600;color:var(--color-warning);">${
+              order.status === 'preparing'
+                ? 'Your order is being prepared. Please pay at the shop when you pick it up.'
+                : 'Please arrive at the shop within 1 hour of placing your order. We will prepare it when you arrive; otherwise, it will be cancelled automatically.'
+            }</p>`
+          : ''
+      }
+      ${
+        order.cancelledBy === 'system'
+          ? '<p style="margin:8px 0 0;font-size:0.84rem;color:var(--color-danger);">Automatically cancelled because the 1-hour arrival window expired.</p>'
+          : ''
+      }
 
       <div class="order-card-footer" style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px dashed var(--color-border);">
         <div>
@@ -706,7 +838,8 @@ async function openOrderReceipt(orderId) {
       .map((item) => {
         let addonsStr = '';
         if (item.addons && item.addons.length > 0) {
-          const quantityLabel = item.addonQuantityMode === 'per_order' ? 'for order' : 'per item';
+          const quantityLabel =
+            item.addonQuantityMode === 'per_order' ? 'for order' : 'per item';
           addonsStr = `<div style="font-size:0.75rem;color:var(--color-text-muted);padding-left:10px;">${item.addons.map((a) => `+ ${escapeHtml(a.name)} (x${a.qty} ${quantityLabel} @ ₱${a.price.toFixed(2)})`).join(', ')}</div>`;
         }
         return `
@@ -748,11 +881,15 @@ async function openOrderReceipt(orderId) {
         <div style="display:flex;justify-content:space-between;">
           <span>Subtotal:</span> <span>₱${order.subtotal.toFixed(2)}</span>
         </div>
-        ${order.deliveryFee > 0 ? `
+        ${
+          order.deliveryFee > 0
+            ? `
           <div style="display:flex;justify-content:space-between;">
             <span>Delivery Fee:</span> <span>₱${order.deliveryFee.toFixed(2)}</span>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
         <div style="display:flex;justify-content:space-between;font-weight:800;font-size:1.15rem;padding-top:6px;border-top:1px solid var(--color-border);color:var(--color-brand);">
           <span>Total:</span> <span>₱${order.total.toFixed(2)}</span>
         </div>
@@ -767,7 +904,12 @@ async function openOrderReceipt(orderId) {
 
 // Cancel order handler
 async function handleCancelOrder(orderId, button) {
-  if (!confirm('Cancel this order while it is still waiting for admin acceptance? If the admin accepts first, cancellation will be blocked and you will need to contact the shop.')) return;
+  if (
+    !confirm(
+      'Cancel this order while it is still waiting for admin acceptance? If the admin accepts first, cancellation will be blocked and you will need to contact the shop.'
+    )
+  )
+    return;
 
   button.disabled = true;
   button.textContent = 'Cancelling...';
@@ -780,7 +922,6 @@ async function handleCancelOrder(orderId, button) {
     button.disabled = false;
     button.textContent = 'Cancel Order';
   }
-
 }
 
 async function handleCompleteOrder(orderId, button) {
@@ -841,9 +982,12 @@ async function handleBuyAgain(orderId, button) {
           : 'Items from previous order re-added to your cart!',
         failures.length ? 'warning' : 'success'
       );
-      setTimeout(() => {
-        window.location.href = 'cart.html';
-      }, failures.length ? 1800 : 700);
+      setTimeout(
+        () => {
+          window.location.href = 'cart.html';
+        },
+        failures.length ? 1800 : 700
+      );
     } else {
       showToast(
         failures.length
@@ -862,8 +1006,9 @@ async function handleBuyAgain(orderId, button) {
 
 // Setup Event Listeners
 function setProfileTab(tab) {
-  const tabButton = Array.from(document.querySelectorAll('.profile-nav-btn'))
-    .find((button) => button.getAttribute('data-tab') === tab);
+  const tabButton = Array.from(
+    document.querySelectorAll('.profile-nav-btn')
+  ).find((button) => button.getAttribute('data-tab') === tab);
   if (!tabButton) return;
 
   activeTab = tab;
@@ -872,8 +1017,12 @@ function setProfileTab(tab) {
     if (button === tabButton) button.setAttribute('aria-current', 'page');
     else button.removeAttribute('aria-current');
   });
-  document.querySelectorAll('.profile-tab-section').forEach((section) => section.classList.add('hidden'));
-  document.getElementById(`tab-section-${activeTab}`)?.classList.remove('hidden');
+  document
+    .querySelectorAll('.profile-tab-section')
+    .forEach((section) => section.classList.add('hidden'));
+  document
+    .getElementById(`tab-section-${activeTab}`)
+    ?.classList.remove('hidden');
 
   if (activeTab === 'status') loadStatusOrders();
   if (activeTab === 'history') loadHistoryOrders();
@@ -884,8 +1033,12 @@ function setupProfileTabs() {
     button.addEventListener('click', () => {
       setProfileTab(button.getAttribute('data-tab'));
       if (window.matchMedia('(max-width: 900px)').matches) {
-        document.getElementById('profile-sidebar')?.classList.remove('open-mobile');
-        document.getElementById('profile-sidebar-backdrop')?.classList.add('hidden');
+        document
+          .getElementById('profile-sidebar')
+          ?.classList.remove('open-mobile');
+        document
+          .getElementById('profile-sidebar-backdrop')
+          ?.classList.add('hidden');
         updateProfileSidebarToggle();
       }
     });
@@ -930,7 +1083,10 @@ function setupProfileTabs() {
 
     const completeBtn = e.target.closest('.btn-complete-order');
     if (completeBtn) {
-      handleCompleteOrder(completeBtn.getAttribute('data-order-id'), completeBtn);
+      handleCompleteOrder(
+        completeBtn.getAttribute('data-order-id'),
+        completeBtn
+      );
       return;
     }
 
@@ -947,26 +1103,46 @@ function setupProfileTabs() {
   if (savedDetailsForm) {
     savedDetailsForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const firstName = document.getElementById('profile-first-name-input').value.trim();
-      const lastName = document.getElementById('profile-last-name-input').value.trim();
-      const contactEmail = document.getElementById('profile-contact-email-input').value.trim().toLowerCase();
+      const firstName = document
+        .getElementById('profile-first-name-input')
+        .value.trim();
+      const lastName = document
+        .getElementById('profile-last-name-input')
+        .value.trim();
+      const contactEmail = document
+        .getElementById('profile-contact-email-input')
+        .value.trim()
+        .toLowerCase();
       const phone = document.getElementById('profile-phone-input').value.trim();
-      const addressFields = Object.fromEntries(['street', 'barangay', 'city', 'province', 'postalCode'].map((field) => {
-        const inputId = `profile-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`;
-        return [field, document.getElementById(inputId).value.trim()];
-      }));
+      const addressFields = Object.fromEntries(
+        ['street', 'barangay', 'city', 'province', 'postalCode'].map(
+          (field) => {
+            const inputId = `profile-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`;
+            return [field, document.getElementById(inputId).value.trim()];
+          }
+        )
+      );
 
       const phPhoneRegex = /^(09\d{9}|\+639\d{9})$/;
       if (!phPhoneRegex.test(phone.replace(/[\s-]/g, ''))) {
-        showToast('Please enter a valid Philippine mobile number (e.g. 09171234567).', 'warning');
+        showToast(
+          'Please enter a valid Philippine mobile number (e.g. 09171234567).',
+          'warning'
+        );
         return;
       }
       const hasAddress = Object.values(addressFields).some(Boolean);
       if (hasAddress && Object.values(addressFields).some((value) => !value)) {
-        showToast('Complete every delivery address field, including your 4-digit postal code.', 'warning');
+        showToast(
+          'Complete every delivery address field, including your 4-digit postal code.',
+          'warning'
+        );
         return;
       }
-      if (addressFields.postalCode && !/^\d{4}$/.test(addressFields.postalCode)) {
+      if (
+        addressFields.postalCode &&
+        !/^\d{4}$/.test(addressFields.postalCode)
+      ) {
         showToast('Postal code must contain exactly 4 digits.', 'warning');
         document.getElementById('profile-postal-code-input').focus();
         return;
@@ -998,7 +1174,10 @@ function setupProfileTabs() {
           setUser(u);
         }
         const overviewName = document.getElementById('overview-username');
-        if (overviewName) overviewName.textContent = [firstName, lastName].filter(Boolean).join(' ');
+        if (overviewName)
+          overviewName.textContent = [firstName, lastName]
+            .filter(Boolean)
+            .join(' ');
       } catch (err) {
         showToast(err.message, 'error');
       }
@@ -1010,9 +1189,13 @@ function setupProfileTabs() {
   if (securityForm) {
     securityForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const currentPassword = document.getElementById('current-password-input').value;
+      const currentPassword = document.getElementById(
+        'current-password-input'
+      ).value;
       const newPassword = document.getElementById('new-password-input').value;
-      const confirmPassword = document.getElementById('confirm-password-input').value;
+      const confirmPassword = document.getElementById(
+        'confirm-password-input'
+      ).value;
 
       if (newPassword !== confirmPassword) {
         showToast('New passwords do not match.', 'warning');
@@ -1022,7 +1205,11 @@ function setupProfileTabs() {
       try {
         await apiFetch('/profile/password', {
           method: 'PATCH',
-          body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
+          body: JSON.stringify({
+            currentPassword,
+            newPassword,
+            confirmPassword,
+          }),
         });
         showToast('Password changed successfully!', 'success');
         securityForm.reset();
@@ -1121,16 +1308,19 @@ function setupProfileTabs() {
   }
 
   const closeUsernameButton = document.getElementById('close-username-modal');
-  if (closeUsernameButton) closeUsernameButton.addEventListener('click', closeUsernameModal);
+  if (closeUsernameButton)
+    closeUsernameButton.addEventListener('click', closeUsernameModal);
 
   const cancelUsernameButton = document.getElementById('cancel-username-btn');
-  if (cancelUsernameButton) cancelUsernameButton.addEventListener('click', closeUsernameModal);
+  if (cancelUsernameButton)
+    cancelUsernameButton.addEventListener('click', closeUsernameModal);
 
   const usernameForm = document.getElementById('username-form');
   if (usernameForm) usernameForm.addEventListener('submit', saveUsernameChange);
 
   const closeAvatarButton = document.getElementById('close-avatar-modal');
-  if (closeAvatarButton) closeAvatarButton.addEventListener('click', closeAvatarModal);
+  if (closeAvatarButton)
+    closeAvatarButton.addEventListener('click', closeAvatarModal);
 
   const avatarModal = document.getElementById('avatar-lightbox');
   if (avatarModal) {
@@ -1144,8 +1334,12 @@ function setupProfileTabs() {
         return;
       }
       if (event.key !== 'Tab') return;
-      const focusable = avatarModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-      const items = Array.from(focusable).filter((el) => !el.disabled && el.offsetParent !== null);
+      const focusable = avatarModal.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      const items = Array.from(focusable).filter(
+        (el) => !el.disabled && el.offsetParent !== null
+      );
       if (!items.length) return;
       const first = items[0];
       const last = items[items.length - 1];
@@ -1182,7 +1376,10 @@ function setupProfileTabs() {
 
   // Modal close buttons
   const closeReceiptModal = document.getElementById('close-receipt-modal');
-  if (closeReceiptModal) closeReceiptModal.addEventListener('click', () => closeModal('order-receipt-modal'));
+  if (closeReceiptModal)
+    closeReceiptModal.addEventListener('click', () =>
+      closeModal('order-receipt-modal')
+    );
 }
 
 function setupProfileTheme() {
@@ -1202,7 +1399,9 @@ function setupProfileTheme() {
 
   applyTheme(localStorage.getItem('profile-theme') || 'light');
   themeToggle.addEventListener('click', () => {
-    const nextTheme = document.body.classList.contains('theme-dark') ? 'light' : 'dark';
+    const nextTheme = document.body.classList.contains('theme-dark')
+      ? 'light'
+      : 'dark';
     localStorage.setItem('profile-theme', nextTheme);
     applyTheme(nextTheme);
   });
@@ -1218,7 +1417,10 @@ function setupProfileSidebar() {
   toggle.addEventListener('click', () => {
     if (window.matchMedia('(max-width: 900px)').matches) {
       sidebar.classList.toggle('open-mobile');
-      backdrop.classList.toggle('hidden', !sidebar.classList.contains('open-mobile'));
+      backdrop.classList.toggle(
+        'hidden',
+        !sidebar.classList.contains('open-mobile')
+      );
     } else {
       layout.classList.toggle('is-sidebar-collapsed');
     }

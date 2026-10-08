@@ -108,7 +108,8 @@ class StockStream {
       card.setAttribute('data-stock', stock);
       card.setAttribute('data-available', String(isAvailable));
 
-      const orderingAllowed = card.getAttribute('data-ordering-allowed') === 'true';
+      const orderingAllowed =
+        card.getAttribute('data-ordering-allowed') === 'true';
       if (!isAvailable) {
         card.classList.add('unavailable');
         if (badge) {
@@ -123,7 +124,10 @@ class StockStream {
         }
       } else {
         card.classList.remove('unavailable');
-        const threshold = parseInt(card.getAttribute('data-threshold') || '10', 10);
+        const threshold = parseInt(
+          card.getAttribute('data-threshold') || '10',
+          10
+        );
         if (badge) {
           if (stock <= threshold) {
             badge.className = 'badge badge-low-stock stock-badge';
@@ -147,9 +151,10 @@ class StockStream {
           addBtn.textContent = 'Out of Stock';
         } else {
           addBtn.disabled = false;
-          addBtn.textContent = addBtn.getAttribute('data-is-guest') === 'true'
-            ? 'Login to order'
-            : 'Add to Cart';
+          addBtn.textContent =
+            addBtn.getAttribute('data-is-guest') === 'true'
+              ? 'Login to order'
+              : 'Add to Cart';
         }
       }
     });

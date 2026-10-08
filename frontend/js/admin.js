@@ -1,6 +1,13 @@
 // Admin Dashboard & Operations Controller
 import { apiFetch } from './api.js';
-import { showToast, escapeHtml, openModal, closeModal, getProductImageUrl, setupBackToTop } from './ui.js';
+import {
+  showToast,
+  escapeHtml,
+  openModal,
+  closeModal,
+  getProductImageUrl,
+  setupBackToTop,
+} from './ui.js';
 import { requireAuth, getUser, resizeImageToDataUrl } from './auth.js';
 
 let activeSection = 'dashboard';
@@ -37,7 +44,9 @@ function setupAdminNavigation() {
       btn.classList.add('active');
       activeSection = btn.getAttribute('data-section');
 
-      document.querySelectorAll('.admin-section').forEach((sec) => sec.classList.add('hidden'));
+      document
+        .querySelectorAll('.admin-section')
+        .forEach((sec) => sec.classList.add('hidden'));
       const targetSec = document.getElementById(`section-${activeSection}`);
       if (targetSec) targetSec.classList.remove('hidden');
 
@@ -48,12 +57,24 @@ function setupAdminNavigation() {
 
       // Refresh target section
       switch (activeSection) {
-        case 'dashboard': loadDashboardStats(); break;
-        case 'orders': loadAdminOrders(); break;
-        case 'menu': loadAdminMenu(); break;
-        case 'categories': loadAdminCategories(); break;
-        case 'customers': loadAdminCustomers(); break;
-        case 'settings': loadAdminSettings(); break;
+        case 'dashboard':
+          loadDashboardStats();
+          break;
+        case 'orders':
+          loadAdminOrders();
+          break;
+        case 'menu':
+          loadAdminMenu();
+          break;
+        case 'categories':
+          loadAdminCategories();
+          break;
+        case 'customers':
+          loadAdminCustomers();
+          break;
+        case 'settings':
+          loadAdminSettings();
+          break;
       }
     });
   });
@@ -92,7 +113,9 @@ function setupAdminTheme() {
 
   applyTheme(localStorage.getItem('profile-theme') || 'light');
   themeToggle.addEventListener('click', () => {
-    const nextTheme = document.body.classList.contains('theme-dark') ? 'light' : 'dark';
+    const nextTheme = document.body.classList.contains('theme-dark')
+      ? 'light'
+      : 'dark';
     localStorage.setItem('profile-theme', nextTheme);
     applyTheme(nextTheme);
   });
@@ -110,9 +133,12 @@ function updateSidebarToggleState() {
     : !adminLayout.classList.contains('is-sidebar-collapsed');
   const actionLabel = isExpanded ? 'Collapse navigation' : 'Expand navigation';
   toggleButton.setAttribute('aria-expanded', String(isExpanded));
-  toggleButton.setAttribute('aria-label', isMobile
-    ? `${isExpanded ? 'Close' : 'Open'} navigation drawer`
-    : actionLabel);
+  toggleButton.setAttribute(
+    'aria-label',
+    isMobile
+      ? `${isExpanded ? 'Close' : 'Open'} navigation drawer`
+      : actionLabel
+  );
   toggleButton.title = isMobile
     ? `${isExpanded ? 'Close' : 'Open'} navigation drawer`
     : actionLabel;
@@ -134,13 +160,25 @@ async function loadDashboardStats() {
     dashboardStats = res.stats;
 
     // Stat cards
-    document.getElementById('stat-total-revenue').textContent = formatPeso(dashboardStats.totalRevenue);
-    document.getElementById('stat-total-orders').textContent = String(dashboardStats.totalOrders);
-    document.getElementById('stat-pending-orders').textContent = String(dashboardStats.pendingOrders);
+    document.getElementById('stat-total-revenue').textContent = formatPeso(
+      dashboardStats.totalRevenue
+    );
+    document.getElementById('stat-total-orders').textContent = String(
+      dashboardStats.totalOrders
+    );
+    document.getElementById('stat-pending-orders').textContent = String(
+      dashboardStats.pendingOrders
+    );
     updatePendingOrderBadge(dashboardStats.pendingOrders);
-    document.getElementById('stat-completed-orders').textContent = String(dashboardStats.completedOrders);
-    document.getElementById('stat-cancelled-orders').textContent = String(dashboardStats.cancelledOrders);
-    document.getElementById('stat-total-customers').textContent = String(dashboardStats.totalCustomers);
+    document.getElementById('stat-completed-orders').textContent = String(
+      dashboardStats.completedOrders
+    );
+    document.getElementById('stat-cancelled-orders').textContent = String(
+      dashboardStats.cancelledOrders
+    );
+    document.getElementById('stat-total-customers').textContent = String(
+      dashboardStats.totalCustomers
+    );
 
     const updatedAt = document.getElementById('dashboard-last-updated');
     if (updatedAt) {
@@ -167,14 +205,17 @@ function updatePendingOrderBadge(count) {
   const pendingBadge = document.getElementById('admin-pending-count');
   if (!pendingBadge) return;
 
-  const pendingCount = Number.isFinite(Number(count)) ? Math.max(0, Number(count)) : 0;
+  const pendingCount = Number.isFinite(Number(count))
+    ? Math.max(0, Number(count))
+    : 0;
   pendingBadge.textContent = String(pendingCount);
   pendingBadge.classList.toggle('hidden', pendingCount === 0);
   const ordersButton = pendingBadge.closest('.admin-nav-item');
   if (ordersButton) {
     ordersButton.setAttribute(
       'aria-label',
-      pendingCount === 1 ? 'Orders Management, 1 order awaiting acceptance'
+      pendingCount === 1
+        ? 'Orders Management, 1 order awaiting acceptance'
         : `Orders Management, ${pendingCount} orders awaiting acceptance`
     );
   }
@@ -212,20 +253,32 @@ function getStoreDateKey(date) {
     month: '2-digit',
     day: '2-digit',
   }).formatToParts(date);
-  const values = Object.fromEntries(parts.filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]));
+  const values = Object.fromEntries(
+    parts
+      .filter((part) => part.type !== 'literal')
+      .map((part) => [part.type, part.value])
+  );
   return `${values.year}-${values.month}-${values.day}`;
 }
 
 function renderSalesToggleData() {
   if (!dashboardStats || !dashboardStats.sales) return;
-  const data = dashboardStats.sales[currentSalesView] || { count: 0, revenue: 0 };
+  const data = dashboardStats.sales[currentSalesView] || {
+    count: 0,
+    revenue: 0,
+  };
   const labelElem = document.getElementById('sales-toggle-label');
   const countElem = document.getElementById('sales-toggle-count');
   const revElem = document.getElementById('sales-toggle-revenue');
 
-  const titles = { daily: "Today's Sales", weekly: 'Last 7 Days Sales', monthly: 'Last 30 Days Sales' };
+  const titles = {
+    daily: "Today's Sales",
+    weekly: 'Last 7 Days Sales',
+    monthly: 'Last 30 Days Sales',
+  };
   if (labelElem) labelElem.textContent = titles[currentSalesView];
-  if (countElem) countElem.textContent = `${data.count} completed ${data.count === 1 ? 'order' : 'orders'}`;
+  if (countElem)
+    countElem.textContent = `${data.count} completed ${data.count === 1 ? 'order' : 'orders'}`;
   if (revElem) revElem.textContent = formatPeso(data.revenue);
 }
 
@@ -234,7 +287,9 @@ function renderRevenueBarChart() {
   const container = document.getElementById('revenue-chart-container');
   if (!container || !dashboardStats || !dashboardStats.revenueHistory) return;
 
-  const historyByDate = new Map(dashboardStats.revenueHistory.map((item) => [item._id, item]));
+  const historyByDate = new Map(
+    dashboardStats.revenueHistory.map((item) => [item._id, item])
+  );
   const today = new Date(`${getStoreDateKey(new Date())}T00:00:00Z`);
   today.setUTCDate(today.getUTCDate() - currentChartDays + 1);
   const history = Array.from({ length: currentChartDays }, (_, index) => {
@@ -253,7 +308,10 @@ function renderRevenueBarChart() {
 
   const bars = history
     .map((item, idx) => {
-      const height = item.revenue > 0 ? Math.max(2, (item.revenue / maxRevenue) * (chartBottom - chartTop)) : 0;
+      const height =
+        item.revenue > 0
+          ? Math.max(2, (item.revenue / maxRevenue) * (chartBottom - chartTop))
+          : 0;
       const x = 32 + idx * slotWidth + (slotWidth - barWidth) / 2;
       const y = chartBottom - height;
       const dateLabel = item._id.slice(5);
@@ -286,7 +344,8 @@ function renderStatusDonutChart() {
   const container = document.getElementById('status-donut-container');
   if (!container || !dashboardStats || !dashboardStats.statusComparison) return;
 
-  const { completed, cancelled, pending, inProgress } = dashboardStats.statusComparison;
+  const { completed, cancelled, pending, inProgress } =
+    dashboardStats.statusComparison;
   const active = pending + inProgress;
   const total = completed + cancelled + active;
   const completedPct = total ? (completed / total) * 100 : 0;
@@ -323,12 +382,14 @@ function renderTopItems() {
 
   const topItems = dashboardStats.topItems;
   if (topItems.length === 0) {
-    container.innerHTML = '<p class="text-muted" style="font-size:0.85rem;">No orders yet.</p>';
+    container.innerHTML =
+      '<p class="text-muted" style="font-size:0.85rem;">No orders yet.</p>';
     return;
   }
 
   container.innerHTML = topItems
-    .map((item, idx) => `
+    .map(
+      (item, idx) => `
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--color-border);font-size:0.88rem;">
         <div style="display:flex;align-items:center;gap:10px;">
           <span style="width:20px;height:20px;border-radius:50%;background:var(--color-surface-alt);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;">${idx + 1}</span>
@@ -339,7 +400,8 @@ function renderTopItems() {
           <div>${formatPeso(item.totalSales)}</div>
         </div>
       </div>
-    `)
+    `
+    )
     .join('');
 }
 
@@ -350,12 +412,14 @@ function renderRecentOrders() {
 
   const orders = dashboardStats.recentOrders;
   if (orders.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding:20px;">No recent orders.</td></tr>';
+    tbody.innerHTML =
+      '<tr><td colspan="6" class="text-center text-muted" style="padding:20px;">No recent orders.</td></tr>';
     return;
   }
 
   tbody.innerHTML = orders
-    .map((o) => `
+    .map(
+      (o) => `
       <tr>
         <td><strong>#${escapeHtml(o.orderNumber)}</strong></td>
         <td>${escapeHtml(o.contact.fullName)}</td>
@@ -364,7 +428,8 @@ function renderRecentOrders() {
         <td><span class="badge badge-${o.status}">${o.status}</span></td>
         <td><span class="badge badge-${o.paymentStatus}">${o.paymentStatus}</span></td>
       </tr>
-    `)
+    `
+    )
     .join('');
 }
 
@@ -373,15 +438,20 @@ async function loadAdminOrders() {
   const tbody = document.getElementById('admin-orders-tbody');
   if (!tbody) return;
 
-  tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:24px;">Loading orders...</td></tr>';
+  tbody.innerHTML =
+    '<tr><td colspan="8" class="text-center" style="padding:24px;">Loading orders...</td></tr>';
 
   try {
     const params = new URLSearchParams();
     if (ordersFilter.search) params.append('search', ordersFilter.search);
-    if (ordersFilter.status !== 'all') params.append('status', ordersFilter.status);
-    if (ordersFilter.paymentStatus !== 'all') params.append('paymentStatus', ordersFilter.paymentStatus);
-    if (ordersFilter.fulfillment !== 'all') params.append('fulfillment', ordersFilter.fulfillment);
-    if (ordersFilter.dateRange) params.append('dateRange', ordersFilter.dateRange);
+    if (ordersFilter.status !== 'all')
+      params.append('status', ordersFilter.status);
+    if (ordersFilter.paymentStatus !== 'all')
+      params.append('paymentStatus', ordersFilter.paymentStatus);
+    if (ordersFilter.fulfillment !== 'all')
+      params.append('fulfillment', ordersFilter.fulfillment);
+    if (ordersFilter.dateRange)
+      params.append('dateRange', ordersFilter.dateRange);
     params.append('page', ordersFilter.page);
     params.append('limit', ordersFilter.limit);
 
@@ -402,10 +472,12 @@ async function loadAdminOrders() {
     const prevPageBtn = document.getElementById('orders-prev-page');
     const nextPageBtn = document.getElementById('orders-next-page');
     if (prevPageBtn) prevPageBtn.disabled = pagination.page <= 1;
-    if (nextPageBtn) nextPageBtn.disabled = pagination.page >= pagination.totalPages;
+    if (nextPageBtn)
+      nextPageBtn.disabled = pagination.page >= pagination.totalPages;
 
     if (orders.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted" style="padding:32px;">No orders match the selected filters.</td></tr>';
+      tbody.innerHTML =
+        '<tr><td colspan="8" class="text-center text-muted" style="padding:32px;">No orders match the selected filters.</td></tr>';
       return;
     }
 
@@ -443,16 +515,18 @@ async function loadAdminOrders() {
 }
 
 function statusLabel(status) {
-  return ({
-    pending: 'PENDING ACCEPTANCE',
-    preparing: 'PREPARING',
-    ready_for_pickup: 'READY FOR PICKUP',
-    ready_to_deliver: 'READY TO DELIVER',
-    to_pickup: 'READY FOR PICKUP',
-    to_ship: 'READY TO DELIVER',
-    completed: 'COMPLETED',
-    cancelled: 'CANCELLED',
-  })[status] || status.toUpperCase();
+  return (
+    {
+      pending: 'PENDING ACCEPTANCE',
+      preparing: 'PREPARING',
+      ready_for_pickup: 'READY FOR PICKUP',
+      ready_to_deliver: 'READY TO DELIVER',
+      to_pickup: 'READY FOR PICKUP',
+      to_ship: 'READY TO DELIVER',
+      completed: 'COMPLETED',
+      cancelled: 'CANCELLED',
+    }[status] || status.toUpperCase()
+  );
 }
 
 // Order Detail Drawer
@@ -484,12 +558,18 @@ async function openOrderDrawer(orderId) {
     // Action buttons based on status
     let actionButtons = '';
     if (order.status === 'pending') {
-      const nextStatus = order.paymentMethod === 'pay_at_shop'
-        ? 'preparing'
-        : order.fulfillment === 'pickup' ? 'ready_for_pickup' : 'ready_to_deliver';
-      const nextLabel = order.paymentMethod === 'pay_at_shop'
-        ? 'Customer Arrived — Start Preparing'
-        : order.fulfillment === 'pickup' ? 'Accept & Mark Ready for Pickup' : 'Accept & Mark Ready for Delivery';
+      const nextStatus =
+        order.paymentMethod === 'pay_at_shop'
+          ? 'preparing'
+          : order.fulfillment === 'pickup'
+            ? 'ready_for_pickup'
+            : 'ready_to_deliver';
+      const nextLabel =
+        order.paymentMethod === 'pay_at_shop'
+          ? 'Customer Arrived — Start Preparing'
+          : order.fulfillment === 'pickup'
+            ? 'Accept & Mark Ready for Pickup'
+            : 'Accept & Mark Ready for Delivery';
       actionButtons += `
         <button type="button" class="btn btn-primary btn-sm btn-action-status" data-order-id="${order._id}" data-status="${nextStatus}">
           ${nextLabel}
@@ -504,14 +584,21 @@ async function openOrderDrawer(orderId) {
           Mark Ready for Pickup
         </button>
       `;
-    } else if (order.status === 'ready_for_pickup' || order.status === 'to_pickup') {
+    } else if (
+      order.status === 'ready_for_pickup' ||
+      order.status === 'to_pickup'
+    ) {
       actionButtons += `
         <button type="button" class="btn btn-primary btn-sm btn-action-status" data-order-id="${order._id}" data-status="completed">
           Mark Pick Up as Completed
         </button>
       `;
-    } else if (order.status === 'ready_to_deliver' || order.status === 'to_ship') {
-      actionButtons += '<p class="text-muted">Waiting for the customer to confirm delivery.</p>';
+    } else if (
+      order.status === 'ready_to_deliver' ||
+      order.status === 'to_ship'
+    ) {
+      actionButtons +=
+        '<p class="text-muted">Waiting for the customer to confirm delivery.</p>';
     }
 
     if (order.paymentStatus === 'unpaid' && order.status !== 'cancelled') {
@@ -541,9 +628,13 @@ async function openOrderDrawer(orderId) {
         ${order.fulfillment === 'delivery' ? `<div><strong>Address:</strong> ${escapeHtml(order.contact.address)}</div>` : ''}
         <div><strong>Fulfillment:</strong> ${order.fulfillment.toUpperCase()}</div>
         <div><strong>Payment Method:</strong> ${order.paymentMethod.toUpperCase().replace(/_/g, ' ')}</div>
-        ${order.paymentMethod === 'pay_at_shop' && order.arrivalDeadline && order.status === 'pending'
-    ? `<div><strong>Customer arrival deadline:</strong> ${new Date(order.arrivalDeadline).toLocaleString()}</div><div style="color:var(--color-warning);font-weight:600;">Start preparing only after the customer arrives.</div>`
-    : ''}
+        ${
+          order.paymentMethod === 'pay_at_shop' &&
+          order.arrivalDeadline &&
+          order.status === 'pending'
+            ? `<div><strong>Customer arrival deadline:</strong> ${new Date(order.arrivalDeadline).toLocaleString()}</div><div style="color:var(--color-warning);font-weight:600;">Start preparing only after the customer arrives.</div>`
+            : ''
+        }
         ${order.gcashReference ? `<div style="background:#E1EFFE;padding:6px;border-radius:4px;margin-top:6px;"><strong>GCash Reference No:</strong> ${escapeHtml(order.gcashReference)}</div>` : ''}
       </div>
 
@@ -553,11 +644,15 @@ async function openOrderDrawer(orderId) {
         <div style="display:flex;justify-content:space-between;padding-top:8px;font-weight:700;">
           <span>Subtotal:</span> <span>₱${order.subtotal.toFixed(2)}</span>
         </div>
-        ${order.deliveryFee > 0 ? `
+        ${
+          order.deliveryFee > 0
+            ? `
           <div style="display:flex;justify-content:space-between;padding-top:2px;">
             <span>Delivery Fee:</span> <span>₱${order.deliveryFee.toFixed(2)}</span>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
         <div style="display:flex;justify-content:space-between;padding-top:6px;font-size:1.1rem;font-weight:800;border-top:1px solid var(--color-border);margin-top:6px;">
           <span>Total:</span> <span>₱${order.total.toFixed(2)}</span>
         </div>
@@ -579,19 +674,23 @@ async function loadAdminMenu() {
   const tbody = document.getElementById('admin-menu-tbody');
   if (!tbody) return;
 
-  tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:24px;">Loading menu items...</td></tr>';
+  tbody.innerHTML =
+    '<tr><td colspan="7" class="text-center" style="padding:24px;">Loading menu items...</td></tr>';
 
   try {
     const params = new URLSearchParams();
-    if (menuCategoryFilter !== 'all') params.append('category', menuCategoryFilter);
-    if (menuStockFilter !== 'all') params.append('stockFilter', menuStockFilter);
+    if (menuCategoryFilter !== 'all')
+      params.append('category', menuCategoryFilter);
+    if (menuStockFilter !== 'all')
+      params.append('stockFilter', menuStockFilter);
     if (menuSearchQuery.trim()) params.append('search', menuSearchQuery.trim());
 
     const res = await apiFetch(`/admin/products?${params.toString()}`);
     const products = res.products || [];
 
     if (products.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding:32px;">No menu items found.</td></tr>';
+      tbody.innerHTML =
+        '<tr><td colspan="7" class="text-center text-muted" style="padding:32px;">No menu items found.</td></tr>';
       return;
     }
 
@@ -599,8 +698,13 @@ async function loadAdminMenu() {
       .map((p) => {
         const isLow = p.stock <= (p.lowStockThreshold || 10) && p.stock > 0;
         const isOut = p.stock <= 0;
-        const rowClass = isOut ? 'background-color:#FDE8E8;' : isLow ? 'background-color:#FEF3C7;' : '';
-        const catName = p.category && p.category.name ? p.category.name : 'Unassigned';
+        const rowClass = isOut
+          ? 'background-color:#FDE8E8;'
+          : isLow
+            ? 'background-color:#FEF3C7;'
+            : '';
+        const catName =
+          p.category && p.category.name ? p.category.name : 'Unassigned';
         const imgUrl = getProductImageUrl(p);
 
         return `
@@ -675,13 +779,21 @@ async function openProductModal(productId = null) {
       const p = res.product;
       document.getElementById('product-name-input').value = p.name;
       document.getElementById('product-price-input').value = p.price;
-      document.getElementById('product-description-input').value = p.description || '';
+      document.getElementById('product-description-input').value =
+        p.description || '';
       document.getElementById('product-stock-input').value = p.stock;
-      document.getElementById('product-threshold-input').value = p.lowStockThreshold || 10;
+      document.getElementById('product-threshold-input').value =
+        p.lowStockThreshold || 10;
       if (catSelect) catSelect.value = p.category._id || p.category;
-      document.getElementById('product-is-addon-input').checked = Boolean(p.isAddon);
-      document.getElementById('product-is-available-input').checked = Boolean(p.isAvailable);
-      document.getElementById('product-is-featured-input').checked = Boolean(p.isFeatured);
+      document.getElementById('product-is-addon-input').checked = Boolean(
+        p.isAddon
+      );
+      document.getElementById('product-is-available-input').checked = Boolean(
+        p.isAvailable
+      );
+      document.getElementById('product-is-featured-input').checked = Boolean(
+        p.isFeatured
+      );
     } catch (e) {
       showToast('Error loading item details', 'error');
       return;
@@ -702,19 +814,22 @@ async function loadAdminCategories() {
   const tbody = document.getElementById('admin-categories-tbody');
   if (!tbody) return;
 
-  tbody.innerHTML = '<tr><td colspan="4" class="text-center" style="padding:20px;">Loading categories...</td></tr>';
+  tbody.innerHTML =
+    '<tr><td colspan="4" class="text-center" style="padding:20px;">Loading categories...</td></tr>';
 
   try {
     const res = await apiFetch('/categories');
     categoriesList = res.categories || [];
 
     if (categoriesList.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted" style="padding:20px;">No categories created.</td></tr>';
+      tbody.innerHTML =
+        '<tr><td colspan="4" class="text-center text-muted" style="padding:20px;">No categories created.</td></tr>';
       return;
     }
 
     tbody.innerHTML = categoriesList
-      .map((c) => `
+      .map(
+        (c) => `
         <tr>
           <td><strong>${escapeHtml(c.name)}</strong></td>
           <td>${c.sortOrder}</td>
@@ -724,7 +839,8 @@ async function loadAdminCategories() {
             <button class="btn btn-danger btn-sm btn-delete-category" data-id="${c._id}" data-name="${escapeHtml(c.name)}">Delete</button>
           </td>
         </tr>
-      `)
+      `
+      )
       .join('');
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger" style="padding:20px;">${escapeHtml(err.message)}</td></tr>`;
@@ -736,21 +852,26 @@ async function loadAdminCustomers() {
   const tbody = document.getElementById('admin-customers-tbody');
   if (!tbody) return;
 
-  tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:24px;">Loading customer accounts...</td></tr>';
+  tbody.innerHTML =
+    '<tr><td colspan="7" class="text-center" style="padding:24px;">Loading customer accounts...</td></tr>';
 
   try {
     const searchInput = document.getElementById('customer-search-input');
     const q = searchInput ? searchInput.value.trim() : '';
-    const res = await apiFetch(`/admin/customers${q ? `?search=${encodeURIComponent(q)}` : ''}`);
+    const res = await apiFetch(
+      `/admin/customers${q ? `?search=${encodeURIComponent(q)}` : ''}`
+    );
     const customers = res.customers || [];
 
     if (customers.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding:32px;">No customers found.</td></tr>';
+      tbody.innerHTML =
+        '<tr><td colspan="7" class="text-center text-muted" style="padding:32px;">No customers found.</td></tr>';
       return;
     }
 
     tbody.innerHTML = customers
-      .map((c) => `
+      .map(
+        (c) => `
         <tr>
           <td><strong>${escapeHtml(c.username)}</strong></td>
           <td>${escapeHtml(c.fullName || '—')}</td>
@@ -771,7 +892,8 @@ async function loadAdminCustomers() {
             </div>
           </td>
         </tr>
-      `)
+      `
+      )
       .join('');
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger" style="padding:24px;">${escapeHtml(err.message)}</td></tr>`;
@@ -786,10 +908,12 @@ async function openCustomerHistoryModal(customerId) {
     const body = document.getElementById('customer-history-body');
     if (!body) return;
 
-    const ordersHtml = orders.length === 0
-      ? '<p class="text-muted" style="padding:16px 0;">Customer has not placed any orders yet.</p>'
-      : orders
-          .map((o) => `
+    const ordersHtml =
+      orders.length === 0
+        ? '<p class="text-muted" style="padding:16px 0;">Customer has not placed any orders yet.</p>'
+        : orders
+            .map(
+              (o) => `
             <div class="step-card" style="margin-bottom:10px;">
               <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
                 <strong>#${escapeHtml(o.orderNumber)}</strong>
@@ -797,8 +921,9 @@ async function openCustomerHistoryModal(customerId) {
               </div>
               <div style="font-size:0.8rem;color:var(--color-text-muted);">${new Date(o.createdAt).toLocaleString()} &bull; Total: <strong>₱${o.total.toFixed(2)}</strong></div>
             </div>
-          `)
-          .join('');
+          `
+            )
+            .join('');
 
     body.innerHTML = `
       <div style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--color-border);">
@@ -832,26 +957,53 @@ async function loadAdminSettings() {
     document.getElementById('settings-email').value = s.email || '';
 
     // Switches
-    document.getElementById('settings-accepting-orders').checked = Boolean(s.acceptingOrders);
+    document.getElementById('settings-accepting-orders').checked = Boolean(
+      s.acceptingOrders
+    );
     updateOnlineOrderingSummary(Boolean(s.acceptingOrders), true);
-    document.getElementById('settings-delivery-enabled').checked = Boolean(s.deliveryEnabled);
-    document.getElementById('settings-pickup-enabled').checked = Boolean(s.pickupEnabled);
-    document.getElementById('settings-delivery-fee').value = Number.isFinite(Number(s.deliveryFee))
+    document.getElementById('settings-delivery-enabled').checked = Boolean(
+      s.deliveryEnabled
+    );
+    document.getElementById('settings-pickup-enabled').checked = Boolean(
+      s.pickupEnabled
+    );
+    document.getElementById('settings-delivery-fee').value = Number.isFinite(
+      Number(s.deliveryFee)
+    )
       ? Number(s.deliveryFee)
       : 30;
     document.getElementById('settings-min-order').value = s.minimumOrder || 0;
 
     // Payment methods
-    document.getElementById('settings-gcash-enabled').checked = Boolean(s.gcashEnabled);
-    document.getElementById('settings-cod-enabled').checked = Boolean(s.codEnabled);
-    document.getElementById('settings-pay-at-shop-enabled').checked = Boolean(s.payAtShopEnabled);
+    document.getElementById('settings-gcash-enabled').checked = Boolean(
+      s.gcashEnabled
+    );
+    document.getElementById('settings-cod-enabled').checked = Boolean(
+      s.codEnabled
+    );
+    document.getElementById('settings-pay-at-shop-enabled').checked = Boolean(
+      s.payAtShopEnabled
+    );
     document.getElementById('settings-gcash-name').value = s.gcashName || '';
-    document.getElementById('settings-gcash-number').value = s.gcashNumber || '';
+    document.getElementById('settings-gcash-number').value =
+      s.gcashNumber || '';
 
     // Business Hours
-    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const days = [
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+      'sunday',
+    ];
     days.forEach((day) => {
-      const h = (s.businessHours && s.businessHours[day]) || { open: '09:00', close: '21:00', closed: false };
+      const h = (s.businessHours && s.businessHours[day]) || {
+        open: '09:00',
+        close: '21:00',
+        closed: false,
+      };
       const openElem = document.getElementById(`hours-${day}-open`);
       const closeElem = document.getElementById(`hours-${day}-close`);
       const closedElem = document.getElementById(`hours-${day}-closed`);
@@ -863,10 +1015,14 @@ async function loadAdminSettings() {
     // Admin Profile Tab
     const profRes = await apiFetch('/admin/profile');
     if (profRes.admin) {
-      document.getElementById('admin-profile-username').value = profRes.admin.username;
-      document.getElementById('admin-profile-email').value = profRes.admin.email;
-      document.getElementById('admin-profile-fullname').value = profRes.admin.fullName || '';
-      document.getElementById('admin-profile-phone').value = profRes.admin.phone || '';
+      document.getElementById('admin-profile-username').value =
+        profRes.admin.username;
+      document.getElementById('admin-profile-email').value =
+        profRes.admin.email;
+      document.getElementById('admin-profile-fullname').value =
+        profRes.admin.fullName || '';
+      document.getElementById('admin-profile-phone').value =
+        profRes.admin.phone || '';
     }
   } catch (err) {
     showToast('Failed to load store settings: ' + err.message, 'error');
@@ -875,17 +1031,24 @@ async function loadAdminSettings() {
 
 // ---------------- GLOBAL EVENT ATTACHMENTS ----------------
 function attachAdminEventListeners() {
-  const dashboardRefreshButton = document.getElementById('dashboard-refresh-btn');
-  if (dashboardRefreshButton) dashboardRefreshButton.addEventListener('click', loadDashboardStats);
+  const dashboardRefreshButton = document.getElementById(
+    'dashboard-refresh-btn'
+  );
+  if (dashboardRefreshButton)
+    dashboardRefreshButton.addEventListener('click', loadDashboardStats);
 
   const openOrdersSection = () => {
-    const ordersNavButton = document.querySelector('.admin-nav-item[data-section="orders"]');
+    const ordersNavButton = document.querySelector(
+      '.admin-nav-item[data-section="orders"]'
+    );
     if (ordersNavButton) ordersNavButton.click();
   };
-  ['dashboard-view-orders-btn', 'dashboard-view-all-orders-btn'].forEach((id) => {
-    const button = document.getElementById(id);
-    if (button) button.addEventListener('click', openOrdersSection);
-  });
+  ['dashboard-view-orders-btn', 'dashboard-view-all-orders-btn'].forEach(
+    (id) => {
+      const button = document.getElementById(id);
+      if (button) button.addEventListener('click', openOrdersSection);
+    }
+  );
 
   document.addEventListener('click', (event) => {
     const closeButton = event.target.closest('[data-modal-close]');
@@ -894,10 +1057,16 @@ function attachAdminEventListeners() {
     }
   });
 
-  const customerHistoryModal = document.getElementById('customer-history-modal');
+  const customerHistoryModal = document.getElementById(
+    'customer-history-modal'
+  );
   const closeCustomerHistory = () => closeModal('customer-history-modal');
-  const closeCustomerHistoryButton = document.getElementById('close-customer-history-modal');
-  const customerHistoryCloseButton = document.getElementById('customer-history-close-btn');
+  const closeCustomerHistoryButton = document.getElementById(
+    'close-customer-history-modal'
+  );
+  const customerHistoryCloseButton = document.getElementById(
+    'customer-history-close-btn'
+  );
 
   if (closeCustomerHistoryButton) {
     closeCustomerHistoryButton.addEventListener('click', closeCustomerHistory);
@@ -913,7 +1082,11 @@ function attachAdminEventListeners() {
     });
   }
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && customerHistoryModal && customerHistoryModal.classList.contains('open')) {
+    if (
+      event.key === 'Escape' &&
+      customerHistoryModal &&
+      customerHistoryModal.classList.contains('open')
+    ) {
       closeCustomerHistory();
     }
   });
@@ -921,7 +1094,9 @@ function attachAdminEventListeners() {
   // Sales view toggles (daily, weekly, monthly)
   document.querySelectorAll('.btn-sales-toggle').forEach((btn) => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.btn-sales-toggle').forEach((b) => b.classList.remove('active'));
+      document
+        .querySelectorAll('.btn-sales-toggle')
+        .forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       currentSalesView = btn.getAttribute('data-view');
       renderSalesToggleData();
@@ -931,7 +1106,9 @@ function attachAdminEventListeners() {
   // Chart range toggle (14 / 30 days)
   document.querySelectorAll('.btn-chart-range').forEach((btn) => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.btn-chart-range').forEach((b) => b.classList.remove('active'));
+      document
+        .querySelectorAll('.btn-chart-range')
+        .forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       currentChartDays = parseInt(btn.getAttribute('data-days'), 10);
       renderRevenueBarChart();
@@ -991,7 +1168,9 @@ function attachAdminEventListeners() {
     });
   }
 
-  const menuStockFilterInput = document.getElementById('admin-menu-stock-filter');
+  const menuStockFilterInput = document.getElementById(
+    'admin-menu-stock-filter'
+  );
   if (menuStockFilterInput) {
     menuStockFilterInput.addEventListener('change', (e) => {
       menuStockFilter = e.target.value;
@@ -1046,7 +1225,10 @@ function attachAdminEventListeners() {
           method: 'PATCH',
           body: JSON.stringify({ status }),
         });
-        showToast(`Order status updated to ${statusLabel(status).toLowerCase()}`, 'success');
+        showToast(
+          `Order status updated to ${statusLabel(status).toLowerCase()}`,
+          'success'
+        );
         closeModal('order-drawer-modal');
         loadAdminOrders();
         loadDashboardStats();
@@ -1061,7 +1243,12 @@ function attachAdminEventListeners() {
     const cancelActionBtn = e.target.closest('.btn-action-cancel');
     if (cancelActionBtn) {
       const orderId = cancelActionBtn.getAttribute('data-order-id');
-      if (!confirm('Cancel this pending customer order? Reserved stock will be returned.')) return;
+      if (
+        !confirm(
+          'Cancel this pending customer order? Reserved stock will be returned.'
+        )
+      )
+        return;
       cancelActionBtn.disabled = true;
       try {
         await apiFetch(`/admin/orders/${orderId}/cancel`, { method: 'PATCH' });
@@ -1112,9 +1299,14 @@ function attachAdminEventListeners() {
       const pid = toggleAvailBtn.getAttribute('data-product-id');
       toggleAvailBtn.disabled = true;
       try {
-        const res = await apiFetch(`/admin/products/${pid}/availability`, { method: 'PATCH' });
+        const res = await apiFetch(`/admin/products/${pid}/availability`, {
+          method: 'PATCH',
+        });
         await loadAdminMenu();
-        showToast(`${res.product.name} ${res.product.isAvailable ? 'enabled' : 'disabled'} for ordering`, 'success');
+        showToast(
+          `${res.product.name} ${res.product.isAvailable ? 'enabled' : 'disabled'} for ordering`,
+          'success'
+        );
       } catch (err) {
         showToast(err.message, 'error');
         toggleAvailBtn.disabled = false;
@@ -1126,7 +1318,11 @@ function attachAdminEventListeners() {
     if (deleteProdBtn) {
       const pid = deleteProdBtn.getAttribute('data-product-id');
       const name = deleteProdBtn.getAttribute('data-name');
-      if (confirm(`Permanently delete "${name}"? It will also be removed from any active user carts.`)) {
+      if (
+        confirm(
+          `Permanently delete "${name}"? It will also be removed from any active user carts.`
+        )
+      ) {
         try {
           await apiFetch(`/admin/products/${pid}`, { method: 'DELETE' });
           showToast(`"${name}" was deleted permanently.`, 'info');
@@ -1167,9 +1363,12 @@ function attachAdminEventListeners() {
     const editCatBtn = e.target.closest('.btn-edit-category');
     if (editCatBtn) {
       editingCategoryId = editCatBtn.getAttribute('data-id');
-      document.getElementById('category-modal-title').textContent = 'Edit Category';
-      document.getElementById('category-name-input').value = editCatBtn.getAttribute('data-name');
-      document.getElementById('category-order-input').value = editCatBtn.getAttribute('data-order');
+      document.getElementById('category-modal-title').textContent =
+        'Edit Category';
+      document.getElementById('category-name-input').value =
+        editCatBtn.getAttribute('data-name');
+      document.getElementById('category-order-input').value =
+        editCatBtn.getAttribute('data-order');
       openModal('category-modal');
       return;
     }
@@ -1201,14 +1400,32 @@ function attachAdminEventListeners() {
 
       try {
         const name = document.getElementById('product-name-input').value.trim();
-        const price = parseFloat(document.getElementById('product-price-input').value);
-        const description = document.getElementById('product-description-input').value.trim();
-        const stock = parseInt(document.getElementById('product-stock-input').value, 10);
-        const lowStockThreshold = parseInt(document.getElementById('product-threshold-input').value, 10);
-        const category = document.getElementById('product-category-input').value;
-        const isAddon = document.getElementById('product-is-addon-input').checked;
-        const isAvailable = document.getElementById('product-is-available-input').checked;
-        const isFeatured = document.getElementById('product-is-featured-input').checked;
+        const price = parseFloat(
+          document.getElementById('product-price-input').value
+        );
+        const description = document
+          .getElementById('product-description-input')
+          .value.trim();
+        const stock = parseInt(
+          document.getElementById('product-stock-input').value,
+          10
+        );
+        const lowStockThreshold = parseInt(
+          document.getElementById('product-threshold-input').value,
+          10
+        );
+        const category = document.getElementById(
+          'product-category-input'
+        ).value;
+        const isAddon = document.getElementById(
+          'product-is-addon-input'
+        ).checked;
+        const isAvailable = document.getElementById(
+          'product-is-available-input'
+        ).checked;
+        const isFeatured = document.getElementById(
+          'product-is-featured-input'
+        ).checked;
 
         // Image file upload
         let image = '';
@@ -1273,8 +1490,13 @@ function attachAdminEventListeners() {
   const confirmRestockBtn = document.getElementById('confirm-restock-btn');
   if (confirmRestockBtn) {
     confirmRestockBtn.addEventListener('click', async () => {
-      const mode = document.querySelector('input[name="restock_mode"]:checked').value;
-      const amount = parseInt(document.getElementById('restock-amount-input').value, 10);
+      const mode = document.querySelector(
+        'input[name="restock_mode"]:checked'
+      ).value;
+      const amount = parseInt(
+        document.getElementById('restock-amount-input').value,
+        10
+      );
 
       try {
         await apiFetch(`/admin/products/${restockProductId}/stock`, {
@@ -1296,7 +1518,9 @@ function attachAdminEventListeners() {
     categoryForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('category-name-input').value.trim();
-      const sortOrder = parseInt(document.getElementById('category-order-input').value, 10) || 0;
+      const sortOrder =
+        parseInt(document.getElementById('category-order-input').value, 10) ||
+        0;
 
       try {
         if (editingCategoryId) {
@@ -1323,7 +1547,9 @@ function attachAdminEventListeners() {
   // Store Settings Form Submission
   const settingsForm = document.getElementById('store-settings-form');
   if (settingsForm) {
-    const onlineOrderingToggle = document.getElementById('settings-accepting-orders');
+    const onlineOrderingToggle = document.getElementById(
+      'settings-accepting-orders'
+    );
     if (onlineOrderingToggle) {
       onlineOrderingToggle.addEventListener('change', () => {
         updateOnlineOrderingSummary(onlineOrderingToggle.checked);
@@ -1332,7 +1558,15 @@ function attachAdminEventListeners() {
 
     settingsForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      const days = [
+        'monday',
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'friday',
+        'saturday',
+        'sunday',
+      ];
       const businessHours = {};
       days.forEach((day) => {
         businessHours[day] = {
@@ -1348,16 +1582,26 @@ function attachAdminEventListeners() {
         address: document.getElementById('settings-address').value.trim(),
         phone: document.getElementById('settings-phone').value.trim(),
         email: document.getElementById('settings-email').value.trim(),
-        acceptingOrders: document.getElementById('settings-accepting-orders').checked,
-        deliveryEnabled: document.getElementById('settings-delivery-enabled').checked,
-        pickupEnabled: document.getElementById('settings-pickup-enabled').checked,
-        deliveryFee: parseFloat(document.getElementById('settings-delivery-fee').value) || 0,
-        minimumOrder: parseFloat(document.getElementById('settings-min-order').value) || 0,
+        acceptingOrders: document.getElementById('settings-accepting-orders')
+          .checked,
+        deliveryEnabled: document.getElementById('settings-delivery-enabled')
+          .checked,
+        pickupEnabled: document.getElementById('settings-pickup-enabled')
+          .checked,
+        deliveryFee:
+          parseFloat(document.getElementById('settings-delivery-fee').value) ||
+          0,
+        minimumOrder:
+          parseFloat(document.getElementById('settings-min-order').value) || 0,
         gcashEnabled: document.getElementById('settings-gcash-enabled').checked,
         codEnabled: document.getElementById('settings-cod-enabled').checked,
-        payAtShopEnabled: document.getElementById('settings-pay-at-shop-enabled').checked,
+        payAtShopEnabled: document.getElementById(
+          'settings-pay-at-shop-enabled'
+        ).checked,
         gcashName: document.getElementById('settings-gcash-name').value.trim(),
-        gcashNumber: document.getElementById('settings-gcash-number').value.trim(),
+        gcashNumber: document
+          .getElementById('settings-gcash-number')
+          .value.trim(),
         businessHours,
       };
 
@@ -1379,9 +1623,13 @@ function attachAdminEventListeners() {
   if (adminProfileForm) {
     adminProfileForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const username = document.getElementById('admin-profile-username').value.trim();
+      const username = document
+        .getElementById('admin-profile-username')
+        .value.trim();
       const email = document.getElementById('admin-profile-email').value.trim();
-      const fullName = document.getElementById('admin-profile-fullname').value.trim();
+      const fullName = document
+        .getElementById('admin-profile-fullname')
+        .value.trim();
       const phone = document.getElementById('admin-profile-phone').value.trim();
 
       try {
@@ -1401,14 +1649,20 @@ function attachAdminEventListeners() {
   if (adminPasswordForm) {
     adminPasswordForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const currentPassword = document.getElementById('admin-current-pass').value;
+      const currentPassword =
+        document.getElementById('admin-current-pass').value;
       const newPassword = document.getElementById('admin-new-pass').value;
-      const confirmPassword = document.getElementById('admin-confirm-pass').value;
+      const confirmPassword =
+        document.getElementById('admin-confirm-pass').value;
 
       try {
         await apiFetch('/admin/password', {
           method: 'PATCH',
-          body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
+          body: JSON.stringify({
+            currentPassword,
+            newPassword,
+            confirmPassword,
+          }),
         });
         showToast('Admin password changed successfully!', 'success');
         adminPasswordForm.reset();
@@ -1420,13 +1674,15 @@ function attachAdminEventListeners() {
 
   // Add Item / Add Category modal buttons
   const addProductBtn = document.getElementById('btn-add-product');
-  if (addProductBtn) addProductBtn.addEventListener('click', () => openProductModal());
+  if (addProductBtn)
+    addProductBtn.addEventListener('click', () => openProductModal());
 
   const addCategoryBtn = document.getElementById('btn-add-category');
   if (addCategoryBtn) {
     addCategoryBtn.addEventListener('click', () => {
       editingCategoryId = null;
-      document.getElementById('category-modal-title').textContent = 'Add Category';
+      document.getElementById('category-modal-title').textContent =
+        'Add Category';
       document.getElementById('category-form').reset();
       openModal('category-modal');
     });
@@ -1440,7 +1696,8 @@ function initAdmin() {
   const adminUser = getUser();
   const greetingName = document.getElementById('admin-greeting-name');
   if (greetingName && adminUser) {
-    greetingName.textContent = adminUser.fullName || adminUser.username || 'Admin';
+    greetingName.textContent =
+      adminUser.fullName || adminUser.username || 'Admin';
   }
   setupBackToTop();
   setupAdminNavigation();

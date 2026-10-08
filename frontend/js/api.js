@@ -1,6 +1,8 @@
 // Central API Fetch Wrapper
 
-const isLocalDevelopment = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+const isLocalDevelopment = ['localhost', '127.0.0.1'].includes(
+  window.location.hostname
+);
 const API_BASE_URL = isLocalDevelopment
   ? 'http://localhost:5000'
   : 'https://sad-web-db.onrender.com';
@@ -15,7 +17,8 @@ export async function apiFetch(endpoint, options = {}) {
   const url = apiUrl(endpoint);
 
   const headers = { ...(options.headers || {}) };
-  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  const isFormData =
+    typeof FormData !== 'undefined' && options.body instanceof FormData;
   if (!isFormData && options.body !== undefined && !headers['Content-Type']) {
     headers['Content-Type'] = 'application/json';
   }
@@ -45,7 +48,9 @@ export async function apiFetch(endpoint, options = {}) {
   if (!response.ok) {
     // Session expired or unauthorized
     if (response.status === 401) {
-      const isAuthPage = window.location.pathname.endsWith('login.html') || window.location.pathname.endsWith('register.html');
+      const isAuthPage =
+        window.location.pathname.endsWith('login.html') ||
+        window.location.pathname.endsWith('register.html');
       if (!isAuthPage && token) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -53,7 +58,8 @@ export async function apiFetch(endpoint, options = {}) {
         return;
       }
     }
-    const message = data.message || `Request failed with status ${response.status}`;
+    const message =
+      data.message || `Request failed with status ${response.status}`;
     const error = new Error(message);
     error.status = response.status;
     error.data = data;

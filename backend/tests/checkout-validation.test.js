@@ -1,7 +1,6 @@
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
 const checkoutSchema = require('../src/utils/checkoutValidation');
-const User = require('../src/models/User');
 
 function makeCheckout(fulfillment, overrides = {}) {
   return {
@@ -37,37 +36,58 @@ test('delivery requires each structured address field and a four-digit postal co
   });
   assert.equal(checkoutSchema.safeParse(validDelivery).success, true);
 
-  assert.equal(checkoutSchema.safeParse({
-    ...validDelivery,
-    contact: { ...validDelivery.contact, postalCode: '10000' },
-  }).success, false);
-  assert.equal(checkoutSchema.safeParse({
-    ...validDelivery,
-    contact: { ...validDelivery.contact, barangay: '' },
-  }).success, false);
+  assert.equal(
+    checkoutSchema.safeParse({
+      ...validDelivery,
+      contact: { ...validDelivery.contact, postalCode: '10000' },
+    }).success,
+    false
+  );
+  assert.equal(
+    checkoutSchema.safeParse({
+      ...validDelivery,
+      contact: { ...validDelivery.contact, barangay: '' },
+    }).success,
+    false
+  );
 });
 
 test('checkout requires first and last name and a valid contact email', () => {
   const pickup = makeCheckout('pickup');
-  assert.equal(checkoutSchema.safeParse({
-    ...pickup,
-    contact: { ...pickup.contact, firstName: '' },
-  }).success, false);
-  assert.equal(checkoutSchema.safeParse({
-    ...pickup,
-    contact: { ...pickup.contact, email: 'not-an-email' },
-  }).success, false);
+  assert.equal(
+    checkoutSchema.safeParse({
+      ...pickup,
+      contact: { ...pickup.contact, firstName: '' },
+    }).success,
+    false
+  );
+  assert.equal(
+    checkoutSchema.safeParse({
+      ...pickup,
+      contact: { ...pickup.contact, email: 'not-an-email' },
+    }).success,
+    false
+  );
 });
 
-test('saved account postal codes are empty or exactly four digits', () => {
-  const user = new User({
-    username: 'Customer_01',
-    email: 'contactuser@gmail.com',
-    passwordHash: 'hash',
-    postalCode: '12345',
-  });
+test('postal code must be empty or exactly four digits', () => {
+  // Five-digit postal code is rejected
+  const result = checkoutSchema.safeParse(
+    makeCheckout('pickup', { postalCode: '12345' })
+  );
+  assert.equal(result.success, false);
 
-  assert.match(user.validateSync().errors.postalCode.message, /exactly 4 digits/);
-  user.postalCode = '1000';
-  assert.equal(user.validateSync(), undefined);
+  // Four-digit postal code is accepted
+  assert.equal(
+    checkoutSchema.safeParse(makeCheckout('pickup', { postalCode: '1000' }))
+      .success,
+    true
+  );
+
+  // Empty postal code is accepted for pickup
+  assert.equal(
+    checkoutSchema.safeParse(makeCheckout('pickup', { postalCode: '' }))
+      .success,
+    true
+  );
 });
