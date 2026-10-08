@@ -1,6 +1,16 @@
 // Cart Management and Dynamic Rendering
 import { apiFetch } from './api.js';
-import { renderHeader, renderFooter, showToast, BURGER_PLACEHOLDER, escapeHtml, openModal, closeModal, updateCartBadge, getProductImageUrl } from './ui.js';
+import {
+  renderHeader,
+  renderFooter,
+  showToast,
+  BURGER_PLACEHOLDER,
+  escapeHtml,
+  openModal,
+  closeModal,
+  updateCartBadge,
+  getProductImageUrl,
+} from './ui.js';
 import { requireAuth } from './auth.js';
 import { updateReceipt } from './checkout.js';
 
@@ -21,19 +31,27 @@ export function hasStockIssue() {
   const checkedItems = getCheckedCartItems();
   const addonUsage = new Map();
   for (const item of checkedItems) {
-    if (!item.product || !item.product.isAvailable || item.product.stock < item.quantity) {
+    if (
+      !item.product ||
+      !item.product.isAvailable ||
+      item.product.stock < item.quantity
+    ) {
       return true;
     }
     if (item.addons && Array.isArray(item.addons)) {
       for (const a of item.addons) {
-        const addonQuantity = item.addonQuantityMode === 'per_order'
-          ? a.qty
-          : a.qty * item.quantity;
+        const addonQuantity =
+          item.addonQuantityMode === 'per_order'
+            ? a.qty
+            : a.qty * item.quantity;
         if (!a.product || !a.product.isAvailable) {
           return true;
         }
         const addonId = String(a.product._id || a.product);
-        const current = addonUsage.get(addonId) || { quantity: 0, stock: a.product.stock };
+        const current = addonUsage.get(addonId) || {
+          quantity: 0,
+          stock: a.product.stock,
+        };
         current.quantity += addonQuantity;
         addonUsage.set(addonId, current);
       }
@@ -89,7 +107,9 @@ export function renderCartLines() {
   if (emptyState) emptyState.classList.add('hidden');
   if (cartContent) cartContent.classList.remove('hidden');
 
-  const allChecked = cartItems.length > 0 && cartItems.every((item) => checkedItemIds.has(item._id));
+  const allChecked =
+    cartItems.length > 0 &&
+    cartItems.every((item) => checkedItemIds.has(item._id));
   const someChecked = cartItems.some((item) => checkedItemIds.has(item._id));
   if (selectAllCb) {
     selectAllCb.checked = allChecked;
@@ -98,10 +118,13 @@ export function renderCartLines() {
   const addonUsage = new Map();
   for (const item of cartItems) {
     for (const addon of item.addons || []) {
-      const addonId = String(addon.product && addon.product._id ? addon.product._id : addon.product);
-      const quantity = item.addonQuantityMode === 'per_order'
-        ? addon.qty
-        : addon.qty * item.quantity;
+      const addonId = String(
+        addon.product && addon.product._id ? addon.product._id : addon.product
+      );
+      const quantity =
+        item.addonQuantityMode === 'per_order'
+          ? addon.qty
+          : addon.qty * item.quantity;
       const current = addonUsage.get(addonId) || {
         quantity: 0,
         stock: addon.product && addon.product.stock,
@@ -123,7 +146,8 @@ export function renderCartLines() {
       let isBlocked = false;
 
       if (!prod.isAvailable) {
-        stockWarning = '<div class="text-danger" style="font-size:0.75rem;font-weight:700;">Item is no longer available!</div>';
+        stockWarning =
+          '<div class="text-danger" style="font-size:0.75rem;font-weight:700;">Item is no longer available!</div>';
         isBlocked = true;
       } else if (prod.stock < item.quantity) {
         stockWarning = `<div class="text-danger" style="font-size:0.75rem;font-weight:700;">Only ${prod.stock} left in stock (you have ${item.quantity}). Please decrease quantity.</div>`;
@@ -139,26 +163,31 @@ export function renderCartLines() {
           const singleTotal = (aProd.price || 0) * (a.qty || 1);
           addonsPriceTotal += singleTotal;
 
-          const addonQuantity = item.addonQuantityMode === 'per_order'
-            ? (a.qty || 1)
-            : (a.qty || 1) * item.quantity;
-          const totalAddonUsage = addonUsage.get(String(aProd._id || a.product));
+          const addonQuantity =
+            item.addonQuantityMode === 'per_order'
+              ? a.qty || 1
+              : (a.qty || 1) * item.quantity;
+          const totalAddonUsage = addonUsage.get(
+            String(aProd._id || a.product)
+          );
           if (totalAddonUsage && totalAddonUsage.quantity > aProd.stock) {
             stockWarning += `<div class="text-danger" style="font-size:0.75rem;font-weight:700;">Your cart has ${totalAddonUsage.quantity} of "${escapeHtml(aProd.name)}", but only ${aProd.stock} are in stock.</div>`;
             isBlocked = true;
           }
 
-          const quantityLabel = item.addonQuantityMode === 'per_order'
-            ? `x${a.qty || 1} for order`
-            : `x${a.qty || 1} per item`;
+          const quantityLabel =
+            item.addonQuantityMode === 'per_order'
+              ? `x${a.qty || 1} for order`
+              : `x${a.qty || 1} per item`;
           return `+ ${escapeHtml(aProd.name || 'Add-on')} (${quantityLabel} • ₱${singleTotal.toFixed(2)})`;
         });
         addonsDisplay = `<div class="cart-item-addons-list">${addonStrs.join('<br>')}</div>`;
       }
 
-      const addonTotal = item.addonQuantityMode === 'per_order'
-        ? addonsPriceTotal
-        : addonsPriceTotal * item.quantity;
+      const addonTotal =
+        item.addonQuantityMode === 'per_order'
+          ? addonsPriceTotal
+          : addonsPriceTotal * item.quantity;
       const lineTotal = (prod.price || 0) * item.quantity + addonTotal;
 
       return `
@@ -250,9 +279,12 @@ function scheduleQuantitySync(cartItemId, quantity) {
   const timer = debounceSyncTimers.get(cartItemId);
   if (timer) clearTimeout(timer);
   pendingQuantities.set(cartItemId, quantity);
-  debounceSyncTimers.set(cartItemId, setTimeout(() => {
-    syncQuantityToServer(cartItemId);
-  }, 400));
+  debounceSyncTimers.set(
+    cartItemId,
+    setTimeout(() => {
+      syncQuantityToServer(cartItemId);
+    }, 400)
+  );
 }
 
 export async function flushPendingCartUpdates() {
@@ -304,9 +336,8 @@ async function confirmCartDeletion() {
   confirmButton.textContent = 'Removing...';
 
   try {
-    const itemIds = deletion.type === 'all'
-      ? [...pendingQuantities.keys()]
-      : [deletion.id];
+    const itemIds =
+      deletion.type === 'all' ? [...pendingQuantities.keys()] : [deletion.id];
     for (const itemId of itemIds) {
       const timer = debounceSyncTimers.get(itemId);
       if (timer) clearTimeout(timer);
@@ -322,24 +353,29 @@ async function confirmCartDeletion() {
 
     const currentCart = await apiFetch('/cart');
     const remainingItems = currentCart.items || [];
-    const isDeleted = deletion.type === 'all'
-      ? remainingItems.length === 0
-      : !remainingItems.some((item) => item._id === deletion.id);
+    const isDeleted =
+      deletion.type === 'all'
+        ? remainingItems.length === 0
+        : !remainingItems.some((item) => item._id === deletion.id);
 
     if (!isDeleted) {
-      throw new Error('The item is still present in your cart after deletion. Please try again.');
+      throw new Error(
+        'The item is still present in your cart after deletion. Please try again.'
+      );
     }
 
     cartItems = remainingItems;
-    checkedItemIds = new Set([...checkedItemIds].filter((id) => cartItems.some((item) => item._id === id)));
+    checkedItemIds = new Set(
+      [...checkedItemIds].filter((id) =>
+        cartItems.some((item) => item._id === id)
+      )
+    );
     renderCartLines();
     updateReceipt();
     await updateCartBadge();
     closeCartDeleteConfirmation();
     showToast(
-      deletion.type === 'all'
-        ? 'Cart cleared.'
-        : 'Item removed from cart.',
+      deletion.type === 'all' ? 'Cart cleared.' : 'Item removed from cart.',
       'success'
     );
   } catch (err) {
@@ -362,7 +398,8 @@ async function openEditAddonsModal(cartItemId) {
   const modal = document.getElementById('edit-addons-modal');
   if (!modal) return;
 
-  document.getElementById('edit-modal-item-name').textContent = editingCartItem.product.name;
+  document.getElementById('edit-modal-item-name').textContent =
+    editingCartItem.product.name;
 
   if (allAddons.length === 0) {
     try {
@@ -387,9 +424,10 @@ async function openEditAddonsModal(cartItemId) {
     .map((addon) => {
       const isSelected = existingAddonMap.has(String(addon._id));
       const savedQty = existingAddonMap.get(String(addon._id)) || 1;
-      const currentQty = editingCartItem.addonQuantityMode === 'per_order'
-        ? savedQty
-        : savedQty * editingCartItem.quantity;
+      const currentQty =
+        editingCartItem.addonQuantityMode === 'per_order'
+          ? savedQty
+          : savedQty * editingCartItem.quantity;
 
       return `
         <div class="addon-row" style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--color-border);font-size:0.88rem;">
@@ -427,7 +465,8 @@ async function openEditAddonsModal(cartItemId) {
         let val = parseInt(elem.textContent, 10) || 1;
         const stock = Number(btn.getAttribute('data-stock')) || 0;
         if (val < stock) elem.textContent = String(val + 1);
-        else showToast(`Only ${stock} of this add-on are available.`, 'warning');
+        else
+          showToast(`Only ${stock} of this add-on are available.`, 'warning');
       }
     });
   });
@@ -447,7 +486,9 @@ async function saveEditedAddons() {
   const updatedAddons = [];
   document.querySelectorAll('.edit-addon-checkbox:checked').forEach((cb) => {
     const miniQtyInput = document.getElementById(`edit-addon-qty-${cb.value}`);
-    const miniQty = miniQtyInput ? parseInt(miniQtyInput.textContent, 10) || 1 : 1;
+    const miniQty = miniQtyInput
+      ? parseInt(miniQtyInput.textContent, 10) || 1
+      : 1;
     updatedAddons.push({
       product: cb.value,
       qty: miniQty,
@@ -457,7 +498,10 @@ async function saveEditedAddons() {
   try {
     await apiFetch(`/cart/${editingCartItem._id}`, {
       method: 'PATCH',
-      body: JSON.stringify({ addons: updatedAddons, addonQuantityMode: 'per_order' }),
+      body: JSON.stringify({
+        addons: updatedAddons,
+        addonQuantityMode: 'per_order',
+      }),
     });
 
     showToast('Add-ons updated!', 'success');
@@ -488,8 +532,12 @@ function setupCartListeners() {
       }
       const selectAllCb = document.getElementById('select-all-checkbox');
       if (selectAllCb) {
-        const allChecked = cartItems.length > 0 && cartItems.every((item) => checkedItemIds.has(item._id));
-        const someChecked = cartItems.some((item) => checkedItemIds.has(item._id));
+        const allChecked =
+          cartItems.length > 0 &&
+          cartItems.every((item) => checkedItemIds.has(item._id));
+        const someChecked = cartItems.some((item) =>
+          checkedItemIds.has(item._id)
+        );
         selectAllCb.checked = allChecked;
         selectAllCb.indeterminate = someChecked && !allChecked;
       }
@@ -524,7 +572,10 @@ function setupCartListeners() {
           updateReceipt();
           scheduleQuantitySync(lineId, item.quantity);
         } else {
-          showToast(`Cannot add more. Only ${item.product.stock} items left in stock.`, 'warning');
+          showToast(
+            `Cannot add more. Only ${item.product.stock} items left in stock.`,
+            'warning'
+          );
         }
       }
       return;
@@ -583,9 +634,12 @@ function setupCartListeners() {
   const closeDeleteBtn = document.getElementById('cart-delete-confirm-close');
   const deleteModal = document.getElementById('cart-delete-confirm-modal');
 
-  if (confirmDeleteBtn) confirmDeleteBtn.addEventListener('click', confirmCartDeletion);
-  if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', closeCartDeleteConfirmation);
-  if (closeDeleteBtn) closeDeleteBtn.addEventListener('click', closeCartDeleteConfirmation);
+  if (confirmDeleteBtn)
+    confirmDeleteBtn.addEventListener('click', confirmCartDeletion);
+  if (cancelDeleteBtn)
+    cancelDeleteBtn.addEventListener('click', closeCartDeleteConfirmation);
+  if (closeDeleteBtn)
+    closeDeleteBtn.addEventListener('click', closeCartDeleteConfirmation);
   if (deleteModal) {
     deleteModal.addEventListener('click', (event) => {
       if (event.target === deleteModal && !confirmDeleteBtn.disabled) {
@@ -594,7 +648,11 @@ function setupCartListeners() {
     });
   }
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && pendingCartDeletion && !confirmDeleteBtn.disabled) {
+    if (
+      event.key === 'Escape' &&
+      pendingCartDeletion &&
+      !confirmDeleteBtn.disabled
+    ) {
       closeCartDeleteConfirmation();
     }
   });
@@ -604,8 +662,14 @@ function setupCartListeners() {
   const cancelEditBtn = document.getElementById('cancel-edit-addons-btn');
   const saveEditBtn = document.getElementById('save-edit-addons-btn');
 
-  if (closeEditBtn) closeEditBtn.addEventListener('click', () => closeModal('edit-addons-modal'));
-  if (cancelEditBtn) cancelEditBtn.addEventListener('click', () => closeModal('edit-addons-modal'));
+  if (closeEditBtn)
+    closeEditBtn.addEventListener('click', () =>
+      closeModal('edit-addons-modal')
+    );
+  if (cancelEditBtn)
+    cancelEditBtn.addEventListener('click', () =>
+      closeModal('edit-addons-modal')
+    );
   if (saveEditBtn) saveEditBtn.addEventListener('click', saveEditedAddons);
 }
 

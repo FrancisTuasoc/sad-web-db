@@ -1,14 +1,72 @@
 // Home Page Controller
 import { apiFetch } from './api.js';
-import { renderHeader, renderFooter, renderBusinessHours, showToast, BURGER_PLACEHOLDER, escapeHtml, openModal, closeModal, updateCartBadge, getProductImageUrl } from './ui.js';
+import {
+  renderHeader,
+  renderFooter,
+  renderBusinessHours,
+  showToast,
+  BURGER_PLACEHOLDER,
+  escapeHtml,
+  openModal,
+  closeModal,
+  updateCartBadge,
+  getProductImageUrl,
+} from './ui.js';
 import { isLoggedIn } from './auth.js';
 import { stockStream } from './stock-stream.js';
 
 export const DEFAULT_FEATURED_PRODUCTS = [
-  { _id: 'prod-cdo-burger', name: 'CDO Burger', price: 27, category: { name: 'Burgers' }, stock: 40, lowStockThreshold: 10, isAvailable: true, isFeatured: true, slug: 'cdo-burger', description: 'Classic grilled beef patty in a toasted sesame bun with our special dressing.' },
-  { _id: 'prod-burger-bacon', name: 'Burger with Bacon', price: 42, category: { name: 'Burgers' }, stock: 40, lowStockThreshold: 10, isAvailable: true, isFeatured: true, slug: 'burger-with-bacon', description: 'Savory burger patty crowned with crispy smoked bacon strips.' },
-  { _id: 'prod-cheese-bacon', name: 'Cheese Burger with Bacon', price: 47, category: { name: 'Cheese Burgers' }, stock: 40, lowStockThreshold: 10, isAvailable: true, isFeatured: true, slug: 'cheese-burger-with-bacon', description: 'Smokey crispy bacon layered over golden melted cheese and beef patty.' },
-  { _id: 'prod-complete-bacon', name: 'Complete with Bacon', price: 72, category: { name: 'Complete' }, stock: 40, lowStockThreshold: 10, isAvailable: true, isFeatured: true, slug: 'complete-with-bacon', description: 'The ultimate monster burger: beef patty, ham, egg, cheese, slaw, and crispy bacon.' },
+  {
+    _id: 'prod-cdo-burger',
+    name: 'CDO Burger',
+    price: 27,
+    category: { name: 'Burgers' },
+    stock: 40,
+    lowStockThreshold: 10,
+    isAvailable: true,
+    isFeatured: true,
+    slug: 'cdo-burger',
+    description:
+      'Classic grilled beef patty in a toasted sesame bun with our special dressing.',
+  },
+  {
+    _id: 'prod-burger-bacon',
+    name: 'Burger with Bacon',
+    price: 42,
+    category: { name: 'Burgers' },
+    stock: 40,
+    lowStockThreshold: 10,
+    isAvailable: true,
+    isFeatured: true,
+    slug: 'burger-with-bacon',
+    description: 'Savory burger patty crowned with crispy smoked bacon strips.',
+  },
+  {
+    _id: 'prod-cheese-bacon',
+    name: 'Cheese Burger with Bacon',
+    price: 47,
+    category: { name: 'Cheese Burgers' },
+    stock: 40,
+    lowStockThreshold: 10,
+    isAvailable: true,
+    isFeatured: true,
+    slug: 'cheese-burger-with-bacon',
+    description:
+      'Smokey crispy bacon layered over golden melted cheese and beef patty.',
+  },
+  {
+    _id: 'prod-complete-bacon',
+    name: 'Complete with Bacon',
+    price: 72,
+    category: { name: 'Complete' },
+    stock: 40,
+    lowStockThreshold: 10,
+    isAvailable: true,
+    isFeatured: true,
+    slug: 'complete-with-bacon',
+    description:
+      'The ultimate monster burger: beef patty, ham, egg, cheese, slaw, and crispy bacon.',
+  },
 ];
 
 let availableAddons = [];
@@ -22,7 +80,8 @@ export function setOnlineOrderingEnabled(enabled) {
 export function renderProductCard(product, isGuest = false, canOrder = true) {
   const isAvailable = product.isAvailable && product.stock > 0;
   const isOutOfStock = product.stock <= 0;
-  const isLowStock = product.stock > 0 && product.stock <= (product.lowStockThreshold || 10);
+  const isLowStock =
+    product.stock > 0 && product.stock <= (product.lowStockThreshold || 10);
 
   let badgeClass = 'badge-in-stock';
   let badgeText = `${product.stock} left`;
@@ -38,15 +97,20 @@ export function renderProductCard(product, isGuest = false, canOrder = true) {
     badgeText = `Only ${product.stock} left`;
   }
 
-  const categoryName = product.category && typeof product.category === 'object' ? product.category.name : '';
+  const categoryName =
+    product.category && typeof product.category === 'object'
+      ? product.category.name
+      : '';
   const imgUrl = getProductImageUrl(product);
 
   let buttonHtml = '';
   const canPlaceOrder = canOrder && onlineOrderingEnabled;
   if (!onlineOrderingEnabled) {
-    buttonHtml = '<button type="button" class="btn btn-primary btn-sm" disabled>Ordering Paused</button>';
+    buttonHtml =
+      '<button type="button" class="btn btn-primary btn-sm" disabled>Ordering Paused</button>';
   } else if (!canOrder) {
-    buttonHtml = '<button type="button" class="btn btn-primary btn-sm" disabled>Unavailable</button>';
+    buttonHtml =
+      '<button type="button" class="btn btn-primary btn-sm" disabled>Unavailable</button>';
   } else if (isGuest) {
     buttonHtml = `
       <button type="button" class="btn btn-primary btn-sm btn-add-to-cart" data-is-guest="true" data-product-id="${product._id}" ${!isAvailable ? 'disabled' : ''}>
@@ -109,10 +173,14 @@ async function loadStoreInfo() {
       const contactEmail = document.getElementById('contact-email');
       const contactHours = document.getElementById('contact-hours');
 
-      if (heroTitleElem && typeof s.storeName === 'string') heroTitleElem.textContent = s.storeName;
-      if (heroTaglineElem && typeof s.tagline === 'string') heroTaglineElem.textContent = s.tagline;
-      if (aboutStoreName && typeof s.storeName === 'string') aboutStoreName.textContent = s.storeName;
-      if (contactAddress && typeof s.address === 'string') contactAddress.textContent = s.address;
+      if (heroTitleElem && typeof s.storeName === 'string')
+        heroTitleElem.textContent = s.storeName;
+      if (heroTaglineElem && typeof s.tagline === 'string')
+        heroTaglineElem.textContent = s.tagline;
+      if (aboutStoreName && typeof s.storeName === 'string')
+        aboutStoreName.textContent = s.storeName;
+      if (contactAddress && typeof s.address === 'string')
+        contactAddress.textContent = s.address;
       if (contactPhone && typeof s.phone === 'string') {
         contactPhone.textContent = s.phone;
         const phoneLink = s.phone.replace(/[^\d+]/g, '');
@@ -132,7 +200,8 @@ async function loadStoreInfo() {
   const orderingNotice = document.getElementById('home-ordering-notice');
   if (orderingNotice) {
     orderingNotice.classList.remove('hidden');
-    orderingNotice.textContent = 'Online ordering availability could not be confirmed. Please try again later.';
+    orderingNotice.textContent =
+      'Online ordering availability could not be confirmed. Please try again later.';
   }
   return null;
 }
@@ -149,16 +218,22 @@ async function loadFeaturedProducts() {
     if (data && Array.isArray(data.products)) {
       const featured = data.products.filter((p) => !p.isAddon && p.isFeatured);
       if (featured.length > 0) {
-        container.innerHTML = featured.slice(0, 4).map((p) => renderProductCard(p, isGuest)).join('');
+        container.innerHTML = featured
+          .slice(0, 4)
+          .map((p) => renderProductCard(p, isGuest))
+          .join('');
       } else {
-        container.innerHTML = '<div class="state-box" style="grid-column:1/-1;"><h3 class="state-title">No featured items right now</h3><p class="state-desc">Browse the full menu to see what is available.</p><a href="menu.html" class="btn btn-secondary btn-sm">View Menu</a></div>';
+        container.innerHTML =
+          '<div class="state-box" style="grid-column:1/-1;"><h3 class="state-title">No featured items right now</h3><p class="state-desc">Browse the full menu to see what is available.</p><a href="menu.html" class="btn btn-secondary btn-sm">View Menu</a></div>';
       }
       return;
     }
     throw new Error('The featured menu response was invalid.');
   } catch (err) {
     // Seamless fallback to default featured products so menu is NEVER empty
-    container.innerHTML = DEFAULT_FEATURED_PRODUCTS.map((p) => renderProductCard(p, isGuest, false)).join('');
+    container.innerHTML = DEFAULT_FEATURED_PRODUCTS.map((p) =>
+      renderProductCard(p, isGuest, false)
+    ).join('');
   }
 }
 
@@ -179,19 +254,25 @@ export function setupAddToCartModal() {
   const qtyPlus = document.getElementById('modal-qty-plus');
   const qtyInput = document.getElementById('modal-qty-val');
 
-  if (closeBtn) closeBtn.addEventListener('click', () => closeModal('add-to-cart-modal'));
-  if (cancelBtn) cancelBtn.addEventListener('click', () => closeModal('add-to-cart-modal'));
+  if (closeBtn)
+    closeBtn.addEventListener('click', () => closeModal('add-to-cart-modal'));
+  if (cancelBtn)
+    cancelBtn.addEventListener('click', () => closeModal('add-to-cart-modal'));
 
   function updateModalTotal() {
     if (!selectedProduct) return;
     const qty = parseInt(qtyInput.textContent, 10) || 1;
 
     let addonsSum = 0;
-    const addonCheckboxes = document.querySelectorAll('.modal-addon-checkbox:checked');
+    const addonCheckboxes = document.querySelectorAll(
+      '.modal-addon-checkbox:checked'
+    );
     addonCheckboxes.forEach((cb) => {
       const price = parseFloat(cb.getAttribute('data-price')) || 0;
       const miniQtyInput = document.getElementById(`addon-qty-${cb.value}`);
-      const miniQty = miniQtyInput ? parseInt(miniQtyInput.textContent, 10) || 1 : 1;
+      const miniQty = miniQtyInput
+        ? parseInt(miniQtyInput.textContent, 10) || 1
+        : 1;
       addonsSum += price * miniQty;
     });
 
@@ -217,7 +298,10 @@ export function setupAddToCartModal() {
         qtyInput.textContent = String(current + 1);
         updateModalTotal();
       } else {
-        showToast(`Maximum available stock reached (${selectedProduct ? selectedProduct.stock : 40})`, 'warning');
+        showToast(
+          `Maximum available stock reached (${selectedProduct ? selectedProduct.stock : 40})`,
+          'warning'
+        );
       }
     });
   }
@@ -230,10 +314,14 @@ export function setupAddToCartModal() {
 
       const qty = parseInt(qtyInput.textContent, 10) || 1;
       const addonsPayload = [];
-      const addonCheckboxes = document.querySelectorAll('.modal-addon-checkbox:checked');
+      const addonCheckboxes = document.querySelectorAll(
+        '.modal-addon-checkbox:checked'
+      );
       addonCheckboxes.forEach((cb) => {
         const miniQtyInput = document.getElementById(`addon-qty-${cb.value}`);
-        const miniQty = miniQtyInput ? parseInt(miniQtyInput.textContent, 10) || 1 : 1;
+        const miniQty = miniQtyInput
+          ? parseInt(miniQtyInput.textContent, 10) || 1
+          : 1;
         addonsPayload.push({
           product: cb.value,
           qty: miniQty,
@@ -281,7 +369,9 @@ export async function openAddToCartForProduct(productId, productObj = null) {
       selectedProduct = res.product;
     }
   } catch (err) {
-    selectedProduct = DEFAULT_FEATURED_PRODUCTS.find((p) => p._id === productId) || {
+    selectedProduct = DEFAULT_FEATURED_PRODUCTS.find(
+      (p) => p._id === productId
+    ) || {
       _id: productId,
       name: 'Burger Specialty',
       price: 35,
@@ -290,14 +380,20 @@ export async function openAddToCartForProduct(productId, productObj = null) {
     };
   }
 
-  if (!selectedProduct || !selectedProduct.isAvailable || selectedProduct.stock <= 0) {
+  if (
+    !selectedProduct ||
+    !selectedProduct.isAvailable ||
+    selectedProduct.stock <= 0
+  ) {
     showToast('This item is currently unavailable.', 'warning');
     return;
   }
 
   // Prefill modal details
-  document.getElementById('modal-product-name').textContent = selectedProduct.name;
-  document.getElementById('modal-product-price').textContent = `₱${Number(selectedProduct.price).toFixed(2)}`;
+  document.getElementById('modal-product-name').textContent =
+    selectedProduct.name;
+  document.getElementById('modal-product-price').textContent =
+    `₱${Number(selectedProduct.price).toFixed(2)}`;
   document.getElementById('modal-qty-val').textContent = '1';
   const productImage = document.getElementById('modal-product-image');
   if (productImage) {
@@ -312,10 +408,13 @@ export async function openAddToCartForProduct(productId, productObj = null) {
   // Populate addons
   const addonsListContainer = document.getElementById('modal-addons-list');
   if (addonsListContainer) {
-    const addonsToUse = availableAddons.filter((addon) => addon.isAvailable && addon.stock > 0);
+    const addonsToUse = availableAddons.filter(
+      (addon) => addon.isAvailable && addon.stock > 0
+    );
     addonsListContainer.innerHTML = addonsToUse.length
       ? addonsToUse
-      .map((addon) => `
+          .map(
+            (addon) => `
         <div class="addon-row">
           <label class="addon-choice" for="modal-addon-${addon._id}">
             <input type="checkbox" id="modal-addon-${addon._id}" class="modal-addon-checkbox" value="${addon._id}" data-price="${addon.price}" data-stock="${addon.stock}">
@@ -327,25 +426,39 @@ export async function openAddToCartForProduct(productId, productObj = null) {
             <button type="button" class="stepper-btn mini-addon-plus" data-target="addon-qty-${addon._id}" data-stock="${addon.stock}" aria-label="Increase ${escapeHtml(addon.name)} quantity">+</button>
           </div>
         </div>
-      `)
-      .join('')
+      `
+          )
+          .join('')
       : '<p class="text-muted">No add-ons are currently available.</p>';
 
     // Wire mini steppers and checkbox changes
-    addonsListContainer.querySelectorAll('.modal-addon-checkbox').forEach((cb) => {
-      cb.addEventListener('change', () => {
-        const currentQty = parseInt(document.getElementById('modal-qty-val').textContent, 10) || 1;
-        let addonsSum = 0;
-        document.querySelectorAll('.modal-addon-checkbox:checked').forEach((ch) => {
-          const price = parseFloat(ch.getAttribute('data-price')) || 0;
-          const miniInput = document.getElementById(`addon-qty-${ch.value}`);
-          const miniVal = miniInput ? parseInt(miniInput.textContent, 10) || 1 : 1;
-          addonsSum += price * miniVal;
+    addonsListContainer
+      .querySelectorAll('.modal-addon-checkbox')
+      .forEach((cb) => {
+        cb.addEventListener('change', () => {
+          const currentQty =
+            parseInt(
+              document.getElementById('modal-qty-val').textContent,
+              10
+            ) || 1;
+          let addonsSum = 0;
+          document
+            .querySelectorAll('.modal-addon-checkbox:checked')
+            .forEach((ch) => {
+              const price = parseFloat(ch.getAttribute('data-price')) || 0;
+              const miniInput = document.getElementById(
+                `addon-qty-${ch.value}`
+              );
+              const miniVal = miniInput
+                ? parseInt(miniInput.textContent, 10) || 1
+                : 1;
+              addonsSum += price * miniVal;
+            });
+          const lineTotal = selectedProduct.price * currentQty + addonsSum;
+          document.getElementById('modal-line-total').textContent =
+            `₱${lineTotal.toFixed(2)}`;
         });
-        const lineTotal = selectedProduct.price * currentQty + addonsSum;
-        document.getElementById('modal-line-total').textContent = `₱${lineTotal.toFixed(2)}`;
       });
-    });
 
     addonsListContainer.querySelectorAll('.mini-addon-minus').forEach((btn) => {
       btn.addEventListener('click', (e) => {
@@ -356,7 +469,9 @@ export async function openAddToCartForProduct(productId, productObj = null) {
           let val = parseInt(elem.textContent, 10) || 1;
           if (val > 1) {
             elem.textContent = String(val - 1);
-            const cb = elem.closest('.addon-row').querySelector('.modal-addon-checkbox');
+            const cb = elem
+              .closest('.addon-row')
+              .querySelector('.modal-addon-checkbox');
             if (cb.checked) cb.dispatchEvent(new Event('change'));
           }
         }
@@ -373,7 +488,9 @@ export async function openAddToCartForProduct(productId, productObj = null) {
           const stock = Number(btn.getAttribute('data-stock')) || 0;
           if (val < stock) {
             elem.textContent = String(val + 1);
-            const cb = elem.closest('.addon-row').querySelector('.modal-addon-checkbox');
+            const cb = elem
+              .closest('.addon-row')
+              .querySelector('.modal-addon-checkbox');
             if (cb.checked) cb.dispatchEvent(new Event('change'));
           } else {
             showToast(`Only ${stock} of this add-on are available.`, 'warning');
@@ -383,12 +500,16 @@ export async function openAddToCartForProduct(productId, productObj = null) {
     });
   }
 
-  document.getElementById('modal-line-total').textContent = `₱${Number(selectedProduct.price).toFixed(2)}`;
+  document.getElementById('modal-line-total').textContent =
+    `₱${Number(selectedProduct.price).toFixed(2)}`;
   openModal('add-to-cart-modal');
 }
 
 // Global Event Delegation for Product Grid cards
-export function attachProductGridListeners(containerId = 'featured-grid', getProductById = null) {
+export function attachProductGridListeners(
+  containerId = 'featured-grid',
+  getProductById = null
+) {
   const container = document.getElementById(containerId);
   if (!container) return;
 
@@ -417,7 +538,9 @@ function initHome() {
   renderFooter();
   loadStoreInfo().then(() => loadFeaturedProducts());
   setupAddToCartModal();
-  attachProductGridListeners('featured-grid', (id) => DEFAULT_FEATURED_PRODUCTS.find((p) => p._id === id));
+  attachProductGridListeners('featured-grid', (id) =>
+    DEFAULT_FEATURED_PRODUCTS.find((p) => p._id === id)
+  );
   stockStream.init();
 }
 
@@ -433,23 +556,26 @@ function setupHomeSectionNavigation() {
 
   function updateActiveSection() {
     const headerBottom = header.getBoundingClientRect().bottom;
-    const isAtPageBottom = window.scrollY + window.innerHeight
-      >= document.documentElement.scrollHeight - 1;
+    const isAtPageBottom =
+      window.scrollY + window.innerHeight >=
+      document.documentElement.scrollHeight - 1;
     const activeSection = isAtPageBottom
       ? sections[sections.length - 1]
       : sections.reduce((current, section) => {
-        return section.element.getBoundingClientRect().top <= headerBottom + 1
-          ? section
-          : current;
-      }, sections[0]);
+          return section.element.getBoundingClientRect().top <= headerBottom + 1
+            ? section
+            : current;
+        }, sections[0]);
 
     header.querySelectorAll('.nav-links a').forEach((link) => {
       const linkUrl = new URL(link.href, window.location.href);
-      const isHomeLink = linkUrl.pathname === window.location.pathname
-        && !linkUrl.hash
-        && link.getAttribute('href').endsWith('index.html');
+      const isHomeLink =
+        linkUrl.pathname === window.location.pathname &&
+        !linkUrl.hash &&
+        link.getAttribute('href').endsWith('index.html');
       const isActive = activeSection.id
-        ? linkUrl.pathname === window.location.pathname && linkUrl.hash === `#${activeSection.id}`
+        ? linkUrl.pathname === window.location.pathname &&
+          linkUrl.hash === `#${activeSection.id}`
         : isHomeLink;
 
       link.classList.toggle('active', isActive);
@@ -488,8 +614,12 @@ function setupHomeSectionNavigation() {
     return !link.hash && link.getAttribute('href').endsWith('index.html');
   }
 
-  window.addEventListener('scroll', scheduleActiveSectionUpdate, { passive: true });
-  document.addEventListener('scroll', scheduleActiveSectionUpdate, { passive: true });
+  window.addEventListener('scroll', scheduleActiveSectionUpdate, {
+    passive: true,
+  });
+  document.addEventListener('scroll', scheduleActiveSectionUpdate, {
+    passive: true,
+  });
   window.addEventListener('resize', scheduleActiveSectionUpdate);
   window.addEventListener('hashchange', scheduleActiveSectionUpdate);
   updateActiveSection();

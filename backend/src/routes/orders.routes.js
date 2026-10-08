@@ -1,11 +1,15 @@
 const express = require('express');
-const Order = require('../models/Order');
+const orderRepository = require('../repositories/orderRepository');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 const validate = require('../middleware/validate');
 const checkoutSchema = require('../utils/checkoutValidation');
 const { requireAuth } = require('../middleware/auth');
-const { placeOrder, cancelOrder, completeOrder } = require('../services/order.service');
+const {
+  placeOrder,
+  cancelOrder,
+  completeOrder,
+} = require('../services/order.service');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -15,14 +19,15 @@ router.post(
   '/',
   validate(checkoutSchema),
   asyncHandler(async (req, res) => {
-    const { cartItemIds, fulfillment, paymentMethod, gcashReference } = req.body;
+    const { cartItemIds, fulfillment, paymentMethod, gcashReference } =
+      req.body;
     const contact = {
       ...req.body.contact,
       email: req.body.contact.email || req.user.email,
     };
 
     const order = await placeOrder({
-      userId: req.user._id,
+      userId: req.user.id,
       cartItemIds,
       fulfillment,
       paymentMethod,
@@ -43,21 +48,26 @@ router.get(
   '/mine',
   asyncHandler(async (req, res) => {
     const { status, limit = 50 } = req.query;
-    const filter = { user: req.user._id };
+    const filter = { userId: req.user.id };
 
     if (status) {
       if (status === 'active') {
-        filter.status = { $in: ['pending', 'preparing', 'ready_for_pickup', 'ready_to_deliver', 'to_pickup', 'to_ship'] };
+        filter.status = [
+          'pending',
+          'preparing',
+          'ready_for_pickup',
+          'ready_to_deliver',
+          'to_pickup',
+          'to_ship',
+        ];
       } else if (status === 'history') {
-        filter.status = { $in: ['completed', 'cancelled'] };
+        filter.status = ['completed', 'cancelled'];
       } else {
         filter.status = status;
       }
     }
 
-    const orders = await Order.find(filter)
-      .sort({ createdAt: -1 })
-      .limit(Number(limit));
+    const orders = await orderRepository.find(filter, { limit: Number(limit) });
 
     res.json({
       success: true,
@@ -70,12 +80,8 @@ router.get(
 router.get(
   '/:id',
   asyncHandler(async (req, res) => {
-    const query = { _id: req.params.id };
-    if (req.user.role !== 'admin') {
-      query.user = req.user._id;
-    }
-
-    const order = await Order.findOne(query);
+    const userId = req.user.role === 'admin' ? null : req.user.id;
+    const order = await orderRepository.findById(req.params.id, userId);
     if (!order) {
       throw new AppError('Order not found.', 404);
     }
@@ -101,10 +107,11 @@ router.patch(
   })
 );
 
+// PATCH /api/orders/:id/complete
 router.patch(
   '/:id/complete',
   asyncHandler(async (req, res) => {
-    const order = await completeOrder(req.params.id, req.user._id);
+    const order = await completeOrder(req.params.id, req.user.id);
     res.json({
       success: true,
       message: 'Order marked as completed.',

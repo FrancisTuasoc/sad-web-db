@@ -2,18 +2,22 @@ const express = require('express');
 const { z } = require('zod');
 const bcrypt = require('bcryptjs');
 
-const Order = require('../models/Order');
-const Product = require('../models/Product');
-const Category = require('../models/Category');
-const CartItem = require('../models/CartItem');
-const User = require('../models/User');
-const Settings = require('../models/Settings');
+const { query } = require('../config/db');
+const orderRepository = require('../repositories/orderRepository');
+const productRepository = require('../repositories/productRepository');
+const categoryRepository = require('../repositories/categoryRepository');
+const userRepository = require('../repositories/userRepository');
+const settingsRepository = require('../repositories/settingsRepository');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 const validate = require('../middleware/validate');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 const { getDashboardStats } = require('../services/stats.service');
-const { cancelOrder, updateOrderStatus, markOrderPaid } = require('../services/order.service');
+const {
+  cancelOrder,
+  updateOrderStatus,
+  markOrderPaid,
+} = require('../services/order.service');
 const { broadcastStock } = require('../services/events');
 
 const router = express.Router();
@@ -55,41 +59,19 @@ router.get(
       limit = 20,
     } = req.query;
 
-    const query = {};
+    const filter = {};
 
     if (status && status !== 'all') {
-      query.status = status;
+      filter.status = status;
     }
     if (paymentStatus && paymentStatus !== 'all') {
-      query.paymentStatus = paymentStatus;
+      filter.paymentStatus = paymentStatus;
     }
     if (fulfillment && fulfillment !== 'all') {
-      query.fulfillment = fulfillment;
+      filter.fulfillment = fulfillment;
     }
-
     if (search && search.trim()) {
-      const s = search.trim();
-      query.$or = [
-        { orderNumber: { $regex: s, $options: 'i' } },
-        { 'contact.fullName': { $regex: s, $options: 'i' } },
-        { 'contact.email': { $regex: s, $options: 'i' } },
-        { 'contact.phone': { $regex: s, $options: 'i' } },
-        { gcashReference: { $regex: s, $options: 'i' } },
-      ];
-    }
-
-    if (dateRange) {
-      const now = new Date();
-      if (dateRange === 'today') {
-        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        query.createdAt = { $gte: start };
-      } else if (dateRange === 'week') {
-        const start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        query.createdAt = { $gte: start };
-      } else if (dateRange === 'month') {
-        const start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        query.createdAt = { $gte: start };
-      }
+      filter.search = search.trim();
     }
 
     const pageNum = Math.max(1, parseInt(page, 10));
@@ -97,8 +79,8 @@ router.get(
     const skip = (pageNum - 1) * limitNum;
 
     const [orders, total] = await Promise.all([
-      Order.find(query).sort({ createdAt: -1 }).skip(skip).limit(limitNum).populate('user', 'username email'),
-      Order.countDocuments(query),
+      orderRepository.find(filter, { limit: limitNum, offset: skip }),
+      orderRepository.count(filter),
     ]);
 
     res.json({
@@ -117,7 +99,7 @@ router.get(
 router.get(
   '/orders/:id',
   asyncHandler(async (req, res) => {
-    const order = await Order.findById(req.params.id).populate('user', 'username email');
+    const order = await orderRepository.findById(req.params.id);
     if (!order) {
       throw new AppError('Order not found', 404);
     }
@@ -127,7 +109,16 @@ router.get(
 
 router.patch(
   '/orders/:id/status',
-  validate(z.object({ status: z.enum(['preparing', 'ready_for_pickup', 'ready_to_deliver', 'completed']) })),
+  validate(
+    z.object({
+      status: z.enum([
+        'preparing',
+        'ready_for_pickup',
+        'ready_to_deliver',
+        'completed',
+      ]),
+    })
+  ),
   asyncHandler(async (req, res) => {
     const updated = await updateOrderStatus(req.params.id, req.body.status);
     res.json({
@@ -172,7 +163,11 @@ const productSchema = z.object({
   stock: z.number().int().min(0, 'Stock cannot be negative').default(0),
   lowStockThreshold: z.number().int().min(0).default(10),
   category: z.string().min(1, 'Category is required'),
-  image: z.string().max(600000, 'Image data exceeds maximum size (approx 400KB)').optional().default(''),
+  image: z
+    .string()
+    .max(600000, 'Image data exceeds maximum size (approx 400KB)')
+    .optional()
+    .default(''),
   isAddon: z.boolean().default(false),
   isAvailable: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
@@ -182,21 +177,22 @@ router.get(
   '/products',
   asyncHandler(async (req, res) => {
     const { category, search, stockFilter } = req.query;
-    const query = {};
+    let products = await productRepository.find({
+      category: category && category !== 'all' ? category : undefined,
+      search,
+    });
 
-    if (category && category !== 'all') {
-      query.category = category;
-    }
-    if (search && search.trim()) {
-      query.name = { $regex: search.trim(), $options: 'i' };
-    }
     if (stockFilter === 'low') {
-      query.$expr = { $lte: ['$stock', '$lowStockThreshold'] };
+      products = products.filter((p) => p.stock <= p.lowStockThreshold);
     } else if (stockFilter === 'out') {
-      query.stock = 0;
+      products = products.filter((p) => p.stock === 0);
     }
 
-    const products = await Product.find(query).populate('category').sort({ isAddon: 1, name: 1 });
+    products.sort((a, b) => {
+      if (a.isAddon !== b.isAddon) return a.isAddon ? 1 : -1;
+      return a.name.localeCompare(b.name);
+    });
+
     res.json({ success: true, products });
   })
 );
@@ -208,23 +204,22 @@ router.post(
     let baseSlug = slugify(req.body.name);
     let slug = baseSlug;
     let count = 1;
-    while (await Product.findOne({ slug })) {
+    while (await productRepository.findBySlug(slug)) {
       slug = `${baseSlug}-${count++}`;
     }
 
-    const product = await Product.create({
+    const product = await productRepository.create({
       ...req.body,
       slug,
       image: req.body.image || `assets/items/${slug}.png`,
     });
 
-    broadcastStock(product._id, product.stock, product.isAvailable);
+    broadcastStock(product.id, product.stock, product.isAvailable);
 
-    const populated = await Product.findById(product._id).populate('category');
     res.status(201).json({
       success: true,
       message: 'Product created successfully',
-      product: populated,
+      product,
     });
   })
 );
@@ -233,33 +228,30 @@ router.put(
   '/products/:id',
   validate(productSchema),
   asyncHandler(async (req, res) => {
-    const existing = await Product.findById(req.params.id);
+    const existing = await productRepository.findById(req.params.id);
     if (!existing) {
       throw new AppError('Product not found', 404);
     }
 
-    existing.name = req.body.name;
-    existing.price = req.body.price;
-    existing.description = req.body.description;
-    existing.stock = req.body.stock;
-    existing.lowStockThreshold = req.body.lowStockThreshold;
-    existing.category = req.body.category;
-    existing.isAddon = req.body.isAddon;
-    existing.isAvailable = req.body.isAvailable;
-    existing.isFeatured = req.body.isFeatured;
-    if (req.body.image) {
-      existing.image = req.body.image;
-    }
+    const updated = await productRepository.update(req.params.id, {
+      name: req.body.name,
+      price: req.body.price,
+      description: req.body.description,
+      stock: req.body.stock,
+      lowStockThreshold: req.body.lowStockThreshold,
+      category: req.body.category,
+      isAddon: req.body.isAddon,
+      isAvailable: req.body.isAvailable,
+      isFeatured: req.body.isFeatured,
+      image: req.body.image || existing.image,
+    });
 
-    await existing.save();
+    broadcastStock(updated.id, updated.stock, updated.isAvailable);
 
-    broadcastStock(existing._id, existing.stock, existing.isAvailable);
-
-    const populated = await Product.findById(existing._id).populate('category');
     res.json({
       success: true,
       message: 'Product updated successfully',
-      product: populated,
+      product: updated,
     });
   })
 );
@@ -273,31 +265,33 @@ router.patch(
     })
   ),
   asyncHandler(async (req, res) => {
-    const product = await Product.findById(req.params.id);
+    const product = await productRepository.findById(req.params.id);
     if (!product) {
       throw new AppError('Product not found', 404);
     }
 
+    let nextStock = product.stock;
     if (req.body.mode === 'set') {
       if (req.body.amount < 0) {
         throw new AppError('Stock cannot be set to a negative number', 400);
       }
-      product.stock = req.body.amount;
+      nextStock = req.body.amount;
     } else {
-      const nextStock = product.stock + req.body.amount;
+      nextStock = product.stock + req.body.amount;
       if (nextStock < 0) {
         throw new AppError('Resulting stock cannot be negative', 400);
       }
-      product.stock = nextStock;
     }
 
-    await product.save();
-    broadcastStock(product._id, product.stock, product.isAvailable);
+    const updated = await productRepository.update(req.params.id, {
+      stock: nextStock,
+    });
+    broadcastStock(updated.id, updated.stock, updated.isAvailable);
 
     res.json({
       success: true,
-      message: `Stock updated to ${product.stock}`,
-      product,
+      message: `Stock updated to ${updated.stock}`,
+      product: updated,
     });
   })
 );
@@ -305,20 +299,21 @@ router.patch(
 router.patch(
   '/products/:id/availability',
   asyncHandler(async (req, res) => {
-    const product = await Product.findById(req.params.id);
+    const product = await productRepository.findById(req.params.id);
     if (!product) {
       throw new AppError('Product not found', 404);
     }
 
-    product.isAvailable = !product.isAvailable;
-    await product.save();
+    const updated = await productRepository.update(req.params.id, {
+      isAvailable: !product.isAvailable,
+    });
 
-    broadcastStock(product._id, product.stock, product.isAvailable);
+    broadcastStock(updated.id, updated.stock, updated.isAvailable);
 
     res.json({
       success: true,
-      message: `Item marked as ${product.isAvailable ? 'available' : 'unavailable'}`,
-      product,
+      message: `Item marked as ${updated.isAvailable ? 'available' : 'unavailable'}`,
+      product: updated,
     });
   })
 );
@@ -326,24 +321,20 @@ router.patch(
 router.delete(
   '/products/:id',
   asyncHandler(async (req, res) => {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await productRepository.findById(req.params.id);
     if (!product) {
       throw new AppError('Product not found', 404);
     }
 
-    // Clean up from user carts
-    await CartItem.deleteMany({ product: req.params.id });
-    await CartItem.updateMany(
-      {},
-      { $pull: { addons: { product: req.params.id } } }
-    );
+    await productRepository.delete(req.params.id);
 
-    // Broadcast that it's no longer available
-    broadcastStock(product._id, 0, false);
+    // Broadcast stock 0 / unavailable
+    broadcastStock(product.id, 0, false);
 
     res.json({
       success: true,
-      message: 'Product deleted permanently and removed from active shopping carts.',
+      message:
+        'Product deleted permanently and removed from active shopping carts.',
     });
   })
 );
@@ -353,14 +344,19 @@ router.delete(
 // -------------------------------------------------------------
 router.post(
   '/categories',
-  validate(z.object({ name: z.string().trim().min(1, 'Category name is required'), sortOrder: z.number().int().default(0) })),
+  validate(
+    z.object({
+      name: z.string().trim().min(1, 'Category name is required'),
+      sortOrder: z.number().int().default(0),
+    })
+  ),
   asyncHandler(async (req, res) => {
-    const exists = await Category.findOne({ name: req.body.name.trim() });
+    const exists = await categoryRepository.findByName(req.body.name.trim());
     if (exists) {
       throw new AppError('A category with that name already exists.', 400);
     }
 
-    const category = await Category.create({
+    const category = await categoryRepository.create({
       name: req.body.name.trim(),
       sortOrder: req.body.sortOrder,
     });
@@ -375,21 +371,27 @@ router.post(
 
 router.put(
   '/categories/:id',
-  validate(z.object({ name: z.string().trim().min(1, 'Category name is required'), sortOrder: z.number().int().default(0) })),
+  validate(
+    z.object({
+      name: z.string().trim().min(1, 'Category name is required'),
+      sortOrder: z.number().int().default(0),
+    })
+  ),
   asyncHandler(async (req, res) => {
-    const category = await Category.findById(req.params.id);
+    const category = await categoryRepository.findById(req.params.id);
     if (!category) {
       throw new AppError('Category not found', 404);
     }
 
-    category.name = req.body.name.trim();
-    category.sortOrder = req.body.sortOrder;
-    await category.save();
+    const updated = await categoryRepository.update(req.params.id, {
+      name: req.body.name.trim(),
+      sortOrder: req.body.sortOrder,
+    });
 
     res.json({
       success: true,
       message: 'Category updated.',
-      category,
+      category: updated,
     });
   })
 );
@@ -397,7 +399,11 @@ router.put(
 router.delete(
   '/categories/:id',
   asyncHandler(async (req, res) => {
-    const inUse = await Product.countDocuments({ category: req.params.id });
+    const productsInCat = await query(
+      'SELECT COUNT(*)::int as count FROM products WHERE category_id = $1',
+      [req.params.id]
+    );
+    const inUse = productsInCat.rows[0].count;
     if (inUse > 0) {
       throw new AppError(
         `Cannot delete this category because ${inUse} product(s) are still assigned to it. Please reassign or delete them first.`,
@@ -405,7 +411,7 @@ router.delete(
       );
     }
 
-    const deleted = await Category.findByIdAndDelete(req.params.id);
+    const deleted = await categoryRepository.delete(req.params.id);
     if (!deleted) {
       throw new AppError('Category not found', 404);
     }
@@ -424,55 +430,56 @@ router.get(
   '/customers',
   asyncHandler(async (req, res) => {
     const { search } = req.query;
-    const query = { role: 'customer' };
+
+    let sql = `
+      SELECT 
+        u.*,
+        COUNT(o.id)::int as order_count,
+        COALESCE(SUM(o.total), 0)::numeric as total_spent
+      FROM users u
+      LEFT JOIN orders o ON u.id = o.user_id
+      WHERE u.role = 'customer'
+    `;
+    const params = [];
 
     if (search && search.trim()) {
-      const s = search.trim();
-      query.$or = [
-        { username: { $regex: s, $options: 'i' } },
-        { email: { $regex: s, $options: 'i' } },
-        { contactEmail: { $regex: s, $options: 'i' } },
-        { firstName: { $regex: s, $options: 'i' } },
-        { lastName: { $regex: s, $options: 'i' } },
-        { fullName: { $regex: s, $options: 'i' } },
-        { phone: { $regex: s, $options: 'i' } },
-      ];
+      params.push(`%${search.trim()}%`);
+      sql += ` AND (
+        u.username ILIKE $${params.length} OR
+        u.email ILIKE $${params.length} OR
+        u.contact_email ILIKE $${params.length} OR
+        u.first_name ILIKE $${params.length} OR
+        u.last_name ILIKE $${params.length} OR
+        u.full_name ILIKE $${params.length} OR
+        u.phone ILIKE $${params.length}
+      )`;
     }
 
-    const customers = await User.find(query).sort({ createdAt: -1 });
+    sql += ' GROUP BY u.id ORDER BY u.created_at DESC';
 
-    // Aggregate order counts per customer
-    const orderCounts = await Order.aggregate([
-      { $group: { _id: '$user', count: { $sum: 1 }, totalSpent: { $sum: '$total' } } },
-    ]);
-    const orderMap = new Map();
-    for (const item of orderCounts) {
-      orderMap.set(String(item._id), { count: item.count, totalSpent: item.totalSpent });
-    }
+    const result = await query(sql, params);
 
-    const customerList = customers.map((c) => {
-      const stats = orderMap.get(String(c._id)) || { count: 0, totalSpent: 0 };
-      return {
-        _id: c._id,
-        username: c.username,
-        email: c.email,
-        contactEmail: c.contactEmail || c.email,
-        firstName: c.firstName,
-        lastName: c.lastName,
-        fullName: c.fullName,
-        phone: c.phone,
-        street: c.street,
-        barangay: c.barangay,
-        city: c.city,
-        province: c.province,
-        postalCode: c.postalCode,
-        address: c.address,
-        status: c.status,
-        createdAt: c.createdAt,
-        orderCount: stats.count,
-        totalSpent: stats.totalSpent,
-      };
-    });
+    const customerList = result.rows.map((c) => ({
+      _id: c.id,
+      id: c.id,
+      username: c.username,
+      email: c.email,
+      contactEmail: c.contact_email || c.email,
+      firstName: c.first_name,
+      lastName: c.last_name,
+      fullName: c.full_name,
+      phone: c.phone,
+      street: c.street,
+      barangay: c.barangay,
+      city: c.city,
+      province: c.province,
+      postalCode: c.postal_code,
+      address: c.address,
+      status: c.status,
+      createdAt: c.created_at,
+      orderCount: c.order_count,
+      totalSpent: Number(c.total_spent),
+    }));
 
     res.json({
       success: true,
@@ -484,16 +491,16 @@ router.get(
 router.get(
   '/customers/:id',
   asyncHandler(async (req, res) => {
-    const customer = await User.findById(req.params.id);
+    const customer = await userRepository.findById(req.params.id);
     if (!customer) {
       throw new AppError('Customer not found', 404);
     }
 
-    const orders = await Order.find({ user: customer._id }).sort({ createdAt: -1 });
+    const orders = await orderRepository.find({ userId: customer.id });
 
     res.json({
       success: true,
-      customer,
+      customer: userRepository.safeUser(customer),
       orders,
     });
   })
@@ -503,7 +510,7 @@ router.patch(
   '/customers/:id/status',
   validate(z.object({ status: z.enum(['active', 'suspended']) })),
   asyncHandler(async (req, res) => {
-    const customer = await User.findById(req.params.id);
+    const customer = await userRepository.findById(req.params.id);
     if (!customer) {
       throw new AppError('Customer not found', 404);
     }
@@ -512,13 +519,14 @@ router.patch(
       throw new AppError('Cannot suspend an administrator account.', 400);
     }
 
-    customer.status = req.body.status;
-    await customer.save();
+    const updated = await userRepository.update(req.params.id, {
+      status: req.body.status,
+    });
 
     res.json({
       success: true,
       message: `Customer account has been ${req.body.status === 'suspended' ? 'suspended' : 'reactivated'}.`,
-      customer,
+      customer: userRepository.safeUser(updated),
     });
   })
 );
@@ -529,10 +537,7 @@ router.patch(
 router.get(
   '/settings',
   asyncHandler(async (req, res) => {
-    let settings = await Settings.findOne();
-    if (!settings) {
-      settings = await Settings.create({});
-    }
+    const settings = await settingsRepository.getSettings();
     res.json({ success: true, settings });
   })
 );
@@ -540,11 +545,6 @@ router.get(
 router.patch(
   '/settings',
   asyncHandler(async (req, res) => {
-    let settings = await Settings.findOne();
-    if (!settings) {
-      settings = await Settings.create({});
-    }
-
     const fields = [
       'storeName',
       'tagline',
@@ -564,13 +564,14 @@ router.patch(
       'minimumOrder',
     ];
 
+    const updates = {};
     for (const f of fields) {
       if (req.body[f] !== undefined) {
-        settings[f] = req.body[f];
+        updates[f] = req.body[f];
       }
     }
 
-    await settings.save();
+    const settings = await settingsRepository.update(updates);
 
     res.json({
       success: true,
@@ -586,8 +587,8 @@ router.patch(
 router.get(
   '/profile',
   asyncHandler(async (req, res) => {
-    const admin = await User.findById(req.user._id);
-    res.json({ success: true, admin });
+    const admin = await userRepository.findById(req.user.id);
+    res.json({ success: true, admin: userRepository.safeUser(admin) });
   })
 );
 
@@ -603,26 +604,33 @@ router.patch(
     })
   ),
   asyncHandler(async (req, res) => {
-    const admin = await User.findById(req.user._id);
+    const admin = await userRepository.findById(req.user.id);
 
     if (req.body.username && req.body.username !== admin.username) {
-      const taken = await User.findOne({ username: req.body.username });
-      if (taken) throw new AppError('Username is already taken', 400);
-      admin.username = req.body.username;
+      const taken = await userRepository.findByUsername(req.body.username);
+      if (taken && taken.id !== admin.id)
+        throw new AppError('Username is already taken', 400);
     }
 
     if (req.body.email && req.body.email !== admin.email) {
-      const taken = await User.findOne({ email: req.body.email });
-      if (taken) throw new AppError('Email is already taken', 400);
-      admin.email = req.body.email;
+      const taken = await userRepository.findByEmail(req.body.email);
+      if (taken && taken.id !== admin.id)
+        throw new AppError('Email is already taken', 400);
     }
 
-    if (req.body.fullName !== undefined) admin.fullName = req.body.fullName;
-    if (req.body.phone !== undefined) admin.phone = req.body.phone;
-    if (req.body.address !== undefined) admin.address = req.body.address;
+    const updates = {};
+    if (req.body.username !== undefined) updates.username = req.body.username;
+    if (req.body.email !== undefined) updates.email = req.body.email;
+    if (req.body.fullName !== undefined) updates.fullName = req.body.fullName;
+    if (req.body.phone !== undefined) updates.phone = req.body.phone;
+    if (req.body.address !== undefined) updates.address = req.body.address;
 
-    await admin.save();
-    res.json({ success: true, message: 'Admin profile updated', admin });
+    const updated = await userRepository.update(req.user.id, updates);
+    res.json({
+      success: true,
+      message: 'Admin profile updated',
+      admin: userRepository.safeUser(updated),
+    });
   })
 );
 
@@ -645,14 +653,17 @@ router.patch(
       })
   ),
   asyncHandler(async (req, res) => {
-    const admin = await User.findById(req.user._id);
-    const isMatch = await bcrypt.compare(req.body.currentPassword, admin.passwordHash);
+    const admin = await userRepository.findById(req.user.id);
+    const isMatch = await bcrypt.compare(
+      req.body.currentPassword,
+      admin.passwordHash
+    );
     if (!isMatch) {
       throw new AppError('Incorrect current password.', 400);
     }
 
-    admin.passwordHash = await bcrypt.hash(req.body.newPassword, 12);
-    await admin.save();
+    const passwordHash = await bcrypt.hash(req.body.newPassword, 12);
+    await userRepository.update(req.user.id, { passwordHash });
 
     res.json({ success: true, message: 'Password updated successfully' });
   })

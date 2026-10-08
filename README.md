@@ -12,15 +12,17 @@ Add-on quantities selected for new cart entries represent the total extras for t
 casestudy-system/
 ├── README.md                   # System documentation and startup guide
 ├── backend/                    # Node.js / Express backend
-│   ├── .env                    # Environment variables (MONGODB_URI, JWT_SECRET, etc.)
+│   ├── .env                    # Environment variables (DATABASE_URL, JWT_SECRET, etc.)
 │   ├── .env.example            # Environment template
 │   ├── package.json            # Node.js dependencies & scripts
 │   ├── server.js               # Express application entrypoint & static host
 │   └── src/
-│       ├── config/             # DB connection & environment configuration
+│       ├── config/             # DB connection (pg.Pool) & environment configuration
 │       ├── controllers/        # Auth, product, order, and settings controllers
+│       ├── db/                 # schema.sql — full normalized PostgreSQL schema
 │       ├── middleware/         # Auth, validation, and error middleware
-│       ├── models/             # Mongoose schemas (User, Product, Order, Settings)
+│       ├── models/             # Thin re-export wrappers (delegate to repositories)
+│       ├── repositories/       # SQL data-access layer (user, product, order, …)
 │       ├── routes/             # REST API routes
 │       ├── seed/               # Database seeder with all 35 menu items & addons
 │       └── utils/              # Stock streams and helpers
@@ -57,6 +59,7 @@ casestudy-system/
 ## 🚀 Quick Start Guide
 
 ### 1. Backend Setup & Dependencies
+
 The `package.json` resides cleanly inside `backend/` without any duplicate root clutter:
 
 ```bash
@@ -65,22 +68,38 @@ npm install
 ```
 
 ### 2. Configure Environment Variables
-Copy `backend/.env.example` to `backend/.env`, then fill in the database URI, a long random JWT secret, and your administrator email and password. Keep `backend/.env` private; it is excluded from Git. Never put real credentials in this README or commit them. The administrator credentials in this file are used when the account is first created; changing them later does not change an existing account's password.
+
+Copy `backend/.env.example` to `backend/.env`, then fill in the database connection string, a long random JWT secret, and your administrator email and password. Keep `backend/.env` private; it is excluded from Git. Never put real credentials in this README or commit them. The administrator credentials in this file are used when the account is first created; changing them later does not change an existing account's password.
+
+```dotenv
+DATABASE_URL=postgresql://admin:admin123@localhost:5432/francis
+JWT_SECRET=your_long_random_secret_here
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=YourAdminPassword
+```
+
+> **Prerequisites**: PostgreSQL must be installed and running locally. The database (`francis`) and the database user must exist before running the seeder. The backend creates all tables automatically in a dedicated `app` schema on first seed.
 
 ### 3. Seed Database
-Populate the database with all 35 products, categories, add-ons, and an administrator created using the credentials in `backend/.env`:
+
+Create the schema and populate the database with all 35 products, categories, add-ons, and an administrator account using the credentials in `backend/.env`:
+
 ```bash
 cd backend
 npm run seed
 ```
 
 ### 4. Start Server
+
 Run the production server:
+
 ```bash
 cd backend
 npm start
 ```
+
 Or run with live reload during development:
+
 ```bash
 npm run dev
 ```
@@ -91,7 +110,7 @@ The Express server serves the backend API at `http://localhost:5000/api` and sta
 
 Checkout opens in a responsive dialog from the compact cart summary. It requires a fulfillment choice first, then first and last name, contact email, Philippine phone number, and a supported payment method. Delivery also requires street, barangay, city/municipality, province, and a four-digit postal code. The dialog can be dismissed with Escape or its close button, and restores focus to the checkout button when closed. Customer contact and address details are saved to the account after a successful order and are shared with **Saved Details** in the customer profile; the account sign-in email remains separate from the editable contact email. Checkout loads the latest saved details and lets customers change them for an order. Placing an order creates it as `pending`; admins see newest pending orders under **Orders Management** and can accept one to move pickup orders to `ready_for_pickup` or delivery orders to `ready_to_deliver`. Customers track pickup and delivery orders in separate tabs in their profile and confirm collection or receipt to complete them. Admin order lists refresh every 10 seconds.
 
-Customers can cancel only while an order is still `pending`. Cancellation and admin acceptance compete through an atomic status transition: whichever succeeds first wins. If acceptance wins, the customer is told that online cancellation is no longer available and must contact the shop immediately; staff should coordinate any cancellation, refund, or stock adjustment manually. Cancellation also restores reserved stock in the same MongoDB transaction, so the configured MongoDB deployment must support transactions (a replica set, including MongoDB Atlas).
+Customers can cancel only while an order is still `pending`. Cancellation and admin acceptance compete through an atomic status transition: whichever succeeds first wins. If acceptance wins, the customer is told that online cancellation is no longer available and must contact the shop immediately; staff should coordinate any cancellation, refund, or stock adjustment manually. Cancellation also restores reserved stock atomically within a PostgreSQL transaction.
 
 For pickup orders paid at the shop, admins start preparation after confirming the customer has arrived, then mark the order ready once cooking is complete. Customers must arrive within one hour of placing the order; overdue pending orders are automatically cancelled and reserved stock is restored. Admins can also cancel pending customer orders from the order management drawer.
 
@@ -102,7 +121,9 @@ Lifetime revenue includes completed orders only; cancelled and still-active orde
 ---
 
 ## 🍔 Food Asset Images
+
 All 35 authentic item images are located directly in `frontend/assets/items/`:
+
 - **Burgers**: `cdo-burger.png`, `burger-with-ham.png`, `burger-with-egg.png`, `burger-with-bacon.png`, `burger-bacon-ham.png`
 - **Cheese Burgers**: `cheeseburger.png`, `cheeseburger-with-ham.png`, `cheeseburger-with-egg.png`, `cheeseburger-with-bacon.png`
 - **Sandwiches**: `ham.png`, `ham-with-cheese.png`, `ham-with-egg.png`, `ham-cheese-with-egg.png`, `egg-cheese.png`, `egg-sandwich.png`, `bacon-sandwich.png`, `bacon-with-ham.png`, `bacon-with-egg.png`, `bacon-with-cheese.png`, `bacon-cheese-with-ham.png`, `bacon-cheese-with-egg.png`

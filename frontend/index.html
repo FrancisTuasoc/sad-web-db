@@ -1,333 +1,691 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>casestudy-system - Flavor on Wheels | Order Online</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/pages.css">
-</head>
-<body class="home-page">
-  <!-- Header with static markup fallback -->
-  <header id="site-header" class="site-header">
-    <div class="container header-container">
-      <a href="index.html" class="brand-logo" aria-label="casestudy-system Home">
-        <img src="assets/logo.svg" alt="casestudy-system Logo" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 200 40\' width=\'200\' height=\'40\'%3E%3Ctext x=\'10\' y=\'26\' font-family=\'sans-serif\' font-size=\'18\' font-weight=\'bold\' fill=\'%23F2A413\'%3EBURGER%3Ctspan fill=\'%23FFFFFF\'%3ESHOP%3C/tspan%3E%3C/text%3E%3C/svg%3E';">
-      </a>
-
-      <nav aria-label="Main Navigation">
-        <ul class="nav-links">
-          <li><a href="index.html" class="active">Home</a></li>
-          <li><a href="menu.html">Menu</a></li>
-          <li><a href="#featured">Featured</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-      </nav>
-
-      <div class="header-actions">
-        <a href="cart.html" id="header-cart-btn" class="cart-btn" aria-label="View Shopping Cart">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="9" cy="21" r="1"></circle>
-            <circle cx="20" cy="21" r="1"></circle>
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-          </svg>
-          <span id="header-cart-badge" class="cart-badge hidden">0</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>casestudy-system - Flavor on Wheels | Order Online</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages.css" />
+  </head>
+  <body class="home-page">
+    <!-- Header with static markup fallback -->
+    <header id="site-header" class="site-header">
+      <div class="container header-container">
+        <a
+          href="index.html"
+          class="brand-logo"
+          aria-label="casestudy-system Home"
+        >
+          <img
+            src="assets/logo.svg"
+            alt="casestudy-system Logo"
+            onerror="
+              this.onerror = null;
+              this.src =
+                'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 200 40\' width=\'200\' height=\'40\'%3E%3Ctext x=\'10\' y=\'26\' font-family=\'sans-serif\' font-size=\'18\' font-weight=\'bold\' fill=\'%23F2A413\'%3EBURGER%3Ctspan fill=\'%23FFFFFF\'%3ESHOP%3C/tspan%3E%3C/text%3E%3C/svg%3E';
+            "
+          />
         </a>
 
-        <div id="header-user-slot">
-          <a href="login.html" class="btn btn-primary btn-sm">Login</a>
-        </div>
-
-        <button id="mobile-nav-btn" class="mobile-nav-toggle" aria-label="Toggle mobile menu">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <div id="mobile-drawer-menu" class="mobile-drawer">
-      <a href="index.html">Home</a>
-      <a href="menu.html">Menu</a>
-      <a href="#featured">Featured Burgers</a>
-      <a href="#about">About Us</a>
-      <a href="#contact">Contact & Store Hours</a>
-      <a href="cart.html">My Cart</a>
-      <a href="login.html" style="color:var(--color-accent);font-weight:700;">Login / Register</a>
-    </div>
-  </header>
-
-  <main>
-    <div id="home-ordering-notice" class="store-availability-notice hidden" role="status" aria-live="polite"></div>
-    <!-- Hero Section -->
-    <section class="hero-section">
-      <div class="container">
-        <div class="hero-grid">
-          <div>
-            <div class="hero-badge">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              Freshly Grilled & Handcrafted
-            </div>
-            <h1 class="hero-title">
-              Fresh, Hot &amp; Juicy Burgers from <span id="hero-store-name">Burger Shop</span>
-            </h1>
-            <p class="hero-subtitle" id="hero-tagline">
-              Flavor on Wheels - Freshly Grilled Everyday. Hot patties, melted cheddar, crispy bacon, and toasted buns prepared to order.
-            </p>
-            <div class="hero-cta">
-              <a href="menu.html" class="btn btn-primary btn-lg">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                Order Now
-              </a>
-              <a href="#about" class="btn btn-secondary btn-lg">Our Story</a>
-            </div>
-            <div class="hero-highlights" aria-label="Why order with us">
-              <div class="hero-highlight">
-                <span class="hero-highlight-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3m0 12v3M4.9 4.9 7 7m10 10 2.1 2.1M3 12h3m12 0h3M4.9 19.1 7 17m10-10 2.1-2.1"/><circle cx="12" cy="12" r="5"/></svg>
-                </span>
-                <span><strong>Grilled fresh</strong><small>Made when you order</small></span>
-              </div>
-              <div class="hero-highlight">
-                <span class="hero-highlight-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v10H3zM14 10h4l3 3v4h-7z"/><circle cx="7.5" cy="19" r="1.5"/><circle cx="17.5" cy="19" r="1.5"/></svg>
-                </span>
-                <span><strong>Easy pickup</strong><small>Hot and ready for you</small></span>
-              </div>
-            </div>
-          </div>
-          <div class="hero-image-wrap">
-            <img src="assets/items/burger-hero-transparent.png" alt="Freshly grilled burger with egg, cheese, ham, and bacon" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 200 160\' width=\'200\' height=\'160\'%3E%3Crect width=\'200\' height=\'160\' fill=\'%233e281e\'/%3E%3Cg transform=\'translate(50, 30)\' fill=\'none\' stroke=\'%23F2A413\' stroke-width=\'4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpath d=\'M10 45 A 40 35 0 0 1 90 45 Z\' fill=\'%23F6B02C\' stroke=\'%23D97A07\'/%3E%3Cpath d=\'M8 50 Q 25 45 50 50 Q 75 55 92 50\' stroke=\'%2348BB78\' stroke-width=\'6\'/%3E%3Crect x=\'12\' y=\'58\' width=\'76\' height=\'14\' rx=\'6\' fill=\'%23A4262C\' stroke=\'%23881F24\'/%3E%3Crect x=\'14\' y=\'76\' width=\'72\' height=\'16\' rx=\'8\' fill=\'%23F6B02C\' stroke=\'%23D97A07\'/%3E%3C/g%3E%3Ctext x=\'100\' y=\'140\' font-family=\'sans-serif\' font-size=\'11\' font-weight=\'700\' fill=\'%23FBF8F3\' text-anchor=\'middle\'%3EFRESH BURGERS%3C/text%3E%3C/svg%3E';">
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Featured Burgers -->
-    <section class="section" id="featured">
-      <div class="container">
-        <div class="section-header">
-          <div>
-            <h2 class="section-title">Popular Crowd Favorites</h2>
-            <p class="section-desc">Hand-picked bestsellers grilled fresh to sizzling perfection</p>
-          </div>
-          <a href="menu.html" class="btn btn-secondary btn-sm">View Full Menu &rarr;</a>
-        </div>
-        <div class="product-grid" id="featured-grid">
-          <!-- Rendered dynamically with instant fallback -->
-        </div>
-      </div>
-    </section>
-
-    <!-- About Section -->
-    <section class="section" id="about" style="background:var(--color-surface-alt);border-top:1px solid var(--color-border);border-bottom:1px solid var(--color-border);">
-      <div class="container">
-        <div class="about-card">
-          <div class="about-details">
-            <p class="home-section-eyebrow">A little about us</p>
-            <h2 class="section-title" style="margin-bottom:8px;">About <span id="about-store-name">Burger Shop</span></h2>
-            <p>
-              We started as a neighborhood grill with one passion: serving real, honest, mouthwatering burgers and savory sandwiches at everyday prices.
-            </p>
-            <p>
-              Every patty is seasoned and seared to lock in juices, layered with savory cured ham, crisp smoked bacon, melted cheese, and dressed in our signature house special mayo. Whether you crave a quick breakfast sandwich, a footlong frank, or our monster Complete burger, we prepare each order hot and fresh upon order.
-            </p>
-            <div class="feature-pill-grid">
-              <div class="feature-pill">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand-secondary)" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                Budget Friendly
-              </div>
-              <div class="feature-pill">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                Fast &amp; Hot Pickup
-              </div>
-              <div class="feature-pill">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="2.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                Direct Local Delivery
-              </div>
-              <div class="feature-pill">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-info)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                Real Ingredients
-              </div>
-            </div>
-          </div>
-          <aside class="about-proof-card" aria-labelledby="about-proof-title">
-            <div class="about-proof-art" aria-hidden="true">
-              <img src="assets/items/three-burgers-transparent.png" alt="">
-              <span>Made fresh<br>for you</span>
-            </div>
-            <div class="about-proof-heading">
-              <span class="about-proof-mark" aria-hidden="true">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>
-              </span>
-              <div>
-                <p class="home-section-eyebrow">The good stuff</p>
-                <h3 id="about-proof-title">Why Customers Love Us</h3>
-              </div>
-            </div>
-            <ul class="about-proof-list">
-              <li>
-                <span aria-hidden="true">&check;</span>
-                <span><strong>Fresh stock:</strong> Real-time inventory tracking helps ensure your favorites are available.</span>
-              </li>
-              <li>
-                <span aria-hidden="true">&check;</span>
-                <span><strong>Made your way:</strong> Add extra patty, savory ham, or house coleslaw to your burger.</span>
-              </li>
-              <li>
-                <span aria-hidden="true">&check;</span>
-                <span><strong>Easy checkout:</strong> Choose GCash or COD, then follow your order status live.</span>
-              </li>
-            </ul>
-          </aside>
-        </div>
-      </div>
-    </section>
-
-    <!-- Contact & Store Hours -->
-    <section class="section" id="contact">
-      <div class="container">
-        <div class="section-header">
-          <div>
-            <p class="home-section-eyebrow">Come by or order in</p>
-            <h2 class="section-title">Visit Us or Order Delivery</h2>
-            <p class="section-desc">Store operating hours and contact information</p>
-          </div>
-        </div>
-        <div class="contact-grid">
-          <div class="contact-card">
-            <div class="contact-card-heading">
-              <span class="contact-card-icon" aria-hidden="true">
-                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
-              </span>
-              <div><p class="home-section-eyebrow">Find your next favorite</p><h3>Shop Details</h3></div>
-            </div>
-            <div class="contact-details">
-              <div class="contact-detail">
-                <span class="contact-detail-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
-                <div><strong>Physical store</strong><span id="contact-address">123 Main Street, City Center</span></div>
-              </div>
-              <div class="contact-detail">
-                <span class="contact-detail-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7l.5 3.2a2 2 0 0 1-.6 1.7L7.7 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 1.7-.6l3.2.5a2 2 0 0 1 2.1 2.4Z"/></svg></span>
-                <div><strong>Call us</strong><a id="contact-phone" href="tel:+639123456789">+63 912 345 6789</a></div>
-              </div>
-              <div class="contact-detail">
-                <span class="contact-detail-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>
-                <div><strong>Email support</strong><a id="contact-email" href="mailto:hello@burgershop.com">hello@burgershop.com</a></div>
-              </div>
-            </div>
-            <div class="contact-order-cta">
-              <a href="menu.html" class="btn btn-primary btn-sm">Start Your Order Now</a>
-            </div>
-          </div>
-          <div class="contact-card">
-            <div class="contact-card-heading">
-              <span class="contact-card-icon contact-hours-icon" aria-hidden="true">
-                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
-              </span>
-              <div><p class="home-section-eyebrow">Plan your visit</p><h3>Weekly Schedule</h3></div>
-            </div>
-            <ul id="contact-hours" class="contact-hours-list" aria-label="Store hours by day">
-              <li><span>Monday</span><span>09:00 - 21:00</span></li>
-              <li><span>Tuesday</span><span>09:00 - 21:00</span></li>
-              <li><span>Wednesday</span><span>09:00 - 21:00</span></li>
-              <li><span>Thursday</span><span>09:00 - 21:00</span></li>
-              <li><span>Friday</span><span>09:00 - 22:00</span></li>
-              <li><span>Saturday</span><span>09:00 - 22:00</span></li>
-              <li><span>Sunday</span><span>10:00 - 20:00</span></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Add to Cart Modal -->
-  <div id="add-to-cart-modal" class="modal-overlay add-to-cart-modal" role="dialog" aria-modal="true" aria-labelledby="modal-product-name" aria-hidden="true">
-    <div class="modal-card add-to-cart-card">
-      <div class="modal-header add-to-cart-header">
-        <div>
-          <p class="add-to-cart-eyebrow">Make it yours</p>
-          <h2 id="modal-product-name">Add to Cart</h2>
-          <p>Choose your quantity and any extras.</p>
-        </div>
-        <button type="button" class="modal-close" id="modal-close-btn" aria-label="Close item options">&times;</button>
-      </div>
-      <div class="modal-body add-to-cart-body">
-        <div class="add-to-cart-product">
-          <div class="add-to-cart-product-art">
-            <img id="modal-product-image" alt="">
-          </div>
-          <div class="add-to-cart-product-details">
-            <span class="add-to-cart-label">Base price</span>
-            <div id="modal-product-price" class="add-to-cart-base-price">₱0.00</div>
-            <div class="add-to-cart-quantity">
-              <span id="modal-qty-label">Quantity</span>
-              <div class="qty-stepper" aria-labelledby="modal-qty-label">
-                <button type="button" class="stepper-btn" id="modal-qty-minus" aria-label="Decrease quantity">−</button>
-                <span class="stepper-val" id="modal-qty-val" aria-live="polite">1</span>
-                <button type="button" class="stepper-btn" id="modal-qty-plus" aria-label="Increase quantity">+</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <section class="add-to-cart-addons" aria-labelledby="modal-addons-title">
-          <div class="add-to-cart-section-heading">
-            <div>
-              <h3 id="modal-addons-title">Add something extra</h3>
-              <p>Optional add-ons for this order</p>
-            </div>
-            <span class="add-to-cart-optional">OPTIONAL</span>
-          </div>
-          <div id="modal-addons-list"></div>
-        </section>
-
-        <div class="add-to-cart-total">
-          <div><span class="add-to-cart-label">Your item total</span><span class="add-to-cart-total-caption">Including selected extras</span></div>
-          <span id="modal-line-total" aria-live="polite">₱0.00</span>
-        </div>
-      </div>
-      <div class="modal-footer add-to-cart-footer">
-        <button type="button" class="btn btn-secondary btn-sm" id="modal-cancel-btn">Cancel</button>
-        <button type="button" class="btn btn-primary btn-sm" id="modal-confirm-btn">Confirm &amp; Add to Cart</button>
-      </div>
-    </div>
-  </div>
-
-  <footer id="site-footer" class="site-footer">
-    <div class="container">
-      <div class="footer-grid">
-        <div class="footer-col">
-          <h4 id="footer-store-name" style="font-size:1.15rem;color:var(--color-accent);">casestudy-system</h4>
-          <p id="footer-store-tagline">Flavor on Wheels - Freshly Grilled Everyday</p>
-          <p style="margin-top:12px;font-size:0.85rem;">
-            Serving handcrafted hot burgers, specialty sandwiches, footlongs, and sizzling sides with premium local ingredients.
-          </p>
-        </div>
-        <div class="footer-col">
-          <h4>Store Hours</h4>
-          <ul class="footer-hours-list" id="footer-hours-list">
-            <li><span>Mon - Fri</span> <span>9:00 AM - 9:00 PM</span></li>
-            <li><span>Saturday</span> <span>9:00 AM - 10:00 PM</span></li>
-            <li><span>Sunday</span> <span>10:00 AM - 8:00 PM</span></li>
+        <nav aria-label="Main Navigation">
+          <ul class="nav-links">
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="menu.html">Menu</a></li>
+            <li><a href="#featured">Featured</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
           </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Contact &amp; Location</h4>
-          <p><strong>Address:</strong><br><span id="footer-store-address">123 Main Street, City Center</span></p>
-          <p style="margin-top:8px;"><strong>Phone:</strong><br><span id="footer-store-phone">+63 912 345 6789</span></p>
+        </nav>
+
+        <div class="header-actions">
+          <a
+            href="cart.html"
+            id="header-cart-btn"
+            class="cart-btn"
+            aria-label="View Shopping Cart"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path
+                d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+              ></path>
+            </svg>
+            <span id="header-cart-badge" class="cart-badge hidden">0</span>
+          </a>
+
+          <div id="header-user-slot">
+            <a href="login.html" class="btn btn-primary btn-sm">Login</a>
+          </div>
+
+          <button
+            id="mobile-nav-btn"
+            class="mobile-nav-toggle"
+            aria-label="Toggle mobile menu"
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
         </div>
       </div>
-      <div class="footer-bottom">
-        &copy; 2026 casestudy-system. All rights reserved.
+
+      <div id="mobile-drawer-menu" class="mobile-drawer">
+        <a href="index.html">Home</a>
+        <a href="menu.html">Menu</a>
+        <a href="#featured">Featured Burgers</a>
+        <a href="#about">About Us</a>
+        <a href="#contact">Contact & Store Hours</a>
+        <a href="cart.html">My Cart</a>
+        <a
+          href="login.html"
+          style="color: var(--color-accent); font-weight: 700"
+          >Login / Register</a
+        >
+      </div>
+    </header>
+
+    <main>
+      <div
+        id="home-ordering-notice"
+        class="store-availability-notice hidden"
+        role="status"
+        aria-live="polite"
+      ></div>
+      <!-- Hero Section -->
+      <section class="hero-section">
+        <div class="container">
+          <div class="hero-grid">
+            <div>
+              <div class="hero-badge">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                  />
+                </svg>
+                Freshly Grilled & Handcrafted
+              </div>
+              <h1 class="hero-title">
+                Fresh, Hot &amp; Juicy Burgers from
+                <span id="hero-store-name">Burger Shop</span>
+              </h1>
+              <p class="hero-subtitle" id="hero-tagline">
+                Flavor on Wheels - Freshly Grilled Everyday. Hot patties, melted
+                cheddar, crispy bacon, and toasted buns prepared to order.
+              </p>
+              <div class="hero-cta">
+                <a href="menu.html" class="btn btn-primary btn-lg">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <circle cx="9" cy="21" r="1" />
+                    <circle cx="20" cy="21" r="1" />
+                    <path
+                      d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+                    />
+                  </svg>
+                  Order Now
+                </a>
+                <a href="#about" class="btn btn-secondary btn-lg">Our Story</a>
+              </div>
+              <div class="hero-highlights" aria-label="Why order with us">
+                <div class="hero-highlight">
+                  <span class="hero-highlight-icon" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M12 3v3m0 12v3M4.9 4.9 7 7m10 10 2.1 2.1M3 12h3m12 0h3M4.9 19.1 7 17m10-10 2.1-2.1"
+                      />
+                      <circle cx="12" cy="12" r="5" />
+                    </svg>
+                  </span>
+                  <span
+                    ><strong>Grilled fresh</strong
+                    ><small>Made when you order</small></span
+                  >
+                </div>
+                <div class="hero-highlight">
+                  <span class="hero-highlight-icon" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M3 7h11v10H3zM14 10h4l3 3v4h-7z" />
+                      <circle cx="7.5" cy="19" r="1.5" />
+                      <circle cx="17.5" cy="19" r="1.5" />
+                    </svg>
+                  </span>
+                  <span
+                    ><strong>Easy pickup</strong
+                    ><small>Hot and ready for you</small></span
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="hero-image-wrap">
+              <img
+                src="assets/items/burger-hero-transparent.png"
+                alt="Freshly grilled burger with egg, cheese, ham, and bacon"
+                onerror="
+                  this.onerror = null;
+                  this.src =
+                    'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 200 160\' width=\'200\' height=\'160\'%3E%3Crect width=\'200\' height=\'160\' fill=\'%233e281e\'/%3E%3Cg transform=\'translate(50, 30)\' fill=\'none\' stroke=\'%23F2A413\' stroke-width=\'4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpath d=\'M10 45 A 40 35 0 0 1 90 45 Z\' fill=\'%23F6B02C\' stroke=\'%23D97A07\'/%3E%3Cpath d=\'M8 50 Q 25 45 50 50 Q 75 55 92 50\' stroke=\'%2348BB78\' stroke-width=\'6\'/%3E%3Crect x=\'12\' y=\'58\' width=\'76\' height=\'14\' rx=\'6\' fill=\'%23A4262C\' stroke=\'%23881F24\'/%3E%3Crect x=\'14\' y=\'76\' width=\'72\' height=\'16\' rx=\'8\' fill=\'%23F6B02C\' stroke=\'%23D97A07\'/%3E%3C/g%3E%3Ctext x=\'100\' y=\'140\' font-family=\'sans-serif\' font-size=\'11\' font-weight=\'700\' fill=\'%23FBF8F3\' text-anchor=\'middle\'%3EFRESH BURGERS%3C/text%3E%3C/svg%3E';
+                "
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Featured Burgers -->
+      <section class="section" id="featured">
+        <div class="container">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Popular Crowd Favorites</h2>
+              <p class="section-desc">
+                Hand-picked bestsellers grilled fresh to sizzling perfection
+              </p>
+            </div>
+            <a href="menu.html" class="btn btn-secondary btn-sm"
+              >View Full Menu &rarr;</a
+            >
+          </div>
+          <div class="product-grid" id="featured-grid">
+            <!-- Rendered dynamically with instant fallback -->
+          </div>
+        </div>
+      </section>
+
+      <!-- About Section -->
+      <section
+        class="section"
+        id="about"
+        style="
+          background: var(--color-surface-alt);
+          border-top: 1px solid var(--color-border);
+          border-bottom: 1px solid var(--color-border);
+        "
+      >
+        <div class="container">
+          <div class="about-card">
+            <div class="about-details">
+              <p class="home-section-eyebrow">A little about us</p>
+              <h2 class="section-title" style="margin-bottom: 8px">
+                About <span id="about-store-name">Burger Shop</span>
+              </h2>
+              <p>
+                We started as a neighborhood grill with one passion: serving
+                real, honest, mouthwatering burgers and savory sandwiches at
+                everyday prices.
+              </p>
+              <p>
+                Every patty is seasoned and seared to lock in juices, layered
+                with savory cured ham, crisp smoked bacon, melted cheese, and
+                dressed in our signature house special mayo. Whether you crave a
+                quick breakfast sandwich, a footlong frank, or our monster
+                Complete burger, we prepare each order hot and fresh upon order.
+              </p>
+              <div class="feature-pill-grid">
+                <div class="feature-pill">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="var(--color-brand-secondary)"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                    />
+                  </svg>
+                  Budget Friendly
+                </div>
+                <div class="feature-pill">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="var(--color-accent)"
+                    stroke-width="2.5"
+                  >
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                  </svg>
+                  Fast &amp; Hot Pickup
+                </div>
+                <div class="feature-pill">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="var(--color-success)"
+                    stroke-width="2.5"
+                  >
+                    <rect x="1" y="3" width="15" height="13" />
+                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+                    <circle cx="5.5" cy="18.5" r="2.5" />
+                    <circle cx="18.5" cy="18.5" r="2.5" />
+                  </svg>
+                  Direct Local Delivery
+                </div>
+                <div class="feature-pill">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="var(--color-info)"
+                    stroke-width="2.5"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Real Ingredients
+                </div>
+              </div>
+            </div>
+            <aside class="about-proof-card" aria-labelledby="about-proof-title">
+              <div class="about-proof-art" aria-hidden="true">
+                <img src="assets/items/three-burgers-transparent.png" alt="" />
+                <span>Made fresh<br />for you</span>
+              </div>
+              <div class="about-proof-heading">
+                <span class="about-proof-mark" aria-hidden="true">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"
+                    />
+                  </svg>
+                </span>
+                <div>
+                  <p class="home-section-eyebrow">The good stuff</p>
+                  <h3 id="about-proof-title">Why Customers Love Us</h3>
+                </div>
+              </div>
+              <ul class="about-proof-list">
+                <li>
+                  <span aria-hidden="true">&check;</span>
+                  <span
+                    ><strong>Fresh stock:</strong> Real-time inventory tracking
+                    helps ensure your favorites are available.</span
+                  >
+                </li>
+                <li>
+                  <span aria-hidden="true">&check;</span>
+                  <span
+                    ><strong>Made your way:</strong> Add extra patty, savory
+                    ham, or house coleslaw to your burger.</span
+                  >
+                </li>
+                <li>
+                  <span aria-hidden="true">&check;</span>
+                  <span
+                    ><strong>Easy checkout:</strong> Choose GCash or COD, then
+                    follow your order status live.</span
+                  >
+                </li>
+              </ul>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact & Store Hours -->
+      <section class="section" id="contact">
+        <div class="container">
+          <div class="section-header">
+            <div>
+              <p class="home-section-eyebrow">Come by or order in</p>
+              <h2 class="section-title">Visit Us or Order Delivery</h2>
+              <p class="section-desc">
+                Store operating hours and contact information
+              </p>
+            </div>
+          </div>
+          <div class="contact-grid">
+            <div class="contact-card">
+              <div class="contact-card-heading">
+                <span class="contact-card-icon" aria-hidden="true">
+                  <svg
+                    width="21"
+                    height="21"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  >
+                    <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" />
+                    <circle cx="12" cy="10" r="2.5" />
+                  </svg>
+                </span>
+                <div>
+                  <p class="home-section-eyebrow">Find your next favorite</p>
+                  <h3>Shop Details</h3>
+                </div>
+              </div>
+              <div class="contact-details">
+                <div class="contact-detail">
+                  <span class="contact-detail-icon" aria-hidden="true"
+                    ><svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                    >
+                      <path
+                        d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"
+                      />
+                      <circle cx="12" cy="10" r="2.5" /></svg
+                  ></span>
+                  <div>
+                    <strong>Physical store</strong
+                    ><span id="contact-address"
+                      >123 Main Street, City Center</span
+                    >
+                  </div>
+                </div>
+                <div class="contact-detail">
+                  <span class="contact-detail-icon" aria-hidden="true"
+                    ><svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                    >
+                      <path
+                        d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7l.5 3.2a2 2 0 0 1-.6 1.7L7.7 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 1.7-.6l3.2.5a2 2 0 0 1 2.1 2.4Z"
+                      /></svg
+                  ></span>
+                  <div>
+                    <strong>Call us</strong
+                    ><a id="contact-phone" href="tel:+639123456789"
+                      >+63 912 345 6789</a
+                    >
+                  </div>
+                </div>
+                <div class="contact-detail">
+                  <span class="contact-detail-icon" aria-hidden="true"
+                    ><svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                    >
+                      <rect x="3" y="5" width="18" height="14" rx="2" />
+                      <path d="m3 7 9 6 9-6" /></svg
+                  ></span>
+                  <div>
+                    <strong>Email support</strong
+                    ><a id="contact-email" href="mailto:hello@burgershop.com"
+                      >hello@burgershop.com</a
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="contact-order-cta">
+                <a href="menu.html" class="btn btn-primary btn-sm"
+                  >Start Your Order Now</a
+                >
+              </div>
+            </div>
+            <div class="contact-card">
+              <div class="contact-card-heading">
+                <span
+                  class="contact-card-icon contact-hours-icon"
+                  aria-hidden="true"
+                >
+                  <svg
+                    width="21"
+                    height="21"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v5l3.5 2" />
+                  </svg>
+                </span>
+                <div>
+                  <p class="home-section-eyebrow">Plan your visit</p>
+                  <h3>Weekly Schedule</h3>
+                </div>
+              </div>
+              <ul
+                id="contact-hours"
+                class="contact-hours-list"
+                aria-label="Store hours by day"
+              >
+                <li><span>Monday</span><span>09:00 - 21:00</span></li>
+                <li><span>Tuesday</span><span>09:00 - 21:00</span></li>
+                <li><span>Wednesday</span><span>09:00 - 21:00</span></li>
+                <li><span>Thursday</span><span>09:00 - 21:00</span></li>
+                <li><span>Friday</span><span>09:00 - 22:00</span></li>
+                <li><span>Saturday</span><span>09:00 - 22:00</span></li>
+                <li><span>Sunday</span><span>10:00 - 20:00</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Add to Cart Modal -->
+    <div
+      id="add-to-cart-modal"
+      class="modal-overlay add-to-cart-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-product-name"
+      aria-hidden="true"
+    >
+      <div class="modal-card add-to-cart-card">
+        <div class="modal-header add-to-cart-header">
+          <div>
+            <p class="add-to-cart-eyebrow">Make it yours</p>
+            <h2 id="modal-product-name">Add to Cart</h2>
+            <p>Choose your quantity and any extras.</p>
+          </div>
+          <button
+            type="button"
+            class="modal-close"
+            id="modal-close-btn"
+            aria-label="Close item options"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body add-to-cart-body">
+          <div class="add-to-cart-product">
+            <div class="add-to-cart-product-art">
+              <img id="modal-product-image" alt="" />
+            </div>
+            <div class="add-to-cart-product-details">
+              <span class="add-to-cart-label">Base price</span>
+              <div id="modal-product-price" class="add-to-cart-base-price">
+                ₱0.00
+              </div>
+              <div class="add-to-cart-quantity">
+                <span id="modal-qty-label">Quantity</span>
+                <div class="qty-stepper" aria-labelledby="modal-qty-label">
+                  <button
+                    type="button"
+                    class="stepper-btn"
+                    id="modal-qty-minus"
+                    aria-label="Decrease quantity"
+                  >
+                    −
+                  </button>
+                  <span
+                    class="stepper-val"
+                    id="modal-qty-val"
+                    aria-live="polite"
+                    >1</span
+                  >
+                  <button
+                    type="button"
+                    class="stepper-btn"
+                    id="modal-qty-plus"
+                    aria-label="Increase quantity"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <section
+            class="add-to-cart-addons"
+            aria-labelledby="modal-addons-title"
+          >
+            <div class="add-to-cart-section-heading">
+              <div>
+                <h3 id="modal-addons-title">Add something extra</h3>
+                <p>Optional add-ons for this order</p>
+              </div>
+              <span class="add-to-cart-optional">OPTIONAL</span>
+            </div>
+            <div id="modal-addons-list"></div>
+          </section>
+
+          <div class="add-to-cart-total">
+            <div>
+              <span class="add-to-cart-label">Your item total</span
+              ><span class="add-to-cart-total-caption"
+                >Including selected extras</span
+              >
+            </div>
+            <span id="modal-line-total" aria-live="polite">₱0.00</span>
+          </div>
+        </div>
+        <div class="modal-footer add-to-cart-footer">
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            id="modal-cancel-btn"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            id="modal-confirm-btn"
+          >
+            Confirm &amp; Add to Cart
+          </button>
+        </div>
       </div>
     </div>
-  </footer>
 
-  <script type="module" src="js/home.js"></script>
-</body>
+    <footer id="site-footer" class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <h4
+              id="footer-store-name"
+              style="font-size: 1.15rem; color: var(--color-accent)"
+            >
+              casestudy-system
+            </h4>
+            <p id="footer-store-tagline">
+              Flavor on Wheels - Freshly Grilled Everyday
+            </p>
+            <p style="margin-top: 12px; font-size: 0.85rem">
+              Serving handcrafted hot burgers, specialty sandwiches, footlongs,
+              and sizzling sides with premium local ingredients.
+            </p>
+          </div>
+          <div class="footer-col">
+            <h4>Store Hours</h4>
+            <ul class="footer-hours-list" id="footer-hours-list">
+              <li><span>Mon - Fri</span> <span>9:00 AM - 9:00 PM</span></li>
+              <li><span>Saturday</span> <span>9:00 AM - 10:00 PM</span></li>
+              <li><span>Sunday</span> <span>10:00 AM - 8:00 PM</span></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Contact &amp; Location</h4>
+            <p>
+              <strong>Address:</strong><br /><span id="footer-store-address"
+                >123 Main Street, City Center</span
+              >
+            </p>
+            <p style="margin-top: 8px">
+              <strong>Phone:</strong><br /><span id="footer-store-phone"
+                >+63 912 345 6789</span
+              >
+            </p>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          &copy; 2026 casestudy-system. All rights reserved.
+        </div>
+      </div>
+    </footer>
+
+    <script type="module" src="js/home.js"></script>
+  </body>
 </html>

@@ -3,7 +3,8 @@ import { isLoggedIn, isAdmin, getUser, logout, renderAvatar } from './auth.js';
 import { apiFetch } from './api.js';
 
 // SVG Inline Placeholder (Burger icon on warm cream background)
-export const BURGER_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 160' width='200' height='160'%3E%3Crect width='200' height='160' fill='%23F4EFEA'/%3E%3Cg transform='translate(50, 30)' fill='none' stroke='%23C4B3A3' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 45 A 40 35 0 0 1 90 45 Z' fill='%23E9DEC3' stroke='%239B8B82'/%3E%3Cpath d='M8 50 Q 25 45 50 50 Q 75 55 92 50' stroke='%2348BB78' stroke-width='6'/%3E%3Crect x='12' y='58' width='76' height='14' rx='6' fill='%23542B1A' stroke='%23381B10'/%3E%3Cpolygon points='14,60 86,60 76,70 50,65 24,70' fill='%23ECC94B' stroke='%23D69E2E' stroke-width='2'/%3E%3Crect x='14' y='76' width='72' height='16' rx='8' fill='%23E9DEC3' stroke='%239B8B82'/%3E%3C/g%3E%3Ctext x='100' y='142' font-family='sans-serif' font-size='11' font-weight='600' fill='%239B8B82' text-anchor='middle'%3ECASESTUDY SYSTEM%3C/text%3E%3C/svg%3E";
+export const BURGER_PLACEHOLDER =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 160' width='200' height='160'%3E%3Crect width='200' height='160' fill='%23F4EFEA'/%3E%3Cg transform='translate(50, 30)' fill='none' stroke='%23C4B3A3' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 45 A 40 35 0 0 1 90 45 Z' fill='%23E9DEC3' stroke='%239B8B82'/%3E%3Cpath d='M8 50 Q 25 45 50 50 Q 75 55 92 50' stroke='%2348BB78' stroke-width='6'/%3E%3Crect x='12' y='58' width='76' height='14' rx='6' fill='%23542B1A' stroke='%23381B10'/%3E%3Cpolygon points='14,60 86,60 76,70 50,65 24,70' fill='%23ECC94B' stroke='%23D69E2E' stroke-width='2'/%3E%3Crect x='14' y='76' width='72' height='16' rx='8' fill='%23E9DEC3' stroke='%239B8B82'/%3E%3C/g%3E%3Ctext x='100' y='142' font-family='sans-serif' font-size='11' font-weight='600' fill='%239B8B82' text-anchor='middle'%3ECASESTUDY SYSTEM%3C/text%3E%3C/svg%3E";
 
 // Canonical mapping of item names to asset files
 export const ITEM_NAME_IMAGE_MAP = {
@@ -13,14 +14,14 @@ export const ITEM_NAME_IMAGE_MAP = {
   'burger with bacon': 'burger-with-bacon.png',
   'burger bacon ham': 'burger-bacon-ham.png',
   'cheese burger': 'cheeseburger.png',
-  'cheeseburger': 'cheeseburger.png',
+  cheeseburger: 'cheeseburger.png',
   'cheese burger with ham': 'cheeseburger-with-ham.png',
   'cheeseburger with ham': 'cheeseburger-with-ham.png',
   'cheese burger with egg': 'cheeseburger-with-egg.png',
   'cheeseburger with egg': 'cheeseburger-with-egg.png',
   'cheese burger with bacon': 'cheeseburger-with-bacon.png',
   'cheeseburger with bacon': 'cheeseburger-with-bacon.png',
-  'ham': 'ham.png',
+  ham: 'ham.png',
   'ham with cheese': 'ham-with-cheese.png',
   'ham with egg': 'ham-with-egg.png',
   'ham cheese with egg': 'ham-cheese-with-egg.png',
@@ -32,10 +33,10 @@ export const ITEM_NAME_IMAGE_MAP = {
   'bacon with cheese': 'bacon-with-cheese.png',
   'bacon cheese with ham': 'bacon-cheese-with-ham.png',
   'bacon cheese with egg': 'bacon-cheese-with-egg.png',
-  'complete': 'complete.png',
+  complete: 'complete.png',
   'complete change bacon': 'complete-change-bacon.png',
   'complete with bacon': 'complete-with-bacon.png',
-  'footlong': 'footlong.png',
+  footlong: 'footlong.png',
   'footlong ham': 'footlong-ham.png',
   'footlong egg': 'footlong-egg.png',
   'footlong cheese': 'footlong-cheese.png',
@@ -46,15 +47,15 @@ export const ITEM_NAME_IMAGE_MAP = {
   'footlong ham bacon': 'footlong-ham-bacon.png',
   '4pcs grace siomai': 'grace-siomai-4pcs.png',
   'grace siomai 4pcs': 'grace-siomai-4pcs.png',
-  'siomai': 'grace-siomai-4pcs.png',
+  siomai: 'grace-siomai-4pcs.png',
   'add patty': 'add-patty.png',
   'add ham': 'add-ham.png',
-  'add coleslaw': 'add-coleslaw.png'
+  'add coleslaw': 'add-coleslaw.png',
 };
 
 export function getProductImageUrl(product) {
   if (!product) return BURGER_PLACEHOLDER;
-  
+
   // 1. Check explicit name match first
   const normName = (product.name || '').toLowerCase().trim();
   if (ITEM_NAME_IMAGE_MAP[normName]) {
@@ -62,12 +63,18 @@ export function getProductImageUrl(product) {
   }
 
   // 2. Check if product.image is provided
-  if (product.image && typeof product.image === 'string' && product.image.trim()) {
+  if (
+    product.image &&
+    typeof product.image === 'string' &&
+    product.image.trim()
+  ) {
     return product.image.trim();
   }
 
   // 3. Fallback to slug
-  const slug = (product.slug || normName.replace(/\s+/g, '-').replace(/[^\w\-]+/g, '')).toLowerCase();
+  const slug = (
+    product.slug || normName.replace(/\s+/g, '-').replace(/[^\w\-]+/g, '')
+  ).toLowerCase();
   if (slug) {
     return `assets/items/${slug}.png`;
   }
@@ -119,12 +126,13 @@ export function showToast(message, type = 'info', duration = 4000) {
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
 
-  const iconSvg = {
-    success: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#287D3C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
-    error: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A4262C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
-    warning: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D97A07" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
-    info: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D6FB8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`,
-  }[type] || '';
+  const iconSvg =
+    {
+      success: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#287D3C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+      error: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A4262C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+      warning: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D97A07" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+      info: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D6FB8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`,
+    }[type] || '';
 
   toast.innerHTML = `
     <div style="flex-shrink:0;">${iconSvg}</div>
@@ -157,7 +165,8 @@ export function openModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {
     modal.classList.add('open');
-    if (modal.hasAttribute('aria-hidden')) modal.setAttribute('aria-hidden', 'false');
+    if (modal.hasAttribute('aria-hidden'))
+      modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
   }
 }
@@ -166,7 +175,8 @@ export function closeModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {
     modal.classList.remove('open');
-    if (modal.hasAttribute('aria-hidden')) modal.setAttribute('aria-hidden', 'true');
+    if (modal.hasAttribute('aria-hidden'))
+      modal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
   }
 }
@@ -180,7 +190,10 @@ export async function updateCartBadge() {
     // Check local storage cart items if offline
     try {
       const localCart = JSON.parse(localStorage.getItem('cart') || '[]');
-      const count = localCart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+      const count = localCart.reduce(
+        (sum, item) => sum + (item.quantity || 1),
+        0
+      );
       badge.textContent = String(count);
       if (count > 0) badge.classList.remove('hidden');
       else badge.classList.add('hidden');
@@ -192,7 +205,9 @@ export async function updateCartBadge() {
 
   try {
     const data = await apiFetch('/cart');
-    const count = data.items ? data.items.reduce((sum, item) => sum + (item.quantity || 1), 0) : 0;
+    const count = data.items
+      ? data.items.reduce((sum, item) => sum + (item.quantity || 1), 0)
+      : 0;
     badge.textContent = String(count);
     if (count > 0) {
       badge.classList.remove('hidden');
@@ -216,7 +231,8 @@ export function setupBackToTop() {
     button.setAttribute('aria-label', 'Back to top');
     button.title = 'Back to top';
     button.tabIndex = -1;
-    button.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"></path></svg>';
+    button.innerHTML =
+      '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"></path></svg>';
     document.body.appendChild(button);
   }
 
@@ -232,7 +248,9 @@ export function setupBackToTop() {
   window.addEventListener('scroll', updateVisibility, { passive: true });
   document.addEventListener('scroll', updateVisibility, { passive: true });
   button.addEventListener('click', () => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
     window.scrollTo({
       top: 0,
       behavior: prefersReducedMotion ? 'auto' : 'smooth',
@@ -256,10 +274,14 @@ export function renderHeader(activeNav = '') {
   navLinks.forEach((link) => {
     link.classList.remove('active');
     const href = link.getAttribute('href') || '';
-    if (activeNav === 'home' && (href === 'index.html' || href === '/')) link.classList.add('active');
-    if (activeNav === 'menu' && href.includes('menu.html')) link.classList.add('active');
-    if (activeNav === 'cart' && href.includes('cart.html')) link.classList.add('active');
-    if (activeNav === 'profile' && href.includes('profile.html')) link.classList.add('active');
+    if (activeNav === 'home' && (href === 'index.html' || href === '/'))
+      link.classList.add('active');
+    if (activeNav === 'menu' && href.includes('menu.html'))
+      link.classList.add('active');
+    if (activeNav === 'cart' && href.includes('cart.html'))
+      link.classList.add('active');
+    if (activeNav === 'profile' && href.includes('profile.html'))
+      link.classList.add('active');
   });
 
   // User slot dynamic update
@@ -397,7 +419,10 @@ export async function renderFooter() {
         const element = footerElem.querySelector(`#${id}`);
         if (element && typeof value === 'string') element.textContent = value;
       });
-      renderBusinessHours(footerElem.querySelector('#footer-hours-list'), s.businessHours);
+      renderBusinessHours(
+        footerElem.querySelector('#footer-hours-list'),
+        s.businessHours
+      );
     }
   } catch (e) {
     // Keep existing static footer markup
@@ -434,16 +459,18 @@ export function renderBusinessHours(container, businessHours) {
     return `${hour % 12 || 12}:${minutes} ${period}`;
   };
 
-  container.replaceChildren(...days.map(([key, label]) => {
-    const hours = businessHours[key] || defaultHours[key];
-    const row = document.createElement('li');
-    const day = document.createElement('span');
-    const time = document.createElement('span');
-    day.textContent = label;
-    time.textContent = hours.closed
-      ? 'Closed'
-      : `${formatTime(hours.open || defaultHours[key].open)} – ${formatTime(hours.close || defaultHours[key].close)}`;
-    row.append(day, time);
-    return row;
-  }));
+  container.replaceChildren(
+    ...days.map(([key, label]) => {
+      const hours = businessHours[key] || defaultHours[key];
+      const row = document.createElement('li');
+      const day = document.createElement('span');
+      const time = document.createElement('span');
+      day.textContent = label;
+      time.textContent = hours.closed
+        ? 'Closed'
+        : `${formatTime(hours.open || defaultHours[key].open)} – ${formatTime(hours.close || defaultHours[key].close)}`;
+      row.append(day, time);
+      return row;
+    })
+  );
 }

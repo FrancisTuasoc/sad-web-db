@@ -1,12 +1,17 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { checkEnv, PORT, MONGODB_URI, FRONTEND_URL } = require('./src/config/env');
+const {
+  checkEnv,
+  PORT,
+  DATABASE_URL,
+  FRONTEND_URL,
+} = require('./src/config/env');
 
 // Validate critical environment variables before starting
 checkEnv();
 
-const { connectDB } = require('./src/config/db');
+const { connectDB, closeDB } = require('./src/config/db');
 const { ensureAdminAndSettings } = require('./src/seed/seed');
 const errorHandler = require('./src/middleware/errorHandler');
 const { expirePayAtShopOrders } = require('./src/services/order.service');
@@ -38,28 +43,32 @@ const normalizeOrigin = (value) => {
   }
 };
 
-const allowedOrigins = new Set([
-  normalizeOrigin(FRONTEND_URL),
-  'http://localhost:5000',
-  'http://127.0.0.1:5000',
-  'http://localhost:5500',
-  'http://127.0.0.1:5500',
-].map((origin) => normalizeOrigin(origin)));
+const allowedOrigins = new Set(
+  [
+    normalizeOrigin(FRONTEND_URL),
+    'http://localhost:5000',
+    'http://127.0.0.1:5000',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500',
+  ].map((origin) => normalizeOrigin(origin))
+);
 
 // Middleware
-app.use(cors({
-  origin: (origin, callback) => {
-    const normalizedOrigin = origin ? normalizeOrigin(origin) : null;
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      const normalizedOrigin = origin ? normalizeOrigin(origin) : null;
 
-    if (!origin || allowedOrigins.has(normalizedOrigin)) {
-      callback(null, true);
-      return;
-    }
+      if (!origin || allowedOrigins.has(normalizedOrigin)) {
+        callback(null, true);
+        return;
+      }
 
-    callback(new Error(`CORS blocked for origin: ${origin}`));
-  },
-  credentials: true,
-}));
+      callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    credentials: true,
+  })
+);
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
@@ -98,7 +107,7 @@ app.use(errorHandler);
 
 // Connect database and start server
 async function startServer() {
-  await connectDB(MONGODB_URI);
+  await connectDB(DATABASE_URL);
 
   // Auto-run admin & settings seed on startup if missing
   try {
@@ -114,7 +123,9 @@ async function startServer() {
     try {
       const cancelledCount = await expirePayAtShopOrders();
       if (cancelledCount > 0) {
-        console.log(`[ORDER EXPIRY] Automatically cancelled ${cancelledCount} overdue pay-at-shop order(s).`);
+        console.log(
+          `[ORDER EXPIRY] Automatically cancelled ${cancelledCount} overdue pay-at-shop order(s).`
+        );
       }
     } catch (error) {
       console.error('[ORDER EXPIRY ERROR]', error);
@@ -126,16 +137,23 @@ async function startServer() {
   setInterval(runOrderExpirySweep, ORDER_EXPIRY_SWEEP_INTERVAL_MS);
 
   const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`\n============================================================`);
-    console.log(` Burger Ordering & Billing Server running at: http://localhost:${PORT}`);
+    console.log(
+      `\n============================================================`
+    );
+    console.log(
+      ` Burger Ordering & Billing Server running at: http://localhost:${PORT}`
+    );
     console.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`============================================================\n`);
+    console.log(
+      `============================================================\n`
+    );
   });
 
   // Graceful shutdown
-  const shutdown = () => {
+  const shutdown = async () => {
     console.log('Shutting down server gracefully...');
-    server.close(() => {
+    server.close(async () => {
+      await closeDB();
       console.log('Server process terminated.');
       process.exit(0);
     });

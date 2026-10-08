@@ -1,5 +1,5 @@
 const express = require('express');
-const Settings = require('../models/Settings');
+const settingsRepository = require('../repositories/settingsRepository');
 const asyncHandler = require('../utils/asyncHandler');
 
 const router = express.Router();
@@ -7,10 +7,7 @@ const router = express.Router();
 router.get(
   '/public',
   asyncHandler(async (req, res) => {
-    let settings = await Settings.findOne();
-    if (!settings) {
-      settings = await Settings.create({});
-    }
+    const settings = await settingsRepository.getSettings();
 
     res.json({
       success: true,
