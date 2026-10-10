@@ -28,6 +28,7 @@ const envSchema = z.object({
     .pipe(
       z
         .array(z.string().url())
+        .min(1, 'At least one CORS origin is required')
         .transform((origins) => origins.map((origin) => new URL(origin).origin))
     ),
   ADMIN_EMAIL: z.string().trim().email(),
