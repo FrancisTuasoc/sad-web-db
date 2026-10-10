@@ -5,7 +5,8 @@ const {
   checkEnv,
   PORT,
   DATABASE_URL,
-  FRONTEND_URL,
+  CORS_ORIGINS,
+  NODE_ENV,
 } = require('./src/config/env');
 
 // Validate critical environment variables before starting
@@ -43,15 +44,7 @@ const normalizeOrigin = (value) => {
   }
 };
 
-const allowedOrigins = new Set(
-  [
-    normalizeOrigin(FRONTEND_URL),
-    'http://localhost:5000',
-    'http://127.0.0.1:5000',
-    'http://localhost:5500',
-    'http://127.0.0.1:5500',
-  ].map((origin) => normalizeOrigin(origin))
-);
+const allowedOrigins = new Set(CORS_ORIGINS);
 
 // Middleware
 app.use(
@@ -143,7 +136,7 @@ async function startServer() {
     console.log(
       ` Burger Ordering & Billing Server running at: http://localhost:${PORT}`
     );
-    console.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(` Environment: ${NODE_ENV}`);
     console.log(
       `============================================================\n`
     );

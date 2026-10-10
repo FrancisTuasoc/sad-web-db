@@ -69,11 +69,12 @@ npm install
 
 ### 2. Configure Environment Variables
 
-Copy `backend/.env.example` to `backend/.env`, then fill in the database connection string, a long random JWT secret, and your administrator email and password. Keep `backend/.env` private; it is excluded from Git. Never put real credentials in this README or commit them. The administrator credentials in this file are used when the account is first created; changing them later does not change an existing account's password.
+Copy `backend/.env.example` to `backend/.env`, then fill in the database connection string, a long random JWT secret, administrator credentials, and at least one valid CORS origin URL (comma-separated if multiple). At least one CORS origin is required. Keep `backend/.env` private; it is excluded from Git. Never put real credentials in this README or commit them. The administrator credentials in this file are used when the account is first created; changing them later does not change an existing account's password.
 
 ```dotenv
 DATABASE_URL=postgresql://admin:admin123@localhost:5432/francis
 JWT_SECRET=your_long_random_secret_here
+CORS_ORIGINS=http://localhost:5000,http://127.0.0.1:5000
 ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=YourAdminPassword
 ```

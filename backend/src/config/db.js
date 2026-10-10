@@ -1,17 +1,20 @@
 const { Pool } = require('pg');
+const { DATABASE_URL } = require('./env');
 
 let pool = null;
 
-function getPool(connectionString = process.env.DATABASE_URL) {
+function getPool(connectionString = DATABASE_URL) {
   if (!pool) {
     pool = new Pool({
-      connectionString:
-        connectionString ||
-        'postgresql://admin:admin123@localhost:5432/francis',
-      options: '-c search_path=app,public',
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 3000,
+      connectionString,
+      connectionTimeoutMillis: 10000,
+      max: 10,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+      onConnect: async (client) => {
+        await client.query('SET search_path TO app, public');
+      },
     });
 
     pool.on('error', (err) => {
