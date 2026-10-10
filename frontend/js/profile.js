@@ -58,7 +58,11 @@ function validateAvatarFile(file) {
 function updateHeaderAvatar(avatarUrl) {
   const avatar = document.querySelector('#header-user-slot .avatar-circle');
   if (!avatar) return;
-  if (avatarUrl && !avatarUrl.startsWith('gridfs:')) {
+  if (
+    avatarUrl &&
+    !avatarUrl.startsWith('gridfs:') &&
+    !avatarUrl.startsWith('pgavatar:')
+  ) {
     avatar.style.backgroundImage = `url("${avatarUrl.replace(/"/g, '%22')}")`;
     avatar.textContent = '';
   }
@@ -68,7 +72,11 @@ async function loadProfileOverview() {
   try {
     const res = await apiFetch('/profile');
     let p = res.profile;
-    if (p.avatarUrl && p.avatarUrl.startsWith('gridfs:')) {
+    if (
+      p.avatarUrl &&
+      (p.avatarUrl.startsWith('gridfs:') ||
+        p.avatarUrl.startsWith('pgavatar:'))
+    ) {
       const imageBlob = await apiFetchBlob('/profile/avatar');
       const nextAvatarObjectUrl = URL.createObjectURL(imageBlob);
       if (activeAvatarObjectUrl) URL.revokeObjectURL(activeAvatarObjectUrl);

@@ -70,7 +70,11 @@ export function renderAvatar(user, size = 32) {
   }
 
   const avatarUrl = user.avatarUrl && String(user.avatarUrl).trim();
-  if (avatarUrl && !avatarUrl.startsWith('gridfs:')) {
+  if (
+    avatarUrl &&
+    !avatarUrl.startsWith('gridfs:') &&
+    !avatarUrl.startsWith('pgavatar:')
+  ) {
     const safeUrl = avatarUrl.replace(/'/g, '%27');
     return `<div class="avatar-circle" style="width:${size}px;height:${size}px;background-image:url('${safeUrl}');background-size:cover;background-position:center;background-repeat:no-repeat;"></div>`;
   }
