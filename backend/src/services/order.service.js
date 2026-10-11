@@ -4,6 +4,7 @@ const productRepository = require('../repositories/productRepository');
 const settingsRepository = require('../repositories/settingsRepository');
 const userRepository = require('../repositories/userRepository');
 const AppError = require('../utils/AppError');
+const { validateGcashProof } = require('../utils/gcashProof');
 const { generateOrderNumber } = require('../utils/orderNumber');
 const {
   deductStockWithCompensation,
@@ -24,6 +25,8 @@ async function placeOrder({
   fulfillment,
   paymentMethod,
   gcashReference,
+  gcashProofData,
+  gcashProofMimeType,
   contact,
 }) {
   const settings = await getOrCreateSettings();
@@ -71,10 +74,16 @@ async function placeOrder({
     }
   }
 
+  let paymentProof = null;
   if (paymentMethod === 'gcash') {
-    if (!gcashReference || !/^\d{13}$/.test(gcashReference.trim())) {
+    if (gcashProofData && gcashProofMimeType) {
+      paymentProof = validateGcashProof({
+        data: gcashProofData,
+        mimeType: gcashProofMimeType,
+      });
+    } else if (!gcashReference || !/^\d{13}$/.test(gcashReference)) {
       throw new AppError(
-        'Please provide a valid 13-digit GCash reference number.',
+        'Attach a payment screenshot or enter the 13-digit GCash reference number.',
         400
       );
     }
@@ -227,11 +236,12 @@ async function placeOrder({
     fulfillment,
     paymentMethod,
     paymentStatus: 'unpaid',
+    paymentProof,
+    gcashReference: paymentMethod === 'gcash' ? gcashReference : '',
     arrivalDeadline:
       paymentMethod === 'pay_at_shop'
         ? new Date(Date.now() + PAY_AT_SHOP_ARRIVAL_WINDOW_MS)
         : null,
-    gcashReference: paymentMethod === 'gcash' ? gcashReference.trim() : '',
     contact: {
       fullName,
       firstName,

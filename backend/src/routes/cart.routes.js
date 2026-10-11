@@ -263,22 +263,26 @@ router.patch(
       throw new AppError('Cart line not found.', 404);
     }
 
-    let validatedAddons = cartItem.addons;
-    if (addons !== undefined) {
-      validatedAddons = [];
-      for (const addonItem of addons) {
-        const addonProd = await productRepository.findById(addonItem.product);
-        if (!addonProd || !addonProd.isAvailable || !addonProd.isAddon) {
-          throw new AppError(
-            'One of the selected add-ons is not available.',
-            400
-          );
-        }
-        validatedAddons.push({
-          product: addonProd.id,
-          qty: addonItem.qty,
-        });
+    const requestedAddons =
+      addons !== undefined
+        ? addons
+        : cartItem.addons.map((addon) => ({
+            product:
+              addon.product && typeof addon.product === 'object'
+                ? addon.product._id || addon.product.id
+                : addon.product,
+            qty: addon.qty,
+          }));
+    const validatedAddons = [];
+    for (const addonItem of requestedAddons) {
+      const addonProd = await productRepository.findById(addonItem.product);
+      if (!addonProd || !addonProd.isAvailable || !addonProd.isAddon) {
+        throw new AppError('One of the selected add-ons is not available.', 400);
       }
+      validatedAddons.push({
+        product: addonProd.id,
+        qty: addonItem.qty,
+      });
     }
 
     const targetQuantity =

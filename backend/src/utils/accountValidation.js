@@ -22,17 +22,25 @@ function isValidGmailAddress(email) {
   );
 }
 
+function isValidEmailAddress(email) {
+  return (
+    typeof email === 'string' &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  );
+}
+
 function isValidCustomerAccount(user) {
   if (user.role === 'admin') return true;
   return (
     user.role === 'customer' &&
     isValidUsername(user.username) &&
-    isValidGmailAddress(user.email)
+    isValidEmailAddress(user.email)
   );
 }
 
 module.exports = {
   isValidGmailAddress,
+  isValidEmailAddress,
   isValidUsername,
   isValidCustomerAccount,
 };

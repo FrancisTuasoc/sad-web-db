@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Email - GIGABITE</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages.css" />
+  </head>
+  <body class="auth-page">
+    <header id="site-header" class="site-header">
+      <div class="container header-container">
+        <a class="brand-logo" href="index.html" aria-label="GIGABITE Home">
+          <img src="assets/logo.svg" alt="GIGABITE Logo" />
+        </a>
+      </div>
+    </header>
+
+    <main
+      style="
+        display: flex;
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 16px;
+      "
+    >
+      <section
+        class="modal-card"
+        style="
+          width: min(100%, 480px);
+          padding: 28px;
+          border-radius: var(--radius-lg);
+        "
+        aria-labelledby="verification-title"
+      >
+        <h1 id="verification-title" style="font-size: 1.6rem; margin-bottom: 8px">
+          Verifying your email
+        </h1>
+        <p id="verification-status" class="text-muted" role="status" aria-live="polite">
+          Please wait while we confirm your registration.
+        </p>
+
+        <form id="resend-verification-form" class="hidden" style="margin-top: 24px">
+          <div class="form-group">
+            <label class="form-label" for="verification-email">
+              Registration email
+            </label>
+            <input
+              id="verification-email"
+              class="form-input"
+              type="email"
+              autocomplete="email"
+              required
+              placeholder="you@example.com"
+            />
+          </div>
+          <button id="resend-verification-btn" class="btn btn-primary" type="submit">
+            Resend verification email
+          </button>
+          <p id="resend-status" class="text-muted" role="status" aria-live="polite"></p>
+        </form>
+
+        <a id="login-link" class="btn btn-secondary hidden" href="login.html">
+          Go to login
+        </a>
+        <p id="register-again" class="hidden" style="margin-top: 16px">
+          <a href="register.html">Register again</a>
+        </p>
+      </section>
+    </main>
+
+    <script type="module">
+      import { apiFetch } from './js/api.js';
+
+      const status = document.getElementById('verification-status');
+      const resendForm = document.getElementById('resend-verification-form');
+      const resendButton = document.getElementById('resend-verification-btn');
+      const resendStatus = document.getElementById('resend-status');
+      const loginLink = document.getElementById('login-link');
+      const registerAgain = document.getElementById('register-again');
+      const token = new URLSearchParams(window.location.search).get('token');
+
+      function getVerificationServerMessage(error) {
+        if (
+          error.status === 404 &&
+          error.message.includes('Cannot find API endpoint')
+        ) {
+          return 'Email verification is not available on the current server version. Please try again after the site has been updated.';
+        }
+        return error.message;
+      }
+
+      function showResend(message) {
+        status.textContent = message;
+        resendForm.classList.remove('hidden');
+        registerAgain.classList.remove('hidden');
+      }
+
+      async function verifyEmail() {
+        if (!token) {
+          showResend(
+            'The verification link is missing. Enter your registration email to request another link.'
+          );
+          return;
+        }
+
+        try {
+          const result = await apiFetch(
+            `/auth/verify-email?token=${encodeURIComponent(token)}`
+          );
+          status.textContent = result.message;
+          loginLink.classList.remove('hidden');
+          window.setTimeout(() => {
+            window.location.href = 'login.html?verified=1';
+          }, 1800);
+        } catch (error) {
+          showResend(getVerificationServerMessage(error));
+        }
+      }
+
+      resendForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        resendButton.disabled = true;
+        resendStatus.textContent = 'Sending...';
+        try {
+          const result = await apiFetch('/auth/resend-verification', {
+            method: 'POST',
+            body: JSON.stringify({
+              email: document.getElementById('verification-email').value.trim(),
+            }),
+          });
+          resendStatus.textContent = result.message;
+        } catch (error) {
+          resendStatus.textContent = getVerificationServerMessage(error);
+          if (error.status === 404) registerAgain.classList.remove('hidden');
+        } finally {
+          resendButton.disabled = false;
+        }
+      });
+
+      verifyEmail();
+    </script>
+  </body>
+</html>

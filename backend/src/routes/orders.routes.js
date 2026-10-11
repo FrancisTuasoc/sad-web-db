@@ -19,8 +19,14 @@ router.post(
   '/',
   validate(checkoutSchema),
   asyncHandler(async (req, res) => {
-    const { cartItemIds, fulfillment, paymentMethod, gcashReference } =
-      req.body;
+    const {
+      cartItemIds,
+      fulfillment,
+      paymentMethod,
+      gcashReference,
+      gcashProofData,
+      gcashProofMimeType,
+    } = req.body;
     const contact = {
       ...req.body.contact,
       email: req.body.contact.email || req.user.email,
@@ -32,6 +38,8 @@ router.post(
       fulfillment,
       paymentMethod,
       gcashReference,
+      gcashProofData,
+      gcashProofMimeType,
       contact,
     });
 
@@ -73,6 +81,23 @@ router.get(
       success: true,
       orders,
     });
+  })
+);
+
+// GET /api/orders/:id/gcash-proof — only the order owner or an admin may view it.
+router.get(
+  '/:id/gcash-proof',
+  asyncHandler(async (req, res) => {
+    const userId = req.user.role === 'admin' ? null : req.user.id;
+    const proof = await orderRepository.findPaymentProof(req.params.id, userId);
+    if (!proof) {
+      throw new AppError('Payment proof not found.', 404);
+    }
+
+    res
+      .type(proof.mime_type)
+      .set('Cache-Control', 'private, no-store')
+      .send(proof.image_data);
   })
 );
 

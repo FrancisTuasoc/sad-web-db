@@ -1,5 +1,5 @@
 // Admin Dashboard & Operations Controller
-import { apiFetch } from './api.js';
+import { apiFetch, apiFetchBlob } from './api.js';
 import {
   showToast,
   escapeHtml,
@@ -15,6 +15,7 @@ let dashboardStats = null;
 let currentSalesView = 'daily'; // 'daily' | 'weekly' | 'monthly'
 let currentChartDays = 14;
 let dashboardRefreshPending = false;
+let activeGcashProofPreviewUrl = null;
 
 // Pagination and filters state for Orders
 let ordersFilter = {
@@ -536,6 +537,10 @@ async function openOrderDrawer(orderId) {
     const order = res.order;
     const body = document.getElementById('order-drawer-content');
     if (!body) return;
+    if (activeGcashProofPreviewUrl) {
+      URL.revokeObjectURL(activeGcashProofPreviewUrl);
+      activeGcashProofPreviewUrl = null;
+    }
 
     const itemsRows = order.items
       .map((item) => {
@@ -635,7 +640,11 @@ async function openOrderDrawer(orderId) {
             ? `<div><strong>Customer arrival deadline:</strong> ${new Date(order.arrivalDeadline).toLocaleString()}</div><div style="color:var(--color-warning);font-weight:600;">Start preparing only after the customer arrives.</div>`
             : ''
         }
-        ${order.gcashReference ? `<div style="background:#E1EFFE;padding:6px;border-radius:4px;margin-top:6px;"><strong>GCash Reference No:</strong> ${escapeHtml(order.gcashReference)}</div>` : ''}
+        ${
+          order.paymentMethod === 'gcash'
+            ? `<div style="margin-top:8px;"><button type="button" class="btn btn-secondary btn-sm btn-view-gcash-proof" data-order-id="${order._id}">View payment screenshot</button><div id="gcash-proof-viewer" style="margin-top:8px;"></div></div>`
+            : ''
+        }
       </div>
 
       <div class="step-card" style="margin-bottom:16px;">
@@ -984,10 +993,6 @@ async function loadAdminSettings() {
     document.getElementById('settings-pay-at-shop-enabled').checked = Boolean(
       s.payAtShopEnabled
     );
-    document.getElementById('settings-gcash-name').value = s.gcashName || '';
-    document.getElementById('settings-gcash-number').value =
-      s.gcashNumber || '';
-
     // Business Hours
     const days = [
       'monday',
@@ -1207,6 +1212,34 @@ function attachAdminEventListeners() {
 
   // Open Drawer delegation
   document.addEventListener('click', async (e) => {
+    const proofButton = e.target.closest('.btn-view-gcash-proof');
+    if (proofButton) {
+      proofButton.disabled = true;
+      try {
+        const imageBlob = await apiFetchBlob(
+          `/orders/${proofButton.getAttribute('data-order-id')}/gcash-proof`
+        );
+        if (activeGcashProofPreviewUrl) {
+          URL.revokeObjectURL(activeGcashProofPreviewUrl);
+        }
+        activeGcashProofPreviewUrl = URL.createObjectURL(imageBlob);
+        const viewer = document.getElementById('gcash-proof-viewer');
+        if (viewer) {
+          const preview = document.createElement('img');
+          preview.src = activeGcashProofPreviewUrl;
+          preview.alt = 'Customer GCash payment screenshot';
+          preview.style.cssText =
+            'display:block;max-width:100%;max-height:360px;object-fit:contain;';
+          viewer.replaceChildren(preview);
+        }
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        proofButton.disabled = false;
+      }
+      return;
+    }
+
     const openDrawerBtn = e.target.closest('.btn-open-order-drawer');
     if (openDrawerBtn) {
       const orderId = openDrawerBtn.getAttribute('data-order-id');
@@ -1598,10 +1631,6 @@ function attachAdminEventListeners() {
         payAtShopEnabled: document.getElementById(
           'settings-pay-at-shop-enabled'
         ).checked,
-        gcashName: document.getElementById('settings-gcash-name').value.trim(),
-        gcashNumber: document
-          .getElementById('settings-gcash-number')
-          .value.trim(),
         businessHours,
       };
 

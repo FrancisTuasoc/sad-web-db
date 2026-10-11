@@ -13,6 +13,8 @@ const {
 checkEnv();
 
 const { connectDB, closeDB } = require('./src/config/db');
+const { runMigrations } = require('./src/db/migrate');
+const orderRepository = require('./src/repositories/orderRepository');
 const { ensureAdminAndSettings } = require('./src/seed/seed');
 const errorHandler = require('./src/middleware/errorHandler');
 const { expirePayAtShopOrders } = require('./src/services/order.service');
@@ -68,11 +70,16 @@ app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   next();
 });
+// Keep the larger JSON allowance scoped to order submissions carrying proofs.
+app.use('/api/orders', express.json({ limit: '5mb' }));
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // Static frontend serving
 const frontendPath = path.join(__dirname, '../frontend');
+app.get('/verify-email', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'verify-email.html'));
+});
 app.use(express.static(frontendPath));
 
 // API routes
@@ -101,6 +108,8 @@ app.use(errorHandler);
 // Connect database and start server
 async function startServer() {
   await connectDB(DATABASE_URL);
+  await runMigrations();
+  await orderRepository.ensurePaymentProofSchema();
 
   // Auto-run admin & settings seed on startup if missing
   try {

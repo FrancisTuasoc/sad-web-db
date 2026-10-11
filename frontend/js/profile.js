@@ -32,7 +32,7 @@ function splitProfileName(profile) {
 
 function getStoreName() {
   const storeName = document.getElementById('footer-store-name');
-  return storeName ? storeName.textContent.trim() : 'Burger Shop';
+  return storeName ? storeName.textContent.trim() : 'GIGABITE';
 }
 
 function validateAvatarFile(file) {
@@ -877,7 +877,7 @@ async function openOrderReceipt(orderId) {
         ${order.fulfillment === 'delivery' ? `<div><strong>Address:</strong> ${escapeHtml(order.contact.address)}</div>` : ''}
         <div><strong>Fulfillment:</strong> ${order.fulfillment.toUpperCase()}</div>
         <div><strong>Payment:</strong> ${order.paymentMethod.toUpperCase().replace(/_/g, ' ')} (${order.paymentStatus.toUpperCase()})</div>
-        ${order.gcashReference ? `<div><strong>GCash Ref:</strong> ${escapeHtml(order.gcashReference)}</div>` : ''}
+        ${order.paymentMethod === 'gcash' ? '<div><strong>Payment proof:</strong> Submitted for shop verification</div>' : ''}
       </div>
 
       <div style="border-top:1px dashed var(--color-border);padding-top:8px;margin-bottom:10px;">

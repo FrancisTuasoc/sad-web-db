@@ -87,10 +87,10 @@ export async function apiFetchBlob(endpoint) {
       localStorage.removeItem('user');
       window.location.href = 'login.html?expired=1';
     }
-    throw new Error('Please log in again to view your profile photo.');
+    throw new Error('Please log in again to view this file.');
   }
   if (!response.ok) {
-    let message = 'Could not load your profile photo.';
+    let message = 'Could not load the requested file.';
     try {
       const data = await response.json();
       if (data.message) message = data.message;

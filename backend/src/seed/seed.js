@@ -12,6 +12,7 @@ const userRepository = require('../repositories/userRepository');
 const categoryRepository = require('../repositories/categoryRepository');
 const productRepository = require('../repositories/productRepository');
 const settingsRepository = require('../repositories/settingsRepository');
+const { runMigrations } = require('../db/migrate');
 
 function slugify(text) {
   return text
@@ -36,6 +37,7 @@ async function ensureAdminAndSettings() {
       passwordHash,
       role: 'admin',
       status: 'active',
+      isVerified: true,
       phone: '+63 912 345 6789',
       fullName: 'System Administrator',
       address: 'Shop Headquarters, Main Street',
@@ -333,6 +335,7 @@ async function seedAll() {
   );
   await query(schemaSql);
   console.log('[SEED] Database schema applied successfully.');
+  await runMigrations();
 
   // 2. Admin and Settings
   await ensureAdminAndSettings();

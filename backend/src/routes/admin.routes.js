@@ -545,6 +545,14 @@ router.get(
 router.patch(
   '/settings',
   asyncHandler(async (req, res) => {
+    const settingsInput = req.body || {};
+    if ('gcashName' in settingsInput || 'gcashNumber' in settingsInput) {
+      throw new AppError(
+        'GCash account details are no longer configurable.',
+        400
+      );
+    }
+
     const fields = [
       'storeName',
       'tagline',
@@ -558,16 +566,14 @@ router.patch(
       'gcashEnabled',
       'codEnabled',
       'payAtShopEnabled',
-      'gcashName',
-      'gcashNumber',
       'acceptingOrders',
       'minimumOrder',
     ];
 
     const updates = {};
     for (const f of fields) {
-      if (req.body[f] !== undefined) {
-        updates[f] = req.body[f];
+      if (settingsInput[f] !== undefined) {
+        updates[f] = settingsInput[f];
       }
     }
 

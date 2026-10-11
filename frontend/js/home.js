@@ -165,27 +165,15 @@ async function loadStoreInfo() {
           ? ''
           : 'Online ordering is temporarily paused. You can still browse the menu; please check back later.';
       }
-      const heroTitleElem = document.getElementById('hero-store-name');
       const heroTaglineElem = document.getElementById('hero-tagline');
-      const aboutStoreName = document.getElementById('about-store-name');
       const contactAddress = document.getElementById('contact-address');
-      const contactPhone = document.getElementById('contact-phone');
       const contactEmail = document.getElementById('contact-email');
       const contactHours = document.getElementById('contact-hours');
 
-      if (heroTitleElem && typeof s.storeName === 'string')
-        heroTitleElem.textContent = s.storeName;
       if (heroTaglineElem && typeof s.tagline === 'string')
         heroTaglineElem.textContent = s.tagline;
-      if (aboutStoreName && typeof s.storeName === 'string')
-        aboutStoreName.textContent = s.storeName;
       if (contactAddress && typeof s.address === 'string')
         contactAddress.textContent = s.address;
-      if (contactPhone && typeof s.phone === 'string') {
-        contactPhone.textContent = s.phone;
-        const phoneLink = s.phone.replace(/[^\d+]/g, '');
-        if (/^\+?\d+$/.test(phoneLink)) contactPhone.href = `tel:${phoneLink}`;
-      }
       if (contactEmail && typeof s.email === 'string') {
         contactEmail.textContent = s.email;
         contactEmail.href = `mailto:${encodeURI(s.email)}`;

@@ -42,8 +42,6 @@ function mapSettings(row, hours) {
     gcashEnabled: Boolean(row.gcash_enabled),
     codEnabled: Boolean(row.cod_enabled),
     payAtShopEnabled: Boolean(row.pay_at_shop_enabled),
-    gcashName: row.gcash_name,
-    gcashNumber: row.gcash_number,
     acceptingOrders: Boolean(row.accepting_orders),
     minimumOrder: Number(row.minimum_order),
     businessHours: hours || DEFAULT_HOURS,
@@ -70,14 +68,13 @@ const settingsRepository = {
         INSERT INTO store_settings (
           store_name, tagline, address, phone, email, delivery_fee,
           delivery_enabled, pickup_enabled, gcash_enabled, cod_enabled,
-          pay_at_shop_enabled, gcash_name, gcash_number, accepting_orders,
-          minimum_order
+          pay_at_shop_enabled, accepting_orders, minimum_order
         ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
         ) RETURNING *
       `;
       const params = [
-        data.storeName || 'Burger Shop',
+        data.storeName || 'GIGABITE',
         data.tagline || 'Flavor on Wheels - Freshly Grilled Everyday',
         data.address || '123 Main Street, City Center',
         data.phone || '+63 912 345 6789',
@@ -88,8 +85,6 @@ const settingsRepository = {
         data.gcashEnabled !== undefined ? data.gcashEnabled : true,
         data.codEnabled !== undefined ? data.codEnabled : true,
         data.payAtShopEnabled !== undefined ? data.payAtShopEnabled : true,
-        data.gcashName || 'Burger Shop HQ',
-        data.gcashNumber || '09171234567',
         data.acceptingOrders !== undefined ? data.acceptingOrders : true,
         data.minimumOrder !== undefined ? data.minimumOrder : 0,
       ];
@@ -144,8 +139,6 @@ const settingsRepository = {
         gcashEnabled: 'gcash_enabled',
         codEnabled: 'cod_enabled',
         payAtShopEnabled: 'pay_at_shop_enabled',
-        gcashName: 'gcash_name',
-        gcashNumber: 'gcash_number',
         acceptingOrders: 'accepting_orders',
         minimumOrder: 'minimum_order',
       };

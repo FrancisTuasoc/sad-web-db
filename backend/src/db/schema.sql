@@ -51,9 +51,26 @@ CREATE TABLE IF NOT EXISTS users (
   province VARCHAR(255) DEFAULT '',
   postal_code VARCHAR(4) DEFAULT '',
   address TEXT DEFAULT '',
+  is_verified BOOLEAN DEFAULT FALSE NOT NULL,
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE NOT NULL;
+
+CREATE TABLE IF NOT EXISTS pending_verifications (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) NOT NULL,
+  token VARCHAR(255) NOT NULL UNIQUE,
+  user_data JSONB NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_pending_verifications_token
+  ON pending_verifications(token);
+CREATE INDEX IF NOT EXISTS idx_pending_verifications_email
+  ON pending_verifications(email);
 
 -- 4. Categories Table
 CREATE TABLE IF NOT EXISTS categories (
@@ -130,6 +147,13 @@ CREATE TABLE IF NOT EXISTS orders (
   updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS order_payment_proofs (
+  order_id UUID PRIMARY KEY REFERENCES orders(id) ON DELETE CASCADE,
+  mime_type VARCHAR(30) NOT NULL,
+  image_data BYTEA NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 8. Order Items & Addons
 CREATE TABLE IF NOT EXISTS order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -162,7 +186,7 @@ CREATE TABLE IF NOT EXISTS order_status_history (
 -- 10. Store Settings Table
 CREATE TABLE IF NOT EXISTS store_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  store_name VARCHAR(200) DEFAULT 'Burger Shop' NOT NULL,
+  store_name VARCHAR(200) DEFAULT 'GIGABITE' NOT NULL,
   tagline VARCHAR(255) DEFAULT 'Flavor on Wheels - Freshly Grilled Everyday',
   address TEXT DEFAULT '123 Main Street, City Center',
   phone VARCHAR(50) DEFAULT '+63 912 345 6789',
@@ -173,8 +197,6 @@ CREATE TABLE IF NOT EXISTS store_settings (
   gcash_enabled BOOLEAN DEFAULT TRUE NOT NULL,
   cod_enabled BOOLEAN DEFAULT TRUE NOT NULL,
   pay_at_shop_enabled BOOLEAN DEFAULT TRUE NOT NULL,
-  gcash_name VARCHAR(100) DEFAULT 'Burger Shop HQ',
-  gcash_number VARCHAR(50) DEFAULT '09171234567',
   accepting_orders BOOLEAN DEFAULT TRUE NOT NULL,
   minimum_order NUMERIC(10, 2) DEFAULT 0 NOT NULL CHECK (minimum_order >= 0),
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,

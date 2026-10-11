@@ -3,7 +3,7 @@ const AppError = require('../utils/AppError');
 const ipHits = new Map();
 
 // Periodic cleanup every 10 minutes to avoid memory leaks
-setInterval(
+const cleanupInterval = setInterval(
   () => {
     const now = Date.now();
     for (const [ip, data] of ipHits.entries()) {
@@ -14,6 +14,7 @@ setInterval(
   },
   10 * 60 * 1000
 );
+cleanupInterval.unref();
 
 const rateLimitAuth = (maxAttempts = 10, windowMinutes = 15) => {
   return (req, res, next) => {

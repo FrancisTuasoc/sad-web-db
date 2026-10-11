@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Customer &amp; Admin Login - casestudy-system</title>
+    <title>Customer &amp; Admin Login - GIGABITE</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -21,11 +21,11 @@
         <a
           href="index.html"
           class="brand-logo"
-          aria-label="casestudy-system Home"
+          aria-label="GIGABITE Home"
         >
           <img
             src="assets/logo.svg"
-            alt="casestudy-system Logo"
+            alt="GIGABITE Logo"
             onerror="
               this.onerror = null;
               this.src =
@@ -61,10 +61,22 @@
               stroke-linecap="round"
               stroke-linejoin="round"
             >
-              <circle cx="9" cy="21" r="1"></circle>
-              <circle cx="20" cy="21" r="1"></circle>
               <path
-                d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+                d="M6.3 9h14.4l-1.6 7.1a2 2 0 0 1-2 1.6H9.5a2 2 0 0 1-2-1.6L5.2 5H2.5"
+                fill="currentColor"
+                opacity="0.14"
+                stroke="none"
+              ></path>
+              <circle cx="9.5" cy="21" r="1.4"></circle>
+              <circle cx="18" cy="21" r="1.4"></circle>
+              <path
+                d="M2 3h2.4l2.7 13.4a2 2 0 0 0 2 1.6h8.3a2 2 0 0 0 2-1.6L21.5 7H5.2"
+              ></path>
+              <path d="M10 10v5m4-5v5m4-5-.6 5" stroke-width="1.3"></path>
+              <path
+                d="M14.1 14.2s-2.2-1.3-2.2-2.7a1.1 1.1 0 0 1 2.2-.3 1.1 1.1 0 0 1 2.2.3c0 1.4-2.2 2.7-2.2 2.7Z"
+                fill="currentColor"
+                stroke="none"
               ></path>
             </svg>
             <span id="header-cart-badge" class="cart-badge hidden">0</span>
@@ -142,7 +154,7 @@
             Welcome Back
           </h2>
           <p class="text-muted" style="font-size: 0.9rem">
-            Sign in to your casestudy-system account to order
+            Sign in to your GIGABITE account to order
           </p>
         </div>
 
@@ -225,7 +237,7 @@
     <footer id="site-footer" class="site-footer">
       <div class="container">
         <div class="footer-bottom" style="border: none; padding: 16px 0">
-          &copy; 2026 casestudy-system. All rights reserved.
+          &copy; 2026 GIGABITE. All rights reserved.
         </div>
       </div>
     </footer>
@@ -243,6 +255,9 @@
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('expired') === '1') {
           showToast('Your session has expired. Please log in again.', 'info');
+        }
+        if (urlParams.get('verified') === '1') {
+          showToast('Email verified. You can now log in.', 'success');
         }
 
         // Password eye toggle

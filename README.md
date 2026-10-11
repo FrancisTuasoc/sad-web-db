@@ -19,7 +19,7 @@ casestudy-system/
 │   └── src/
 │       ├── config/             # DB connection (pg.Pool) & environment configuration
 │       ├── controllers/        # Auth, product, order, and settings controllers
-│       ├── db/                 # schema.sql — full normalized PostgreSQL schema
+│       ├── db/                 # PostgreSQL schema and versioned migrations
 │       ├── middleware/         # Auth, validation, and error middleware
 │       ├── models/             # Thin re-export wrappers (delegate to repositories)
 │       ├── repositories/       # SQL data-access layer (user, product, order, …)
@@ -51,6 +51,7 @@ casestudy-system/
     ├── profile.html            # User account & order tracking page
     ├── login.html              # Sign in page
     ├── register.html           # Sign up page
+    ├── verify-email.html       # Registration email verification page
     └── admin.html              # Administrative control center
 ```
 
@@ -69,7 +70,7 @@ npm install
 
 ### 2. Configure Environment Variables
 
-Copy `backend/.env.example` to `backend/.env`, then fill in the database connection string, a long random JWT secret, administrator credentials, and at least one valid CORS origin URL (comma-separated if multiple). At least one CORS origin is required. Keep `backend/.env` private; it is excluded from Git. Never put real credentials in this README or commit them. The administrator credentials in this file are used when the account is first created; changing them later does not change an existing account's password.
+Copy `backend/.env.example` to `backend/.env`, then fill in the database connection string, a long random JWT secret, administrator credentials, Brevo API key and verified sender email, the deployed frontend URL, and at least one valid CORS origin URL (comma-separated if multiple). At least one CORS origin is required. Keep `backend/.env` private; it is excluded from Git. Never put real credentials in this README or commit them. The administrator credentials in this file are used when the account is first created; changing them later does not change an existing account's password.
 
 ```dotenv
 DATABASE_URL=postgresql://admin:admin123@localhost:5432/francis
@@ -77,6 +78,9 @@ JWT_SECRET=your_long_random_secret_here
 CORS_ORIGINS=http://localhost:5000,http://127.0.0.1:5000
 ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=YourAdminPassword
+BREVO_API_KEY=your_brevo_api_key
+BREVO_SENDER_EMAIL=verified-sender@example.com
+FRONTEND_URL=https://your-frontend-domain.example
 ```
 
 > **Prerequisites**: PostgreSQL must be installed and running locally. The database (`francis`) and the database user must exist before running the seeder. The backend creates all tables automatically in a dedicated `app` schema on first seed.
@@ -106,6 +110,10 @@ npm run dev
 ```
 
 The Express server serves the backend API at `http://localhost:5000/api` and statically serves the responsive `frontend/` at `http://localhost:5000/`.
+
+## Registration email verification
+
+New customer registrations are held in PostgreSQL until the customer opens the Brevo verification link. Links expire after 24 hours; a new link can be requested once per minute. Existing accounts are marked verified by the one-time migration to preserve access, while newly registered customers must verify before login. The migration runs during server startup and can also be applied with `npm run migrate` from `backend/`.
 
 ## Checkout and order status
 

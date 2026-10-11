@@ -39,6 +39,18 @@ const envSchema = z.object({
     emptyToUndefined,
     z.string().trim().min(1).default('Admin')
   ),
+  BREVO_API_KEY: z.preprocess(
+    emptyToUndefined,
+    z.string().trim().min(1).optional()
+  ),
+  BREVO_SENDER_EMAIL: z.preprocess(
+    emptyToUndefined,
+    z.string().trim().email().optional()
+  ),
+  FRONTEND_URL: z.preprocess(
+    emptyToUndefined,
+    z.string().trim().url().optional()
+  ),
 });
 
 const validation = envSchema.safeParse(process.env);
@@ -77,4 +89,7 @@ module.exports = {
   ADMIN_EMAIL: env.ADMIN_EMAIL,
   ADMIN_PASSWORD: env.ADMIN_PASSWORD,
   ADMIN_USERNAME: env.ADMIN_USERNAME,
+  BREVO_API_KEY: env.BREVO_API_KEY,
+  BREVO_SENDER_EMAIL: env.BREVO_SENDER_EMAIL,
+  FRONTEND_URL: new URL(env.FRONTEND_URL || env.CORS_ORIGINS[0]).origin,
 };

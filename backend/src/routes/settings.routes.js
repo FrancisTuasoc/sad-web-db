@@ -24,8 +24,6 @@ router.get(
         gcashEnabled: settings.gcashEnabled,
         codEnabled: settings.codEnabled,
         payAtShopEnabled: settings.payAtShopEnabled,
-        gcashName: settings.gcashName,
-        gcashNumber: settings.gcashNumber,
         acceptingOrders: settings.acceptingOrders,
         minimumOrder: settings.minimumOrder,
       },

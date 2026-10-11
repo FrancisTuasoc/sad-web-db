@@ -10,6 +10,7 @@ function mapUser(row) {
     passwordHash: row.password_hash,
     role: row.role,
     status: row.status,
+    isVerified: row.is_verified === true,
     avatarUrl: row.avatar_url || '',
     phone: row.phone || '',
     contactEmail: row.contact_email || '',
@@ -99,9 +100,9 @@ const userRepository = {
       INSERT INTO users (
         username, email, password_hash, role, status, avatar_url, phone,
         contact_email, first_name, last_name, full_name, street, barangay,
-        city, province, postal_code, address
+        city, province, postal_code, address, is_verified
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
       ) RETURNING *
     `;
     const params = [
@@ -122,6 +123,7 @@ const userRepository = {
       data.province || '',
       data.postalCode || '',
       data.address || '',
+      data.isVerified === true,
     ];
     const res = await query(sql, params);
     return mapUser(res.rows[0]);
@@ -137,6 +139,7 @@ const userRepository = {
       passwordHash: 'password_hash',
       role: 'role',
       status: 'status',
+      isVerified: 'is_verified',
       avatarUrl: 'avatar_url',
       phone: 'phone',
       contactEmail: 'contact_email',

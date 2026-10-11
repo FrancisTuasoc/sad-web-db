@@ -122,6 +122,37 @@ async function populateOrderRelations(orders) {
 }
 
 const orderRepository = {
+  async ensurePaymentProofSchema() {
+    await query(`
+      ALTER TABLE store_settings
+        DROP COLUMN IF EXISTS gcash_name,
+        DROP COLUMN IF EXISTS gcash_number;
+      CREATE TABLE IF NOT EXISTS order_payment_proofs (
+        order_id UUID PRIMARY KEY REFERENCES orders(id) ON DELETE CASCADE,
+        mime_type VARCHAR(30) NOT NULL,
+        image_data BYTEA NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+  },
+
+  async findPaymentProof(orderId, userId = null) {
+    const params = [orderId];
+    let ownership = '';
+    if (userId) {
+      params.push(userId);
+      ownership = ` AND o.user_id = $${params.length}`;
+    }
+    const result = await query(
+      `SELECT proof.mime_type, proof.image_data
+       FROM orders o
+       JOIN order_payment_proofs proof ON proof.order_id = o.id
+       WHERE o.id = $1${ownership}`,
+      params
+    );
+    return result.rows[0] || null;
+  },
+
   async findById(id, userId = null) {
     let sql = `
       SELECT o.*, u.username as user_username, u.email as user_email
@@ -241,106 +272,131 @@ const orderRepository = {
   },
 
   async create(orderData, client = null) {
-    const q = client ? client.query.bind(client) : query;
-    const {
-      orderNumber,
-      userId,
-      subtotal,
-      deliveryFee = 0,
-      total,
-      fulfillment,
-      paymentMethod,
-      paymentStatus = 'unpaid',
-      arrivalDeadline = null,
-      gcashReference = '',
-      contact = {},
-      status = 'pending',
-      items = [],
-    } = orderData;
+    const ownedClient = !client;
+    const dbClient = client || (await getClient());
+    const q = dbClient.query.bind(dbClient);
+    let orderId;
 
-    const insertOrderSql = `
-      INSERT INTO orders (
-        order_number, user_id, subtotal, delivery_fee, total,
-        fulfillment, payment_method, payment_status, arrival_deadline,
-        gcash_reference, contact_full_name, contact_first_name,
-        contact_last_name, contact_email, contact_phone, contact_street,
-        contact_barangay, contact_city, contact_province, contact_postal_code,
-        contact_address, status
-      ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
-      ) RETURNING *
-    `;
+    try {
+      if (ownedClient) await q('BEGIN');
+      const {
+        orderNumber,
+        userId,
+        subtotal,
+        deliveryFee = 0,
+        total,
+        fulfillment,
+        paymentMethod,
+        paymentStatus = 'unpaid',
+        arrivalDeadline = null,
+        paymentProof = null,
+        contact = {},
+        status = 'pending',
+        items = [],
+      } = orderData;
 
-    const orderRes = await q(insertOrderSql, [
-      orderNumber,
-      userId,
-      subtotal,
-      deliveryFee,
-      total,
-      fulfillment,
-      paymentMethod,
-      paymentStatus,
-      arrivalDeadline,
-      gcashReference || '',
-      contact.fullName || '',
-      contact.firstName || '',
-      contact.lastName || '',
-      contact.email || '',
-      contact.phone || '',
-      contact.street || '',
-      contact.barangay || '',
-      contact.city || '',
-      contact.province || '',
-      contact.postalCode || '',
-      contact.address || '',
-      status,
-    ]);
-
-    const orderId = orderRes.rows[0].id;
-
-    // Insert order items
-    for (const item of items) {
-      const prodId =
-        item.product && item.product._id ? item.product._id : item.product;
-      const itemSql = `
-        INSERT INTO order_items (
-          order_id, product_id, name, unit_price, quantity,
-          addon_quantity_mode, line_total
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING id
+      const insertOrderSql = `
+        INSERT INTO orders (
+          order_number, user_id, subtotal, delivery_fee, total,
+          fulfillment, payment_method, payment_status, arrival_deadline,
+          gcash_reference, contact_full_name, contact_first_name,
+          contact_last_name, contact_email, contact_phone, contact_street,
+          contact_barangay, contact_city, contact_province, contact_postal_code,
+          contact_address, status
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
+        ) RETURNING *
       `;
-      const itemRes = await q(itemSql, [
-        orderId,
-        prodId,
-        item.name,
-        item.unitPrice,
-        item.quantity,
-        item.addonQuantityMode || 'per_item',
-        item.lineTotal,
-      ]);
-      const orderItemId = itemRes.rows[0].id;
 
-      if (item.addons && Array.isArray(item.addons)) {
-        for (const addon of item.addons) {
-          const addonProdId =
-            addon.product && addon.product._id
-              ? addon.product._id
-              : addon.product;
-          await q(
-            `INSERT INTO order_item_addons (order_item_id, product_id, name, price, qty)
-             VALUES ($1, $2, $3, $4, $5)`,
-            [orderItemId, addonProdId, addon.name, addon.price, addon.qty || 1]
-          );
+      const orderRes = await q(insertOrderSql, [
+        orderNumber,
+        userId,
+        subtotal,
+        deliveryFee,
+        total,
+        fulfillment,
+        paymentMethod,
+        paymentStatus,
+        arrivalDeadline,
+        gcashReference || '',
+        contact.fullName || '',
+        contact.firstName || '',
+        contact.lastName || '',
+        contact.email || '',
+        contact.phone || '',
+        contact.street || '',
+        contact.barangay || '',
+        contact.city || '',
+        contact.province || '',
+        contact.postalCode || '',
+        contact.address || '',
+        status,
+      ]);
+
+      orderId = orderRes.rows[0].id;
+
+      if (paymentProof) {
+        await q(
+          `INSERT INTO order_payment_proofs (order_id, mime_type, image_data)
+           VALUES ($1, $2, $3)`,
+          [orderId, paymentProof.mimeType, paymentProof.buffer]
+        );
+      }
+
+      for (const item of items) {
+        const prodId =
+          item.product && item.product._id ? item.product._id : item.product;
+        const itemSql = `
+          INSERT INTO order_items (
+            order_id, product_id, name, unit_price, quantity,
+            addon_quantity_mode, line_total
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+          RETURNING id
+        `;
+        const itemRes = await q(itemSql, [
+          orderId,
+          prodId,
+          item.name,
+          item.unitPrice,
+          item.quantity,
+          item.addonQuantityMode || 'per_item',
+          item.lineTotal,
+        ]);
+        const orderItemId = itemRes.rows[0].id;
+
+        if (item.addons && Array.isArray(item.addons)) {
+          for (const addon of item.addons) {
+            const addonProdId =
+              addon.product && addon.product._id
+                ? addon.product._id
+                : addon.product;
+            await q(
+              `INSERT INTO order_item_addons (order_item_id, product_id, name, price, qty)
+               VALUES ($1, $2, $3, $4, $5)`,
+              [
+                orderItemId,
+                addonProdId,
+                addon.name,
+                addon.price,
+                addon.qty || 1,
+              ]
+            );
+          }
         }
       }
+
+      await q(
+        `INSERT INTO order_status_history (order_id, status, at) VALUES ($1, $2, CURRENT_TIMESTAMP)`,
+        [orderId, status]
+      );
+
+      if (ownedClient) await q('COMMIT');
+    } catch (error) {
+      if (ownedClient) await q('ROLLBACK');
+      throw error;
+    } finally {
+      if (ownedClient) dbClient.release();
     }
-
-    // Insert status history
-    await q(
-      `INSERT INTO order_status_history (order_id, status, at) VALUES ($1, $2, CURRENT_TIMESTAMP)`,
-      [orderId, status]
-    );
-
     return this.findById(orderId);
   },
 

@@ -4,6 +4,15 @@
    ======================================================== */
 
 :root {
+  --text-xs: 11px; /* Labels, tags, captions, and compact metadata. */
+  --text-sm: 13px; /* Secondary copy, navigation, and utility controls. */
+  --text-base: 16px; /* Default body and paragraph text. */
+  --text-md: 20px; /* Lead copy and short introductory text. */
+  --text-lg: 28px; /* Small section headings. */
+  --text-xl: 40px; /* Medium section headings. */
+  --text-2xl: 56px; /* Main page headings. */
+  --text-3xl: 72px; /* Hero/display heading, used sparingly. */
+
   --color-bg: #fffaf3;
   --color-surface: #ffffff;
   --color-surface-alt: #f5eee5;

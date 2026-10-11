@@ -91,3 +91,64 @@ test('postal code must be empty or exactly four digits', () => {
     true
   );
 });
+
+test('GCash checkout accepts either a screenshot or a 13-digit reference', () => {
+  const gcashOrder = {
+    ...makeCheckout('pickup'),
+    paymentMethod: 'gcash',
+  };
+  assert.equal(checkoutSchema.safeParse(gcashOrder).success, false);
+
+  assert.equal(
+    checkoutSchema.safeParse({
+      ...gcashOrder,
+      gcashReference: '1234567890123',
+    }).success,
+    true
+  );
+  assert.equal(
+    checkoutSchema.safeParse({
+      ...gcashOrder,
+      gcashReference: '12345',
+    }).success,
+    false
+  );
+
+  const withProof = {
+    ...gcashOrder,
+    gcashProofData:
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/FioAAAAASUVORK5CYII=',
+    gcashProofMimeType: 'image/png',
+  };
+  assert.equal(checkoutSchema.safeParse(withProof).success, true);
+  assert.equal(
+    checkoutSchema.safeParse({
+      ...withProof,
+      gcashReference: 'not-used',
+    }).success,
+    true
+  );
+
+  assert.equal(
+    checkoutSchema.safeParse({
+      ...makeCheckout('delivery', {
+        street: '10 Main Street',
+        barangay: 'Central',
+        city: 'Manila',
+        province: 'Metro Manila',
+        postalCode: '1000',
+      }),
+      paymentMethod: 'cod',
+    }).success,
+    true
+  );
+  assert.equal(
+    checkoutSchema.safeParse({
+      ...makeCheckout('pickup'),
+      gcashProofData:
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/FioAAAAASUVORK5CYII=',
+      gcashProofMimeType: 'image/png',
+    }).success,
+    false
+  );
+});
