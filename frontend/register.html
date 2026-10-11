@@ -122,36 +122,11 @@
       </div>
     </header>
 
-    <main
-      style="
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 40px 16px;
-        flex: 1;
-      "
-    >
-      <div
-        class="modal-card"
-        style="
-          max-width: 440px;
-          width: 100%;
-          border-radius: var(--radius-lg);
-          padding: 28px;
-          box-shadow: var(--shadow-md);
-        "
-      >
-        <div style="text-align: center; margin-bottom: 24px">
-          <h2
-            style="
-              font-size: 1.6rem;
-              color: var(--color-brand);
-              margin-bottom: 6px;
-            "
-          >
-            Create an Account
-          </h2>
-          <p class="text-muted" style="font-size: 0.9rem">
+    <main class="auth-main auth-main--register">
+      <div class="modal-card auth-panel auth-panel--register">
+        <div class="auth-heading">
+          <h2>Create an Account</h2>
+          <p class="text-muted">
             Join GIGABITE to order quickly and track deliveries
           </p>
         </div>
@@ -159,7 +134,7 @@
         <form id="register-form">
           <div class="form-group">
             <label class="form-label" for="reg-username"
-              >Username <span class="req">*</span></label
+              >Username</label
             >
             <input
               type="text"
@@ -180,7 +155,7 @@
 
           <div class="form-group">
             <label class="form-label" for="reg-email"
-              >Email Address <span class="req">*</span></label
+              >Email Address</label
             >
             <input
               type="email"
@@ -193,7 +168,7 @@
 
           <div class="form-group">
             <label class="form-label" for="reg-password"
-              >Password <span class="req">*</span></label
+              >Password</label
             >
             <div class="password-field-wrapper">
               <input
@@ -226,7 +201,7 @@
 
           <div class="form-group">
             <label class="form-label" for="reg-confirm-password"
-              >Confirm Password <span class="req">*</span></label
+              >Confirm Password</label
             >
             <div class="password-field-wrapper">
               <input
@@ -261,7 +236,6 @@
             type="submit"
             id="register-submit-btn"
             class="btn btn-primary btn-lg"
-            style="width: 100%; margin-top: 8px"
           >
             Create My Account
           </button>
@@ -273,15 +247,12 @@
           role="status"
           aria-live="polite"
         >
-          <h2 style="font-size: 1.35rem; margin-bottom: 8px">
-            Check your email
-          </h2>
+          <h2 class="auth-result-title">Check your email</h2>
           <p id="verification-message" class="text-muted"></p>
           <button
             type="button"
             id="resend-verification-btn"
             class="btn btn-secondary"
-            style="margin-top: 16px"
           >
             Resend verification email
           </button>
@@ -292,20 +263,9 @@
           ></p>
         </div>
 
-        <div
-          style="
-            text-align: center;
-            margin-top: 20px;
-            font-size: 0.88rem;
-            color: var(--color-text-muted);
-          "
-        >
+        <div class="auth-switch">
           Already have an account?
-          <a
-            href="login.html"
-            style="color: var(--color-brand-secondary); font-weight: 700"
-            >Log in here</a
-          >
+          <a href="login.html">Log in here</a>
         </div>
       </div>
     </main>

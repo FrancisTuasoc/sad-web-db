@@ -76,7 +76,7 @@ const settingsRepository = {
       const params = [
         data.storeName || 'GIGABITE',
         data.tagline || 'Flavor on Wheels - Freshly Grilled Everyday',
-        data.address || '123 Main Street, City Center',
+        data.address || 'Abangan Norte 599, McArthur Highway',
         data.phone || '+63 912 345 6789',
         data.email || 'hello@burgershop.com',
         data.deliveryFee !== undefined ? data.deliveryFee : 30,

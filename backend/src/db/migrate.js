@@ -2,7 +2,11 @@ const fs = require('fs');
 const path = require('path');
 const { getClient, closeDB } = require('../config/db');
 
-const MIGRATIONS = ['20261011_email_verification.sql'];
+const MIGRATIONS = [
+  '20261011_email_verification.sql',
+  '20261011_store_location.sql',
+  '20261011_store_location_highway.sql',
+];
 
 async function runMigrations() {
   const client = await getClient();
@@ -48,7 +52,7 @@ async function runMigrations() {
 if (require.main === module) {
   runMigrations()
     .then(() => {
-      console.log('[MIGRATION] Email verification schema is current.');
+      console.log('[MIGRATION] Database migrations are current.');
     })
     .catch((error) => {
       console.error('[MIGRATION ERROR]', error.message);

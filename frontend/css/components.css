@@ -336,6 +336,55 @@
   border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
 }
 
+.footer-facebook-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #d5c9b7;
+  font-size: 0.9rem;
+  transition:
+    color 180ms ease,
+    opacity 180ms ease;
+}
+
+.footer-facebook-link:hover {
+  color: #ffffff;
+}
+
+.footer-facebook-icon {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  fill: #1877f2;
+  transition: transform 180ms ease;
+}
+
+.footer-facebook-arrow {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+  transition: transform 180ms ease;
+}
+
+.footer-facebook-link:hover .footer-facebook-icon {
+  transform: translateY(-2px);
+}
+
+.footer-facebook-link:hover .footer-facebook-arrow {
+  transform: translateX(3px);
+}
+
+.footer-facebook-link:focus-visible {
+  border-radius: 3px;
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
 .footer-bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding-top: 16px;

@@ -73,6 +73,7 @@
 
     <script type="module">
       import { apiFetch } from './js/api.js';
+      import { removeToken, removeUser } from './js/auth.js';
 
       const status = document.getElementById('verification-status');
       const resendForm = document.getElementById('resend-verification-form');
@@ -110,6 +111,8 @@
           const result = await apiFetch(
             `/auth/verify-email?token=${encodeURIComponent(token)}`
           );
+          removeToken();
+          removeUser();
           status.textContent = result.message;
           loginLink.classList.remove('hidden');
           window.setTimeout(() => {

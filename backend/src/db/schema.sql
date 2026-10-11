@@ -188,7 +188,7 @@ CREATE TABLE IF NOT EXISTS store_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   store_name VARCHAR(200) DEFAULT 'GIGABITE' NOT NULL,
   tagline VARCHAR(255) DEFAULT 'Flavor on Wheels - Freshly Grilled Everyday',
-  address TEXT DEFAULT '123 Main Street, City Center',
+  address TEXT DEFAULT 'Abangan Norte 599, McArthur Highway',
   phone VARCHAR(50) DEFAULT '+63 912 345 6789',
   email VARCHAR(255) DEFAULT 'hello@burgershop.com',
   delivery_fee NUMERIC(10, 2) DEFAULT 30 NOT NULL CHECK (delivery_fee >= 0),

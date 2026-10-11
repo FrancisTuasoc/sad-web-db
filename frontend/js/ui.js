@@ -187,19 +187,8 @@ export async function updateCartBadge() {
   if (!badge) return;
 
   if (!isLoggedIn()) {
-    // Check local storage cart items if offline
-    try {
-      const localCart = JSON.parse(localStorage.getItem('cart') || '[]');
-      const count = localCart.reduce(
-        (sum, item) => sum + (item.quantity || 1),
-        0
-      );
-      badge.textContent = String(count);
-      if (count > 0) badge.classList.remove('hidden');
-      else badge.classList.add('hidden');
-    } catch (e) {
-      badge.classList.add('hidden');
-    }
+    badge.textContent = '0';
+    badge.classList.add('hidden');
     return;
   }
 

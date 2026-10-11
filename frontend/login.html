@@ -124,36 +124,11 @@
       </div>
     </header>
 
-    <main
-      style="
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 40px 16px;
-        flex: 1;
-      "
-    >
-      <div
-        class="modal-card"
-        style="
-          max-width: 420px;
-          width: 100%;
-          border-radius: var(--radius-lg);
-          padding: 28px;
-          box-shadow: var(--shadow-md);
-        "
-      >
-        <div style="text-align: center; margin-bottom: 24px">
-          <h2
-            style="
-              font-size: 1.6rem;
-              color: var(--color-brand);
-              margin-bottom: 6px;
-            "
-          >
-            Welcome Back
-          </h2>
-          <p class="text-muted" style="font-size: 0.9rem">
+    <main class="auth-main auth-main--login">
+      <div class="modal-card auth-panel auth-panel--login">
+        <div class="auth-heading">
+          <h2>Welcome Back</h2>
+          <p class="text-muted">
             Sign in to your GIGABITE account to order
           </p>
         </div>
@@ -161,7 +136,7 @@
         <form id="login-form">
           <div class="form-group">
             <label class="form-label" for="login-email"
-              >Email Address <span class="req">*</span></label
+              >Email Address</label
             >
             <input
               type="email"
@@ -175,7 +150,7 @@
 
           <div class="form-group">
             <label class="form-label" for="login-password"
-              >Password <span class="req">*</span></label
+              >Password</label
             >
             <div class="password-field-wrapper">
               <input
@@ -210,26 +185,14 @@
             type="submit"
             id="login-submit-btn"
             class="btn btn-primary btn-lg"
-            style="width: 100%; margin-top: 8px"
           >
             Log In
           </button>
         </form>
 
-        <div
-          style="
-            text-align: center;
-            margin-top: 20px;
-            font-size: 0.88rem;
-            color: var(--color-text-muted);
-          "
-        >
+        <div class="auth-switch">
           Don't have an account?
-          <a
-            href="register.html"
-            style="color: var(--color-brand-secondary); font-weight: 700"
-            >Create one now</a
-          >
+          <a href="register.html">Create one now</a>
         </div>
       </div>
     </main>
