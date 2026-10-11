@@ -401,6 +401,7 @@ export async function renderFooter() {
       const values = {
         'footer-store-tagline': s.tagline,
         'footer-store-address': s.address,
+        'footer-store-phone': s.phone,
       };
       Object.entries(values).forEach(([id, value]) => {
         const element = footerElem.querySelector(`#${id}`);
