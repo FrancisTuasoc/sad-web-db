@@ -6,6 +6,7 @@ const MIGRATIONS = [
   '20261011_email_verification.sql',
   '20261011_store_location.sql',
   '20261011_store_location_highway.sql',
+  '20261012_password_reset.sql',
 ];
 
 async function runMigrations() {

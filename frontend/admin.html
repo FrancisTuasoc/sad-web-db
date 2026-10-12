@@ -13,12 +13,16 @@
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/components.css" />
     <link rel="stylesheet" href="css/pages.css" />
+    <link rel="stylesheet" href="css/impeccable.css" />
   </head>
   <body>
     <!-- Header with Mobile Admin Drawer Toggle -->
-    <header class="site-header" style="background: #1f1511">
+    <header class="site-header admin-site-header" style="background: #1f1511">
       <div class="container header-container">
-        <div style="display: flex; align-items: center; gap: 12px">
+        <div
+          class="admin-header-brand"
+          style="display: flex; align-items: center; gap: 12px"
+        >
           <button
             type="button"
             id="admin-toggle-sidebar-btn"
@@ -65,7 +69,10 @@
           >
         </div>
 
-        <div style="display: flex; align-items: center; gap: 16px">
+        <div
+          class="admin-header-actions"
+          style="display: flex; align-items: center; gap: 16px"
+        >
           <button
             type="button"
             id="admin-theme-toggle"
@@ -74,7 +81,18 @@
             aria-pressed="false"
             title="Switch to dark mode"
           >
-            <span class="admin-theme-icon" aria-hidden="true">🌙</span>
+            <span class="admin-theme-icon" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20.2 15.2A8.5 8.5 0 0 1 8.8 3.8 8.6 8.6 0 1 0 20.2 15.2Z" />
+              </svg>
+            </span>
           </button>
           <a
             href="index.html"
@@ -596,7 +614,24 @@
                       <th>Payment</th>
                     </tr>
                   </thead>
-                  <tbody id="recent-orders-tbody"></tbody>
+                  <tbody id="recent-orders-tbody" aria-busy="true">
+                    <tr aria-hidden="true">
+                      <td><span class="skeleton admin-loading-cell"></span></td>
+                      <td><span class="skeleton admin-loading-cell"></span></td>
+                      <td><span class="skeleton admin-loading-cell"></span></td>
+                      <td><span class="skeleton admin-loading-cell"></span></td>
+                      <td><span class="skeleton admin-loading-cell"></span></td>
+                      <td><span class="skeleton admin-loading-cell"></span></td>
+                    </tr>
+                    <tr aria-hidden="true">
+                      <td><span class="skeleton admin-loading-cell"></span></td>
+                      <td><span class="skeleton admin-loading-cell"></span></td>
+                      <td><span class="skeleton admin-loading-cell"></span></td>
+                      <td><span class="skeleton admin-loading-cell"></span></td>
+                      <td><span class="skeleton admin-loading-cell"></span></td>
+                      <td><span class="skeleton admin-loading-cell"></span></td>
+                    </tr>
+                  </tbody>
                 </table>
               </div>
             </div>

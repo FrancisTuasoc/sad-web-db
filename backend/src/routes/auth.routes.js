@@ -7,14 +7,21 @@ const {
   JWT_SECRET,
   BREVO_API_KEY,
   BREVO_SENDER_EMAIL,
+  PASSWORD_RESET_EMAIL_ENABLED,
 } = require('../config/env');
 
 const userRepository = require('../repositories/userRepository');
+const passwordResetRepository = require('../repositories/passwordResetRepository');
 const pendingVerificationRepository = require('../repositories/pendingVerificationRepository');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 const sendVerificationEmail = require('../utils/verificationEmail');
+const sendPasswordResetEmail = require('../utils/passwordResetEmail');
 const createVerificationToken = require('../utils/verificationToken');
+const {
+  createPasswordResetToken,
+  hashPasswordResetToken,
+} = require('../utils/passwordResetToken');
 const validate = require('../middleware/validate');
 const { requireAuth } = require('../middleware/auth');
 const { rateLimitAuth } = require('../middleware/rateLimit');
@@ -70,6 +77,31 @@ const resendVerificationSchema = z.object({
     .toLowerCase(),
 });
 
+const passwordResetRequestSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .email('Please enter a valid email address')
+    .max(254)
+    .toLowerCase(),
+});
+
+const passwordResetTokenSchema = z.object({
+  token: z.string().regex(/^[a-f0-9]{64}$/i, 'The reset link is invalid.'),
+});
+
+const passwordResetSchema = passwordResetTokenSchema.extend({
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters long')
+    .regex(/[A-Za-z]/, 'Password must contain at least one letter')
+    .regex(/[0-9]/, 'Password must contain at least one number'),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+});
+
 function signToken(userId) {
   return jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: '7d' });
 }
@@ -122,6 +154,93 @@ router.get('/verification-status', (req, res) => {
     verificationEnabled: Boolean(BREVO_API_KEY && BREVO_SENDER_EMAIL),
   });
 });
+
+router.post(
+  '/password-reset/request',
+  rateLimitAuth(5, 15),
+  validate(passwordResetRequestSchema),
+  asyncHandler(async (req, res) => {
+    if (!PASSWORD_RESET_EMAIL_ENABLED) {
+      throw new AppError(
+        'Password recovery email is not enabled yet. Please contact the shop.',
+        503
+      );
+    }
+    if (!BREVO_API_KEY || !BREVO_SENDER_EMAIL) {
+      throw new AppError(
+        'Password recovery email is not configured on the server. Please contact the shop.',
+        503
+      );
+    }
+
+    const user = await userRepository.findByEmail(req.body.email);
+    if (user && user.isVerified) {
+      const token = createPasswordResetToken();
+      const tokenHash = hashPasswordResetToken(token);
+      const result = await passwordResetRepository.createOrReplace(
+        user.id,
+        tokenHash
+      );
+      if (result.status === 'created') {
+        const resetUrl = new URL('/reset-password.html', FRONTEND_URL);
+        resetUrl.searchParams.set('token', token);
+        try {
+          await sendPasswordResetEmail(user.email, resetUrl.toString());
+        } catch (error) {
+          await passwordResetRepository.remove(tokenHash);
+          console.error('[PASSWORD RESET EMAIL SEND ERROR]', error.message);
+        }
+      }
+    }
+
+    res.status(202).json({
+      success: true,
+      message:
+        'If an eligible account exists for that email, a password reset link will be sent.',
+    });
+  })
+);
+
+router.post(
+  '/password-reset/validate',
+  rateLimitAuth(30, 15),
+  validate(passwordResetTokenSchema),
+  asyncHandler(async (req, res) => {
+    const valid = await passwordResetRepository.isValid(
+      hashPasswordResetToken(req.body.token)
+    );
+    if (!valid) {
+      throw new AppError(
+        'This password reset link is invalid, expired, or already used.',
+        410
+      );
+    }
+    res.json({ success: true });
+  })
+);
+
+router.post(
+  '/password-reset/confirm',
+  rateLimitAuth(10, 15),
+  validate(passwordResetSchema),
+  asyncHandler(async (req, res) => {
+    const passwordHash = await bcrypt.hash(req.body.password, 12);
+    const result = await passwordResetRepository.resetPassword(
+      hashPasswordResetToken(req.body.token),
+      passwordHash
+    );
+    if (result.status !== 'reset') {
+      throw new AppError(
+        'This password reset link is invalid, expired, or already used.',
+        410
+      );
+    }
+    res.json({
+      success: true,
+      message: 'Your password has been reset. You can now log in.',
+    });
+  })
+);
 
 router.post(
   '/register',

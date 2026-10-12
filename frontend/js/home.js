@@ -168,6 +168,7 @@ async function loadStoreInfo() {
       const heroTaglineElem = document.getElementById('hero-tagline');
       const contactAddress = document.getElementById('contact-address');
       const contactEmail = document.getElementById('contact-email');
+      const contactPhone = document.getElementById('contact-phone');
       const contactHours = document.getElementById('contact-hours');
 
       if (heroTaglineElem && typeof s.tagline === 'string')
@@ -177,6 +178,12 @@ async function loadStoreInfo() {
       if (contactEmail && typeof s.email === 'string') {
         contactEmail.textContent = s.email;
         contactEmail.href = `mailto:${encodeURI(s.email)}`;
+      }
+      if (contactPhone && typeof s.phone === 'string' && s.phone.trim()) {
+        contactPhone.textContent = s.phone;
+        const phoneDigits = s.phone.replace(/\D/g, '');
+        const countryPrefix = s.phone.trim().startsWith('+') ? '+' : '';
+        contactPhone.href = `tel:${countryPrefix}${phoneDigits}`;
       }
       renderBusinessHours(contactHours, s.businessHours);
       return s;
@@ -214,6 +221,7 @@ async function loadFeaturedProducts() {
         container.innerHTML =
           '<div class="state-box" style="grid-column:1/-1;"><h3 class="state-title">No featured items right now</h3><p class="state-desc">Browse the full menu to see what is available.</p><a href="menu.html" class="btn btn-secondary btn-sm">View Menu</a></div>';
       }
+      container.setAttribute('aria-busy', 'false');
       return;
     }
     throw new Error('The featured menu response was invalid.');
@@ -222,6 +230,7 @@ async function loadFeaturedProducts() {
     container.innerHTML = DEFAULT_FEATURED_PRODUCTS.map((p) =>
       renderProductCard(p, isGuest, false)
     ).join('');
+    container.setAttribute('aria-busy', 'false');
   }
 }
 

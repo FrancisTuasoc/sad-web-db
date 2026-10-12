@@ -13,11 +13,35 @@
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/components.css" />
     <link rel="stylesheet" href="css/pages.css" />
+    <link rel="stylesheet" href="css/impeccable.css" />
   </head>
   <body class="profile-page">
     <!-- Header with static markup fallback -->
     <header id="site-header" class="site-header">
       <div class="container header-container">
+        <button
+          type="button"
+          id="profile-sidebar-toggle"
+          class="btn btn-secondary btn-sm"
+          aria-label="Collapse account navigation"
+          aria-controls="profile-sidebar"
+          aria-expanded="true"
+          title="Collapse account navigation"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
         <a
           href="index.html"
           class="brand-logo"
@@ -48,36 +72,24 @@
           <div class="profile-header-controls">
             <button
               type="button"
-              id="profile-sidebar-toggle"
-              class="profile-control-button"
-              aria-label="Collapse account sidebar"
-              aria-controls="profile-sidebar"
-              aria-expanded="true"
-              title="Collapse account sidebar"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                aria-hidden="true"
-              >
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
-            </button>
-            <button
-              type="button"
               id="profile-theme-toggle"
               class="profile-control-button profile-theme-toggle"
               aria-label="Switch to dark mode"
               aria-pressed="false"
               title="Switch to dark mode"
             >
-              <span class="profile-theme-icon" aria-hidden="true">🌙</span>
+              <span class="profile-theme-icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20.2 15.2A8.5 8.5 0 0 1 8.8 3.8 8.6 8.6 0 1 0 20.2 15.2Z" />
+                </svg>
+              </span>
             </button>
           </div>
           <a
@@ -170,10 +182,6 @@
         <div class="profile-layout customer-area">
           <!-- Profile Navigation -->
           <aside class="profile-nav customer-sidebar" id="profile-sidebar">
-            <div class="customer-sidebar-header">
-              <p class="eyebrow">Account</p>
-              <h2>My account</h2>
-            </div>
             <nav class="profile-sidebar-nav" aria-label="Account sections">
               <button
                 type="button"
@@ -356,8 +364,12 @@
               </div>
 
               <!-- Orders Container -->
-              <div id="status-orders-container">
-                <!-- Rendered dynamically -->
+              <div id="status-orders-container" aria-busy="true">
+                <div class="account-loading-card" aria-hidden="true">
+                  <div class="skeleton skeleton-title"></div>
+                  <div class="skeleton skeleton-text"></div>
+                  <div class="skeleton skeleton-text"></div>
+                </div>
               </div>
             </div>
 
@@ -376,15 +388,11 @@
                   ></div>
                 </button>
                 <div class="customer-profile-meta">
-                  <div class="meta-topline">
+                  <div class="customer-name-row">
+                    <h3 id="overview-username">Username</h3>
                     <span class="status-badge subtle" id="overview-status-badge"
                       >Active</span
                     >
-                    <span class="eyebrow profile-label">Overview</span>
-                  </div>
-                  <div class="customer-name-row">
-                    <span class="eyebrow profile-sub-label">Profile</span>
-                    <h3 id="overview-username">Username</h3>
                   </div>
                   <p id="overview-email">user@example.com</p>
                   <div class="profile-meta-inline">
@@ -402,7 +410,7 @@
                       class="btn btn-secondary btn-sm"
                       style="cursor: pointer"
                     >
-                      Upload Photo
+                      Upload photo
                       <input
                         type="file"
                         id="avatar-file-input"
@@ -415,14 +423,14 @@
                       id="edit-username-btn"
                       class="btn btn-secondary btn-sm"
                     >
-                      Edit Username
+                      Edit username
                     </button>
                     <button
                       type="button"
                       id="remove-avatar-btn"
                       class="btn btn-secondary btn-sm"
                     >
-                      Remove Photo
+                      Remove photo
                     </button>
                   </div>
                 </div>
@@ -450,7 +458,6 @@
                 <select
                   id="history-status-filter"
                   class="form-select"
-                  style="width: auto; font-size: 0.85rem; padding: 6px 12px"
                 >
                   <option value="all">All Past Orders</option>
                   <option value="completed">Completed Only</option>
@@ -482,7 +489,7 @@
                     <label
                       class="form-label contact-field-label"
                       for="profile-first-name-input"
-                      >First Name <span class="req">*</span></label
+                      >First Name</label
                     >
                     <input
                       type="text"
@@ -498,7 +505,7 @@
                     <label
                       class="form-label contact-field-label"
                       for="profile-last-name-input"
-                      >Last Name <span class="req">*</span></label
+                      >Last Name</label
                     >
                     <input
                       type="text"
@@ -517,7 +524,7 @@
                     <label
                       class="form-label contact-field-label"
                       for="profile-contact-email-input"
-                      >Email Address <span class="req">*</span></label
+                      >Email Address</label
                     >
                     <input
                       type="email"
@@ -533,7 +540,7 @@
                     <label
                       class="form-label contact-field-label"
                       for="profile-phone-input"
-                      >Phone Number (PH) <span class="req">*</span></label
+                      >Phone Number (PH)</label
                     >
                     <input
                       type="tel"
@@ -653,7 +660,7 @@
               >
                 <div class="form-group">
                   <label class="form-label" for="current-password-input"
-                    >Current Password <span class="req">*</span></label
+                    >Current Password</label
                   >
                   <div class="password-field-wrapper">
                     <input
@@ -686,7 +693,7 @@
                 </div>
                 <div class="form-group">
                   <label class="form-label" for="new-password-input"
-                    >New Password <span class="req">*</span></label
+                    >New Password</label
                   >
                   <div class="password-field-wrapper">
                     <input
@@ -720,7 +727,7 @@
                 </div>
                 <div class="form-group">
                   <label class="form-label" for="confirm-password-input"
-                    >Confirm New Password <span class="req">*</span></label
+                    >Confirm New Password</label
                   >
                   <div class="password-field-wrapper">
                     <input

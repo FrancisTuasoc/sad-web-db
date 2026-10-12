@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/components.css" />
     <link rel="stylesheet" href="css/pages.css" />
+    <link rel="stylesheet" href="css/impeccable.css" />
   </head>
   <body>
     <!-- Header with static markup fallback -->
@@ -207,8 +208,31 @@
                 </button>
               </div>
 
-              <div class="cart-lines-list" id="cart-items-container">
-                <!-- Rendered dynamically -->
+              <div class="cart-lines-list" id="cart-items-container" aria-busy="true">
+                <div class="cart-loading-line" aria-hidden="true">
+                  <div class="skeleton skeleton-media"></div>
+                  <div class="cart-loading-copy">
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text"></div>
+                  </div>
+                </div>
+                <div class="cart-loading-line" aria-hidden="true">
+                  <div class="skeleton skeleton-media"></div>
+                  <div class="cart-loading-copy">
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text"></div>
+                  </div>
+                </div>
+                <div class="cart-loading-line" aria-hidden="true">
+                  <div class="skeleton skeleton-media"></div>
+                  <div class="cart-loading-copy">
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text"></div>
+                  </div>
+                </div>
               </div>
             </div>
 

@@ -47,6 +47,13 @@ const envSchema = z.object({
     emptyToUndefined,
     z.string().trim().email().optional()
   ),
+  PASSWORD_RESET_EMAIL_ENABLED: z.preprocess(
+    emptyToUndefined,
+    z
+      .enum(['true', 'false'])
+      .default('false')
+      .transform((value) => value === 'true')
+  ),
   FRONTEND_URL: z.preprocess(
     emptyToUndefined,
     z.string().trim().url().optional()
@@ -91,5 +98,6 @@ module.exports = {
   ADMIN_USERNAME: env.ADMIN_USERNAME,
   BREVO_API_KEY: env.BREVO_API_KEY,
   BREVO_SENDER_EMAIL: env.BREVO_SENDER_EMAIL,
+  PASSWORD_RESET_EMAIL_ENABLED: env.PASSWORD_RESET_EMAIL_ENABLED,
   FRONTEND_URL: new URL(env.FRONTEND_URL || env.CORS_ORIGINS[0]).origin,
 };

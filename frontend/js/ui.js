@@ -279,10 +279,8 @@ export function renderHeader(activeNav = '') {
     if (userLoggedIn && user) {
       userSlot.innerHTML = `
         <div class="user-menu-wrapper">
-          <button id="user-menu-btn" class="avatar-btn" aria-label="User Account Menu">
+          <button id="user-menu-btn" class="avatar-btn" aria-label="User account menu for ${escapeHtml(user.username)}" title="${escapeHtml(user.username)}">
             ${renderAvatar(user, 30)}
-            <span style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(user.username)}</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div id="user-dropdown-menu" class="user-dropdown">
             <a href="profile.html">

@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/components.css" />
     <link rel="stylesheet" href="css/pages.css" />
+    <link rel="stylesheet" href="css/impeccable.css" />
   </head>
   <body class="home-page">
     <!-- Header with static markup fallback -->
@@ -259,7 +260,31 @@
               >View Full Menu &rarr;</a
             >
           </div>
-          <div class="product-grid" id="featured-grid">
+          <div class="product-grid" id="featured-grid" aria-busy="true">
+            <article class="skeleton-product" aria-hidden="true">
+              <div class="skeleton skeleton-media"></div>
+              <div class="skeleton skeleton-title"></div>
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text"></div>
+            </article>
+            <article class="skeleton-product" aria-hidden="true">
+              <div class="skeleton skeleton-media"></div>
+              <div class="skeleton skeleton-title"></div>
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text"></div>
+            </article>
+            <article class="skeleton-product" aria-hidden="true">
+              <div class="skeleton skeleton-media"></div>
+              <div class="skeleton skeleton-title"></div>
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text"></div>
+            </article>
+            <article class="skeleton-product" aria-hidden="true">
+              <div class="skeleton skeleton-media"></div>
+              <div class="skeleton skeleton-title"></div>
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text"></div>
+            </article>
             <!-- Rendered dynamically with instant fallback -->
           </div>
         </div>
@@ -412,7 +437,6 @@
         <div class="container">
           <div class="section-header">
             <div>
-              <p class="home-section-eyebrow">Come by or order in</p>
               <h2 class="section-title">Visit Us or Order Delivery</h2>
               <p class="section-desc">
                 Store operating hours and contact information
@@ -444,7 +468,6 @@
                   </svg>
                 </span>
                 <div>
-                  <p class="home-section-eyebrow">Find your next favorite</p>
                   <h3>Shop Details</h3>
                 </div>
               </div>
@@ -552,7 +575,6 @@
                   </svg>
                 </span>
                 <div>
-                  <p class="home-section-eyebrow">Plan your visit</p>
                   <h3>Weekly Schedule</h3>
                 </div>
               </div>

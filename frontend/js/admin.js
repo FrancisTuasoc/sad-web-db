@@ -109,7 +109,9 @@ function setupAdminTheme() {
     const action = isDark ? 'Switch to light mode' : 'Switch to dark mode';
     themeToggle.setAttribute('aria-label', action);
     themeToggle.title = action;
-    themeIcon.textContent = isDark ? '☀️' : '🌙';
+    themeIcon.innerHTML = isDark
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><path d="M12 2.5v2m0 15v2m9.5-9.5h-2m-15 0h-2m16.2-6.7-1.4 1.4m-10.6 10.6-1.4 1.4m13.4 0-1.4-1.4M6.7 6.7 5.3 5.3"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 15.2A8.5 8.5 0 0 1 8.8 3.8 8.6 8.6 0 1 0 20.2 15.2Z"/></svg>';
   };
 
   applyTheme(localStorage.getItem('profile-theme') || 'light');
@@ -149,6 +151,8 @@ function updateSidebarToggleState() {
 async function loadDashboardStats() {
   if (dashboardRefreshPending) return;
   dashboardRefreshPending = true;
+  const recentOrdersBody = document.getElementById('recent-orders-tbody');
+  if (recentOrdersBody) recentOrdersBody.setAttribute('aria-busy', 'true');
   const refreshButton = document.getElementById('dashboard-refresh-btn');
   if (refreshButton) {
     refreshButton.disabled = true;
@@ -191,6 +195,11 @@ async function loadDashboardStats() {
     renderTopItems();
     renderRecentOrders();
   } catch (err) {
+    if (recentOrdersBody) {
+      recentOrdersBody.setAttribute('aria-busy', 'false');
+      recentOrdersBody.innerHTML =
+        '<tr><td colspan="6" class="text-center text-muted" style="padding:20px;">Dashboard orders are unavailable. Refresh to try again.</td></tr>';
+    }
     showToast('Failed to load dashboard metrics: ' + err.message, 'error');
   } finally {
     dashboardRefreshPending = false;
@@ -410,6 +419,7 @@ function renderTopItems() {
 function renderRecentOrders() {
   const tbody = document.getElementById('recent-orders-tbody');
   if (!tbody || !dashboardStats || !dashboardStats.recentOrders) return;
+  tbody.setAttribute('aria-busy', 'false');
 
   const orders = dashboardStats.recentOrders;
   if (orders.length === 0) {

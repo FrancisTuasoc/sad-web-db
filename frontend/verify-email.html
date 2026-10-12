@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/components.css" />
     <link rel="stylesheet" href="css/pages.css" />
+    <link rel="stylesheet" href="css/impeccable.css" />
   </head>
   <body class="auth-page">
     <header id="site-header" class="site-header">
@@ -14,35 +15,55 @@
         <a class="brand-logo" href="index.html" aria-label="GIGABITE Home">
           <img src="assets/logo.svg" alt="GIGABITE Logo" />
         </a>
+        <a class="verify-header-link" href="login.html">Sign in</a>
       </div>
     </header>
 
-    <main
-      style="
-        display: flex;
-        flex: 1;
-        align-items: center;
-        justify-content: center;
-        padding: 40px 16px;
-      "
-    >
-      <section
-        class="modal-card"
-        style="
-          width: min(100%, 480px);
-          padding: 28px;
-          border-radius: var(--radius-lg);
-        "
-        aria-labelledby="verification-title"
-      >
-        <h1 id="verification-title" style="font-size: 1.6rem; margin-bottom: 8px">
-          Verifying your email
-        </h1>
-        <p id="verification-status" class="text-muted" role="status" aria-live="polite">
+    <main class="verify-main">
+      <section class="verify-card" aria-labelledby="verification-title">
+        <div class="verify-icon" aria-hidden="true">
+          <svg
+            viewBox="0 0 48 48"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              x="5"
+              y="10"
+              width="38"
+              height="28"
+              rx="6"
+              stroke="currentColor"
+              stroke-width="2.5"
+            />
+            <path
+              d="m8 14 16 12 16-12"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="m17 31 4 4 9-10"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <p class="verify-eyebrow">ACCOUNT VERIFICATION</p>
+        <h1 id="verification-title">Verifying your email</h1>
+        <p
+          id="verification-status"
+          class="verify-status text-muted"
+          role="status"
+          aria-live="polite"
+        >
           Please wait while we confirm your registration.
         </p>
 
-        <form id="resend-verification-form" class="hidden" style="margin-top: 24px">
+        <form id="resend-verification-form" class="verify-form hidden">
           <div class="form-group">
             <label class="form-label" for="verification-email">
               Registration email
@@ -56,16 +77,29 @@
               placeholder="you@example.com"
             />
           </div>
-          <button id="resend-verification-btn" class="btn btn-primary" type="submit">
+          <button
+            id="resend-verification-btn"
+            class="btn btn-primary"
+            type="submit"
+          >
             Resend verification email
           </button>
-          <p id="resend-status" class="text-muted" role="status" aria-live="polite"></p>
+          <p
+            id="resend-status"
+            class="verify-resend-status text-muted"
+            role="status"
+            aria-live="polite"
+          ></p>
         </form>
 
-        <a id="login-link" class="btn btn-secondary hidden" href="login.html">
+        <a
+          id="login-link"
+          class="btn btn-secondary verify-login-link hidden"
+          href="login.html"
+        >
           Go to login
         </a>
-        <p id="register-again" class="hidden" style="margin-top: 16px">
+        <p id="register-again" class="verify-register-link hidden">
           <a href="register.html">Register again</a>
         </p>
       </section>

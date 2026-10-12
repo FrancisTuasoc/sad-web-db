@@ -78,6 +78,7 @@ export async function fetchCart() {
     updateReceipt();
     updateCartBadge();
   } catch (err) {
+    container.setAttribute('aria-busy', 'false');
     container.innerHTML = `
       <div class="state-box">
         <h4 class="state-title">Unable to load your cart</h4>
@@ -97,6 +98,7 @@ export function renderCartLines() {
   const cartContent = document.getElementById('cart-content-wrapper');
 
   if (!container) return;
+  container.setAttribute('aria-busy', 'false');
 
   if (cartItems.length === 0) {
     if (emptyState) emptyState.classList.remove('hidden');

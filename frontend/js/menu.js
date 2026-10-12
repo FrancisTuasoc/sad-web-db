@@ -533,6 +533,7 @@ function filterAndRenderProducts() {
         <button type="button" id="reset-filters-btn" class="btn btn-secondary btn-sm">Reset Filters</button>
       </div>
     `;
+    container.setAttribute('aria-busy', 'false');
     const resetBtn = document.getElementById('reset-filters-btn');
     if (resetBtn) {
       resetBtn.addEventListener('click', () => {
@@ -553,12 +554,10 @@ function filterAndRenderProducts() {
   container.innerHTML = filtered
     .map((p) => renderProductCard(p, isGuest, hasLiveProducts))
     .join('');
+  container.setAttribute('aria-busy', 'false');
 }
 
 async function loadProducts() {
-  // Render initial fallback immediately so menu is NEVER empty
-  filterAndRenderProducts();
-
   try {
     const params = new URLSearchParams();
     if (activeCategory && activeCategory !== 'all')
@@ -573,6 +572,7 @@ async function loadProducts() {
     hasLiveProducts = true;
     filterAndRenderProducts();
   } catch (err) {
+    filterAndRenderProducts();
     showToast(
       `Unable to load the live menu: ${err.message}. Sample items cannot be ordered until the connection returns.`,
       'error'

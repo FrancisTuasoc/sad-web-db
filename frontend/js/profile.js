@@ -360,25 +360,25 @@ async function loadCustomerStats() {
         label: 'Total orders',
         value: stats.totalOrders || 0,
         meta: 'All orders placed',
-        icon: '🧾',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.75h9l3 3V20.25H6z"/><path d="M14.5 3.75v3.5H18M9 11h6M9 15h6"/></svg>',
       },
       {
         label: 'Pending orders',
         value: stats.pendingOrders || 0,
         meta: 'Waiting for action',
-        icon: '⏳',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.25"/><path d="M12 7.5v5l3.25 2"/></svg>',
       },
       {
         label: 'Delivered orders',
         value: stats.deliveredOrders || 0,
         meta: 'Completed deliveries',
-        icon: '✅',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 19 6v5.2c0 4.4-2.8 7.6-7 9.3-4.2-1.7-7-4.9-7-9.3V6z"/><path d="m8.75 11.75 2.1 2.1 4.4-4.4"/></svg>',
       },
       {
         label: 'Total spent',
         value: `₱${Number(stats.totalSpent || 0).toFixed(2)}`,
         meta: 'Completed orders only',
-        icon: '₱',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.25"/><path d="M9 8.5h4a2 2 0 0 1 0 4H9m0 0h4.5a2 2 0 0 1 0 4H9m1.5-10v11"/></svg>',
       },
     ];
 
@@ -467,7 +467,8 @@ async function loadCustomerStats() {
           return `
           <button type="button" class="status-pill" data-status-filter="${item.key}" style="color:${item.color};">
             <span class="status-dot" style="background:${item.color};"></span>
-            ${escapeHtml(item.label)} <span>${count}</span>
+            <span class="status-pill-label">${escapeHtml(item.label)}</span>
+            <span class="status-pill-count">${count}</span>
           </button>
         `;
         })
@@ -558,9 +559,11 @@ async function loadCustomerStats() {
 async function loadStatusOrders() {
   const container = document.getElementById('status-orders-container');
   if (!container) return;
+  container.setAttribute('aria-busy', 'true');
 
   try {
     const res = await apiFetch('/orders/mine?status=active');
+    container.setAttribute('aria-busy', 'false');
     const allActive = res.orders || [];
 
     // Filter by subtab
@@ -597,6 +600,7 @@ async function loadStatusOrders() {
       .map((order) => renderOrderCard(order, true))
       .join('');
   } catch (err) {
+    container.setAttribute('aria-busy', 'false');
     container.innerHTML = `
       <div class="state-box">
         <h4 class="state-title">Error loading orders</h4>
@@ -1040,15 +1044,13 @@ function setupProfileTabs() {
   document.querySelectorAll('.profile-nav-btn').forEach((button) => {
     button.addEventListener('click', () => {
       setProfileTab(button.getAttribute('data-tab'));
-      if (window.matchMedia('(max-width: 900px)').matches) {
-        document
-          .getElementById('profile-sidebar')
-          ?.classList.remove('open-mobile');
-        document
-          .getElementById('profile-sidebar-backdrop')
-          ?.classList.add('hidden');
-        updateProfileSidebarToggle();
-      }
+      document
+        .getElementById('profile-sidebar')
+        ?.classList.remove('open-mobile');
+      document
+        .getElementById('profile-sidebar-backdrop')
+        ?.classList.add('hidden');
+      updateProfileSidebarToggle();
     });
   });
 
@@ -1402,7 +1404,9 @@ function setupProfileTheme() {
     const action = isDark ? 'Switch to light mode' : 'Switch to dark mode';
     themeToggle.setAttribute('aria-label', action);
     themeToggle.title = action;
-    themeIcon.textContent = isDark ? '☀️' : '🌙';
+    themeIcon.innerHTML = isDark
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><path d="M12 2.5v2m0 15v2m9.5-9.5h-2m-15 0h-2m16.2-6.7-1.4 1.4m-10.6 10.6-1.4 1.4m13.4 0-1.4-1.4M6.7 6.7 5.3 5.3"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 15.2A8.5 8.5 0 0 1 8.8 3.8 8.6 8.6 0 1 0 20.2 15.2Z"/></svg>';
   };
 
   applyTheme(localStorage.getItem('profile-theme') || 'light');
@@ -1417,28 +1421,44 @@ function setupProfileTheme() {
 
 function setupProfileSidebar() {
   const toggle = document.getElementById('profile-sidebar-toggle');
-  const layout = document.querySelector('.profile-layout');
+  const layout = document.querySelector('.profile-layout.customer-area');
   const sidebar = document.getElementById('profile-sidebar');
   const backdrop = document.getElementById('profile-sidebar-backdrop');
   if (!toggle || !layout || !sidebar || !backdrop) return;
 
-  toggle.addEventListener('click', () => {
-    if (window.matchMedia('(max-width: 900px)').matches) {
-      sidebar.classList.toggle('open-mobile');
-      backdrop.classList.toggle(
-        'hidden',
-        !sidebar.classList.contains('open-mobile')
-      );
-    } else {
-      layout.classList.toggle('is-sidebar-collapsed');
-    }
+  const toggleDrawer = () => {
+    sidebar.classList.toggle('open-mobile');
+    backdrop.classList.toggle(
+      'hidden',
+      !sidebar.classList.contains('open-mobile')
+    );
     updateProfileSidebarToggle();
-  });
+  };
 
-  backdrop.addEventListener('click', () => {
+  const toggleRail = () => {
+    layout.classList.toggle('is-sidebar-collapsed');
+    updateProfileSidebarToggle();
+  };
+
+  const toggleNavigation = () => {
+    if (window.matchMedia('(max-width: 900px)').matches) toggleDrawer();
+    else toggleRail();
+  };
+  toggle.addEventListener('click', toggleNavigation);
+  toggle.addEventListener('click', toggleNavigation);
+
+  const closeSidebar = () => {
     sidebar.classList.remove('open-mobile');
     backdrop.classList.add('hidden');
     updateProfileSidebarToggle();
+  };
+
+  backdrop.addEventListener('click', closeSidebar);
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && sidebar.classList.contains('open-mobile')) {
+      closeSidebar();
+      toggle.focus();
+    }
   });
 
   window.addEventListener('resize', updateProfileSidebarToggle);
@@ -1447,27 +1467,40 @@ function setupProfileSidebar() {
 
 function updateProfileSidebarToggle() {
   const toggle = document.getElementById('profile-sidebar-toggle');
-  const layout = document.querySelector('.profile-layout');
+  const layout = document.querySelector('.profile-layout.customer-area');
   const sidebar = document.getElementById('profile-sidebar');
   const backdrop = document.getElementById('profile-sidebar-backdrop');
   if (!toggle || !layout || !sidebar) return;
 
   const isMobile = window.matchMedia('(max-width: 900px)').matches;
-  if (isMobile) {
-    layout.classList.remove('is-sidebar-collapsed');
-  } else {
+  if (!isMobile) {
     sidebar.classList.remove('open-mobile');
     backdrop?.classList.add('hidden');
+  } else {
+    layout.classList.remove('is-sidebar-collapsed');
   }
+
+  const isDrawerOpen = sidebar.classList.contains('open-mobile');
   const isExpanded = isMobile
-    ? sidebar.classList.contains('open-mobile')
+    ? isDrawerOpen
     : !layout.classList.contains('is-sidebar-collapsed');
   const action = isMobile
-    ? `${isExpanded ? 'Close' : 'Open'} account navigation`
+    ? `${isDrawerOpen ? 'Close' : 'Open'} account navigation`
     : `${isExpanded ? 'Collapse' : 'Expand'} account sidebar`;
-  toggle.setAttribute('aria-expanded', String(isExpanded));
-  toggle.setAttribute('aria-label', action);
+  document.body.classList.toggle(
+    'profile-sidebar-open',
+    isMobile && isDrawerOpen
+  );
+  toggle.setAttribute('aria-expanded', String(isMobile && isDrawerOpen));
+  toggle.setAttribute(
+    'aria-label',
+    action
+  );
   toggle.title = action;
+  toggle.setAttribute(
+    'aria-expanded',
+    String(isMobile ? isDrawerOpen : isExpanded)
+  );
 }
 
 function initProfile() {
