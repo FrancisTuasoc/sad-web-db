@@ -2585,7 +2585,7 @@ body.theme-dark .customer-sidebar .logout-button {
   .admin-sidebar.open-mobile {
     display: flex;
     position: fixed;
-    top: var(--header-height);
+    top: var(--admin-header-height, var(--header-height));
     left: 0;
     bottom: 0;
     width: 240px;
@@ -2756,6 +2756,17 @@ body.theme-dark .customer-sidebar .logout-button {
     width: 100%;
     justify-content: flex-end;
     flex-wrap: wrap;
+  }
+  .order-card-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .order-card-header > div:last-child {
+    flex-wrap: wrap;
+  }
+  .history-page-controls {
+    gap: 4px;
   }
 }
 

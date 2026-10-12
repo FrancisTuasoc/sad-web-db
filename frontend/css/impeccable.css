@@ -2564,6 +2564,15 @@ body.theme-dark.profile-page .profile-tab-content :is(input, select, textarea):f
     min-height: 44px;
   }
 
+  .profile-page .site-header .container.header-container {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .profile-page .site-header .header-actions {
+    gap: 2px;
+  }
+
   .profile-page .site-header #profile-sidebar-toggle {
     width: 44px;
     min-width: 44px;
@@ -2576,7 +2585,7 @@ body.theme-dark.profile-page .profile-tab-content :is(input, select, textarea):f
   }
 
   .profile-page .site-header .brand-logo::after {
-    font-size: 13px;
+    font-size: 11px;
   }
 }
 
@@ -2612,6 +2621,18 @@ body.theme-dark.profile-page .profile-tab-content :is(input, select, textarea):f
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: 6px !important;
+  }
+
+  .admin-header-actions > a[target='_blank'] {
+    width: 44px;
+    min-width: 44px;
+    justify-content: center;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .admin-header-actions > a[target='_blank'] span {
+    display: none;
   }
 
   .admin-header-actions > * {

@@ -95,6 +95,7 @@ function setupAdminNavigation() {
   }
 
   window.addEventListener('resize', updateSidebarToggleState);
+  updateSidebarToggleState();
 }
 
 function setupAdminTheme() {
@@ -129,6 +130,14 @@ function updateSidebarToggleState() {
   const sidebar = document.getElementById('admin-sidebar');
   const adminLayout = document.querySelector('.admin-layout');
   if (!toggleButton || !sidebar || !adminLayout) return;
+
+  const header = document.querySelector('.admin-site-header');
+  if (header) {
+    document.documentElement.style.setProperty(
+      '--admin-header-height',
+      `${header.getBoundingClientRect().height}px`
+    );
+  }
 
   const isMobile = window.matchMedia('(max-width: 900px)').matches;
   const isExpanded = isMobile
