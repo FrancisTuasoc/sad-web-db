@@ -644,15 +644,17 @@ async function openOrderDrawer(orderId) {
         <div><strong>Fulfillment:</strong> ${order.fulfillment.toUpperCase()}</div>
         <div><strong>Payment Method:</strong> ${order.paymentMethod.toUpperCase().replace(/_/g, ' ')}</div>
         ${
+          order.paymentMethod === 'gcash'
+            ? `<div><strong>${order.gcashReference === '0000000000000' ? 'Demo reference' : 'Reference'}:</strong> ${escapeHtml(order.gcashReference || 'Not provided')}</div>
+              ${order.gcashReference === '0000000000000' ? '<div class="text-muted">Demo order only. It remains unpaid; the attached image is not proof of payment.</div>' : ''}
+              <div style="margin-top:8px;"><button type="button" class="btn btn-secondary btn-sm btn-view-gcash-proof" data-order-id="${order._id}">View attached image</button><div id="gcash-proof-viewer" style="margin-top:8px;"></div></div>`
+            : ''
+        }
+        ${
           order.paymentMethod === 'pay_at_shop' &&
           order.arrivalDeadline &&
           order.status === 'pending'
             ? `<div><strong>Customer arrival deadline:</strong> ${new Date(order.arrivalDeadline).toLocaleString()}</div><div style="color:var(--color-warning);font-weight:600;">Start preparing only after the customer arrives.</div>`
-            : ''
-        }
-        ${
-          order.paymentMethod === 'gcash'
-            ? `<div style="margin-top:8px;"><button type="button" class="btn btn-secondary btn-sm btn-view-gcash-proof" data-order-id="${order._id}">View payment screenshot</button><div id="gcash-proof-viewer" style="margin-top:8px;"></div></div>`
             : ''
         }
       </div>
@@ -1237,10 +1239,16 @@ function attachAdminEventListeners() {
         if (viewer) {
           const preview = document.createElement('img');
           preview.src = activeGcashProofPreviewUrl;
-          preview.alt = 'Customer GCash payment screenshot';
+          preview.alt =
+            'Customer-submitted GCash image attachment; not payment verification';
           preview.style.cssText =
             'display:block;max-width:100%;max-height:360px;object-fit:contain;';
           viewer.replaceChildren(preview);
+          const caption = document.createElement('p');
+          caption.className = 'text-muted';
+          caption.textContent =
+            'Customer-submitted image for review only. This does not verify that payment was made.';
+          viewer.append(caption);
         }
       } catch (err) {
         showToast(err.message, 'error');

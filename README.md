@@ -115,9 +115,15 @@ The Express server serves the backend API at `http://localhost:5000/api` and sta
 
 New customer registrations are held in PostgreSQL until the customer opens the Brevo verification link. Links expire after 24 hours; a new link can be requested once per minute. Existing accounts are marked verified by the one-time migration to preserve access, while newly registered customers must verify before login. The migration runs during server startup and can also be applied with `npm run migrate` from `backend/`.
 
+## Password recovery
+
+Password reset is disabled by default. To enable it, configure `BREVO_API_KEY`, a verified `BREVO_SENDER_EMAIL`, and `FRONTEND_URL` in `backend/.env`, then set `PASSWORD_RESET_EMAIL_ENABLED=true` only after confirming that sending reset emails is covered by your no-cost email allowance. Reset links expire after 30 minutes and can only be used once. No email is sent while the feature flag is disabled.
+
 ## Checkout and order status
 
 Checkout opens in a responsive dialog from the compact cart summary. It requires a fulfillment choice first, then first and last name, contact email, Philippine phone number, and a supported payment method. Delivery also requires street, barangay, city/municipality, province, and a four-digit postal code. The dialog can be dismissed with Escape or its close button, and restores focus to the checkout button when closed. Customer contact and address details are saved to the account after a successful order and are shared with **Saved Details** in the customer profile; the account sign-in email remains separate from the editable contact email. Checkout loads the latest saved details and lets customers change them for an order. Placing an order creates it as `pending`; admins see newest pending orders under **Orders Management** and can accept one to move pickup orders to `ready_for_pickup` or delivery orders to `ready_to_deliver`. Customers track pickup and delivery orders in separate tabs in their profile and confirm collection or receipt to complete them. Admin order lists refresh every 10 seconds.
+
+The backend applies the order-checkout migration on startup to keep existing databases aligned with the order fields and payment-method enum used by checkout.
 
 Customers can cancel only while an order is still `pending`. Cancellation and admin acceptance compete through an atomic status transition: whichever succeeds first wins. If acceptance wins, the customer is told that online cancellation is no longer available and must contact the shop immediately; staff should coordinate any cancellation, refund, or stock adjustment manually. Cancellation also restores reserved stock atomically within a PostgreSQL transaction.
 

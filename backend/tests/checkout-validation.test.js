@@ -109,6 +109,13 @@ test('GCash checkout accepts either a screenshot or a 13-digit reference', () =>
   assert.equal(
     checkoutSchema.safeParse({
       ...gcashOrder,
+      gcashReference: '0000000000000',
+    }).success,
+    true
+  );
+  assert.equal(
+    checkoutSchema.safeParse({
+      ...gcashOrder,
       gcashReference: '12345',
     }).success,
     false

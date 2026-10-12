@@ -27,6 +27,7 @@ let gcashProofPreviewUrl = null;
 
 const MAX_GCASH_PROOF_BYTES = 3 * 1024 * 1024;
 const GCASH_PROOF_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+const DEMO_GCASH_REFERENCE = '0000000000000';
 
 const CONTACT_ADDRESS_FIELDS = [
   'street',
@@ -61,7 +62,7 @@ function readGcashProof(file) {
       const result = String(reader.result || '');
       const separator = result.indexOf(',');
       if (separator < 0) {
-        reject(new Error('Could not read the selected payment screenshot.'));
+        reject(new Error('Could not read the selected image attachment.'));
         return;
       }
       resolve({
@@ -70,7 +71,7 @@ function readGcashProof(file) {
       });
     });
     reader.addEventListener('error', () =>
-      reject(new Error('Could not read the selected payment screenshot.'))
+      reject(new Error('Could not read the selected image attachment.'))
     );
     reader.readAsDataURL(file);
   });
@@ -492,8 +493,8 @@ function renderPaymentOptions() {
       <label class="payment-option-label">
         <input type="radio" name="payment_method" value="gcash" ${paymentMethod === 'gcash' ? 'checked' : ''}>
         <div>
-          <span style="font-weight:700;">GCash</span>
-          <div style="font-size:0.78rem;color:var(--color-text-muted);">Send payment, then attach a screenshot for the shop to verify</div>
+          <span style="font-weight:700;">GCash (Demo)</span>
+          <div style="font-size:0.78rem;color:var(--color-text-muted);">Demo checkout only. No payment is sent or processed.</div>
         </div>
       </label>
     `;
@@ -558,6 +559,14 @@ function renderPaymentOptions() {
     .forEach((radio) => {
       radio.addEventListener('change', () => {
         paymentMethod = radio.value;
+        if (paymentMethod === 'gcash') {
+          const referenceInput = document.getElementById(
+            'gcash-reference-input'
+          );
+          if (referenceInput) {
+            referenceInput.value = DEMO_GCASH_REFERENCE;
+          }
+        }
         if (gcashBox) {
           gcashBox.classList.toggle('hidden', paymentMethod !== 'gcash');
         }
@@ -729,7 +738,7 @@ async function handlePlaceOrder() {
     const gcashReference = gcashReferenceInput?.value.trim() || '';
     if (!selectedGcashProof && !gcashReference) {
       showToast(
-        'Attach a payment screenshot or enter the GCash reference number.',
+        'Enter the 13-digit demo reference or attach an image for admin review.',
         'warning'
       );
       (gcashProofInput || gcashReferenceInput)?.focus();
@@ -749,7 +758,7 @@ async function handlePlaceOrder() {
       (!GCASH_PROOF_TYPES.includes(selectedGcashProof.type) ||
         selectedGcashProof.size > MAX_GCASH_PROOF_BYTES)
     ) {
-      showToast('Choose a PNG, JPEG, or WebP image up to 3 MiB.', 'warning');
+      showToast('Choose a PNG, JPEG, or WebP test image up to 3 MiB.', 'warning');
       gcashProofInput?.focus();
       return;
     }
@@ -948,7 +957,7 @@ function showSuccessReceipt(order) {
               <div><span>Phone</span><strong>${escapeHtml(order.contact.phone)}</strong></div>
               ${order.contact.email ? `<div><span>Email</span><strong>${escapeHtml(order.contact.email)}</strong></div>` : ''}
               ${order.fulfillment === 'delivery' ? `<div class="receipt-address"><span>Delivery address</span><strong>${escapeHtml(order.contact.address)}</strong></div>` : ''}
-              ${order.paymentMethod === 'gcash' ? `<div><span>Payment proof</span><strong>${order.gcashReference ? `Reference: ${escapeHtml(order.gcashReference)}` : 'Screenshot submitted for shop verification'}</strong></div>` : ''}
+              ${order.paymentMethod === 'gcash' ? `<div><span>Payment status</span><strong>UNPAID — demo only; no payment was processed</strong></div><div><span>Demo reference</span><strong>${escapeHtml(order.gcashReference || DEMO_GCASH_REFERENCE)}</strong></div>` : ''}
             </div>
           </section>
 
@@ -1104,7 +1113,7 @@ export function setupCheckoutListeners() {
         file.size > MAX_GCASH_PROOF_BYTES
       ) {
         gcashProofInput.value = '';
-        showToast('Choose a PNG, JPEG, or WebP image up to 3 MiB.', 'warning');
+        showToast('Choose a PNG, JPEG, or WebP test image up to 3 MiB.', 'warning');
         updateReceipt();
         return;
       }

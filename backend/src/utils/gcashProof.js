@@ -47,7 +47,7 @@ function validateGcashProof({ data, mimeType }) {
     data.length % 4 !== 0 ||
     !BASE64_PATTERN.test(data)
   ) {
-    throw new AppError('Upload a valid GCash payment screenshot (up to 3 MiB).', 400);
+    throw new AppError('Upload a valid image attachment (up to 3 MiB).', 400);
   }
 
   const buffer = Buffer.from(data, 'base64');
@@ -57,7 +57,7 @@ function validateGcashProof({ data, mimeType }) {
     !matchesImageSignature(buffer, mimeType)
   ) {
     throw new AppError(
-      'Use a PNG, JPEG, or WebP image no larger than 3 MiB.',
+      'Use a PNG, JPEG, or WebP attachment no larger than 3 MiB.',
       400
     );
   }

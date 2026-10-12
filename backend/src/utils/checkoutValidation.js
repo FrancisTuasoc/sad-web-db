@@ -59,7 +59,7 @@ const checkoutSchema = z
     if (data.paymentMethod === 'gcash' && !hasProof && !hasReference) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Attach a payment screenshot or enter the GCash reference number.',
+        message: 'Enter the 13-digit demo reference or attach an image for admin review.',
         path: ['gcashReference'],
       });
     }

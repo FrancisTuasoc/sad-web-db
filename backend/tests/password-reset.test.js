@@ -3,6 +3,7 @@ process.env.PASSWORD_RESET_EMAIL_ENABLED = 'false';
 const assert = require('node:assert/strict');
 const { after, before, test } = require('node:test');
 const crypto = require('node:crypto');
+const bcrypt = require('bcryptjs');
 const express = require('express');
 const errorHandler = require('../src/middleware/errorHandler');
 const authRoutes = require('../src/routes/auth.routes');
@@ -78,4 +79,53 @@ test('malformed reset tokens are rejected before repository access', async () =>
 
   assert.equal(response.status, 400);
   assert.equal(body.success, false);
+});
+
+test('password reset validation accepts a valid stored token', async (context) => {
+  const token = createPasswordResetToken();
+  const tokenHash = hashPasswordResetToken(token);
+  context.mock.method(
+    passwordResetRepository,
+    'isValid',
+    async (receivedHash) => receivedHash === tokenHash
+  );
+
+  const response = await fetch(`${baseUrl}/password-reset/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+  });
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.success, true);
+});
+
+test('password reset confirmation hashes the password and consumes the token', async (context) => {
+  const token = createPasswordResetToken();
+  let resetArguments;
+  context.mock.method(
+    passwordResetRepository,
+    'resetPassword',
+    async (...args) => {
+      resetArguments = args;
+      return { status: 'reset' };
+    }
+  );
+
+  const response = await fetch(`${baseUrl}/password-reset/confirm`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      token,
+      password: 'newpassword123',
+      confirmPassword: 'newpassword123',
+    }),
+  });
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.success, true);
+  assert.equal(resetArguments[0], hashPasswordResetToken(token));
+  assert.equal(await bcrypt.compare('newpassword123', resetArguments[1]), true);
 });

@@ -83,7 +83,7 @@ async function placeOrder({
       });
     } else if (!gcashReference || !/^\d{13}$/.test(gcashReference)) {
       throw new AppError(
-        'Attach a payment screenshot or enter the 13-digit GCash reference number.',
+        'Enter the 13-digit demo reference or attach an image for admin review.',
         400
       );
     }

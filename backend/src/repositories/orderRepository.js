@@ -289,6 +289,7 @@ const orderRepository = {
         paymentMethod,
         paymentStatus = 'unpaid',
         arrivalDeadline = null,
+        gcashReference = '',
         paymentProof = null,
         contact = {},
         status = 'pending',

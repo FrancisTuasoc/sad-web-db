@@ -345,7 +345,7 @@
                   <rect x="4" y="10" width="16" height="11" rx="2" />
                   <path d="M8 10V7a4 4 0 0 1 8 0v3" />
                 </svg>
-                Your order details are confirmed in the next step.
+                <span>Your order details are confirmed in the next step.</span>
               </p>
             </div>
           </div>
@@ -670,49 +670,64 @@
                 >
               </div>
               <div id="gcash-payment-box" class="gcash-qr-box hidden">
-                <div
-                  style="font-weight: 700; color: #1d6fb8; margin-bottom: 4px"
-                >
-                  GCash payment details
+                <div class="gcash-demo-title">GCash checkout demo</div>
+                <div class="gcash-demo-qr-label">
+                  GCASH QR CODE WILL APPEAR HERE
+                  <span>Demo illustration only — not scannable</span>
                 </div>
                 <div class="qr-image-holder">
                   <img
-                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140' width='140' height='140'%3E%3Crect width='140' height='140' fill='%23F0F7FF' stroke='%231D6FB8' stroke-dasharray='4 4'/%3E%3Ctext x='70' y='65' font-family='sans-serif' font-size='11' font-weight='700' fill='%231D6FB8' text-anchor='middle'%3EGCash QR Code%3C/text%3E%3Ctext x='70' y='85' font-family='sans-serif' font-size='9' fill='%236B5B52' text-anchor='middle'%3EWill appear here%3C/text%3E%3C/svg%3E"
-                    alt="GCash QR code placeholder"
+                    src="assets/gcash-demo.svg"
+                    alt="Decorative QR-style demo image with DEMO across the center; it is not scannable"
                   />
                 </div>
-                <div style="font-size: 0.82rem; margin-bottom: 6px">
-                  Store contact number:
-                  <strong id="gcash-store-number">09309189124</strong>
-                </div>
-                <div class="gcash-exact-amount">
-                  Amount to send:
-                  <strong id="gcash-exact-amount">₱0.00</strong>
-                </div>
-                <div
-                  class="form-group"
-                  style="margin-bottom: 0; text-align: left"
-                >
-                  <label class="form-label" for="gcash-proof-input"
-                    >Payment screenshot (optional with reference number)</label
+                <p class="gcash-demo-warning" role="status">
+                  Demo only: this QR-style picture is not scannable. No money
+                  transfer or payment processing is involved, and demo orders
+                  remain unpaid.
+                </p>
+                <div class="form-group gcash-demo-reference">
+                  <div class="gcash-demo-number">
+                    <span>Use this demo number as the reference</span>
+                    <strong>0000000000000</strong>
+                  </div>
+                  <label class="form-label" for="gcash-reference-input"
+                    >Enter demo reference number</label
                   >
+                  <input
+                    type="text"
+                    id="gcash-reference-input"
+                    class="form-input"
+                    value="0000000000000"
+                    readonly
+                    aria-describedby="gcash-demo-reference-note"
+                  />
+                  <small id="gcash-demo-reference-note">
+                    Enter this test number as the reference. It is not a real
+                    transaction or proof of payment.
+                  </small>
+                </div>
+                <div class="form-group gcash-demo-attachment">
+                  <label class="form-label" for="gcash-proof-input">
+                    Attach a test image for admin review (optional)
+                  </label>
                   <input
                     type="file"
                     id="gcash-proof-input"
                     class="form-input"
                     accept="image/png,image/jpeg,image/webp"
+                    aria-describedby="gcash-proof-note"
                   />
-                  <label class="form-label" for="gcash-reference-input" style="margin-top:10px;">Or enter GCash reference number</label>
-                  <input
-                    type="text"
-                    id="gcash-reference-input"
-                    class="form-input"
-                    inputmode="numeric"
-                    autocomplete="off"
-                    maxlength="13"
-                    placeholder="13-digit reference number"
+                  <small id="gcash-proof-note">
+                    PNG, JPEG, or WebP up to 3 MiB. The image will appear in
+                    the admin order details as a test attachment only; it
+                    cannot confirm payment.
+                  </small>
+                  <img
+                    id="gcash-proof-preview"
+                    class="gcash-proof-preview hidden"
+                    alt="Preview of the test image attached to this demo order"
                   />
-                  <img id="gcash-proof-preview" class="hidden" alt="Selected GCash payment screenshot preview" style="display:block;max-width:100%;max-height:240px;object-fit:contain;margin-top:12px;" />
                 </div>
               </div>
             </div>
