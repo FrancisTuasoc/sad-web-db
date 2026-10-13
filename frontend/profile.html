@@ -7,8 +7,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap"
       rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/components.css" />
@@ -28,19 +32,7 @@
           aria-expanded="true"
           title="Collapse account navigation"
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            aria-hidden="true"
-          >
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
+          <i class="fa-solid fa-bars" aria-hidden="true"></i>
         </button>
         <a
           href="index.html"
@@ -58,7 +50,11 @@
           />
         </a>
 
-        <nav aria-label="Main Navigation">
+        <nav
+          class="customer-store-navigation"
+          data-customer-only
+          aria-label="Main Navigation"
+        >
           <ul class="nav-links">
             <li><a href="index.html">Home</a></li>
             <li><a href="menu.html">Menu</a></li>
@@ -96,36 +92,10 @@
             href="cart.html"
             id="header-cart-btn"
             class="cart-btn"
+            data-customer-only
             aria-label="View Shopping Cart"
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path
-                d="M6.3 9h14.4l-1.6 7.1a2 2 0 0 1-2 1.6H9.5a2 2 0 0 1-2-1.6L5.2 5H2.5"
-                fill="currentColor"
-                opacity="0.14"
-                stroke="none"
-              ></path>
-              <circle cx="9.5" cy="21" r="1.4"></circle>
-              <circle cx="18" cy="21" r="1.4"></circle>
-              <path
-                d="M2 3h2.4l2.7 13.4a2 2 0 0 0 2 1.6h8.3a2 2 0 0 0 2-1.6L21.5 7H5.2"
-              ></path>
-              <path d="M10 10v5m4-5v5m4-5-.6 5" stroke-width="1.3"></path>
-              <path
-                d="M14.1 14.2s-2.2-1.3-2.2-2.7a1.1 1.1 0 0 1 2.2-.3 1.1 1.1 0 0 1 2.2.3c0 1.4-2.2 2.7-2.2 2.7Z"
-                fill="currentColor"
-                stroke="none"
-              ></path>
-            </svg>
+            <i class="fa-solid fa-cart-shopping fa-fw" aria-hidden="true"></i>
             <span id="header-cart-badge" class="cart-badge hidden">0</span>
           </a>
 
@@ -140,18 +110,7 @@
             class="mobile-nav-toggle"
             aria-label="Toggle mobile menu"
           >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
+            <i class="fa-solid fa-bars" aria-hidden="true"></i>
           </button>
         </div>
       </div>
@@ -186,6 +145,7 @@
               <button
                 type="button"
                 class="profile-nav-btn"
+                data-customer-only
                 data-tab="status"
                 aria-label="Order Status"
                 title="Order Status"
@@ -211,23 +171,13 @@
                 aria-label="Overview"
                 title="Overview"
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  aria-hidden="true"
-                >
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
+                <i class="fa-regular fa-user" aria-hidden="true"></i>
                 <span>Overview</span>
               </button>
               <button
                 type="button"
                 class="profile-nav-btn"
+                data-customer-only
                 data-tab="history"
                 aria-label="Order History"
                 title="Order History"
@@ -257,18 +207,7 @@
                 aria-label="Saved Details"
                 title="Saved Details"
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  aria-hidden="true"
-                >
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
+                <i class="fa-regular fa-address-card" aria-hidden="true"></i>
                 <span>Saved Details</span>
               </button>
               <button
@@ -278,23 +217,12 @@
                 aria-label="Security"
                 title="Security"
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  aria-hidden="true"
-                >
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
+                <i class="fa-solid fa-shield" aria-hidden="true"></i>
                 <span>Security</span>
               </button>
             </nav>
 
-            <div class="customer-status-panel" aria-live="polite">
+            <div class="customer-status-panel" data-customer-only aria-live="polite">
               <div class="panel-header">
                 <span>Order Status</span>
                 <span class="panel-badge" id="customer-status-total">0</span>
@@ -312,19 +240,7 @@
               class="btn btn-secondary logout-button"
               title="Logout"
             >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                aria-hidden="true"
-              >
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
-              </svg>
+              <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
               <span>Logout</span>
             </button>
           </aside>
@@ -332,7 +248,7 @@
           <!-- Profile Tab Content -->
           <section class="profile-tab-content customer-content">
             <!-- 1. LIVE ORDER STATUS TAB -->
-            <div id="tab-section-status" class="profile-tab-section">
+            <div id="tab-section-status" class="profile-tab-section" data-customer-only>
               <div class="account-section-heading">
                 <span class="account-section-icon" aria-hidden="true">↗</span>
                 <div>
@@ -375,6 +291,13 @@
 
             <!-- 2. OVERVIEW TAB -->
             <div id="tab-section-overview" class="profile-tab-section hidden">
+              <div class="admin-account-heading">
+                <p class="eyebrow">Account</p>
+                <h2>Admin profile</h2>
+                <p>
+                  Manage your profile information, sign-in details, and security.
+                </p>
+              </div>
               <div class="customer-header-card">
                 <button
                   type="button"
@@ -400,7 +323,7 @@
                       >Member since
                       <strong id="overview-member-since">-</strong></span
                     >
-                    <span
+                    <span data-customer-only
                       >Orders
                       <strong id="overview-total-orders">0</strong></span
                     >
@@ -436,16 +359,59 @@
                 </div>
               </div>
 
-              <div class="customer-kpi-grid" id="customer-kpi-grid"></div>
+              <div
+                class="customer-kpi-grid"
+                id="customer-kpi-grid"
+                data-customer-only
+              ></div>
+              <section
+                class="customer-dashboard-shortcuts"
+                data-customer-only
+                aria-label="Account shortcuts"
+              >
+                <article class="customer-shortcut-card">
+                  <span class="customer-shortcut-icon" aria-hidden="true"><i class="fa-solid fa-burger"></i></span>
+                  <div>
+                    <p class="eyebrow">IN THE MOOD FOR A FAVORITE?</p>
+                    <h4>Find your next burger</h4>
+                    <p>Explore the menu and build your next order.</p>
+                  </div>
+                  <a class="customer-shortcut-link" href="menu.html"
+                    >Browse menu <span aria-hidden="true">&rarr;</span></a
+                  >
+                </article>
+                <article class="customer-shortcut-card customer-shortcut-history">
+                  <span class="customer-shortcut-icon" aria-hidden="true"
+                    ><i class="fa-regular fa-rectangle-list"></i
+                  ></span>
+                  <div>
+                    <p class="eyebrow">YOUR ACCOUNT</p>
+                    <h4>Keep track of your orders</h4>
+                    <p>Review past orders and check their status.</p>
+                  </div>
+                  <button
+                    type="button"
+                    class="customer-shortcut-link"
+                    id="customer-open-history"
+                    >View order history
+                    <span aria-hidden="true">&rarr;</span></button
+                  >
+                </article>
+              </section>
               <div
                 class="customer-recent-orders"
                 id="customer-recent-orders"
                 aria-live="polite"
+                data-customer-only
               ></div>
             </div>
 
             <!-- 3. HISTORY TAB -->
-            <div id="tab-section-history" class="profile-tab-section hidden">
+            <div
+              id="tab-section-history"
+              class="profile-tab-section hidden"
+              data-customer-only
+            >
               <div class="history-toolbar">
                 <div class="account-section-heading">
                   <span class="account-section-icon" aria-hidden="true">▤</span>
@@ -472,7 +438,7 @@
             <!-- 4. SAVED DETAILS TAB -->
             <div id="tab-section-details" class="profile-tab-section hidden">
               <div class="account-section-heading">
-                <span class="account-section-icon" aria-hidden="true">⌖</span>
+                <span class="account-section-icon" aria-hidden="true"><i class="fa-regular fa-address-card"></i></span>
                 <div>
                   <p class="eyebrow">Faster checkout</p>
                   <h3>Saved Details</h3>
@@ -552,7 +518,7 @@
                     />
                   </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" data-customer-only>
                   <p class="contact-section-heading">Delivery Address</p>
                   <p
                     id="profile-existing-address-note"
@@ -647,7 +613,7 @@
             <!-- 5. SECURITY TAB -->
             <div id="tab-section-security" class="profile-tab-section hidden">
               <div class="account-section-heading">
-                <span class="account-section-icon" aria-hidden="true">⌑</span>
+                <span class="account-section-icon" aria-hidden="true"><i class="fa-solid fa-shield"></i></span>
                 <div>
                   <p class="eyebrow">Keep your account safe</p>
                   <h3>Security</h3>
@@ -675,19 +641,7 @@
                       data-target="current-password-input"
                       aria-label="Toggle password visibility"
                     >
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
-                        <path
-                          d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
-                        />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
+                      <i class="fa-solid fa-eye" aria-hidden="true"></i>
                     </button>
                   </div>
                 </div>
@@ -709,19 +663,7 @@
                       data-target="new-password-input"
                       aria-label="Toggle password visibility"
                     >
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
-                        <path
-                          d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
-                        />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
+                      <i class="fa-solid fa-eye" aria-hidden="true"></i>
                     </button>
                   </div>
                 </div>
@@ -742,19 +684,7 @@
                       data-target="confirm-password-input"
                       aria-label="Toggle password visibility"
                     >
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
-                        <path
-                          d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
-                        />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
+                      <i class="fa-solid fa-eye" aria-hidden="true"></i>
                     </button>
                   </div>
                 </div>

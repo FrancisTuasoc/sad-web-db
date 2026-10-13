@@ -29,6 +29,6 @@
     <rect x="7" y="43" width="38" height="6" rx="3" fill="url(#bunGrad)" />
   </g>
   <!-- Brand Text -->
-  <text x="64" y="29" font-family="'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif" font-weight="800" font-size="18" fill="#FBF8F3" letter-spacing="1">CASESTUDY<tspan fill="#F2A413">-SYSTEM</tspan></text>
-  <text x="65" y="45" font-family="'Open Sans', sans-serif" font-weight="600" font-size="9" fill="#E9E2D6" letter-spacing="2">ORDERING &amp; BILLING</text>
+  <text x="64" y="29" font-family="'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif" font-weight="800" font-size="20" fill="#315D43" letter-spacing=".4">GIGABITE</text>
+  <text x="65" y="45" font-family="'Open Sans', sans-serif" font-weight="600" font-size="9" fill="#617267" letter-spacing="1.8">FRESH BURGERS, MADE EASY</text>
 </svg>

@@ -257,6 +257,7 @@ export function renderHeader(activeNav = '') {
 
   const user = getUser();
   const userLoggedIn = isLoggedIn();
+  const isAdminProfile = document.body.classList.contains('admin-account');
 
   // Active navigation highlight
   const navLinks = headerElem.querySelectorAll('.nav-links a');
@@ -285,7 +286,7 @@ export function renderHeader(activeNav = '') {
           <div id="user-dropdown-menu" class="user-dropdown">
             <a href="profile.html">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              My Profile &amp; Orders
+              ${isAdminProfile ? 'My Profile' : 'My Profile &amp; Orders'}
             </a>
             ${
               isAdmin()
@@ -312,7 +313,13 @@ export function renderHeader(activeNav = '') {
   // Mobile drawer links
   const mobileDrawer = document.getElementById('mobile-drawer-menu');
   if (mobileDrawer) {
-    if (userLoggedIn && user) {
+    if (isAdminProfile && userLoggedIn && user) {
+      mobileDrawer.innerHTML = `
+        <a href="admin.html">Admin Dashboard</a>
+        <a href="profile.html" aria-current="page">My Profile</a>
+        <a href="#" id="mobile-logout-btn">Log Out</a>
+      `;
+    } else if (userLoggedIn && user) {
       mobileDrawer.innerHTML = `
         <a href="index.html">Home</a>
         <a href="menu.html">Menu</a>

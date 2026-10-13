@@ -7,8 +7,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap"
       rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/components.css" />
@@ -32,18 +36,7 @@
             aria-expanded="true"
             title="Collapse navigation"
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
+            <i class="fa-solid fa-bars" aria-hidden="true"></i>
           </button>
           <a href="admin.html" class="brand-logo" style="text-decoration: none">
             <img
@@ -94,30 +87,6 @@
               </svg>
             </span>
           </button>
-          <a
-            href="index.html"
-            class="btn btn-secondary btn-sm"
-            aria-label="View customer storefront"
-            target="_blank"
-            title="View Customer Storefront"
-          >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-              />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
-            </svg>
-            <span>View Website</span>
-          </a>
-          <a href="profile.html" class="btn btn-secondary btn-sm">My Profile</a>
           <button
             type="button"
             id="admin-logout-btn"
@@ -139,20 +108,7 @@
           aria-label="Dashboard"
           title="Dashboard"
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <rect x="3" y="3" width="7" height="7" />
-            <rect x="14" y="3" width="7" height="7" />
-            <rect x="14" y="14" width="7" height="7" />
-            <rect x="3" y="14" width="7" height="7" />
-            <path d="M5 5h3m8 0h3m-3 11h3M5 16h3" stroke-width="1.3" />
-          </svg>
+          <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>
           <span class="admin-nav-label">Dashboard</span>
         </button>
         <button
@@ -162,19 +118,7 @@
           aria-label="Orders Management"
           title="Orders Management"
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3Z"
-            />
-            <path d="M9 8h6m-6 4h6m-6 4h3" stroke-width="1.5" />
-          </svg>
+          <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
           <span class="admin-nav-label">Orders Management</span
           ><span
             id="admin-pending-count"
@@ -190,20 +134,7 @@
           aria-label="Menu and inventory"
           title="Menu and inventory"
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-            <path
-              d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
-            />
-            <path d="M9 7h7m-7 4h7m-7 4h5" stroke-width="1.5" />
-          </svg>
+          <i class="fa-solid fa-book-open" aria-hidden="true"></i>
           <span class="admin-nav-label">Menu & Add-ons</span>
         </button>
         <button
@@ -213,24 +144,7 @@
           aria-label="Categories"
           title="Categories"
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <line x1="8" y1="6" x2="21" y2="6" />
-            <line x1="8" y1="12" x2="21" y2="12" />
-            <line x1="8" y1="18" x2="21" y2="18" />
-            <line x1="3" y1="6" x2="3.01" y2="6" />
-            <line x1="3" y1="12" x2="3.01" y2="12" />
-            <line x1="3" y1="18" x2="3.01" y2="18" />
-            <circle cx="4" cy="6" r="1.1" fill="currentColor" stroke="none" />
-            <circle cx="4" cy="12" r="1.1" fill="currentColor" stroke="none" />
-            <circle cx="4" cy="18" r="1.1" fill="currentColor" stroke="none" />
-          </svg>
+          <i class="fa-solid fa-list" aria-hidden="true"></i>
           <span class="admin-nav-label">Categories</span>
         </button>
         <button
@@ -240,20 +154,7 @@
           aria-label="Customers"
           title="Customers"
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            <path d="M5 18h8m-7 2h6" stroke-width="1.4" />
-          </svg>
+          <i class="fa-solid fa-users" aria-hidden="true"></i>
           <span class="admin-nav-label">Customers</span>
         </button>
         <button
@@ -263,20 +164,18 @@
           aria-label="Store Settings"
           title="Store Settings"
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <circle cx="12" cy="12" r="3" />
-            <path
-              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
-            />
-          </svg>
+          <i class="fa-solid fa-gear" aria-hidden="true"></i>
           <span class="admin-nav-label">Store Settings</span>
+        </button>
+        <button
+          type="button"
+          class="admin-nav-item"
+          data-section="security"
+          aria-label="Security"
+          title="Security"
+        >
+          <i class="fa-solid fa-shield" aria-hidden="true"></i>
+          <span class="admin-nav-label">Security</span>
         </button>
       </aside>
 
@@ -384,14 +283,7 @@
           <div class="stats-grid">
             <div class="stat-card stat-card-revenue">
               <span class="stat-icon" aria-hidden="true"
-                ><svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                >
-                  <path d="M3 17 9 11l4 4 8-9" />
-                  <path d="M15 6h6v6" /></svg
+                ><i class="fa-solid fa-chart-line"></i
               ></span>
               <span class="stat-title">Lifetime revenue</span>
               <span class="stat-value" id="stat-total-revenue">₱0.00</span>
@@ -399,16 +291,7 @@
             </div>
             <div class="stat-card">
               <span class="stat-icon" aria-hidden="true"
-                ><svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                >
-                  <path
-                    d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"
-                  />
-                  <path d="M3 6h18M16 10a4 4 0 0 1-8 0" /></svg
+                ><i class="fa-solid fa-bag-shopping"></i
               ></span>
               <span class="stat-title">All orders</span>
               <span class="stat-value" id="stat-total-orders">0</span>
@@ -416,14 +299,7 @@
             </div>
             <div class="stat-card stat-card-pending">
               <span class="stat-icon" aria-hidden="true"
-                ><svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                >
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M12 7v5l3 2" /></svg
+                ><i class="fa-solid fa-clock"></i
               ></span>
               <span class="stat-title">Awaiting acceptance</span>
               <span class="stat-value" id="stat-pending-orders">0</span>
@@ -431,14 +307,7 @@
             </div>
             <div class="stat-card stat-card-completed">
               <span class="stat-icon" aria-hidden="true"
-                ><svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                >
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="m8 12 2.5 2.5L16 9" /></svg
+                ><i class="fa-solid fa-circle-check"></i
               ></span>
               <span class="stat-title">Completed orders</span>
               <span class="stat-value" id="stat-completed-orders">0</span>
@@ -446,14 +315,7 @@
             </div>
             <div class="stat-card stat-card-cancelled">
               <span class="stat-icon" aria-hidden="true"
-                ><svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                >
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="m9 9 6 6m0-6-6 6" /></svg
+                ><i class="fa-solid fa-circle-xmark"></i
               ></span>
               <span class="stat-title">Cancelled orders</span>
               <span class="stat-value" id="stat-cancelled-orders">0</span>
@@ -461,23 +323,93 @@
             </div>
             <div class="stat-card">
               <span class="stat-icon" aria-hidden="true"
-                ><svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                >
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path
-                    d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
-                  /></svg
+                ><i class="fa-solid fa-users"></i
               ></span>
               <span class="stat-title">Customers</span>
               <span class="stat-value" id="stat-total-customers">0</span>
               <span class="stat-detail">Registered customer accounts</span>
             </div>
           </div>
+
+          <section class="ops-dashboard" aria-label="Store analytics overview">
+            <div class="ops-dashboard-heading">
+              <div>
+                <p class="ops-eyebrow">ANALYTICS SNAPSHOT</p>
+                <h2>Store performance</h2>
+              </div>
+              <span class="ops-data-note">Live completed-order data · Last 30 days</span>
+            </div>
+
+            <div class="ops-chart-grid">
+              <article class="ops-panel ops-income-panel">
+                <div class="ops-panel-heading">
+                  <div>
+                    <p class="ops-eyebrow">COMPLETED ORDERS</p>
+                    <h3>Daily income</h3>
+                  </div>
+                  <span class="ops-period-label">Last 30 days</span>
+                </div>
+                <div class="ops-chart-wrap">
+                  <canvas id="ops-income-chart" role="img" aria-label="Daily revenue from completed orders over the last 30 days"></canvas>
+                </div>
+                <div class="ops-html-legend" aria-label="Chart legend">
+                  <span><i class="legend-blue"></i> Completed revenue</span>
+                </div>
+              </article>
+
+              <article class="ops-panel ops-revenue-panel">
+                <div class="ops-panel-heading">
+                  <div>
+                    <p class="ops-eyebrow">COMPLETED ORDERS</p>
+                    <h3>30-day revenue trend</h3>
+                  </div>
+                  <span class="ops-period-label">Last 30 days</span>
+                </div>
+                <div class="ops-chart-wrap ops-line-chart-wrap">
+                  <canvas id="ops-revenue-chart" role="img" aria-label="Daily completed revenue trend over the last 30 days"></canvas>
+                </div>
+              </article>
+            </div>
+
+            <div class="ops-lower-grid">
+              <article class="ops-panel ops-traffic-panel">
+                <div class="ops-panel-heading">
+                  <div>
+                    <p class="ops-eyebrow">COMPLETED ORDERS</p>
+                    <h3>Order traffic</h3>
+                  </div>
+                  <span class="ops-period-label">Orders per day · Last 30 days</span>
+                </div>
+                <div class="ops-chart-wrap">
+                  <canvas id="ops-traffic-chart" role="img" aria-label="Daily count of completed orders over the last 30 days"></canvas>
+                </div>
+                <div class="ops-html-legend">
+                  <span><i class="legend-blue"></i> Completed orders</span>
+                </div>
+              </article>
+
+              <div class="ops-side-widgets">
+                <article class="ops-panel ops-success-card">
+                  <span class="ops-success-icon" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></span>
+                  <h3>Completed orders</h3>
+                  <strong id="ops-completed-orders">—</strong>
+                  <p>Orders fulfilled to date</p>
+                  <button type="button" class="ops-action-button" id="ops-check-status-btn">View Orders</button>
+                </article>
+                <article class="ops-top-product">
+                  <div>
+                    <p>TOP ORDERED PRODUCT</p>
+                    <span id="ops-top-product-count">—</span>
+                  </div>
+                  <strong id="ops-top-product-name">No data</strong>
+                  <span>Based on non-cancelled order items</span>
+                </article>
+              </div>
+            </div>
+            <p id="ops-chart-error" class="ops-chart-error hidden" role="status">
+              Charts could not load. Check your connection and refresh the page.
+            </p>
+          </section>
 
           <!-- Sales Toggle Card -->
           <div
@@ -1366,107 +1298,62 @@
             </button>
           </form>
 
-          <!-- Admin Profile & Security -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
-            <!-- Profile info -->
-            <div class="step-card">
-              <h4 style="font-size: 1.1rem; margin-bottom: 14px">
-                Administrator Profile
-              </h4>
-              <form id="admin-profile-form">
-                <div class="form-group">
-                  <label class="form-label" for="admin-profile-username"
-                    >Admin Username</label
-                  >
-                  <input
-                    type="text"
-                    id="admin-profile-username"
-                    class="form-input"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="admin-profile-email"
-                    >Admin Email</label
-                  >
-                  <input
-                    type="email"
-                    id="admin-profile-email"
-                    class="form-input"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="admin-profile-fullname"
-                    >Full Name</label
-                  >
-                  <input
-                    type="text"
-                    id="admin-profile-fullname"
-                    class="form-input"
-                  />
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="admin-profile-phone"
-                    >Contact Phone</label
-                  >
-                  <input
-                    type="text"
-                    id="admin-profile-phone"
-                    class="form-input"
-                  />
-                </div>
-                <button type="submit" class="btn btn-secondary btn-sm">
-                  Update Profile
-                </button>
-              </form>
-            </div>
+        </div>
 
-            <!-- Password change -->
-            <div class="step-card">
-              <h4 style="font-size: 1.1rem; margin-bottom: 14px">
-                Change Administrator Password
-              </h4>
-              <form id="admin-password-form">
-                <div class="form-group">
-                  <label class="form-label" for="admin-current-pass"
-                    >Current Password</label
-                  >
-                  <input
-                    type="password"
-                    id="admin-current-pass"
-                    class="form-input"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="admin-new-pass"
-                    >New Password</label
-                  >
-                  <input
-                    type="password"
-                    id="admin-new-pass"
-                    class="form-input"
-                    required
-                    placeholder="Min. 8 chars, letter & number"
-                  />
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="admin-confirm-pass"
-                    >Confirm New Password</label
-                  >
-                  <input
-                    type="password"
-                    id="admin-confirm-pass"
-                    class="form-input"
-                    required
-                  />
-                </div>
-                <button type="submit" class="btn btn-primary btn-sm">
-                  Change Password
-                </button>
-              </form>
-            </div>
+        <!-- SECTION 7: ADMIN SECURITY -->
+        <div id="section-security" class="admin-section hidden">
+          <h2 style="font-size: 1.6rem; margin-bottom: 8px">
+            Account Security
+          </h2>
+          <p class="text-muted" style="margin-bottom: 20px">
+            Change your administrator password to keep your account secure.
+          </p>
+          <div class="step-card admin-security-card">
+            <h3 style="font-size: 1.1rem; margin-bottom: 14px">
+              Change Administrator Password
+            </h3>
+            <form id="admin-password-form">
+              <div class="form-group">
+                <label class="form-label" for="admin-current-pass"
+                  >Current Password</label
+                >
+                <input
+                  type="password"
+                  id="admin-current-pass"
+                  class="form-input"
+                  autocomplete="current-password"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="admin-new-pass"
+                  >New Password</label
+                >
+                <input
+                  type="password"
+                  id="admin-new-pass"
+                  class="form-input"
+                  autocomplete="new-password"
+                  required
+                  placeholder="Min. 8 chars, letter & number"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="admin-confirm-pass"
+                  >Confirm New Password</label
+                >
+                <input
+                  type="password"
+                  id="admin-confirm-pass"
+                  class="form-input"
+                  autocomplete="new-password"
+                  required
+                />
+              </div>
+              <button type="submit" class="btn btn-primary btn-sm">
+                Change Password
+              </button>
+            </form>
           </div>
         </div>
       </main>
@@ -1870,6 +1757,7 @@
       </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="js/admin.js"></script>
     <script type="module">
       import { logout } from './js/auth.js';

@@ -16,6 +16,7 @@ let currentSalesView = 'daily'; // 'daily' | 'weekly' | 'monthly'
 let currentChartDays = 14;
 let dashboardRefreshPending = false;
 let activeGcashProofPreviewUrl = null;
+let opsCharts = null;
 
 // Pagination and filters state for Orders
 let ordersFilter = {
@@ -36,9 +37,257 @@ let editingProductId = null;
 let editingCategoryId = null;
 let categoriesList = [];
 
+function renderOpsDashboard(stats) {
+  const chartError = document.getElementById('ops-chart-error');
+  const canvases = [
+    document.getElementById('ops-income-chart'),
+    document.getElementById('ops-revenue-chart'),
+    document.getElementById('ops-traffic-chart'),
+  ];
+  if (canvases.some((canvas) => !canvas)) return;
+  if (!window.Chart) {
+    chartError?.classList.remove('hidden');
+    if (chartError) chartError.textContent = 'Chart.js could not load. Check your connection and refresh the page.';
+    return;
+  }
+
+  if (chartError) {
+    chartError.classList.add('hidden');
+    chartError.textContent =
+      'Live dashboard chart data is unavailable. Refresh to try again.';
+  }
+
+  if (!Array.isArray(stats.revenueHistory)) {
+    if (chartError) {
+      chartError.textContent =
+        'Live chart history was not included in the dashboard response.';
+      chartError.classList.remove('hidden');
+    }
+    return;
+  }
+
+  const historyByDate = new Map(
+    stats.revenueHistory.map((entry) => [entry._id, entry])
+  );
+  const today = new Date(`${getStoreDateKey(new Date())}T00:00:00Z`);
+  today.setUTCDate(today.getUTCDate() - 29);
+  const history = Array.from({ length: 30 }, (_, index) => {
+    const date = new Date(today);
+    date.setUTCDate(today.getUTCDate() + index);
+    const key = date.toISOString().slice(0, 10);
+    return historyByDate.get(key) || { _id: key, revenue: 0, orders: 0 };
+  });
+  const labels = history.map((entry) =>
+    new Date(`${entry._id}T00:00:00+08:00`).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'Asia/Manila',
+    })
+  );
+  const dailyRevenue = history.map((entry) => Number(entry.revenue) || 0);
+  const dailyOrders = history.map((entry) => Number(entry.orders) || 0);
+  const cumulativeRevenue = dailyRevenue.reduce((values, value, index) => {
+    values.push(value + (values[index - 1] || 0));
+    return values;
+  }, []);
+  const topItem = Array.isArray(stats.topItems) ? stats.topItems[0] : null;
+  const completedOrders = document.getElementById('ops-completed-orders');
+  const topProductCount = document.getElementById('ops-top-product-count');
+  const topProductName = document.getElementById('ops-top-product-name');
+  if (completedOrders) {
+    completedOrders.textContent = Number(stats.completedOrders || 0).toLocaleString();
+  }
+  if (topProductCount) {
+    topProductCount.textContent = topItem
+      ? `${Number(topItem.totalQty || 0).toLocaleString()} items sold`
+      : 'No sales yet';
+  }
+  if (topProductName) {
+    topProductName.textContent = topItem?._id || 'No data';
+    topProductName.title = topItem?._id || '';
+  }
+
+  if (!opsCharts) {
+    initializeOpsCharts(canvases);
+  }
+  if (!opsCharts) return;
+
+  const revenueScale = (maximum) => ({
+    beginAtZero: true,
+    suggestedMax: maximum || undefined,
+    grid: { color: '#edf0f3' },
+    border: { display: false },
+    ticks: {
+      color: '#7b8794',
+      maxTicksLimit: 5,
+      callback: (value) => formatPeso(value),
+    },
+  });
+  const countScale = {
+    beginAtZero: true,
+    grid: { color: '#edf0f3' },
+    border: { display: false },
+    ticks: {
+      color: '#7b8794',
+      precision: 0,
+      maxTicksLimit: 5,
+    },
+  };
+
+  const chartSeries = [
+    {
+      labels,
+      data: dailyRevenue,
+      label: 'Daily completed revenue',
+      y: revenueScale(Math.max(...dailyRevenue)),
+    },
+    {
+      labels,
+      data: cumulativeRevenue,
+      label: 'Cumulative completed revenue (last 30 days)',
+      y: revenueScale(Math.max(...cumulativeRevenue)),
+    },
+    {
+      labels,
+      data: dailyOrders,
+      label: 'Completed orders per day',
+      y: countScale,
+    },
+  ];
+  opsCharts.forEach((chart, index) => {
+    chart.data.labels = chartSeries[index].labels;
+    chart.data.datasets[0].data = chartSeries[index].data;
+    chart.data.datasets[0].label = chartSeries[index].label;
+    chart.options.scales.y = chartSeries[index].y;
+    chart.update('none');
+  });
+}
+
+function initializeOpsCharts(canvases) {
+  const chartError = document.getElementById('ops-chart-error');
+  if (!window.Chart) {
+    chartError?.classList.remove('hidden');
+    if (chartError) chartError.textContent = 'Chart.js could not load. Check your connection and refresh the page.';
+    return;
+  }
+  const commonOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { mode: 'index', intersect: false },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        border: { display: false },
+        ticks: {
+          color: '#7b8794',
+          maxRotation: 0,
+          autoSkip: true,
+          maxTicksLimit: 8,
+        },
+      },
+      y: { beginAtZero: true },
+    },
+  };
+
+  try {
+    opsCharts = [
+      new window.Chart(canvases[0], {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Daily completed revenue',
+            data: [],
+            backgroundColor: '#3b82f6',
+            borderRadius: { topLeft: 4, topRight: 4 },
+            borderSkipped: 'bottom',
+          },
+        ],
+      },
+      options: commonOptions,
+      }),
+
+      new window.Chart(canvases[1], {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Cumulative completed revenue (last 30 days)',
+            data: [],
+            borderColor: '#3b82f6',
+            backgroundColor: '#3b82f6',
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#3b82f6',
+            pointBorderWidth: 2,
+            pointRadius: 3,
+            tension: 0.4,
+            fill: false,
+          },
+        ],
+      },
+      options: commonOptions,
+      }),
+
+      new window.Chart(canvases[2], {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Completed orders per day',
+            data: [],
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0)',
+            pointRadius: 0,
+            tension: 0.4,
+            fill: true,
+          },
+        ],
+      },
+      options: commonOptions,
+      plugins: [
+        {
+          id: 'trafficGradientFills',
+          beforeDatasetsDraw(chart) {
+            const { ctx, chartArea } = chart;
+            if (!chartArea) return;
+            chart.data.datasets.forEach((dataset, index) => {
+              const gradient = ctx.createLinearGradient(
+                0,
+                chartArea.top,
+                0,
+                chartArea.bottom
+              );
+              const color = index === 0 ? '59, 130, 246' : '20, 184, 166';
+              gradient.addColorStop(0, `rgba(${color}, 0.24)`);
+              gradient.addColorStop(1, `rgba(${color}, 0)`);
+              dataset.backgroundColor = gradient;
+            });
+          },
+        },
+      ],
+      }),
+    ];
+  } catch (error) {
+    opsCharts?.forEach((chart) => chart.destroy());
+    opsCharts = null;
+    chartError?.classList.remove('hidden');
+    if (chartError) {
+      chartError.textContent =
+        'Dashboard charts could not be initialized. Refresh to try again.';
+    }
+    console.error('Dashboard charts failed to initialize:', error);
+  }
+}
+
 // ---------------- Initialization & Navigation ----------------
 function setupAdminNavigation() {
-  const navItems = document.querySelectorAll('.admin-nav-item');
+  const navItems = document.querySelectorAll('button.admin-nav-item');
   navItems.forEach((btn) => {
     btn.addEventListener('click', () => {
       navItems.forEach((b) => b.classList.remove('active'));
@@ -75,6 +324,8 @@ function setupAdminNavigation() {
           break;
         case 'settings':
           loadAdminSettings();
+          break;
+        case 'security':
           break;
       }
     });
@@ -193,6 +444,7 @@ async function loadDashboardStats() {
     document.getElementById('stat-total-customers').textContent = String(
       dashboardStats.totalCustomers
     );
+    renderOpsDashboard(dashboardStats);
 
     const updatedAt = document.getElementById('dashboard-last-updated');
     if (updatedAt) {
@@ -204,6 +456,12 @@ async function loadDashboardStats() {
     renderTopItems();
     renderRecentOrders();
   } catch (err) {
+    const chartError = document.getElementById('ops-chart-error');
+    if (chartError) {
+      chartError.textContent =
+        'Live dashboard data could not be loaded. Refresh to try again.';
+      chartError.classList.remove('hidden');
+    }
     if (recentOrdersBody) {
       recentOrdersBody.setAttribute('aria-busy', 'false');
       recentOrdersBody.innerHTML =
@@ -1038,18 +1296,6 @@ async function loadAdminSettings() {
       if (closedElem) closedElem.checked = Boolean(h.closed);
     });
 
-    // Admin Profile Tab
-    const profRes = await apiFetch('/admin/profile');
-    if (profRes.admin) {
-      document.getElementById('admin-profile-username').value =
-        profRes.admin.username;
-      document.getElementById('admin-profile-email').value =
-        profRes.admin.email;
-      document.getElementById('admin-profile-fullname').value =
-        profRes.admin.fullName || '';
-      document.getElementById('admin-profile-phone').value =
-        profRes.admin.phone || '';
-    }
   } catch (err) {
     showToast('Failed to load store settings: ' + err.message, 'error');
   }
@@ -1062,6 +1308,14 @@ function attachAdminEventListeners() {
   );
   if (dashboardRefreshButton)
     dashboardRefreshButton.addEventListener('click', loadDashboardStats);
+  const checkStatusButton = document.getElementById('ops-check-status-btn');
+  if (checkStatusButton) {
+    checkStatusButton.addEventListener('click', () => {
+      document
+        .querySelector('.admin-nav-item[data-section="orders"]')
+        ?.click();
+    });
+  }
 
   const openOrdersSection = () => {
     const ordersNavButton = document.querySelector(
@@ -1668,32 +1922,6 @@ function attachAdminEventListeners() {
         });
         updateOnlineOrderingSummary(payload.acceptingOrders, true);
         showToast('Store settings saved successfully!', 'success');
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    });
-  }
-
-  // Admin Profile Update
-  const adminProfileForm = document.getElementById('admin-profile-form');
-  if (adminProfileForm) {
-    adminProfileForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const username = document
-        .getElementById('admin-profile-username')
-        .value.trim();
-      const email = document.getElementById('admin-profile-email').value.trim();
-      const fullName = document
-        .getElementById('admin-profile-fullname')
-        .value.trim();
-      const phone = document.getElementById('admin-profile-phone').value.trim();
-
-      try {
-        await apiFetch('/admin/profile', {
-          method: 'PATCH',
-          body: JSON.stringify({ username, email, fullName, phone }),
-        });
-        showToast('Admin profile updated', 'success');
       } catch (err) {
         showToast(err.message, 'error');
       }

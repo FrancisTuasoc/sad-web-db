@@ -19,6 +19,10 @@ let pollingTimer = null;
 let currentProfile = null;
 let activeAvatarObjectUrl = null;
 
+function isAdminAccount() {
+  return getUser()?.role === 'admin';
+}
+
 function splitProfileName(profile) {
   const savedParts = String(profile.fullName || '')
     .trim()
@@ -349,6 +353,8 @@ function formatOrderStatusLabel(status = '') {
 }
 
 async function loadCustomerStats() {
+  if (isAdminAccount()) return;
+
   try {
     const res = await apiFetch('/customer/kpis');
     const stats = res.kpis || {};
@@ -360,35 +366,42 @@ async function loadCustomerStats() {
         label: 'Total orders',
         value: stats.totalOrders || 0,
         meta: 'All orders placed',
-        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.75h9l3 3V20.25H6z"/><path d="M14.5 3.75v3.5H18M9 11h6M9 15h6"/></svg>',
+        variant: 'orders',
+        icon: 'fa-solid fa-shopping-bag',
       },
       {
         label: 'Pending orders',
         value: stats.pendingOrders || 0,
         meta: 'Waiting for action',
-        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.25"/><path d="M12 7.5v5l3.25 2"/></svg>',
+        variant: 'pending',
+        icon: 'fa-solid fa-clock',
       },
       {
         label: 'Delivered orders',
         value: stats.deliveredOrders || 0,
         meta: 'Completed deliveries',
-        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 19 6v5.2c0 4.4-2.8 7.6-7 9.3-4.2-1.7-7-4.9-7-9.3V6z"/><path d="m8.75 11.75 2.1 2.1 4.4-4.4"/></svg>',
+        variant: 'delivered',
+        icon: 'fa-solid fa-circle-check',
       },
       {
         label: 'Total spent',
-        value: `₱${Number(stats.totalSpent || 0).toFixed(2)}`,
+        value: new Intl.NumberFormat('en-PH', {
+          style: 'currency',
+          currency: 'PHP',
+        }).format(Number(stats.totalSpent || 0)),
         meta: 'Completed orders only',
-        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.25"/><path d="M9 8.5h4a2 2 0 0 1 0 4H9m0 0h4.5a2 2 0 0 1 0 4H9m1.5-10v11"/></svg>',
+        variant: 'spent',
+        icon: 'fa-solid fa-wallet',
       },
     ];
 
     grid.innerHTML = cards
       .map(
         (card) => `
-      <article class="customer-stat-card">
+      <article class="customer-stat-card customer-stat-${card.variant}">
         <div class="customer-stat-top">
           <span class="customer-stat-label">${escapeHtml(card.label)}</span>
-          <span class="customer-stat-icon">${card.icon}</span>
+          <span class="customer-stat-icon" aria-hidden="true"><i class="${card.icon}"></i></span>
         </div>
         <strong class="customer-stat-value">${escapeHtml(String(card.value))}</strong>
         <span class="customer-stat-meta">${escapeHtml(card.meta)}</span>
@@ -1018,6 +1031,10 @@ async function handleBuyAgain(orderId, button) {
 
 // Setup Event Listeners
 function setProfileTab(tab) {
+  if (isAdminAccount() && ['status', 'history'].includes(tab)) {
+    tab = 'overview';
+  }
+
   const tabButton = Array.from(
     document.querySelectorAll('.profile-nav-btn')
   ).find((button) => button.getAttribute('data-tab') === tab);
@@ -1053,6 +1070,11 @@ function setupProfileTabs() {
       updateProfileSidebarToggle();
     });
   });
+
+  const historyShortcut = document.getElementById('customer-open-history');
+  if (historyShortcut) {
+    historyShortcut.addEventListener('click', () => setProfileTab('history'));
+  }
 
   // Status sub-tabs
   const subtabs = document.querySelectorAll('.status-subtab');
@@ -1124,14 +1146,16 @@ function setupProfileTabs() {
         .value.trim()
         .toLowerCase();
       const phone = document.getElementById('profile-phone-input').value.trim();
-      const addressFields = Object.fromEntries(
-        ['street', 'barangay', 'city', 'province', 'postalCode'].map(
-          (field) => {
-            const inputId = `profile-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`;
-            return [field, document.getElementById(inputId).value.trim()];
-          }
-        )
-      );
+      const addressFields = isAdminAccount()
+        ? {}
+        : Object.fromEntries(
+            ['street', 'barangay', 'city', 'province', 'postalCode'].map(
+              (field) => {
+                const inputId = `profile-${field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}-input`;
+                return [field, document.getElementById(inputId).value.trim()];
+              }
+            )
+          );
 
       const phPhoneRegex = /^(09\d{9}|\+639\d{9})$/;
       if (!phPhoneRegex.test(phone.replace(/[\s-]/g, ''))) {
@@ -1505,27 +1529,76 @@ function updateProfileSidebarToggle() {
 
 function initProfile() {
   if (!requireAuth()) return;
+  const adminAccount = isAdminAccount();
+  document.body.classList.toggle('admin-account', adminAccount);
+  if (adminAccount) {
+    document.title = 'Admin Profile - GIGABITE';
+    document
+      .querySelectorAll('[data-customer-only]')
+      .forEach((element) => element.remove());
+
+    const brandLink = document.querySelector('.brand-logo');
+    if (brandLink) {
+      brandLink.href = 'admin.html';
+      brandLink.setAttribute('aria-label', 'GIGABITE Admin Dashboard');
+    }
+    const overviewButton = document.querySelector(
+      '.profile-nav-btn[data-tab="overview"]'
+    );
+    if (overviewButton) {
+      overviewButton.setAttribute('aria-label', 'Profile');
+      overviewButton.title = 'Profile';
+      overviewButton.querySelector('span').textContent = 'Profile';
+    }
+    const detailsButton = document.querySelector(
+      '.profile-nav-btn[data-tab="details"]'
+    );
+    if (detailsButton) {
+      detailsButton.setAttribute('aria-label', 'Personal Details');
+      detailsButton.title = 'Personal Details';
+      detailsButton.querySelector('span').textContent = 'Personal Details';
+    }
+    const detailsHeading = document.querySelector(
+      '#tab-section-details .account-section-heading'
+    );
+    if (detailsHeading) {
+      detailsHeading.querySelector('.eyebrow').textContent =
+        'Account information';
+      detailsHeading.querySelector('h3').textContent = 'Personal details';
+      detailsHeading.querySelector('p:last-child').textContent =
+        'Update the contact information associated with your account.';
+    }
+    const detailsTitle = document.querySelector(
+      '#tab-section-details .account-form-card > .contact-section-heading'
+    );
+    if (detailsTitle) detailsTitle.textContent = 'Personal information';
+  }
   renderHeader('profile');
   renderFooter();
   setupProfileTabs();
   loadProfileOverview();
-  loadCustomerStats();
+  if (!adminAccount) loadCustomerStats();
 
   // Check URL query for tab selection
   const params = new URLSearchParams(window.location.search);
   const requestedTab = params.get('tab');
-  if (requestedTab) {
+  const allowedTabs = adminAccount
+    ? ['overview', 'details', 'security']
+    : ['overview', 'status', 'history', 'details', 'security'];
+  if (allowedTabs.includes(requestedTab)) {
     setProfileTab(requestedTab);
   } else {
     setProfileTab('overview');
   }
 
   // 10-second polling for active order updates
-  pollingTimer = setInterval(() => {
-    if (activeTab === 'status') {
-      loadStatusOrders();
-    }
-  }, 10000);
+  if (!adminAccount) {
+    pollingTimer = setInterval(() => {
+      if (activeTab === 'status') {
+        loadStatusOrders();
+      }
+    }, 10000);
+  }
 }
 
 if (document.readyState === 'loading') {
