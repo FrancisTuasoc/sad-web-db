@@ -165,14 +165,11 @@ async function loadStoreInfo() {
           ? ''
           : 'Online ordering is temporarily paused. You can still browse the menu; please check back later.';
       }
-      const heroTaglineElem = document.getElementById('hero-tagline');
       const contactAddress = document.getElementById('contact-address');
       const contactEmail = document.getElementById('contact-email');
       const contactPhone = document.getElementById('contact-phone');
       const contactHours = document.getElementById('contact-hours');
 
-      if (heroTaglineElem && typeof s.tagline === 'string')
-        heroTaglineElem.textContent = s.tagline;
       if (contactAddress && typeof s.address === 'string')
         contactAddress.textContent = s.address;
       if (contactEmail && typeof s.email === 'string') {

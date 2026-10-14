@@ -2561,13 +2561,13 @@ body.profile-page .profile-layout.customer-area .profile-tab-content .account-fo
 }
 
 .auth-reset-link {
-  margin: -8px 0 18px;
+  margin: -8px 0 4px;
   text-align: left;
 }
 
 .auth-reset-link a {
   display: inline-flex;
-  min-height: 48px;
+  min-height: 36px;
   align-items: center;
   color: var(--color-brand-secondary);
   font-size: 0.9rem;
@@ -11002,6 +11002,10 @@ body.theme-dark.profile-page .customer-stat-value,
 body.theme-dark.profile-page .recent-order-total,
 body.theme-dark.profile-page .order-card :is(h3, h4, strong) {
   color: #f5eee5 !important;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #d1d5db 25%, #e5e7eb 50%, #d1d5db 75%) !important;
 }
 
 

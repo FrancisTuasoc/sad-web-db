@@ -7188,7 +7188,7 @@ html {
 }
 
 .mobile-drawer {
-  top: 56px;
+  top: 100%;
 }
 
 .site-header {
