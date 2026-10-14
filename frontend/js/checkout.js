@@ -29,6 +29,20 @@ const MAX_GCASH_PROOF_BYTES = 3 * 1024 * 1024;
 const GCASH_PROOF_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 const DEMO_GCASH_REFERENCE = '0000000000000';
 
+function hasValidGcashReference() {
+  return (
+    document.getElementById('gcash-reference-input')?.value.trim() ===
+    DEMO_GCASH_REFERENCE
+  );
+}
+
+function getSelectedPaymentMethod() {
+  return (
+    document.querySelector('input[name="payment_method"]:checked')?.value ||
+    paymentMethod
+  );
+}
+
 const CONTACT_ADDRESS_FIELDS = [
   'street',
   'barangay',
@@ -420,14 +434,23 @@ export function updateReceipt() {
 
   const placeOrderBtn = document.getElementById('place-order-btn');
   const gcashReferenceInput = document.getElementById('gcash-reference-input');
+  const selectedPaymentMethod = getSelectedPaymentMethod();
+  const enteredReference = gcashReferenceInput?.value.trim() || '';
+  const referenceMismatch =
+    selectedPaymentMethod === 'gcash' &&
+    enteredReference.length > 0 &&
+    enteredReference !== DEMO_GCASH_REFERENCE;
+  gcashReferenceInput?.classList.toggle('is-invalid', referenceMismatch);
+  if (gcashReferenceInput) {
+    if (referenceMismatch) gcashReferenceInput.setAttribute('aria-invalid', 'true');
+    else gcashReferenceInput.removeAttribute('aria-invalid');
+  }
   if (placeOrderBtn) {
     placeOrderBtn.disabled =
       checkedItems.length === 0 ||
       stockIssue ||
-      !paymentMethod ||
-      (paymentMethod === 'gcash' &&
-        !selectedGcashProof &&
-        !gcashReferenceInput?.value.trim()) ||
+      !selectedPaymentMethod ||
+      (selectedPaymentMethod === 'gcash' && !hasValidGcashReference()) ||
       !orderingAvailable ||
       belowMinimum;
   }
@@ -493,8 +516,7 @@ function renderPaymentOptions() {
       <label class="payment-option-label">
         <input type="radio" name="payment_method" value="gcash" ${paymentMethod === 'gcash' ? 'checked' : ''}>
         <div>
-          <span style="font-weight:700;">GCash (Demo)</span>
-          <div style="font-size:0.78rem;color:var(--color-text-muted);">Demo checkout only. No payment is sent or processed.</div>
+          <span class="payment-option-title">GCash</span>
         </div>
       </label>
     `;
@@ -559,14 +581,6 @@ function renderPaymentOptions() {
     .forEach((radio) => {
       radio.addEventListener('change', () => {
         paymentMethod = radio.value;
-        if (paymentMethod === 'gcash') {
-          const referenceInput = document.getElementById(
-            'gcash-reference-input'
-          );
-          if (referenceInput) {
-            referenceInput.value = DEMO_GCASH_REFERENCE;
-          }
-        }
         if (gcashBox) {
           gcashBox.classList.toggle('hidden', paymentMethod !== 'gcash');
         }
@@ -611,17 +625,47 @@ function initContactDetails() {
       summaryBox.innerHTML = `
         <div class="saved-contact-summary-content">
           <div>
-            <div style="font-size:0.78rem;color:var(--color-text-muted);margin-bottom:3px;">Saved account details</div>
-            <strong>${escapeHtml([firstName, lastName].join(' '))}</strong>
-            <div style="font-size:0.82rem;color:var(--color-text-muted);">${escapeHtml(user.contactEmail || user.email)} &bull; ${escapeHtml(user.phone)}</div>
-            ${formatContactAddress({ ...addressFields, address: user.address }) ? `<div style="font-size:0.82rem;color:var(--color-text-muted);margin-top:2px;">${escapeHtml(formatContactAddress({ ...addressFields, address: user.address }))}</div>` : ''}
+            <div class="saved-contact-heading">
+              <strong>Saved account details</strong>
+              <button
+                type="button"
+                id="change-contact-btn"
+                class="checkout-change-contact-button"
+              >
+                Change
+              </button>
+            </div>
+            <div class="saved-contact-rows">
+              <div class="saved-contact-row">
+                <span>Name</span>
+                <strong>${escapeHtml([firstName, lastName].join(' '))}</strong>
+              </div>
+              <div class="saved-contact-row">
+                <span>Email / Phone</span>
+                <strong>
+                  ${escapeHtml(user.contactEmail || user.email)} · ${escapeHtml(user.phone)}
+                </strong>
+              </div>
+              ${
+                formatContactAddress({
+                  ...addressFields,
+                  address: user.address,
+                })
+                  ? `
+                    <div class="saved-contact-row">
+                      <span>Address</span>
+                      <strong>${escapeHtml(
+                        formatContactAddress({
+                          ...addressFields,
+                          address: user.address,
+                        })
+                      )}</strong>
+                    </div>
+                  `
+                  : ''
+              }
+            </div>
           </div>
-          <button type="button" id="change-contact-btn" class="cart-action-button checkout-change-contact-button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/>
-            </svg>
-            Change for this order
-          </button>
         </div>
       `;
       const changeBtn = document.getElementById('change-contact-btn');
@@ -673,6 +717,7 @@ function initContactDetails() {
 }
 
 async function handlePlaceOrder() {
+  paymentMethod = getSelectedPaymentMethod();
   if (!isCheckoutAllowed()) {
     const minimumOrder =
       Number(publicSettings && publicSettings.minimumOrder) || 0;
@@ -736,20 +781,8 @@ async function handlePlaceOrder() {
 
   if (paymentMethod === 'gcash') {
     const gcashReference = gcashReferenceInput?.value.trim() || '';
-    if (!selectedGcashProof && !gcashReference) {
-      showToast(
-        'Enter the 13-digit demo reference or attach an image for admin review.',
-        'warning'
-      );
-      (gcashProofInput || gcashReferenceInput)?.focus();
-      return;
-    }
-    if (
-      !selectedGcashProof &&
-      gcashReference &&
-      !/^\d{13}$/.test(gcashReference)
-    ) {
-      showToast('GCash reference numbers must contain exactly 13 digits.', 'warning');
+    if (gcashReference !== DEMO_GCASH_REFERENCE) {
+      showToast('Enter the correct demo reference number.', 'warning');
       gcashReferenceInput?.focus();
       return;
     }
@@ -809,10 +842,8 @@ async function handlePlaceOrder() {
       fulfillment: fulfillmentMethod,
       paymentMethod,
       gcashReference:
-        paymentMethod === 'gcash' &&
-        (!selectedGcashProof ||
-          /^\d{13}$/.test(gcashReferenceInput?.value.trim() || ''))
-          ? gcashReferenceInput?.value.trim() || ''
+        paymentMethod === 'gcash' && hasValidGcashReference()
+          ? DEMO_GCASH_REFERENCE
           : '',
       gcashProofData: gcashProof ? gcashProof.data : '',
       gcashProofMimeType: gcashProof ? gcashProof.mimeType : '',
@@ -1013,6 +1044,9 @@ export function setupCheckoutListeners() {
   const gcashProofInput = document.getElementById('gcash-proof-input');
   const gcashProofPreview = document.getElementById('gcash-proof-preview');
   const gcashReferenceInput = document.getElementById('gcash-reference-input');
+  const copyGcashReferenceBtn = document.getElementById(
+    'copy-gcash-reference-btn'
+  );
   const continueContactBtn = document.getElementById('continue-contact-btn');
   const continuePaymentBtn = document.getElementById('continue-payment-btn');
   const backFulfillmentBtn = document.getElementById('back-fulfillment-btn');
@@ -1021,6 +1055,46 @@ export function setupCheckoutListeners() {
   if (checkoutBtn) checkoutBtn.addEventListener('click', openCheckoutModal);
   if (closeCheckoutBtn)
     closeCheckoutBtn.addEventListener('click', () => closeCheckoutModal());
+  if (copyGcashReferenceBtn) {
+    copyGcashReferenceBtn.addEventListener('click', async () => {
+      try {
+        let copied = false;
+        let clipboardError = null;
+        if (navigator.clipboard?.writeText) {
+          try {
+            await navigator.clipboard.writeText(DEMO_GCASH_REFERENCE);
+            copied = true;
+          } catch (err) {
+            clipboardError = err;
+          }
+        }
+        if (!copied) {
+          const temporaryInput = document.createElement('textarea');
+          temporaryInput.value = DEMO_GCASH_REFERENCE;
+          temporaryInput.setAttribute('readonly', '');
+          temporaryInput.style.position = 'fixed';
+          temporaryInput.style.opacity = '0';
+          document.body.append(temporaryInput);
+          try {
+            temporaryInput.select();
+            copied = document.execCommand('copy');
+          } finally {
+            temporaryInput.remove();
+          }
+        }
+        if (!copied)
+          throw new Error(
+            clipboardError?.message || 'Clipboard access is unavailable.'
+          );
+        copyGcashReferenceBtn.textContent = 'Copied';
+        window.setTimeout(() => {
+          copyGcashReferenceBtn.textContent = 'Copy';
+        }, 1600);
+      } catch (err) {
+        showToast(`Could not copy the reference number: ${err.message}`, 'error');
+      }
+    });
+  }
   if (checkoutModal) {
     checkoutModal.addEventListener('click', (event) => {
       if (event.target === checkoutModal) closeCheckoutModal();

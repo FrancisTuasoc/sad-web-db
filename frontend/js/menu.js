@@ -454,7 +454,7 @@ async function loadCategories() {
           .filter((c) => c.name !== 'Add-ons')
           .map(
             (c) =>
-              `<button class="chip ${activeCategory === c._id || activeCategory === c.name ? 'active' : ''}" data-category="${c._id}" data-name="${c.name}">${escapeHtml(c.name)}</button>`
+              `<button class="chip ${activeCategory === c._id || activeCategory === c.name ? 'active' : ''}" data-category="${c._id}" data-name="${escapeHtml(c.name)}">${escapeHtml(c.name)}</button>`
           ),
       ].join('');
 
@@ -471,7 +471,10 @@ async function loadCategories() {
         .querySelectorAll('.chip')
         .forEach((c) => c.classList.remove('active'));
       chip.classList.add('active');
-      activeCategory = chip.getAttribute('data-category') || 'all';
+      activeCategory =
+        chip.getAttribute('data-name') ||
+        chip.getAttribute('data-category') ||
+        'all';
       filterAndRenderProducts();
     });
   });

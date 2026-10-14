@@ -88,13 +88,13 @@
 }
 
 .nav-links a:hover {
-  color: #f5c46b;
+  color: #ffffff;
   text-decoration: none;
 }
 
 .nav-links a.active,
 .nav-links a:active {
-  color: #f5c46b;
+  color: #ffffff;
 }
 
 .nav-links a.active::after,
@@ -105,7 +105,7 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background: #f5c46b;
+  background: #ffffff;
   border-radius: 999px;
 }
 
@@ -134,9 +134,9 @@
 }
 
 .cart-btn:hover {
-  color: #f5c46b;
-  border-color: rgba(245, 196, 107, 0.7);
-  background: rgba(242, 164, 19, 0.1);
+  color: var(--brand-primary);
+  border-color: var(--brand-primary);
+  background: color-mix(in srgb, var(--brand-primary) 10%, transparent);
   transform: translateY(-1px);
 }
 
@@ -181,8 +181,8 @@
 }
 
 .avatar-btn:hover {
-  color: #f2a413;
-  border-color: #f2a413;
+  color: var(--brand-primary);
+  border-color: var(--brand-primary);
 }
 
 .avatar-circle {
@@ -257,7 +257,7 @@
 }
 
 .mobile-nav-toggle:hover {
-  color: #f2a413;
+  color: var(--brand-primary);
 }
 
 .mobile-drawer {
@@ -290,13 +290,13 @@
 }
 
 .mobile-drawer a:hover {
-  color: #f2a413;
+  color: var(--brand-primary);
   text-decoration: none;
 }
 
 .mobile-drawer a.active,
 .mobile-drawer a:active {
-  color: #f2a413;
+  color: var(--brand-primary);
 }
 
 /* ---------------- Footer ---------------- */

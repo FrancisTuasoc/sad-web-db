@@ -2,13 +2,21 @@
 import { apiFetch, apiFetchBlob } from './api.js';
 import {
   renderHeader,
-  renderFooter,
   showToast,
   escapeHtml,
   openModal,
   closeModal,
 } from './ui.js';
-import { requireAuth, getUser, setUser, renderAvatar, logout } from './auth.js';
+import {
+  requireAuth,
+  getUser,
+  setUser,
+  renderAvatar,
+  logout,
+  resizeImageToDataUrl,
+  saveAvatarCache,
+  clearAvatarCache,
+} from './auth.js';
 
 let activeTab = 'overview';
 let statusSubTab = 'pickup';
@@ -67,8 +75,13 @@ function updateHeaderAvatar(avatarUrl) {
     !avatarUrl.startsWith('gridfs:') &&
     !avatarUrl.startsWith('pgavatar:')
   ) {
-    avatar.style.backgroundImage = `url("${avatarUrl.replace(/"/g, '%22')}")`;
-    avatar.textContent = '';
+    const image = avatar.querySelector('img');
+    if (image) {
+      image.src = avatarUrl;
+    } else {
+      avatar.style.backgroundImage = `url("${avatarUrl.replace(/"/g, '%22')}")`;
+      avatar.textContent = '';
+    }
   }
 }
 
@@ -273,8 +286,6 @@ function setAvatarModalContent(profile) {
   const frame = document.getElementById('avatar-lightbox-frame');
   if (!frame) return;
   const name = profile.fullName || profile.username || 'Customer';
-  const caption = document.getElementById('avatar-lightbox-caption');
-  if (caption) caption.textContent = name;
 
   const safeUrl =
     profile && profile.avatarUrl && String(profile.avatarUrl).trim()
@@ -367,14 +378,14 @@ async function loadCustomerStats() {
         value: stats.totalOrders || 0,
         meta: 'All orders placed',
         variant: 'orders',
-        icon: 'fa-solid fa-shopping-bag',
+        icon: 'fa-solid fa-bag-shopping',
       },
       {
         label: 'Pending orders',
         value: stats.pendingOrders || 0,
         meta: 'Waiting for action',
         variant: 'pending',
-        icon: 'fa-solid fa-clock',
+        icon: 'fa-solid fa-hourglass-half',
       },
       {
         label: 'Delivered orders',
@@ -399,12 +410,12 @@ async function loadCustomerStats() {
       .map(
         (card) => `
       <article class="customer-stat-card customer-stat-${card.variant}">
-        <div class="customer-stat-top">
+        <span class="customer-stat-icon" aria-hidden="true"><i class="${card.icon}"></i></span>
+        <div class="customer-stat-content">
           <span class="customer-stat-label">${escapeHtml(card.label)}</span>
-          <span class="customer-stat-icon" aria-hidden="true"><i class="${card.icon}"></i></span>
+          <strong class="customer-stat-value">${escapeHtml(String(card.value))}</strong>
+          <span class="customer-stat-meta">${escapeHtml(card.meta)}</span>
         </div>
-        <strong class="customer-stat-value">${escapeHtml(String(card.value))}</strong>
-        <span class="customer-stat-meta">${escapeHtml(card.meta)}</span>
       </article>
     `
       )
@@ -701,6 +712,14 @@ function renderOrderCard(order, isLive = false) {
     hour: '2-digit',
     minute: '2-digit',
   });
+  const historyDateStr = new Date(order.createdAt).toLocaleDateString(
+    undefined,
+    {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }
+  );
 
   const itemsSnippet = order.items
     .map((item) => `${escapeHtml(item.name)} (x${item.quantity})`)
@@ -795,6 +814,39 @@ function renderOrderCard(order, isLive = false) {
       <button type="button" class="btn btn-primary btn-sm btn-buy-again" data-order-id="${order._id}">
         Buy Again
       </button>
+    `;
+  }
+
+  if (!isLive) {
+    return `
+      <div class="order-card history-order-row" data-order-id="${order._id}">
+        <div class="order-history-primary">
+          <div class="order-history-identity">
+            <span class="order-history-id" style="font-family:var(--font-heading);color:var(--color-brand);">
+              #${escapeHtml(order.orderNumber)}
+            </span>
+            <span class="order-history-date">${historyDateStr}</span>
+          </div>
+          <span class="badge badge-${order.status} order-history-status">${statusLabels[order.status] || order.status}</span>
+          <span class="order-history-price" style="font-family:var(--font-heading);color:var(--color-brand);">
+            ₱${order.total.toFixed(2)}
+          </span>
+        </div>
+        <div class="order-history-details">
+          <div class="order-items-snippet">
+            <strong>Items:</strong> ${itemsSnippet}
+          </div>
+          <span style="font-size:0.82rem;color:var(--color-text-muted);">
+            ${order.fulfillment.toUpperCase()} &bull; ${order.paymentMethod.toUpperCase().replace(/_/g, ' ')}
+          </span>
+          ${
+            order.cancelledBy === 'system'
+              ? '<p style="margin:0;font-size:0.84rem;color:var(--color-danger);">Automatically cancelled because the 1-hour arrival window expired.</p>'
+              : ''
+          }
+          <div class="order-history-actions">${actionsHtml}</div>
+        </div>
+      </div>
     `;
   }
 
@@ -1031,7 +1083,7 @@ async function handleBuyAgain(orderId, button) {
 
 // Setup Event Listeners
 function setProfileTab(tab) {
-  if (isAdminAccount() && ['status', 'history'].includes(tab)) {
+  if (isAdminAccount() && ['status', 'history', 'recent'].includes(tab)) {
     tab = 'overview';
   }
 
@@ -1262,6 +1314,7 @@ function setupProfileTabs() {
 
       try {
         const validFile = validateAvatarFile(file);
+        const avatarDataUrl = await resizeImageToDataUrl(validFile, 256, 0.78);
         const formData = new FormData();
         formData.append('photo', validFile, validFile.name);
         const res = await apiFetch('/profile/avatar', {
@@ -1270,12 +1323,22 @@ function setupProfileTabs() {
         });
 
         const u = getUser();
+        let avatarCached = false;
         if (u) {
+          try {
+            saveAvatarCache(u, avatarDataUrl);
+            avatarCached = true;
+          } catch {
+            showToast(
+              'Profile photo updated, but this browser could not save a local avatar copy.',
+              'warning'
+            );
+          }
           u.avatarUrl = res.avatarUrl;
           setUser(u);
         }
 
-        showToast('Profile photo updated!', 'success');
+        if (avatarCached) showToast('Profile photo updated!', 'success');
         renderHeader('profile');
         await loadProfileOverview();
       } catch (err) {
@@ -1297,6 +1360,7 @@ function setupProfileTabs() {
 
         const u = getUser();
         if (u) {
+          clearAvatarCache(u);
           u.avatarUrl = '';
           setUser(u);
         }
@@ -1406,7 +1470,6 @@ function setupProfileTabs() {
   }
 
   setupProfileSidebar();
-  setupProfileTheme();
 
   // Modal close buttons
   const closeReceiptModal = document.getElementById('close-receipt-modal');
@@ -1414,33 +1477,6 @@ function setupProfileTabs() {
     closeReceiptModal.addEventListener('click', () =>
       closeModal('order-receipt-modal')
     );
-}
-
-function setupProfileTheme() {
-  const themeToggle = document.getElementById('profile-theme-toggle');
-  const themeIcon = document.querySelector('.profile-theme-icon');
-  if (!themeToggle || !themeIcon) return;
-
-  const applyTheme = (theme) => {
-    const isDark = theme === 'dark';
-    document.body.classList.toggle('theme-dark', isDark);
-    themeToggle.setAttribute('aria-pressed', String(isDark));
-    const action = isDark ? 'Switch to light mode' : 'Switch to dark mode';
-    themeToggle.setAttribute('aria-label', action);
-    themeToggle.title = action;
-    themeIcon.innerHTML = isDark
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><path d="M12 2.5v2m0 15v2m9.5-9.5h-2m-15 0h-2m16.2-6.7-1.4 1.4m-10.6 10.6-1.4 1.4m13.4 0-1.4-1.4M6.7 6.7 5.3 5.3"/></svg>'
-      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 15.2A8.5 8.5 0 0 1 8.8 3.8 8.6 8.6 0 1 0 20.2 15.2Z"/></svg>';
-  };
-
-  applyTheme(localStorage.getItem('profile-theme') || 'light');
-  themeToggle.addEventListener('click', () => {
-    const nextTheme = document.body.classList.contains('theme-dark')
-      ? 'light'
-      : 'dark';
-    localStorage.setItem('profile-theme', nextTheme);
-    applyTheme(nextTheme);
-  });
 }
 
 function setupProfileSidebar() {
@@ -1574,7 +1610,6 @@ function initProfile() {
     if (detailsTitle) detailsTitle.textContent = 'Personal information';
   }
   renderHeader('profile');
-  renderFooter();
   setupProfileTabs();
   loadProfileOverview();
   if (!adminAccount) loadCustomerStats();
@@ -1584,7 +1619,7 @@ function initProfile() {
   const requestedTab = params.get('tab');
   const allowedTabs = adminAccount
     ? ['overview', 'details', 'security']
-    : ['overview', 'status', 'history', 'details', 'security'];
+    : ['overview', 'status', 'history', 'recent', 'details', 'security'];
   if (allowedTabs.includes(requestedTab)) {
     setProfileTab(requestedTab);
   } else {

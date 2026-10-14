@@ -1,6 +1,53 @@
 // UI Components, Toast, Modal, Header & Footer Renderer
 import { isLoggedIn, isAdmin, getUser, logout, renderAvatar } from './auth.js';
-import { apiFetch } from './api.js';
+import {
+  apiFetch,
+  apiFetchBlob,
+} from './api.js';
+
+let headerAvatarObjectUrl = null;
+let headerAvatarRequestId = 0;
+let cartBadgeRefreshEventsBound = false;
+
+const CART_CHANGED_EVENT = 'gigabite:cart-changed';
+const CART_CHANGED_STORAGE_KEY = 'gigabite:cart-changed';
+
+async function loadHeaderAvatar(user, avatarElement) {
+  const avatarUrl = String(user?.avatarUrl || '');
+  if (
+    !avatarElement ||
+    (!avatarUrl.startsWith('gridfs:') && !avatarUrl.startsWith('pgavatar:'))
+  ) {
+    return;
+  }
+
+  const requestId = ++headerAvatarRequestId;
+  try {
+    const blob = await apiFetchBlob('/profile/avatar');
+    const currentUser = getUser();
+    if (
+      requestId !== headerAvatarRequestId ||
+      !avatarElement.isConnected ||
+      (currentUser?.id || currentUser?._id) !== (user.id || user._id) ||
+      currentUser?.avatarUrl !== avatarUrl
+    ) {
+      return;
+    }
+
+    const nextObjectUrl = URL.createObjectURL(blob);
+    if (headerAvatarObjectUrl) URL.revokeObjectURL(headerAvatarObjectUrl);
+    headerAvatarObjectUrl = nextObjectUrl;
+
+    const image = document.createElement('img');
+    image.src = nextObjectUrl;
+    image.alt = '';
+    image.style.cssText =
+      'display:block;width:100%;height:100%;object-fit:cover;';
+    avatarElement.replaceChildren(image);
+  } catch (error) {
+    console.error('Could not load the profile photo in the site header.', error);
+  }
+}
 
 // SVG Inline Placeholder (Burger icon on warm cream background)
 export const BURGER_PLACEHOLDER =
@@ -209,6 +256,20 @@ export async function updateCartBadge() {
   }
 }
 
+function bindCartBadgeRefreshEvents() {
+  if (cartBadgeRefreshEventsBound) return;
+  cartBadgeRefreshEventsBound = true;
+
+  window.addEventListener(CART_CHANGED_EVENT, updateCartBadge);
+  window.addEventListener('storage', (event) => {
+    if (event.key === CART_CHANGED_STORAGE_KEY) updateCartBadge();
+  });
+  window.addEventListener('focus', updateCartBadge);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) updateCartBadge();
+  });
+}
+
 // ---------------- Header & Footer Renderer ----------------
 export function setupBackToTop() {
   let button = document.getElementById('back-to-top');
@@ -253,7 +314,19 @@ export function renderHeader(activeNav = '') {
   const headerElem = document.getElementById('site-header');
   if (!headerElem) return;
 
+  bindCartBadgeRefreshEvents();
+  headerAvatarRequestId += 1;
+  if (headerAvatarObjectUrl) {
+    URL.revokeObjectURL(headerAvatarObjectUrl);
+    headerAvatarObjectUrl = null;
+  }
+
   setupBackToTop();
+  headerElem.classList.toggle(
+    'theme-dark',
+    document.body.classList.contains('admin-account') &&
+      localStorage.getItem('profile-theme') === 'dark'
+  );
 
   const user = getUser();
   const userLoggedIn = isLoggedIn();
@@ -305,6 +378,7 @@ export function renderHeader(activeNav = '') {
           </div>
         </div>
       `;
+      loadHeaderAvatar(user, userSlot.querySelector('.avatar-circle'));
     } else {
       userSlot.innerHTML = `<a href="login.html" class="btn btn-primary btn-sm">Login</a>`;
     }

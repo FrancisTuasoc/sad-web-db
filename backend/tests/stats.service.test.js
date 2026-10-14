@@ -3,7 +3,6 @@ const { test } = require('node:test');
 
 const db = require('../src/config/db');
 const userRepository = require('../src/repositories/userRepository');
-const orderRepository = require('../src/repositories/orderRepository');
 const {
   getDashboardStats,
   getStartOfDayInTimeZone,
@@ -65,9 +64,6 @@ test('dashboard stats aggregate order counts, revenue, sales timeframes, and top
   // userRepository.count for totalCustomers
   context.mock.method(userRepository, 'count', async () => 6);
 
-  // orderRepository.find for recentOrders
-  context.mock.method(orderRepository, 'find', async () => []);
-
   const stats = await getDashboardStats();
 
   assert.equal(stats.totalRevenue, 2400);
@@ -98,10 +94,23 @@ test('dashboard stats aggregate order counts, revenue, sales timeframes, and top
   const today = new Date();
   const expectedToday = getStartOfDayInTimeZone(today, 'Asia/Manila');
   assert.equal(salesQueries[0].params[0].getTime(), expectedToday.getTime());
+  assert.equal(
+    salesQueries[1].params[0].getTime(),
+    expectedToday.getTime() - 6 * 24 * 60 * 60 * 1000
+  );
+  assert.equal(
+    salesQueries[2].params[0].getTime(),
+    expectedToday.getTime() - 29 * 24 * 60 * 60 * 1000
+  );
+  for (const { sql } of salesQueries) {
+    assert.match(sql, /order_status_history/);
+    assert.match(sql, /history\.status = 'completed'/);
+  }
 
   // Revenue history must look back exactly 29 days from the start of today
   const revQuery = queries.find(({ sql }) => /TO_CHAR/.test(sql));
   assert.ok(revQuery, 'revenue history query not found');
+  assert.match(revQuery.sql, /order_status_history/);
   const revStart = revQuery.params[0];
   assert.ok(revStart instanceof Date);
   assert.equal(

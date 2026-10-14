@@ -36,6 +36,22 @@ export function setUser(user) {
   localStorage.setItem('user', JSON.stringify(user));
 }
 
+function getAvatarCacheKey(user) {
+  const userId = user && (user.id || user._id);
+  return userId ? `gigabite:avatar:${userId}` : null;
+}
+
+export function saveAvatarCache(user, dataUrl) {
+  const key = getAvatarCacheKey(user);
+  if (!key) throw new Error('Could not identify the account for this avatar.');
+  localStorage.setItem(key, dataUrl);
+}
+
+export function clearAvatarCache(user) {
+  const key = getAvatarCacheKey(user);
+  if (key) localStorage.removeItem(key);
+}
+
 export function removeUser() {
   localStorage.removeItem('user');
 }
@@ -69,14 +85,28 @@ export function renderAvatar(user, size = 32) {
     return `<div class="avatar-circle" style="width:${size}px;height:${size}px;background:#6B5B52;">?</div>`;
   }
 
-  const avatarUrl = user.avatarUrl && String(user.avatarUrl).trim();
+  let avatarUrl = '';
+  const avatarCacheKey = getAvatarCacheKey(user);
+  if (avatarCacheKey) {
+    try {
+      avatarUrl = localStorage.getItem(avatarCacheKey) || '';
+    } catch {
+      avatarUrl = '';
+    }
+  }
+  avatarUrl =
+    avatarUrl || (user.avatarUrl && String(user.avatarUrl).trim()) || '';
   if (
     avatarUrl &&
     !avatarUrl.startsWith('gridfs:') &&
     !avatarUrl.startsWith('pgavatar:')
   ) {
-    const safeUrl = avatarUrl.replace(/'/g, '%27');
-    return `<div class="avatar-circle" style="width:${size}px;height:${size}px;background-image:url('${safeUrl}');background-size:cover;background-position:center;background-repeat:no-repeat;"></div>`;
+    const safeUrl = avatarUrl
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    return `<div class="avatar-circle" style="width:${size}px;height:${size}px;"><img src="${safeUrl}" alt="" style="display:block;width:100%;height:100%;object-fit:cover;" /></div>`;
   }
 
   const initial = (user.username || user.email || 'U').charAt(0).toUpperCase();

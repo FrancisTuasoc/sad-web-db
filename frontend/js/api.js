@@ -13,8 +13,33 @@ export function apiUrl(endpoint) {
     : `${API_BASE_URL}/api${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
 }
 
+const CART_CHANGED_EVENT = 'gigabite:cart-changed';
+const CART_CHANGED_STORAGE_KEY = 'gigabite:cart-changed';
+
+function notifyCartChanged(endpoint, method) {
+  const path = new URL(apiUrl(endpoint)).pathname.replace(/^\/api(?=\/)/, '');
+  const cartMutation =
+    (path === '/cart' && ['POST', 'DELETE'].includes(method)) ||
+    (path.startsWith('/cart/') &&
+      ['PATCH', 'PUT', 'DELETE'].includes(method));
+  const orderPlacement = path === '/orders' && method === 'POST';
+
+  if (!cartMutation && !orderPlacement) return;
+
+  window.dispatchEvent(new Event(CART_CHANGED_EVENT));
+  try {
+    localStorage.setItem(
+      CART_CHANGED_STORAGE_KEY,
+      `${Date.now()}-${Math.random()}`
+    );
+  } catch (err) {
+    console.error('Could not notify other tabs that the cart changed.', err);
+  }
+}
+
 export async function apiFetch(endpoint, options = {}) {
   const url = apiUrl(endpoint);
+  const method = String(options.method || 'GET').toUpperCase();
 
   const headers = { ...(options.headers || {}) };
   const isFormData =
@@ -66,6 +91,7 @@ export async function apiFetch(endpoint, options = {}) {
     throw error;
   }
 
+  notifyCartChanged(endpoint, method);
   return data;
 }
 

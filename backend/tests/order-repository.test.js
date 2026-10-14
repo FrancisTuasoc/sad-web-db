@@ -3,7 +3,12 @@ const { test } = require('node:test');
 const database = require('../src/config/db');
 
 const originalGetClient = database.getClient;
+const originalQuery = database.query;
 const queries = [];
+database.query = async (sql, params = []) => {
+  queries.push({ sql, params });
+  return { rows: [{ count: 5 }] };
+};
 database.getClient = async () => ({
   async query(sql, params = []) {
     queries.push({ sql, params });
@@ -23,6 +28,7 @@ test('create persists the supplied GCash reference', async (context) => {
   context.after(() => {
     orderRepository.findById = originalFindById;
     database.getClient = originalGetClient;
+    database.query = originalQuery;
   });
 
   const order = await orderRepository.create({
@@ -48,4 +54,33 @@ test('create persists the supplied GCash reference', async (context) => {
   assert.equal(insert.params[9], '0000000000000');
   assert.deepEqual(order, { id: 'test-order-id' });
   assert.ok(queries.some(({ sql }) => sql === 'COMMIT'));
+});
+
+test('count applies order search and admin filters', async (context) => {
+  context.after(() => {
+    database.getClient = originalGetClient;
+    database.query = originalQuery;
+  });
+
+  const count = await orderRepository.count({
+    search: ' Kenshin ',
+    status: 'completed',
+    paymentStatus: 'paid',
+    fulfillment: 'pickup',
+    dateRange: 'week',
+  });
+  const countQuery = queries.at(-1);
+
+  assert.equal(count, 5);
+  assert.match(countQuery.sql, /o\.status = \$\d+/);
+  assert.match(countQuery.sql, /o\.payment_status = \$\d+/);
+  assert.match(countQuery.sql, /o\.fulfillment = \$\d+/);
+  assert.match(countQuery.sql, /o\.order_number ILIKE \$\d+/);
+  assert.match(countQuery.sql, /o\.created_at >= NOW\(\) - INTERVAL '7 days'/);
+  assert.deepEqual(countQuery.params, [
+    'completed',
+    'paid',
+    'pickup',
+    '%Kenshin%',
+  ]);
 });

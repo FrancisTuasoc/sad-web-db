@@ -70,6 +70,9 @@ router.get(
     if (fulfillment && fulfillment !== 'all') {
       filter.fulfillment = fulfillment;
     }
+    if (['today', 'week', 'month'].includes(dateRange)) {
+      filter.dateRange = dateRange;
+    }
     if (search && search.trim()) {
       filter.search = search.trim();
     }

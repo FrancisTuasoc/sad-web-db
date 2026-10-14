@@ -12,16 +12,10 @@
       src="https://kit.fontawesome.com/32d4994703.js"
       crossorigin="anonymous"
     ></script>
+    <script type="module" src="js/site-header.js"></script>
   </head>
   <body class="auth-page">
-    <header id="site-header" class="site-header">
-      <div class="container header-container">
-        <a class="brand-logo" href="index.html" aria-label="GIGABITE Home">
-          <img src="assets/logo.svg" alt="GIGABITE Logo" />
-        </a>
-        <a class="verify-header-link" href="login.html">Sign in</a>
-      </div>
-    </header>
+    <site-header id="site-header"></site-header>
 
     <main class="verify-main">
       <section class="verify-card" aria-labelledby="verification-title">
@@ -84,7 +78,9 @@
     <script type="module">
       import { apiFetch } from './js/api.js';
       import { removeToken, removeUser } from './js/auth.js';
+      import { renderHeader } from './js/ui.js';
 
+      renderHeader('verify-email');
       const status = document.getElementById('verification-status');
       const resendForm = document.getElementById('resend-verification-form');
       const resendButton = document.getElementById('resend-verification-btn');

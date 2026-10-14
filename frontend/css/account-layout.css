@@ -1,0 +1,705 @@
+body.profile-page main > .container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+body.profile-page .profile-layout.customer-area {
+  grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+  gap: 20px;
+  margin: 0;
+  font-size: 14px;
+}
+
+body.profile-page .profile-layout.customer-area h1 {
+  font-size: 24px;
+}
+
+body.profile-page .profile-layout.customer-area h2 {
+  font-size: 18px;
+}
+
+body.profile-page .profile-layout.customer-area h3,
+body.profile-page .profile-layout.customer-area h4 {
+  font-size: 16px;
+}
+
+body.profile-page .profile-layout.customer-area .btn {
+  font-size: 14px;
+}
+
+body.profile-page .profile-layout.customer-area .customer-content {
+  min-width: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.profile-page .profile-layout.customer-area .profile-tab-section:not(.hidden) {
+  display: grid;
+  min-width: 0;
+  gap: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.profile-page .profile-layout.customer-area .profile-tab-section:not(.hidden) > * {
+  min-width: 0;
+  margin: 0 !important;
+}
+
+body.profile-page .profile-layout.customer-area .profile-tab-section:not(.hidden) > :is(
+  .admin-account-heading,
+  .customer-header-card,
+  .account-section-heading,
+  .history-toolbar,
+  .tab-pill-group,
+  #status-orders-container,
+  #history-orders-container,
+  #customer-recent-orders,
+  #saved-details-form
+) {
+  padding: 20px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  background: var(--surface) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-header-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding-right: 28px;
+}
+
+body.profile-page .profile-layout.customer-area .customer-profile-meta {
+  min-width: 0;
+  flex: 1 1 auto;
+  padding-right: 8px;
+}
+
+body.profile-page .profile-layout.customer-area .customer-name-row {
+  margin: 0 0 4px;
+}
+
+body.profile-page .profile-layout.customer-area .profile-meta-inline {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: 8px;
+}
+
+body.profile-page .profile-layout.customer-area .customer-actions {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 10px 0 0;
+}
+
+body.profile-page .profile-layout.customer-area .customer-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+body.profile-page .profile-layout.customer-area .customer-stat-card,
+body.profile-page .profile-layout.customer-area .customer-dashboard-shortcuts .customer-shortcut-card {
+  min-width: 0;
+  min-height: 0;
+  margin: 0 !important;
+  padding: 16px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  background: var(--surface) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-stat-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+  text-align: left;
+  padding: 20px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--color-text-main) 8%, transparent) !important;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+body.profile-page .profile-layout.customer-area .customer-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px color-mix(in srgb, var(--color-text-main) 8%, transparent) !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-stat-icon {
+  display: inline-flex;
+  flex: 0 0 48px;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: var(--color-surface-alt);
+  color: var(--color-brand);
+  font-size: 18px;
+}
+
+body.profile-page .profile-layout.customer-area .customer-stat-pending .customer-stat-icon {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+body.profile-page .profile-layout.customer-area .customer-stat-delivered .customer-stat-icon,
+body.profile-page .profile-layout.customer-area .customer-stat-spent .customer-stat-icon {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+body.profile-page .profile-layout.customer-area .customer-stat-content {
+  display: grid;
+  min-width: 0;
+  justify-items: start;
+  gap: 4px;
+  text-align: left !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-stat-label {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.35;
+  text-transform: none;
+  color: var(--color-text-muted);
+  text-align: left !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-stat-value {
+  margin-top: 0;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--color-text-main);
+  text-align: left !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-stat-meta {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+  text-align: left !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-dashboard-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  min-width: 0;
+}
+
+body.profile-page .profile-layout.customer-area #customer-recent-orders {
+  min-width: 0;
+  margin: 0 !important;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+body.profile-page .profile-layout.customer-area .recent-orders-panel {
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.profile-page .profile-layout.customer-area #customer-recent-orders .recent-orders-header {
+  padding: 0 0 12px;
+}
+
+body.profile-page .profile-layout.customer-area #customer-recent-orders .recent-orders-list {
+  display: grid;
+  gap: 0;
+}
+
+body.profile-page .profile-layout.customer-area #customer-recent-orders .recent-order-item {
+  padding: 12px 0;
+}
+
+body.profile-page .profile-layout.customer-area #customer-recent-orders .recent-order-item:last-child {
+  border-bottom: 0;
+}
+
+body.profile-page .profile-layout.customer-area .recent-orders-header {
+  padding: 0 0 12px;
+}
+
+body.profile-page .profile-layout.customer-area .recent-orders-list {
+  display: grid;
+  gap: 0;
+}
+
+body.profile-page .profile-layout.customer-area .recent-order-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+body.profile-page .profile-layout.customer-area .recent-order-item:last-child {
+  border-bottom: 0;
+}
+
+body.profile-page .profile-layout.customer-area .history-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+body.profile-page .profile-layout.customer-area .history-toolbar .account-section-heading {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.profile-page .profile-layout.customer-area #history-orders-container,
+body.profile-page .profile-layout.customer-area #status-orders-container {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 !important;
+}
+
+body.profile-page .profile-layout.customer-area .order-card {
+  width: 100%;
+  margin: 0 !important;
+  padding: 16px 0 !important;
+  border: 0 !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.profile-page .profile-layout.customer-area .history-order-row {
+  padding: 12px 0 !important;
+}
+
+body.profile-page .profile-layout.customer-area .order-history-primary {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 0;
+}
+
+body.profile-page .profile-layout.customer-area .order-history-identity {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+body.profile-page .profile-layout.customer-area .order-history-id {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+body.profile-page .profile-layout.customer-area .order-history-price {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+body.profile-page .profile-layout.customer-area .order-history-date {
+  font-size: 12px;
+  color: var(--color-text-light);
+}
+
+body.profile-page .profile-layout.customer-area .order-history-status {
+  justify-self: start;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+body.profile-page .profile-layout.customer-area .order-history-price {
+  justify-self: end;
+  white-space: nowrap;
+}
+
+body.profile-page .profile-layout.customer-area .order-history-details {
+  display: grid;
+  gap: 0;
+  margin-top: 4px;
+}
+
+body.profile-page .profile-layout.customer-area .order-history-details .order-items-snippet {
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--color-text-main);
+}
+
+body.profile-page .profile-layout.customer-area .order-history-details > span {
+  margin-top: 12px;
+  font-size: 12px !important;
+  text-transform: uppercase;
+  color: var(--color-text-muted) !important;
+}
+
+body.profile-page .profile-layout.customer-area .order-history-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+body.profile-page .profile-layout.customer-area .history-pagination,
+body.profile-page .profile-layout.customer-area .state-box,
+body.profile-page .profile-layout.customer-area .account-loading-card {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.profile-page .profile-layout.customer-area #change-password-form {
+  display: grid;
+  width: 100%;
+  max-width: none;
+  gap: 20px;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.profile-page .profile-layout.customer-area #change-password-form .security-field-card,
+body.profile-page .profile-layout.customer-area #change-password-form .security-form-actions {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 20px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  background: var(--surface) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+body.profile-page .profile-layout.customer-area #change-password-form .form-label {
+  margin: 0;
+}
+
+body.profile-page .profile-layout.customer-area #change-password-form .form-input {
+  min-width: 0;
+  padding: 12px 16px;
+}
+
+body.profile-page .profile-layout.customer-area #change-password-form .security-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+body.profile-page .profile-layout.customer-area .profile-tab-section:not(.hidden) > #saved-details-form {
+  width: 100%;
+  max-width: none;
+  padding: 16px !important;
+}
+
+body.profile-page .profile-layout.customer-area #saved-details-form .contact-section-heading {
+  margin: 4px 0 8px !important;
+  padding-bottom: 6px !important;
+}
+
+body.profile-page .profile-layout.customer-area #saved-details-form .contact-fields-grid {
+  gap: 12px 16px;
+  margin-bottom: 4px;
+}
+
+body.profile-page .profile-layout.customer-area #saved-details-form .form-group {
+  margin-bottom: 8px;
+}
+
+@media (max-width: 900px) {
+  body.profile-page main > .container {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  body.profile-page main > .container {
+    padding: 16px;
+  }
+
+  body.profile-page .profile-layout.customer-area {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.profile-page .profile-layout.customer-area .customer-header-card {
+    display: grid;
+    grid-template-columns: 76px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px 12px;
+    padding: 16px !important;
+  }
+
+  body.profile-page .profile-layout.customer-area .customer-profile-meta {
+    display: contents;
+  }
+
+  body.profile-page .profile-layout.customer-area .customer-avatar-button {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    align-self: start;
+    width: 76px;
+    height: 76px;
+    margin: 0;
+  }
+
+  body.profile-page .profile-layout.customer-area .customer-name-row {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  body.profile-page .profile-layout.customer-area .customer-name-row h3 {
+    font-size: 16px;
+    line-height: 1.2;
+  }
+
+  body.profile-page .profile-layout.customer-area #overview-email {
+    grid-column: 2;
+    grid-row: 2;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    justify-self: stretch;
+    box-sizing: border-box;
+    font-size: 12px;
+    line-height: 1.35;
+    overflow-wrap: break-word;
+    text-align: left;
+  }
+
+  body.profile-page .profile-layout.customer-area .profile-meta-inline {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 10px;
+    margin: 0;
+    font-size: 11px;
+  }
+
+  body.profile-page .profile-layout.customer-area .profile-meta-inline > span {
+    min-width: 0;
+    line-height: 1.35;
+    text-align: left;
+  }
+
+  body.profile-page .profile-layout.customer-area .profile-meta-inline strong {
+    display: block;
+    white-space: nowrap;
+  }
+
+  body.profile-page .profile-layout.customer-area .customer-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+  }
+
+  body.profile-page .profile-layout.customer-area .customer-actions > .btn {
+    min-width: 0;
+    width: 100%;
+    justify-content: center;
+    padding: 8px 5px;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  body.profile-page .profile-layout.customer-area .customer-actions > .btn:last-child {
+    grid-column: 1 / -1;
+    width: auto;
+    justify-self: center;
+    white-space: nowrap;
+  }
+
+  body.profile-page .profile-layout.customer-area .customer-dashboard-shortcuts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.profile-page .profile-layout.customer-area .customer-stat-card {
+    gap: 10px;
+    padding: 14px !important;
+  }
+
+  body.profile-page .profile-layout.customer-area .customer-stat-icon {
+    flex-basis: 40px;
+    width: 40px;
+    height: 40px;
+  }
+
+  body.profile-page .profile-layout.customer-area .customer-stat-value {
+    font-size: clamp(14px, 5vw, 24px);
+  }
+
+  body.profile-page .profile-layout.customer-area .history-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.profile-page .profile-layout.customer-area .order-history-primary {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 420px) {
+  body.profile-page .profile-layout.customer-area .customer-kpi-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn > :is(i, svg) {
+  border: 0 !important;
+  border-radius: 10px !important;
+  font-size: 15px;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn[data-tab="status"]:not(.active) > :is(i, svg) {
+  background: #e8f0fb !important;
+  color: #245d8a !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn[data-tab="overview"]:not(.active) > :is(i, svg) {
+  background: #e2f3e7 !important;
+  color: #216a3c !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn[data-tab="history"]:not(.active) > :is(i, svg) {
+  background: #f0eafb !important;
+  color: #6941a5 !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn[data-tab="recent"]:not(.active) > :is(i, svg) {
+  background: #fff1d6 !important;
+  color: #9d5c12 !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn[data-tab="details"]:not(.active) > :is(i, svg) {
+  background: #e3f4f2 !important;
+  color: #14766d !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn[data-tab="security"]:not(.active) > :is(i, svg) {
+  background: #edf0f5 !important;
+  color: #4b5563 !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn.active > :is(i, svg) {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-stat-orders .customer-stat-icon {
+  background: #e8f0fb !important;
+  color: #245d8a !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-stat-pending .customer-stat-icon {
+  background: #fff1d6 !important;
+  color: #9d5c12 !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-stat-delivered .customer-stat-icon {
+  background: #e2f3e7 !important;
+  color: #216a3c !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-stat-spent .customer-stat-icon {
+  background: #f0eafb !important;
+  color: #6941a5 !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-shortcut-card:first-child .customer-shortcut-icon {
+  background: #e2f3e7 !important;
+  color: #216a3c !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-shortcut-history .customer-shortcut-icon {
+  background: #e8f0fb !important;
+  color: #245d8a !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-dashboard-shortcuts .customer-shortcut-card {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+}
+
+body.profile-page .profile-layout.customer-area .customer-shortcut-link {
+  display: inline-flex;
+  grid-column: 1 / -1;
+  width: 100%;
+  justify-self: stretch;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid var(--brand-primary);
+  border-radius: 8px;
+  background: var(--brand-primary);
+  color: var(--brand-on-primary) !important;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  text-decoration: none !important;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+body.profile-page .profile-layout.customer-area .customer-shortcut-link:hover {
+  border-color: var(--brand-primary-hover);
+  background: var(--brand-primary-hover);
+  color: var(--brand-on-primary) !important;
+  text-decoration: none !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-shortcut-link:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--brand-primary) 32%, transparent);
+  outline-offset: 2px;
+}

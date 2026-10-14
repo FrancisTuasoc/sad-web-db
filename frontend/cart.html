@@ -18,78 +18,11 @@
       src="https://kit.fontawesome.com/32d4994703.js"
       crossorigin="anonymous"
     ></script>
+    <script type="module" src="js/site-header.js"></script>
   </head>
-  <body>
+  <body class="cart-page">
     <!-- Header with static markup fallback -->
-    <header id="site-header" class="site-header">
-      <div class="container header-container">
-        <a
-          href="index.html"
-          class="brand-logo"
-          aria-label="GIGABITE Home"
-        >
-          <img
-            src="assets/logo.svg"
-            alt="GIGABITE Logo"
-            onerror="
-              this.onerror = null;
-              this.src =
-                'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 200 40\' width=\'200\' height=\'40\'%3E%3Ctext x=\'10\' y=\'26\' font-family=\'sans-serif\' font-size=\'18\' font-weight=\'bold\' fill=\'%23F2A413\'%3EBURGER%3Ctspan fill=\'%23FFFFFF\'%3ESHOP%3C/tspan%3E%3C/text%3E%3C/svg%3E';
-            "
-          />
-        </a>
-
-        <nav aria-label="Main Navigation">
-          <ul class="nav-links">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="menu.html">Menu</a></li>
-            <li><a href="index.html#featured">Featured</a></li>
-            <li><a href="index.html#about">About</a></li>
-            <li><a href="index.html#contact">Contact</a></li>
-          </ul>
-        </nav>
-
-        <div class="header-actions">
-          <a
-            href="cart.html"
-            id="header-cart-btn"
-            class="cart-btn"
-            aria-label="View Shopping Cart"
-          >
-            <i class="fa-solid fa-cart-shopping fa-fw" aria-hidden="true"></i>
-            <span id="header-cart-badge" class="cart-badge hidden">0</span>
-          </a>
-
-          <div id="header-user-slot">
-            <a href="login.html" class="btn btn-primary btn-sm">Login</a>
-          </div>
-
-          <button
-            id="mobile-nav-btn"
-            class="mobile-nav-toggle"
-            aria-label="Toggle mobile menu"
-          >
-            <i class="fa-solid fa-bars" aria-hidden="true"></i>
-          </button>
-        </div>
-      </div>
-
-      <div id="mobile-drawer-menu" class="mobile-drawer">
-        <a href="index.html">Home</a>
-        <a href="menu.html">Menu</a>
-        <a href="index.html#featured">Featured Burgers</a>
-        <a href="index.html#about">About Us</a>
-        <a href="index.html#contact">Contact & Store Hours</a>
-        <a href="cart.html" style="color: var(--color-accent); font-weight: 700"
-          >My Cart</a
-        >
-        <a
-          href="login.html"
-          style="color: var(--color-accent); font-weight: 700"
-          >Login / Register</a
-        >
-      </div>
-    </header>
+    <site-header id="site-header"></site-header>
 
     <main>
       <div class="container">
@@ -278,9 +211,8 @@
                 class="checkout-requirement-notice hidden"
                 role="status"
                 aria-live="polite"
-              ></div>
+              >              </div>
               <div class="receipt-checkout-note">
-                <span aria-hidden="true">✦</span>
                 Made fresh when you order
               </div>
               <button
@@ -376,7 +308,7 @@
                   <circle cx="5.5" cy="18.5" r="2.5" />
                   <circle cx="18.5" cy="18.5" r="2.5" />
                 </svg>
-                1. Fulfillment Method
+                1. Fulfillment method
               </div>
               <div class="tab-pill-group">
                 <button type="button" class="tab-pill active" id="tab-pickup">
@@ -408,13 +340,8 @@
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
-                2. Contact &amp; Delivery Info
+                2. Contact and delivery
               </div>
-              <p class="text-muted" style="font-size: 0.8rem; margin: 0 0 10px">
-                New or changed details are saved to your account when you place
-                this order. You can also edit them in Profile &gt; Saved
-                Details.
-              </p>
               <div
                 id="saved-contact-summary"
                 class="saved-details-box hidden"
@@ -455,7 +382,7 @@
                     />
                   </div>
                 </div>
-                <p class="contact-section-heading">Contact Information</p>
+                <p class="contact-section-heading">Contact information</p>
                 <div class="contact-fields-grid">
                   <div class="form-group">
                     <label
@@ -603,7 +530,7 @@
                   <rect x="2" y="5" width="20" height="14" rx="2" />
                   <line x1="2" y1="10" x2="22" y2="10" />
                 </svg>
-                3. Payment Method
+                3. Payment method
               </div>
               <div
                 class="payment-options-grid"
@@ -636,59 +563,46 @@
                 >
               </div>
               <div id="gcash-payment-box" class="gcash-qr-box hidden">
-                <div class="gcash-demo-title">GCash checkout demo</div>
-                <div class="gcash-demo-qr-label">
-                  GCASH QR CODE WILL APPEAR HERE
-                  <span>Demo illustration only — not scannable</span>
-                </div>
+                <span class="checkout-demo-pill gcash-qr-demo-pill">Demo</span>
                 <div class="qr-image-holder">
                   <img
                     src="assets/gcash-demo.svg"
-                    alt="Decorative QR-style demo image with DEMO across the center; it is not scannable"
+                    alt="Decorative demo QR illustration"
                   />
                 </div>
-                <p class="gcash-demo-warning" role="status">
-                  Demo only: this QR-style picture is not scannable. No money
-                  transfer or payment processing is involved, and demo orders
-                  remain unpaid.
-                </p>
                 <div class="form-group gcash-demo-reference">
-                  <div class="gcash-demo-number">
-                    <span>Use this demo number as the reference</span>
-                    <strong>0000000000000</strong>
+                  <div class="gcash-reference-copy-row">
+                    <span class="gcash-reference-display">0000000000000</span>
+                    <button
+                      type="button"
+                      id="copy-gcash-reference-btn"
+                      class="gcash-copy-button"
+                    >
+                      Copy
+                    </button>
                   </div>
-                  <label class="form-label" for="gcash-reference-input"
-                    >Enter demo reference number</label
-                  >
+                  <label class="form-label" for="gcash-reference-input">
+                    Enter demo reference number
+                  </label>
                   <input
                     type="text"
                     id="gcash-reference-input"
                     class="form-input"
-                    value="0000000000000"
-                    readonly
-                    aria-describedby="gcash-demo-reference-note"
+                    inputmode="numeric"
+                    autocomplete="off"
+                    maxlength="13"
                   />
-                  <small id="gcash-demo-reference-note">
-                    Enter this test number as the reference. It is not a real
-                    transaction or proof of payment.
-                  </small>
                 </div>
                 <div class="form-group gcash-demo-attachment">
                   <label class="form-label" for="gcash-proof-input">
-                    Attach a test image for admin review (optional)
+                    Attach proof of payment
                   </label>
                   <input
                     type="file"
                     id="gcash-proof-input"
                     class="form-input"
                     accept="image/png,image/jpeg,image/webp"
-                    aria-describedby="gcash-proof-note"
                   />
-                  <small id="gcash-proof-note">
-                    PNG, JPEG, or WebP up to 3 MiB. The image will appear in
-                    the admin order details as a test attachment only; it
-                    cannot confirm payment.
-                  </small>
                   <img
                     id="gcash-proof-preview"
                     class="gcash-proof-preview hidden"
@@ -705,14 +619,14 @@
               >
                 Back
               </button>
+              <button
+                type="button"
+                id="place-order-btn"
+                class="btn btn-primary btn-lg hidden checkout-place-order-btn"
+              >
+                Place Order
+              </button>
             </div>
-            <button
-              type="button"
-              id="place-order-btn"
-              class="btn btn-primary btn-lg hidden checkout-place-order-btn"
-            >
-              Place Order
-            </button>
           </div>
         </div>
       </div>

@@ -15,8 +15,21 @@ let dashboardStats = null;
 let currentSalesView = 'daily'; // 'daily' | 'weekly' | 'monthly'
 let currentChartDays = 14;
 let dashboardRefreshPending = false;
+let dashboardRecentOrdersPage = 1;
+let dashboardRecentOrdersTotalPages = 1;
+let dashboardRecentOrdersStatus = 'all';
+let dashboardRecentOrdersRequestId = 0;
+let dashboardRecentOrdersErrorNotified = false;
 let activeGcashProofPreviewUrl = null;
 let opsCharts = null;
+
+const ADMIN_CHART_COLORS = {
+  completed: '#16a34a',
+  cancelled: '#ef4444',
+  pending: '#3b82f6',
+  grid: '#e5e7eb',
+  tick: '#64748b',
+};
 
 // Pagination and filters state for Orders
 let ordersFilter = {
@@ -90,45 +103,29 @@ function renderOpsDashboard(stats) {
     values.push(value + (values[index - 1] || 0));
     return values;
   }, []);
-  const topItem = Array.isArray(stats.topItems) ? stats.topItems[0] : null;
-  const completedOrders = document.getElementById('ops-completed-orders');
-  const topProductCount = document.getElementById('ops-top-product-count');
-  const topProductName = document.getElementById('ops-top-product-name');
-  if (completedOrders) {
-    completedOrders.textContent = Number(stats.completedOrders || 0).toLocaleString();
-  }
-  if (topProductCount) {
-    topProductCount.textContent = topItem
-      ? `${Number(topItem.totalQty || 0).toLocaleString()} items sold`
-      : 'No sales yet';
-  }
-  if (topProductName) {
-    topProductName.textContent = topItem?._id || 'No data';
-    topProductName.title = topItem?._id || '';
-  }
-
   if (!opsCharts) {
     initializeOpsCharts(canvases);
   }
   if (!opsCharts) return;
 
+  const chartTheme = getAdminChartTheme();
   const revenueScale = (maximum) => ({
     beginAtZero: true,
     suggestedMax: maximum || undefined,
-    grid: { color: '#edf0f3' },
+    grid: { color: chartTheme.grid },
     border: { display: false },
     ticks: {
-      color: '#7b8794',
+      color: chartTheme.tick,
       maxTicksLimit: 5,
       callback: (value) => formatPeso(value),
     },
   });
   const countScale = {
     beginAtZero: true,
-    grid: { color: '#edf0f3' },
+    grid: { color: chartTheme.grid },
     border: { display: false },
     ticks: {
-      color: '#7b8794',
+      color: chartTheme.tick,
       precision: 0,
       maxTicksLimit: 5,
     },
@@ -159,6 +156,50 @@ function renderOpsDashboard(stats) {
     chart.data.datasets[0].data = chartSeries[index].data;
     chart.data.datasets[0].label = chartSeries[index].label;
     chart.options.scales.y = chartSeries[index].y;
+    chart.options.scales.x.ticks.color = chartTheme.tick;
+    chart.data.datasets[0].borderColor = ADMIN_CHART_COLORS.completed;
+    chart.data.datasets[0].backgroundColor =
+      index === 0
+        ? ADMIN_CHART_COLORS.completed
+        : index === 1
+          ? ADMIN_CHART_COLORS.completed
+          : `rgba(22, 163, 74, ${chartTheme.fillOpacity})`;
+    chart.update('none');
+  });
+}
+
+function getAdminChartTheme() {
+  const isDark = document.body.classList.contains('theme-dark');
+  return {
+    grid: isDark ? '#374151' : ADMIN_CHART_COLORS.grid,
+    tick: isDark ? '#cbd5e1' : ADMIN_CHART_COLORS.tick,
+    tooltip: isDark ? '#1f2937' : '#ffffff',
+    fillOpacity: isDark ? 0.2 : 0.12,
+  };
+}
+
+function updateOpsChartTheme() {
+  if (!opsCharts) return;
+  const theme = getAdminChartTheme();
+
+  opsCharts.forEach((chart, index) => {
+    chart.options.scales.x.ticks.color = theme.tick;
+    chart.options.scales.y.grid.color = theme.grid;
+    chart.options.scales.y.ticks.color = theme.tick;
+    chart.options.plugins.tooltip.backgroundColor = theme.tooltip;
+    chart.options.plugins.tooltip.titleColor = theme.tick;
+    chart.options.plugins.tooltip.bodyColor = theme.tick;
+    chart.data.datasets[0].borderColor = ADMIN_CHART_COLORS.completed;
+    chart.data.datasets[0].backgroundColor =
+      index === 0
+        ? ADMIN_CHART_COLORS.completed
+        : index === 1
+          ? ADMIN_CHART_COLORS.completed
+          : `rgba(22, 163, 74, ${theme.fillOpacity})`;
+    if (index === 1) {
+      chart.data.datasets[0].pointBorderColor = ADMIN_CHART_COLORS.completed;
+      chart.data.datasets[0].pointBackgroundColor = theme.tick;
+    }
     chart.update('none');
   });
 }
@@ -170,19 +211,27 @@ function initializeOpsCharts(canvases) {
     if (chartError) chartError.textContent = 'Chart.js could not load. Check your connection and refresh the page.';
     return;
   }
+  const chartTheme = getAdminChartTheme();
   const commonOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: false,
     plugins: {
       legend: { display: false },
-      tooltip: { mode: 'index', intersect: false },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        backgroundColor: chartTheme.tooltip,
+        titleColor: chartTheme.tick,
+        bodyColor: chartTheme.tick,
+      },
     },
     scales: {
       x: {
         grid: { display: false },
         border: { display: false },
         ticks: {
-          color: '#7b8794',
+          color: chartTheme.tick,
           maxRotation: 0,
           autoSkip: true,
           maxTicksLimit: 8,
@@ -202,7 +251,7 @@ function initializeOpsCharts(canvases) {
           {
             label: 'Daily completed revenue',
             data: [],
-            backgroundColor: '#3b82f6',
+            backgroundColor: ADMIN_CHART_COLORS.completed,
             borderRadius: { topLeft: 4, topRight: 4 },
             borderSkipped: 'bottom',
           },
@@ -219,10 +268,10 @@ function initializeOpsCharts(canvases) {
           {
             label: 'Cumulative completed revenue (last 30 days)',
             data: [],
-            borderColor: '#3b82f6',
-            backgroundColor: '#3b82f6',
-            pointBackgroundColor: '#ffffff',
-            pointBorderColor: '#3b82f6',
+            borderColor: ADMIN_CHART_COLORS.completed,
+            backgroundColor: ADMIN_CHART_COLORS.completed,
+            pointBackgroundColor: chartTheme.tick,
+            pointBorderColor: ADMIN_CHART_COLORS.completed,
             pointBorderWidth: 2,
             pointRadius: 3,
             tension: 0.4,
@@ -241,8 +290,8 @@ function initializeOpsCharts(canvases) {
           {
             label: 'Completed orders per day',
             data: [],
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0)',
+            borderColor: ADMIN_CHART_COLORS.completed,
+            backgroundColor: `rgba(22, 163, 74, ${chartTheme.fillOpacity})`,
             pointRadius: 0,
             tension: 0.4,
             fill: true,
@@ -263,7 +312,7 @@ function initializeOpsCharts(canvases) {
                 0,
                 chartArea.bottom
               );
-              const color = index === 0 ? '59, 130, 246' : '20, 184, 166';
+              const color = index === 0 ? '22, 163, 74' : '59, 130, 246';
               gradient.addColorStop(0, `rgba(${color}, 0.24)`);
               gradient.addColorStop(1, `rgba(${color}, 0)`);
               dataset.backgroundColor = gradient;
@@ -273,6 +322,7 @@ function initializeOpsCharts(canvases) {
       ],
       }),
     ];
+    updateOpsChartTheme();
   } catch (error) {
     opsCharts?.forEach((chart) => chart.destroy());
     opsCharts = null;
@@ -287,7 +337,9 @@ function initializeOpsCharts(canvases) {
 
 // ---------------- Initialization & Navigation ----------------
 function setupAdminNavigation() {
-  const navItems = document.querySelectorAll('button.admin-nav-item');
+  const navItems = document.querySelectorAll(
+    'button.admin-nav-item[data-section]'
+  );
   navItems.forEach((btn) => {
     btn.addEventListener('click', () => {
       navItems.forEach((b) => b.classList.remove('active'));
@@ -312,6 +364,12 @@ function setupAdminNavigation() {
           break;
         case 'orders':
           loadAdminOrders();
+          break;
+        case 'recent-orders':
+          loadDashboardRecentOrders();
+          break;
+        case 'top-items':
+          loadDashboardStats();
           break;
         case 'menu':
           loadAdminMenu();
@@ -349,33 +407,6 @@ function setupAdminNavigation() {
   updateSidebarToggleState();
 }
 
-function setupAdminTheme() {
-  const themeToggle = document.getElementById('admin-theme-toggle');
-  const themeIcon = document.querySelector('.admin-theme-icon');
-  if (!themeToggle || !themeIcon) return;
-
-  const applyTheme = (theme) => {
-    const isDark = theme === 'dark';
-    document.body.classList.toggle('theme-dark', isDark);
-    themeToggle.setAttribute('aria-pressed', String(isDark));
-    const action = isDark ? 'Switch to light mode' : 'Switch to dark mode';
-    themeToggle.setAttribute('aria-label', action);
-    themeToggle.title = action;
-    themeIcon.innerHTML = isDark
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><path d="M12 2.5v2m0 15v2m9.5-9.5h-2m-15 0h-2m16.2-6.7-1.4 1.4m-10.6 10.6-1.4 1.4m13.4 0-1.4-1.4M6.7 6.7 5.3 5.3"/></svg>'
-      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 15.2A8.5 8.5 0 0 1 8.8 3.8 8.6 8.6 0 1 0 20.2 15.2Z"/></svg>';
-  };
-
-  applyTheme(localStorage.getItem('profile-theme') || 'light');
-  themeToggle.addEventListener('click', () => {
-    const nextTheme = document.body.classList.contains('theme-dark')
-      ? 'light'
-      : 'dark';
-    localStorage.setItem('profile-theme', nextTheme);
-    applyTheme(nextTheme);
-  });
-}
-
 function updateSidebarToggleState() {
   const toggleButton = document.getElementById('admin-toggle-sidebar-btn');
   const sidebar = document.getElementById('admin-sidebar');
@@ -411,8 +442,8 @@ function updateSidebarToggleState() {
 async function loadDashboardStats() {
   if (dashboardRefreshPending) return;
   dashboardRefreshPending = true;
-  const recentOrdersBody = document.getElementById('recent-orders-tbody');
-  if (recentOrdersBody) recentOrdersBody.setAttribute('aria-busy', 'true');
+  const recentOrdersList = document.getElementById('recent-orders-list');
+  if (recentOrdersList) recentOrdersList.setAttribute('aria-busy', 'true');
   const refreshButton = document.getElementById('dashboard-refresh-btn');
   if (refreshButton) {
     refreshButton.disabled = true;
@@ -454,7 +485,6 @@ async function loadDashboardStats() {
     renderRevenueBarChart();
     renderStatusDonutChart();
     renderTopItems();
-    renderRecentOrders();
   } catch (err) {
     const chartError = document.getElementById('ops-chart-error');
     if (chartError) {
@@ -462,10 +492,10 @@ async function loadDashboardStats() {
         'Live dashboard data could not be loaded. Refresh to try again.';
       chartError.classList.remove('hidden');
     }
-    if (recentOrdersBody) {
-      recentOrdersBody.setAttribute('aria-busy', 'false');
-      recentOrdersBody.innerHTML =
-        '<tr><td colspan="6" class="text-center text-muted" style="padding:20px;">Dashboard orders are unavailable. Refresh to try again.</td></tr>';
+    if (recentOrdersList) {
+      recentOrdersList.setAttribute('aria-busy', 'false');
+      recentOrdersList.innerHTML =
+        '<p class="text-muted">Dashboard data is unavailable. Refresh to try again.</p>';
     }
     showToast('Failed to load dashboard metrics: ' + err.message, 'error');
   } finally {
@@ -521,6 +551,14 @@ function formatPeso(value) {
     currency: 'PHP',
     minimumFractionDigits: 2,
   }).format(Number(value));
+}
+
+function formatTableDate(value) {
+  return new Intl.DateTimeFormat('en-PH', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  }).format(new Date(value));
 }
 
 function getStoreDateKey(date) {
@@ -593,13 +631,16 @@ function renderRevenueBarChart() {
       const y = chartBottom - height;
       const dateLabel = item._id.slice(5);
       const labelInterval = currentChartDays === 14 ? 2 : 5;
+      const showDateLabel =
+        idx % labelInterval === 0 ||
+        (idx === history.length - 1 && (idx - 1) % labelInterval !== 0);
 
       return `
         <g class="chart-bar-group">
           <rect x="${x}" y="${y}" width="${barWidth}" height="${height}" rx="4" fill="url(#revenue-bar-fill)" opacity="${item.revenue ? '0.95' : '0.2'}">
             <title>${item._id}: ${formatPeso(item.revenue)} (${item.orders} completed ${item.orders === 1 ? 'order' : 'orders'})</title>
           </rect>
-          ${idx % labelInterval === 0 || idx === history.length - 1 ? `<text x="${x + barWidth / 2}" y="${chartHeight - 8}" font-size="10" text-anchor="middle" fill="#706259">${dateLabel}</text>` : ''}
+          ${showDateLabel ? `<text x="${x + barWidth / 2}" y="${chartHeight - 8}" font-size="10" text-anchor="middle" fill="${document.body.classList.contains('theme-dark') ? '#cbd5e1' : '#64748b'}">${dateLabel}</text>` : ''}
         </g>
       `;
     })
@@ -607,10 +648,10 @@ function renderRevenueBarChart() {
 
   container.innerHTML = `
     <svg class="admin-revenue-chart" viewBox="0 0 ${chartWidth} ${chartHeight}" role="img" aria-label="Completed revenue over the last ${currentChartDays} days">
-      <defs><linearGradient id="revenue-bar-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#4f46e5"/></linearGradient></defs>
-      <line x1="24" y1="${chartTop}" x2="${chartWidth - 12}" y2="${chartTop}" stroke="#f0e8df" stroke-width="1"/>
-      <line x1="24" y1="${(chartTop + chartBottom) / 2}" x2="${chartWidth - 12}" y2="${(chartTop + chartBottom) / 2}" stroke="#f0e8df" stroke-width="1"/>
-      <line x1="24" y1="${chartBottom}" x2="${chartWidth - 12}" y2="${chartBottom}" stroke="#e8dccd" stroke-width="1"/>
+      <defs><linearGradient id="revenue-bar-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#15803d"/></linearGradient></defs>
+      <line x1="24" y1="${chartTop}" x2="${chartWidth - 12}" y2="${chartTop}" stroke="${document.body.classList.contains('theme-dark') ? '#374151' : '#e5e7eb'}" stroke-width="1"/>
+      <line x1="24" y1="${(chartTop + chartBottom) / 2}" x2="${chartWidth - 12}" y2="${(chartTop + chartBottom) / 2}" stroke="${document.body.classList.contains('theme-dark') ? '#374151' : '#e5e7eb'}" stroke-width="1"/>
+      <line x1="24" y1="${chartBottom}" x2="${chartWidth - 12}" y2="${chartBottom}" stroke="${document.body.classList.contains('theme-dark') ? '#4b5563' : '#d1d5db'}" stroke-width="1"/>
       ${bars}
     </svg>
   `;
@@ -636,10 +677,10 @@ function renderStatusDonutChart() {
     <div class="admin-fulfillment-chart">
       <div class="admin-donut-wrap">
         <svg class="admin-donut" viewBox="0 0 36 36" role="img" aria-label="${total} total orders: ${completed} completed, ${cancelled} cancelled, ${active} active or pending">
-          <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#eee7df" stroke-width="3.8"/>
-          <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#10b981" stroke-width="3.8" stroke-dasharray="${completedPct} ${100 - completedPct}" stroke-dashoffset="${completedOffset}"/>
-          <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#fb7185" stroke-width="3.8" stroke-dasharray="${cancelledPct} ${100 - cancelledPct}" stroke-dashoffset="${cancelledOffset}"/>
-          <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#818cf8" stroke-width="3.8" stroke-dasharray="${activePct} ${100 - activePct}" stroke-dashoffset="${activeOffset}"/>
+          <circle cx="18" cy="18" r="15.9155" fill="none" stroke="${document.body.classList.contains('theme-dark') ? '#374151' : '#e5e7eb'}" stroke-width="3.8"/>
+          <circle cx="18" cy="18" r="15.9155" fill="none" stroke="${ADMIN_CHART_COLORS.completed}" stroke-width="3.8" stroke-dasharray="${completedPct} ${100 - completedPct}" stroke-dashoffset="${completedOffset}"/>
+          <circle cx="18" cy="18" r="15.9155" fill="none" stroke="${ADMIN_CHART_COLORS.cancelled}" stroke-width="3.8" stroke-dasharray="${cancelledPct} ${100 - cancelledPct}" stroke-dashoffset="${cancelledOffset}"/>
+          <circle cx="18" cy="18" r="15.9155" fill="none" stroke="${ADMIN_CHART_COLORS.pending}" stroke-width="3.8" stroke-dasharray="${activePct} ${100 - activePct}" stroke-dashoffset="${activeOffset}"/>
         </svg>
         <span class="admin-donut-total">${total}<small>orders</small></span>
       </div>
@@ -682,33 +723,119 @@ function renderTopItems() {
     .join('');
 }
 
-// Recent Orders Table in Dashboard
-function renderRecentOrders() {
-  const tbody = document.getElementById('recent-orders-tbody');
-  if (!tbody || !dashboardStats || !dashboardStats.recentOrders) return;
-  tbody.setAttribute('aria-busy', 'false');
-
-  const orders = dashboardStats.recentOrders;
+// Recent Orders section
+function renderRecentOrders(orders, pagination) {
+  const list = document.getElementById('recent-orders-list');
+  if (!list) return;
   if (orders.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="6" class="text-center text-muted" style="padding:20px;">No recent orders.</td></tr>';
-    return;
+    list.innerHTML =
+      '<p class="text-muted">No orders match this status.</p>';
+  } else {
+    list.innerHTML = orders
+      .map(
+        (order) => `
+        <article class="admin-recent-order" role="listitem">
+          <strong class="admin-recent-order-number">#${escapeHtml(order.orderNumber || '')}</strong>
+          <span class="admin-recent-order-customer">${escapeHtml(order.contact?.fullName || 'Guest')}</span>
+          <div class="admin-recent-order-meta">
+            <span class="badge badge-${escapeHtml(order.status)}">${escapeHtml(order.status)}</span>
+            <span>${escapeHtml(String(order.fulfillment || '').replaceAll('_', ' '))}</span>
+          </div>
+          <strong class="admin-recent-order-total">${formatPeso(order.total)}</strong>
+        </article>
+      `
+      )
+      .join('');
   }
 
-  tbody.innerHTML = orders
-    .map(
-      (o) => `
-      <tr>
-        <td><strong>#${escapeHtml(o.orderNumber)}</strong></td>
-        <td>${escapeHtml(o.contact.fullName)}</td>
-        <td>₱${o.total.toFixed(2)}</td>
-        <td>${o.fulfillment.toUpperCase()}</td>
-        <td><span class="badge badge-${o.status}">${o.status}</span></td>
-        <td><span class="badge badge-${o.paymentStatus}">${o.paymentStatus}</span></td>
-      </tr>
-    `
-    )
-    .join('');
+  const paginationInfo = document.getElementById(
+    'orders-insights-pagination-info'
+  );
+  if (paginationInfo) {
+    const start = pagination.total
+      ? (pagination.page - 1) * pagination.limit + 1
+      : 0;
+    const end = Math.min(pagination.page * pagination.limit, pagination.total);
+    paginationInfo.textContent = `Showing ${start}-${end} of ${pagination.total} orders · Page ${pagination.page} of ${pagination.totalPages}`;
+  }
+  const previousButton = document.getElementById(
+    'orders-insights-prev'
+  );
+  const nextButton = document.getElementById('orders-insights-next');
+  if (previousButton) previousButton.disabled = pagination.page <= 1;
+  if (nextButton)
+    nextButton.disabled = pagination.page >= pagination.totalPages;
+}
+
+async function loadDashboardRecentOrders() {
+  const list = document.getElementById('recent-orders-list');
+  if (!list) return;
+
+  const requestId = ++dashboardRecentOrdersRequestId;
+  list.setAttribute('aria-busy', 'true');
+  list.innerHTML = '<p class="text-muted">Loading recent orders…</p>';
+  const paginationInfo = document.getElementById(
+    'orders-insights-pagination-info'
+  );
+  if (paginationInfo) paginationInfo.textContent = 'Loading recent orders…';
+  const previousButton = document.getElementById(
+    'orders-insights-prev'
+  );
+  const nextButton = document.getElementById('orders-insights-next');
+  if (previousButton) previousButton.disabled = true;
+  if (nextButton) nextButton.disabled = true;
+
+  const params = new URLSearchParams({
+    page: String(dashboardRecentOrdersPage),
+    limit: '5',
+  });
+  if (dashboardRecentOrdersStatus !== 'all') {
+    params.set('status', dashboardRecentOrdersStatus);
+  }
+
+  try {
+    const response = await apiFetch(`/admin/orders?${params.toString()}`);
+    if (requestId !== dashboardRecentOrdersRequestId) return;
+
+    if (dashboardRecentOrdersPage > response.pagination.totalPages) {
+      dashboardRecentOrdersPage = response.pagination.totalPages;
+      await loadDashboardRecentOrders();
+      return;
+    }
+    dashboardRecentOrdersPage = response.pagination.page;
+    dashboardRecentOrdersTotalPages = response.pagination.totalPages;
+    renderRecentOrders(response.orders, response.pagination);
+    dashboardRecentOrdersErrorNotified = false;
+  } catch (error) {
+    if (requestId !== dashboardRecentOrdersRequestId) return;
+    list.innerHTML =
+      '<p class="text-muted">Recent orders could not be loaded. Refresh to try again.</p>';
+    if (paginationInfo) {
+      paginationInfo.textContent = 'Recent orders are unavailable.';
+    }
+    if (!dashboardRecentOrdersErrorNotified) {
+      showToast(`Failed to load recent orders: ${error.message}`, 'error');
+      dashboardRecentOrdersErrorNotified = true;
+    }
+  } finally {
+    if (requestId === dashboardRecentOrdersRequestId) {
+      list.setAttribute('aria-busy', 'false');
+      const previousButton = document.getElementById(
+        'orders-insights-prev'
+      );
+      const nextButton = document.getElementById(
+        'orders-insights-next'
+      );
+      if (previousButton) {
+        previousButton.disabled =
+          dashboardRecentOrdersPage <= 1;
+      }
+      if (nextButton) {
+        nextButton.disabled =
+          dashboardRecentOrdersPage >= dashboardRecentOrdersTotalPages;
+      }
+    }
+  }
 }
 
 // ---------------- 2. ORDERS MANAGEMENT ----------------
@@ -773,9 +900,9 @@ async function loadAdminOrders() {
               <div style="font-size:0.75rem;color:var(--color-text-muted);">${escapeHtml(o.contact.email || '')}</div>
               <div style="font-size:0.75rem;color:var(--color-text-muted);">${escapeHtml(o.contact.phone)}</div>
             </td>
-            <td>${new Date(o.createdAt).toLocaleDateString()}</td>
+            <td>${formatTableDate(o.createdAt)}</td>
             <td>${o.fulfillment.toUpperCase()}</td>
-            <td><strong>₱${o.total.toFixed(2)}</strong></td>
+            <td><strong>${formatPeso(o.total)}</strong></td>
             <td><span class="badge badge-${o.paymentStatus}">${o.paymentStatus.toUpperCase()}</span></td>
             <td><span class="badge badge-${o.status}">${statusLabel(o.status)}</span></td>
             <td>
@@ -1008,7 +1135,7 @@ async function loadAdminMenu() {
               </div>
             </td>
             <td>${escapeHtml(catName)}</td>
-            <td><strong>₱${p.price.toFixed(2)}</strong></td>
+            <td><strong>${formatPeso(p.price)}</strong></td>
             <td>
               <span style="font-weight:700;${isOut ? 'color:var(--color-danger);' : isLow ? 'color:var(--color-warning);' : ''}">
                 ${p.stock}
@@ -1120,8 +1247,8 @@ async function loadAdminCategories() {
         (c) => `
         <tr>
           <td><strong>${escapeHtml(c.name)}</strong></td>
-          <td>${c.sortOrder}</td>
-          <td>${new Date(c.createdAt).toLocaleDateString()}</td>
+          <td>${Number(c.sortOrder)}</td>
+          <td>${formatTableDate(c.createdAt)}</td>
           <td>
             <button class="btn btn-secondary btn-sm btn-edit-category" data-id="${c._id}" data-name="${escapeHtml(c.name)}" data-order="${c.sortOrder}">Edit</button>
             <button class="btn btn-danger btn-sm btn-delete-category" data-id="${c._id}" data-name="${escapeHtml(c.name)}">Delete</button>
@@ -1158,14 +1285,20 @@ async function loadAdminCustomers() {
     }
 
     tbody.innerHTML = customers
-      .map(
-        (c) => `
+      .map((c) => {
+        const orderCount = Number(c.orderCount);
+        return `
         <tr>
           <td><strong>${escapeHtml(c.username)}</strong></td>
           <td>${escapeHtml(c.fullName || '—')}</td>
           <td>${escapeHtml(c.email)}</td>
           <td>${escapeHtml(c.phone || '—')}</td>
-          <td><strong>${c.orderCount}</strong> (₱${Number(c.totalSpent).toFixed(2)})</td>
+          <td>
+            <div class="customer-orders-metric">
+              <strong>${orderCount} ${orderCount === 1 ? 'order' : 'orders'}</strong>
+              <span>${formatPeso(c.totalSpent)}</span>
+            </div>
+          </td>
           <td>
             <span class="badge ${c.status === 'active' ? 'badge-in-stock' : 'badge-out-stock'}">
               ${c.status.toUpperCase()}
@@ -1180,8 +1313,8 @@ async function loadAdminCustomers() {
             </div>
           </td>
         </tr>
-      `
-      )
+      `;
+      })
       .join('');
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger" style="padding:24px;">${escapeHtml(err.message)}</td></tr>`;
@@ -1303,27 +1436,125 @@ async function loadAdminSettings() {
 
 // ---------------- GLOBAL EVENT ATTACHMENTS ----------------
 function attachAdminEventListeners() {
+  const storeSettingsTabs = [
+    ...document.querySelectorAll('[data-settings-tab]'),
+  ];
+  storeSettingsTabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const selectedTab = tab.dataset.settingsTab;
+      storeSettingsTabs.forEach((item) => {
+        const isSelected = item === tab;
+        item.classList.toggle('active', isSelected);
+        item.setAttribute('aria-selected', String(isSelected));
+        item.tabIndex = isSelected ? 0 : -1;
+      });
+
+      storeSettingsTabs.forEach((item) => {
+        const panel = document.getElementById(
+          item.getAttribute('aria-controls')
+        );
+        const isSelected = item.dataset.settingsTab === selectedTab;
+        panel.hidden = !isSelected;
+      });
+    });
+
+    tab.addEventListener('keydown', (event) => {
+      const currentIndex = storeSettingsTabs.indexOf(tab);
+      let nextIndex;
+      if (event.key === 'ArrowRight') {
+        nextIndex = (currentIndex + 1) % storeSettingsTabs.length;
+      } else if (event.key === 'ArrowLeft') {
+        nextIndex =
+          (currentIndex - 1 + storeSettingsTabs.length) %
+          storeSettingsTabs.length;
+      } else if (event.key === 'Home') {
+        nextIndex = 0;
+      } else if (event.key === 'End') {
+        nextIndex = storeSettingsTabs.length - 1;
+      } else {
+        return;
+      }
+
+      event.preventDefault();
+      storeSettingsTabs[nextIndex].click();
+      storeSettingsTabs[nextIndex].focus();
+    });
+  });
+
+  document.querySelectorAll('[data-dashboard-tab]').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const selectedTab = tab.dataset.dashboardTab;
+      document.querySelectorAll('[data-dashboard-tab]').forEach((item) => {
+        const isSelected = item === tab;
+        item.classList.toggle('active', isSelected);
+        item.setAttribute('aria-selected', String(isSelected));
+        item.tabIndex = isSelected ? 0 : -1;
+      });
+
+      document.querySelectorAll('.dashboard-tab-panel').forEach((panel) => {
+        const isSelected = panel.id === `dashboard-${selectedTab}-panel`;
+        panel.classList.toggle('hidden', !isSelected);
+        panel.hidden = !isSelected;
+      });
+
+      if (selectedTab === 'performance') {
+        opsCharts?.forEach((chart) => chart.resize());
+      }
+    });
+
+    tab.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      event.preventDefault();
+      const tabs = [...document.querySelectorAll('[data-dashboard-tab]')];
+      const currentIndex = tabs.indexOf(tab);
+      const direction = event.key === 'ArrowRight' ? 1 : -1;
+      tabs[(currentIndex + direction + tabs.length) % tabs.length].click();
+      tabs[(currentIndex + direction + tabs.length) % tabs.length].focus();
+    });
+  });
+
   const dashboardRefreshButton = document.getElementById(
     'dashboard-refresh-btn'
   );
   if (dashboardRefreshButton)
     dashboardRefreshButton.addEventListener('click', loadDashboardStats);
-  const checkStatusButton = document.getElementById('ops-check-status-btn');
-  if (checkStatusButton) {
-    checkStatusButton.addEventListener('click', () => {
-      document
-        .querySelector('.admin-nav-item[data-section="orders"]')
-        ?.click();
+  const recentOrdersStatus = document.getElementById(
+    'orders-insights-status'
+  );
+  if (recentOrdersStatus) {
+    recentOrdersStatus.addEventListener('change', () => {
+      dashboardRecentOrdersStatus = recentOrdersStatus.value;
+      dashboardRecentOrdersPage = 1;
+      loadDashboardRecentOrders();
     });
   }
-
+  const recentOrdersPrevious = document.getElementById(
+    'orders-insights-prev'
+  );
+  if (recentOrdersPrevious) {
+    recentOrdersPrevious.addEventListener('click', () => {
+      if (dashboardRecentOrdersPage <= 1) return;
+      dashboardRecentOrdersPage -= 1;
+      loadDashboardRecentOrders();
+    });
+  }
+  const recentOrdersNext = document.getElementById(
+    'orders-insights-next'
+  );
+  if (recentOrdersNext) {
+    recentOrdersNext.addEventListener('click', () => {
+      if (dashboardRecentOrdersPage >= dashboardRecentOrdersTotalPages) return;
+      dashboardRecentOrdersPage += 1;
+      loadDashboardRecentOrders();
+    });
+  }
   const openOrdersSection = () => {
     const ordersNavButton = document.querySelector(
       '.admin-nav-item[data-section="orders"]'
     );
     if (ordersNavButton) ordersNavButton.click();
   };
-  ['dashboard-view-orders-btn', 'dashboard-view-all-orders-btn'].forEach(
+  ['dashboard-view-orders-btn'].forEach(
     (id) => {
       const button = document.getElementById(id);
       if (button) button.addEventListener('click', openOrdersSection);
@@ -1976,7 +2207,6 @@ function attachAdminEventListeners() {
 // ---------------- INITIALIZE ADMIN ----------------
 function initAdmin() {
   if (!requireAuth('admin')) return;
-  setupAdminTheme();
   const adminUser = getUser();
   const greetingName = document.getElementById('admin-greeting-name');
   if (greetingName && adminUser) {
@@ -1988,11 +2218,17 @@ function initAdmin() {
   attachAdminEventListeners();
   loadDashboardStats();
 
-  // 10-second polling for orders when on orders tab or dashboard
+  // Keep the visible dashboard and recent orders data current.
   setInterval(() => {
     if (activeSection === 'orders') {
       loadAdminOrders();
-    } else if (activeSection === 'dashboard') {
+    }
+    if (activeSection === 'recent-orders') {
+      loadDashboardRecentOrders();
+    } else if (
+      activeSection === 'dashboard' ||
+      activeSection === 'top-items'
+    ) {
       loadDashboardStats();
     }
   }, 10000);

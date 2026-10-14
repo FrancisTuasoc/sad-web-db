@@ -18,117 +18,12 @@
     <link rel="stylesheet" href="css/components.css" />
     <link rel="stylesheet" href="css/pages.css" />
     <link rel="stylesheet" href="css/impeccable.css" />
+    <link rel="stylesheet" href="css/account-layout.css" />
+    <script type="module" src="js/site-header.js"></script>
   </head>
   <body class="profile-page">
     <!-- Header with static markup fallback -->
-    <header id="site-header" class="site-header">
-      <div class="container header-container">
-        <button
-          type="button"
-          id="profile-sidebar-toggle"
-          class="btn btn-secondary btn-sm"
-          aria-label="Collapse account navigation"
-          aria-controls="profile-sidebar"
-          aria-expanded="true"
-          title="Collapse account navigation"
-        >
-          <i class="fa-solid fa-bars" aria-hidden="true"></i>
-        </button>
-        <a
-          href="index.html"
-          class="brand-logo"
-          aria-label="GIGABITE Home"
-        >
-          <img
-            src="assets/logo.svg"
-            alt="GIGABITE Logo"
-            onerror="
-              this.onerror = null;
-              this.src =
-                'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 200 40\' width=\'200\' height=\'40\'%3E%3Ctext x=\'10\' y=\'26\' font-family=\'sans-serif\' font-size=\'18\' font-weight=\'bold\' fill=\'%23F2A413\'%3EBURGER%3Ctspan fill=\'%23FFFFFF\'%3ESHOP%3C/tspan%3E%3C/text%3E%3C/svg%3E';
-            "
-          />
-        </a>
-
-        <nav
-          class="customer-store-navigation"
-          data-customer-only
-          aria-label="Main Navigation"
-        >
-          <ul class="nav-links">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="menu.html">Menu</a></li>
-            <li><a href="index.html#featured">Featured</a></li>
-            <li><a href="index.html#about">About</a></li>
-            <li><a href="index.html#contact">Contact</a></li>
-          </ul>
-        </nav>
-
-        <div class="header-actions">
-          <div class="profile-header-controls">
-            <button
-              type="button"
-              id="profile-theme-toggle"
-              class="profile-control-button profile-theme-toggle"
-              aria-label="Switch to dark mode"
-              aria-pressed="false"
-              title="Switch to dark mode"
-            >
-              <span class="profile-theme-icon" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M20.2 15.2A8.5 8.5 0 0 1 8.8 3.8 8.6 8.6 0 1 0 20.2 15.2Z" />
-                </svg>
-              </span>
-            </button>
-          </div>
-          <a
-            href="cart.html"
-            id="header-cart-btn"
-            class="cart-btn"
-            data-customer-only
-            aria-label="View Shopping Cart"
-          >
-            <i class="fa-solid fa-cart-shopping fa-fw" aria-hidden="true"></i>
-            <span id="header-cart-badge" class="cart-badge hidden">0</span>
-          </a>
-
-          <div id="header-user-slot">
-            <a href="profile.html" class="btn btn-secondary btn-sm"
-              >My Profile</a
-            >
-          </div>
-
-          <button
-            id="mobile-nav-btn"
-            class="mobile-nav-toggle"
-            aria-label="Toggle mobile menu"
-          >
-            <i class="fa-solid fa-bars" aria-hidden="true"></i>
-          </button>
-        </div>
-      </div>
-
-      <div id="mobile-drawer-menu" class="mobile-drawer">
-        <a href="index.html">Home</a>
-        <a href="menu.html">Menu</a>
-        <a href="index.html#featured">Featured Burgers</a>
-        <a href="index.html#about">About Us</a>
-        <a href="index.html#contact">Contact & Store Hours</a>
-        <a href="cart.html">My Cart</a>
-        <a
-          href="profile.html"
-          style="color: var(--color-accent); font-weight: 700"
-          >My Profile</a
-        >
-      </div>
-    </header>
+    <site-header id="site-header"></site-header>
 
     <main>
       <div class="container">
@@ -148,20 +43,8 @@
                 data-customer-only
                 data-tab="status"
                 aria-label="Order Status"
-                title="Order Status"
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
+                <i class="fa-solid fa-truck-fast" aria-hidden="true"></i>
                 <span>Order Status</span>
               </button>
               <button
@@ -169,9 +52,8 @@
                 class="profile-nav-btn active"
                 data-tab="overview"
                 aria-label="Overview"
-                title="Overview"
               >
-                <i class="fa-regular fa-user" aria-hidden="true"></i>
+                <i class="fa-solid fa-circle-user" aria-hidden="true"></i>
                 <span>Overview</span>
               </button>
               <button
@@ -180,34 +62,27 @@
                 data-customer-only
                 data-tab="history"
                 aria-label="Order History"
-                title="Order History"
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                  />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="16" y1="13" x2="8" y2="13" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
-                </svg>
+                <i class="fa-solid fa-receipt" aria-hidden="true"></i>
                 <span>Order History</span>
+              </button>
+              <button
+                type="button"
+                class="profile-nav-btn"
+                data-customer-only
+                data-tab="recent"
+                aria-label="Recent Orders"
+              >
+                <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+                <span>Recent Orders</span>
               </button>
               <button
                 type="button"
                 class="profile-nav-btn"
                 data-tab="details"
                 aria-label="Saved Details"
-                title="Saved Details"
               >
-                <i class="fa-regular fa-address-card" aria-hidden="true"></i>
+                <i class="fa-solid fa-address-card" aria-hidden="true"></i>
                 <span>Saved Details</span>
               </button>
               <button
@@ -215,24 +90,11 @@
                 class="profile-nav-btn"
                 data-tab="security"
                 aria-label="Security"
-                title="Security"
               >
-                <i class="fa-solid fa-shield" aria-hidden="true"></i>
+                <i class="fa-solid fa-lock" aria-hidden="true"></i>
                 <span>Security</span>
               </button>
             </nav>
-
-            <div class="customer-status-panel" data-customer-only aria-live="polite">
-              <div class="panel-header">
-                <span>Order Status</span>
-                <span class="panel-badge" id="customer-status-total">0</span>
-              </div>
-              <div
-                class="status-pill-list"
-                id="customer-status-pill-list"
-              ></div>
-              <div class="mini-tracker" id="customer-mini-tracker"></div>
-            </div>
 
             <button
               type="button"
@@ -252,9 +114,7 @@
               <div class="account-section-heading">
                 <span class="account-section-icon" aria-hidden="true">↗</span>
                 <div>
-                  <p class="eyebrow">Stay up to date</p>
                   <h3>Live Order Tracking</h3>
-                  <p>Follow active orders from confirmation to collection.</p>
                 </div>
               </div>
 
@@ -293,10 +153,7 @@
             <div id="tab-section-overview" class="profile-tab-section hidden">
               <div class="admin-account-heading">
                 <p class="eyebrow">Account</p>
-                <h2>Admin profile</h2>
-                <p>
-                  Manage your profile information, sign-in details, and security.
-                </p>
+                <h2>Customer profile</h2>
               </div>
               <div class="customer-header-card">
                 <button
@@ -372,7 +229,6 @@
                 <article class="customer-shortcut-card">
                   <span class="customer-shortcut-icon" aria-hidden="true"><i class="fa-solid fa-burger"></i></span>
                   <div>
-                    <p class="eyebrow">IN THE MOOD FOR A FAVORITE?</p>
                     <h4>Find your next burger</h4>
                     <p>Explore the menu and build your next order.</p>
                   </div>
@@ -385,7 +241,6 @@
                     ><i class="fa-regular fa-rectangle-list"></i
                   ></span>
                   <div>
-                    <p class="eyebrow">YOUR ACCOUNT</p>
                     <h4>Keep track of your orders</h4>
                     <p>Review past orders and check their status.</p>
                   </div>
@@ -398,15 +253,28 @@
                   >
                 </article>
               </section>
+            </div>
+
+            <!-- 3. RECENT ORDERS TAB -->
+            <div
+              id="tab-section-recent"
+              class="profile-tab-section hidden"
+              data-customer-only
+            >
+              <div class="account-section-heading">
+                <span class="account-section-icon" aria-hidden="true"><i class="fa-regular fa-clock"></i></span>
+                <div>
+                  <h3>Recent Orders</h3>
+                </div>
+              </div>
               <div
                 class="customer-recent-orders"
                 id="customer-recent-orders"
                 aria-live="polite"
-                data-customer-only
               ></div>
             </div>
 
-            <!-- 3. HISTORY TAB -->
+            <!-- 4. HISTORY TAB -->
             <div
               id="tab-section-history"
               class="profile-tab-section hidden"
@@ -416,9 +284,7 @@
                 <div class="account-section-heading">
                   <span class="account-section-icon" aria-hidden="true">▤</span>
                   <div>
-                    <p class="eyebrow">Your past orders</p>
                     <h3>Order History</h3>
-                    <p>Review receipts and past order statuses.</p>
                   </div>
                 </div>
                 <select
@@ -435,17 +301,12 @@
               </div>
             </div>
 
-            <!-- 4. SAVED DETAILS TAB -->
+            <!-- 5. SAVED DETAILS TAB -->
             <div id="tab-section-details" class="profile-tab-section hidden">
               <div class="account-section-heading">
                 <span class="account-section-icon" aria-hidden="true"><i class="fa-regular fa-address-card"></i></span>
                 <div>
-                  <p class="eyebrow">Faster checkout</p>
                   <h3>Saved Details</h3>
-                  <p>
-                    Your contact and delivery details are ready for your next
-                    order.
-                  </p>
                 </div>
               </div>
               <form id="saved-details-form" class="account-form-card">
@@ -615,16 +476,14 @@
               <div class="account-section-heading">
                 <span class="account-section-icon" aria-hidden="true"><i class="fa-solid fa-shield"></i></span>
                 <div>
-                  <p class="eyebrow">Keep your account safe</p>
                   <h3>Security</h3>
-                  <p>Update your password to protect your account.</p>
                 </div>
               </div>
               <form
                 id="change-password-form"
-                class="account-form-card account-form-card-compact"
+                class="account-form-card-compact"
               >
-                <div class="form-group">
+                <div class="form-group security-field-card">
                   <label class="form-label" for="current-password-input"
                     >Current Password</label
                   >
@@ -645,7 +504,7 @@
                     </button>
                   </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group security-field-card">
                   <label class="form-label" for="new-password-input"
                     >New Password</label
                   >
@@ -667,7 +526,7 @@
                     </button>
                   </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group security-field-card">
                   <label class="form-label" for="confirm-password-input"
                     >Confirm New Password</label
                   >
@@ -688,9 +547,11 @@
                     </button>
                   </div>
                 </div>
-                <button type="submit" class="btn btn-primary btn-sm">
-                  Update Password
-                </button>
+                <div class="security-form-actions">
+                  <button type="submit" class="btn btn-primary btn-sm">
+                    Update Password
+                  </button>
+                </div>
               </form>
             </div>
           </section>
@@ -741,13 +602,7 @@
         aria-labelledby="avatar-lightbox-title"
       >
         <div class="avatar-modal-heading">
-          <div>
-            <p class="eyebrow">Account photo</p>
-            <h3 id="avatar-lightbox-title">Profile picture</h3>
-          </div>
-          <span class="avatar-modal-hint"
-            >Press Esc or click outside to close</span
-          >
+          <h3 id="avatar-lightbox-title">Profile picture</h3>
         </div>
         <button
           type="button"
@@ -755,12 +610,11 @@
           id="close-avatar-modal"
           aria-label="Close profile photo"
         >
-          &times;
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
         </button>
         <div class="avatar-modal-body">
           <div class="avatar-lightbox-frame" id="avatar-lightbox-frame"></div>
         </div>
-        <div class="avatar-modal-caption" id="avatar-lightbox-caption"></div>
       </div>
     </div>
 
@@ -816,73 +670,8 @@
             </div>
           </form>
         </div>
-      </div>
     </div>
-
-    <footer id="site-footer" class="site-footer">
-      <div class="container">
-        <div class="footer-grid">
-          <div class="footer-col">
-            <h4
-              id="footer-store-name"
-              style="font-size: 1.15rem; color: var(--color-accent)"
-            >
-              GIGABITE
-            </h4>
-            <p id="footer-store-tagline">
-              Flavor on Wheels - Freshly Grilled Everyday
-            </p>
-            <p style="margin-top: 12px; font-size: 0.85rem">
-              Serving handcrafted hot burgers, specialty sandwiches, footlongs,
-              and sizzling sides with premium local ingredients.
-            </p>
-          </div>
-          <div class="footer-col">
-            <h4>Find us on</h4>
-            <a
-              class="footer-facebook-link"
-              href="https://www.facebook.com/cecilia.rublico"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <svg
-                class="footer-facebook-icon"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073c0 6.019 4.388 11.018 10.125 11.927v-8.437H7.078v-3.49h3.047V9.411c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.977h-1.513c-1.49 0-1.956.931-1.956 1.886v2.26h3.328l-.532 3.49h-2.796V24C19.612 23.091 24 18.092 24 12.073Z"
-                />
-              </svg>
-              <span class="visually-hidden">Visit our Facebook page</span>
-              <svg
-                class="footer-facebook-arrow"
-                viewBox="0 0 20 20"
-                aria-hidden="true"
-              >
-                <path d="M4 10h11M10 5l5 5-5 5" />
-              </svg>
-            </a>
-          </div>
-          <div class="footer-col">
-            <h4>Contact &amp; Location</h4>
-            <p>
-              <strong>Address:</strong><br /><span id="footer-store-address"
-                >Abangan Norte 599, McArthur Highway</span
-              >
-            </p>
-            <p style="margin-top: 8px">
-              <strong>Phone:</strong><br /><span id="footer-store-phone"
-                >09309189124</span
-              >
-            </p>
-          </div>
-        </div>
-        <div class="footer-bottom">
-          &copy; 2026 GIGABITE. All rights reserved.
-        </div>
       </div>
-    </footer>
 
     <script type="module" src="js/profile.js"></script>
   </body>

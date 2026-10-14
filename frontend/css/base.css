@@ -24,19 +24,30 @@
   --color-text-light: #7c685e;
   --color-text-white: #fffdfb;
 
-  --color-brand: #1d140e;
-  --color-brand-gradient: linear-gradient(135deg, #20150f 0%, #3a261d 100%);
-  --color-brand-secondary: #b94c2c;
-  --color-brand-secondary-hover: #944021;
+  --color-brand: var(--brand-primary);
+  --color-brand-gradient: linear-gradient(
+    135deg,
+    var(--brand-primary) 0%,
+    var(--brand-primary-hover) 100%
+  );
+  --color-brand-secondary: var(--brand-primary);
+  --color-brand-secondary-hover: var(--brand-primary-hover);
+  --brand-primary: #216a3c;
+  --brand-primary-hover: #19512e;
+  --brand-on-primary: #ffffff;
 
-  --color-accent: #d9782b;
-  --color-accent-soft: #f9ebd8;
-  --color-accent-gradient: linear-gradient(135deg, #f8b14d 0%, #d9782b 100%);
-  --color-accent-hover: #be6218;
-  --color-accent-text: #2a1b12;
-  --color-accent-text-strong: #8a4b15;
+  --color-accent: var(--brand-primary);
+  --color-accent-soft: #e8f3ea;
+  --color-accent-gradient: linear-gradient(
+    135deg,
+    var(--brand-primary),
+    var(--brand-primary-hover)
+  );
+  --color-accent-hover: var(--brand-primary-hover);
+  --color-accent-text: #ffffff;
+  --color-accent-text-strong: var(--brand-primary);
 
-  --color-success: #1c6a3f;
+  --color-success: var(--brand-primary);
   --color-success-bg: #ebf7ee;
   --color-warning: #9d5c12;
   --color-warning-bg: #fff1d6;
@@ -89,6 +100,7 @@
   --z-modal: 1000;
 
   --header-height: 72px;
+  --header-padding-x: clamp(16px, 2.6vw, 32px);
   --container-max: 1180px;
 }
 
@@ -124,7 +136,7 @@ body {
 }
 
 ::selection {
-  background: rgba(217, 120, 43, 0.18);
+  background: rgba(33, 106, 60, 0.18);
   color: var(--color-text-main);
 }
 
@@ -226,12 +238,12 @@ textarea:focus-visible {
 .btn-primary {
   background: var(--color-accent-gradient);
   color: var(--color-accent-text);
-  box-shadow: 0 10px 18px rgba(217, 120, 43, 0.18);
-  border-color: rgba(174, 92, 26, 0.25);
+  box-shadow: 0 10px 18px rgba(33, 106, 60, 0.18);
+  border-color: rgba(33, 106, 60, 0.3);
 }
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 14px 20px rgba(217, 120, 43, 0.22);
+  box-shadow: 0 14px 20px rgba(33, 106, 60, 0.22);
 }
 .btn-primary:active:not(:disabled) {
   transform: translateY(0);
@@ -253,7 +265,7 @@ textarea:focus-visible {
   border-color: var(--color-brand);
 }
 .btn-dark:hover:not(:disabled) {
-  background: #34261d;
+  background: var(--brand-primary-hover);
 }
 
 .btn-danger {

@@ -1,5 +1,57 @@
 const { query, getClient } = require('../config/db');
 
+function appendOrderFilters(sql, params, filter) {
+  if (filter.user || filter.userId) {
+    params.push(filter.user || filter.userId);
+    sql += ` AND o.user_id = $${params.length}`;
+  }
+
+  if (filter.status) {
+    if (Array.isArray(filter.status)) {
+      params.push(filter.status);
+      sql += ` AND o.status = ANY($${params.length}::order_status[])`;
+    } else {
+      params.push(filter.status);
+      sql += ` AND o.status = $${params.length}`;
+    }
+  }
+
+  if (filter.paymentStatus) {
+    params.push(filter.paymentStatus);
+    sql += ` AND o.payment_status = $${params.length}`;
+  }
+
+  if (filter.paymentMethod) {
+    params.push(filter.paymentMethod);
+    sql += ` AND o.payment_method = $${params.length}`;
+  }
+
+  if (filter.fulfillment) {
+    params.push(filter.fulfillment);
+    sql += ` AND o.fulfillment = $${params.length}`;
+  }
+
+  if (filter.arrivalDeadlineLte) {
+    params.push(filter.arrivalDeadlineLte);
+    sql += ` AND o.arrival_deadline <= $${params.length}`;
+  }
+
+  if (filter.search && filter.search.trim()) {
+    params.push(`%${filter.search.trim()}%`);
+    sql += ` AND (o.order_number ILIKE $${params.length} OR o.contact_full_name ILIKE $${params.length} OR o.contact_phone ILIKE $${params.length})`;
+  }
+
+  if (filter.dateRange === 'today') {
+    sql += ' AND o.created_at >= CURRENT_DATE AND o.created_at < CURRENT_DATE + INTERVAL \'1 day\'';
+  } else if (filter.dateRange === 'week') {
+    sql += " AND o.created_at >= NOW() - INTERVAL '7 days'";
+  } else if (filter.dateRange === 'month') {
+    sql += " AND o.created_at >= NOW() - INTERVAL '30 days'";
+  }
+
+  return sql;
+}
+
 function mapOrderRow(row) {
   if (!row) return null;
   return {
@@ -197,42 +249,9 @@ const orderRepository = {
     `;
     const params = [];
 
-    if (filter.user || filter.userId) {
-      params.push(filter.user || filter.userId);
-      sql += ` AND o.user_id = $${params.length}`;
-    }
+    sql = appendOrderFilters(sql, params, filter);
 
-    if (filter.status) {
-      if (Array.isArray(filter.status)) {
-        params.push(filter.status);
-        sql += ` AND o.status = ANY($${params.length}::order_status[])`;
-      } else {
-        params.push(filter.status);
-        sql += ` AND o.status = $${params.length}`;
-      }
-    }
-
-    if (filter.paymentStatus) {
-      params.push(filter.paymentStatus);
-      sql += ` AND o.payment_status = $${params.length}`;
-    }
-
-    if (filter.paymentMethod) {
-      params.push(filter.paymentMethod);
-      sql += ` AND o.payment_method = $${params.length}`;
-    }
-
-    if (filter.arrivalDeadlineLte) {
-      params.push(filter.arrivalDeadlineLte);
-      sql += ` AND o.arrival_deadline <= $${params.length}`;
-    }
-
-    if (filter.search && filter.search.trim()) {
-      params.push(`%${filter.search.trim()}%`);
-      sql += ` AND (o.order_number ILIKE $${params.length} OR o.contact_full_name ILIKE $${params.length} OR o.contact_phone ILIKE $${params.length})`;
-    }
-
-    sql += ' ORDER BY o.created_at DESC';
+    sql += ' ORDER BY o.created_at DESC, o.id DESC';
 
     if (options.limit) {
       params.push(Number(options.limit));
@@ -250,22 +269,9 @@ const orderRepository = {
   },
 
   async count(filter = {}) {
-    let sql = 'SELECT COUNT(*)::int as count FROM orders WHERE 1=1';
+    let sql = 'SELECT COUNT(*)::int as count FROM orders o WHERE 1=1';
     const params = [];
-
-    if (filter.user || filter.userId) {
-      params.push(filter.user || filter.userId);
-      sql += ` AND user_id = $${params.length}`;
-    }
-    if (filter.status) {
-      if (Array.isArray(filter.status)) {
-        params.push(filter.status);
-        sql += ` AND status = ANY($${params.length}::order_status[])`;
-      } else {
-        params.push(filter.status);
-        sql += ` AND status = $${params.length}`;
-      }
-    }
+    sql = appendOrderFilters(sql, params, filter);
 
     const res = await query(sql, params);
     return res.rows[0].count;

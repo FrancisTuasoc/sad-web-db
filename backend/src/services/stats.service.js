@@ -1,8 +1,15 @@
 const { query } = require('../config/db');
-const orderRepository = require('../repositories/orderRepository');
 const userRepository = require('../repositories/userRepository');
 
 const STORE_TIME_ZONE = 'Asia/Manila';
+const COMPLETED_AT_SQL = `COALESCE(
+  (
+    SELECT MIN(history.at)
+    FROM order_status_history history
+    WHERE history.order_id = o.id AND history.status = 'completed'
+  ),
+  o.updated_at
+)`;
 
 function getStartOfDayInTimeZone(date, timeZone) {
   const dateTimeParts = new Intl.DateTimeFormat('en-US', {
@@ -41,8 +48,8 @@ async function getCompletedSalesSince(startDate) {
     SELECT 
       COUNT(*)::int as count,
       COALESCE(SUM(total), 0)::numeric as revenue
-    FROM orders
-    WHERE status = 'completed' AND updated_at >= $1
+    FROM orders o
+    WHERE o.status = 'completed' AND ${COMPLETED_AT_SQL} >= $1
   `;
   const res = await query(sql, [startDate]);
   return {
@@ -82,8 +89,12 @@ async function getDashboardStats() {
   // Sales timeframes
   const now = new Date();
   const startOfDay = getStartOfDayInTimeZone(now, STORE_TIME_ZONE);
-  const startOfWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-  const startOfMonth = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const startOfWeek = new Date(
+    startOfDay.getTime() - 6 * 24 * 60 * 60 * 1000
+  );
+  const startOfMonth = new Date(
+    startOfDay.getTime() - 29 * 24 * 60 * 60 * 1000
+  );
 
   const [dailySales, weeklySales, monthlySales] = await Promise.all([
     getCompletedSalesSince(startOfDay),
@@ -103,11 +114,14 @@ async function getDashboardStats() {
   );
   const revenueHistorySql = `
     SELECT 
-      TO_CHAR(updated_at AT TIME ZONE 'Asia/Manila', 'YYYY-MM-DD') as date_str,
+      TO_CHAR(
+        ${COMPLETED_AT_SQL} AT TIME ZONE 'Asia/Manila',
+        'YYYY-MM-DD'
+      ) as date_str,
       COALESCE(SUM(total), 0)::numeric as revenue,
       COUNT(*)::int as orders
-    FROM orders
-    WHERE status = 'completed' AND updated_at >= $1
+    FROM orders o
+    WHERE o.status = 'completed' AND ${COMPLETED_AT_SQL} >= $1
     GROUP BY date_str
     ORDER BY date_str ASC
   `;
@@ -136,7 +150,7 @@ async function getDashboardStats() {
     JOIN orders o ON oi.order_id = o.id
     WHERE o.status != 'cancelled'
     GROUP BY oi.name
-    ORDER BY total_qty DESC
+    ORDER BY total_qty DESC, LOWER(oi.name) ASC
     LIMIT 5
   `;
   const topRes = await query(topItemsSql);
@@ -145,10 +159,6 @@ async function getDashboardStats() {
     totalQty: r.total_qty,
     totalSales: Number(r.total_sales),
   }));
-
-  // Recent 8 orders
-  const recentOrders = await orderRepository.find({}, { limit: 8 });
-  stats.recentOrders = recentOrders;
 
   return stats;
 }

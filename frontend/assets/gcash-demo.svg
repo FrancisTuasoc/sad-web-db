@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" role="img" aria-labelledby="title description">
   <title id="title">Decorative demo QR-style image</title>
-  <desc id="description">A non-scannable pattern with DEMO across the center. It cannot make or receive payments.</desc>
+  <desc id="description">A decorative, non-scannable QR-style pattern.</desc>
   <rect width="320" height="320" rx="16" fill="#fff"/>
   <rect x="10" y="10" width="300" height="300" rx="10" fill="#f5f8fc" stroke="#bed0e1" stroke-width="4"/>
   <g fill="#17466c">
@@ -13,7 +13,4 @@
     <path d="M120 184h16v16h-16zM152 184h16v16h-16zM184 184h16v16h-16zM216 184h16v16h-16zM272 184h16v16h-16zM112 216h16v16h-16zM144 216h16v16h-16zM184 216h16v16h-16zM216 248h16v16h-16zM248 224h16v16h-16zM272 264h16v16h-16z"/>
     <path d="M112 272h16v16h-16zM144 264h16v16h-16zM176 280h16v16h-16zM200 272h16v16h-16zM248 272h16v16h-16z"/>
   </g>
-  <rect x="83" y="132" width="154" height="56" rx="12" fill="#fff" stroke="#d68a00" stroke-width="4"/>
-  <text x="160" y="168" fill="#8a4b00" font-family="Arial, sans-serif" font-size="30" font-weight="800" letter-spacing="3" text-anchor="middle">DEMO</text>
-  <text x="160" y="306" fill="#17466c" font-family="Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="1.4" text-anchor="middle">NOT A REAL OR SCANNABLE QR CODE</text>
 </svg>
