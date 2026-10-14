@@ -9720,6 +9720,13 @@ body.profile-page .profile-layout.customer-area .toggle-password-btn:hover {
   background: color-mix(in srgb, var(--brand-primary) 8%, var(--surface)) !important;
 }
 
+body.profile-page:not(.theme-dark) .profile-tab-content .status-subtab.active {
+  border-color: var(--brand-primary) !important;
+  background: var(--brand-primary) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--brand-primary) 20%, transparent) !important;
+}
+
 body.profile-page .profile-layout.customer-area .customer-sidebar .logout-button:hover,
 body.profile-page .profile-layout.customer-area .profile-tab-content .btn:not(.btn-primary):hover:not(:disabled),
 body.profile-page .profile-layout.customer-area .customer-actions .btn:hover:not(:disabled),
