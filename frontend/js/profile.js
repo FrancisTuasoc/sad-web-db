@@ -742,39 +742,52 @@ function renderOrderCard(order, isLive = false) {
   // Progress tracker indicator for active orders
   let progressTracker = '';
   if (isLive && order.status !== 'cancelled') {
-    const isStep1 = true;
-    const isStep2 = [
-      'preparing',
+    const orderIsReady = [
       'ready_for_pickup',
       'ready_to_deliver',
       'to_pickup',
       'to_ship',
       'completed',
     ].includes(order.status);
-    const isStep3 = order.status === 'completed';
-
-    const step2Label =
-      order.status === 'preparing'
-        ? 'Being Prepared'
-        : order.fulfillment === 'pickup'
-          ? 'Ready to Pick Up'
-          : 'Ready to Deliver';
+    const progressSteps = [
+      { label: 'Order Placed', active: true },
+      {
+        label: 'Being Prepared',
+        active: order.status === 'preparing' || orderIsReady,
+      },
+      {
+        label:
+          order.fulfillment === 'pickup'
+            ? 'Ready to Pick Up'
+            : 'Ready to Deliver',
+        active: orderIsReady,
+      },
+      { label: 'Completed', active: order.status === 'completed' },
+    ];
 
     progressTracker = `
       <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 16px;position:relative;">
-        <div style="position:absolute;top:50%;left:15%;right:15%;height:2px;background:var(--color-border);z-index:1;"></div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;z-index:2;background:var(--color-surface);padding:0 6px;">
-          <div style="width:22px;height:22px;border-radius:50%;background:${isStep1 ? 'var(--color-accent)' : 'var(--color-border)'};color:#2A1E18;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;">1</div>
-          <span style="font-size:0.75rem;font-weight:600;">Order Placed</span>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;z-index:2;background:var(--color-surface);padding:0 6px;">
-          <div style="width:22px;height:22px;border-radius:50%;background:${isStep2 ? 'var(--color-accent)' : 'var(--color-border)'};color:#2A1E18;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;">2</div>
-          <span style="font-size:0.75rem;font-weight:600;">${step2Label}</span>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;z-index:2;background:var(--color-surface);padding:0 6px;">
-          <div style="width:22px;height:22px;border-radius:50%;background:${isStep3 ? 'var(--color-success)' : 'var(--color-border)'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;">3</div>
-          <span style="font-size:0.75rem;font-weight:600;">Completed</span>
-        </div>
+        <div style="position:absolute;top:11px;left:12.5%;right:12.5%;height:2px;background:var(--color-border);z-index:1;"></div>
+        ${progressSteps
+          .map(
+            (step, index) => {
+              const isFinalStep = index === progressSteps.length - 1;
+              const circleColor = step.active
+                ? isFinalStep
+                  ? 'var(--color-success)'
+                  : 'var(--color-accent)'
+                : 'var(--color-border)';
+              const circleTextColor =
+                step.active && isFinalStep ? '#fff' : '#2A1E18';
+              return `
+                <div style="display:flex;flex:1;flex-direction:column;align-items:center;gap:4px;z-index:2;background:var(--color-surface);padding:0 2px;text-align:center;">
+                  <div style="width:22px;height:22px;flex:0 0 22px;border-radius:50%;background:${circleColor};color:${circleTextColor};display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;">${index + 1}</div>
+                  <span style="font-size:0.75rem;font-weight:600;">${step.label}</span>
+                </div>
+              `;
+            }
+          )
+          .join('')}
       </div>
     `;
   }

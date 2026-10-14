@@ -389,15 +389,14 @@ async function updateOrderStatus(orderId, nextStatus) {
 
   let expectedStatus = null;
   let expectedFulfillment = null;
-  if (nextStatus === 'preparing' && order.paymentMethod === 'pay_at_shop') {
+  if (nextStatus === 'preparing') {
     expectedStatus = 'pending';
-    expectedFulfillment = 'pickup';
+    expectedFulfillment = order.fulfillment;
   } else if (nextStatus === 'ready_for_pickup') {
-    expectedStatus =
-      order.paymentMethod === 'pay_at_shop' ? 'preparing' : 'pending';
+    expectedStatus = 'preparing';
     expectedFulfillment = 'pickup';
   } else if (nextStatus === 'ready_to_deliver') {
-    expectedStatus = 'pending';
+    expectedStatus = 'preparing';
     expectedFulfillment = 'delivery';
   } else if (nextStatus === 'completed' && order.fulfillment === 'pickup') {
     expectedStatus = 'ready_for_pickup';

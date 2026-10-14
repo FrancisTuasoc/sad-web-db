@@ -967,20 +967,12 @@ async function openOrderDrawer(orderId) {
     // Action buttons based on status
     let actionButtons = '';
     if (order.status === 'pending') {
-      const nextStatus =
-        order.paymentMethod === 'pay_at_shop'
-          ? 'preparing'
-          : order.fulfillment === 'pickup'
-            ? 'ready_for_pickup'
-            : 'ready_to_deliver';
       const nextLabel =
         order.paymentMethod === 'pay_at_shop'
           ? 'Customer Arrived — Start Preparing'
-          : order.fulfillment === 'pickup'
-            ? 'Accept & Mark Ready for Pickup'
-            : 'Accept & Mark Ready for Delivery';
+          : 'Accept & Start Preparing';
       actionButtons += `
-        <button type="button" class="btn btn-primary btn-sm btn-action-status" data-order-id="${order._id}" data-status="${nextStatus}">
+        <button type="button" class="btn btn-primary btn-sm btn-action-status" data-order-id="${order._id}" data-status="preparing">
           ${nextLabel}
         </button>
         <button type="button" class="btn btn-danger btn-sm btn-action-cancel" data-order-id="${order._id}">
@@ -988,9 +980,17 @@ async function openOrderDrawer(orderId) {
         </button>
       `;
     } else if (order.status === 'preparing') {
+      const readyStatus =
+        order.fulfillment === 'pickup'
+          ? 'ready_for_pickup'
+          : 'ready_to_deliver';
+      const readyLabel =
+        order.fulfillment === 'pickup'
+          ? 'Mark Ready for Pickup'
+          : 'Mark Ready for Delivery';
       actionButtons += `
-        <button type="button" class="btn btn-primary btn-sm btn-action-status" data-order-id="${order._id}" data-status="ready_for_pickup">
-          Mark Ready for Pickup
+        <button type="button" class="btn btn-primary btn-sm btn-action-status" data-order-id="${order._id}" data-status="${readyStatus}">
+          ${readyLabel}
         </button>
       `;
     } else if (

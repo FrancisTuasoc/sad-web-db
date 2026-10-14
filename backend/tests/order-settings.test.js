@@ -128,6 +128,45 @@ test('pay-at-shop orders move through preparing before ready for pickup', async 
   );
 });
 
+test('all orders must move through preparing before being marked ready', async (context) => {
+  const order = {
+    id: 'order-id',
+    status: 'pending',
+    fulfillment: 'pickup',
+    paymentMethod: 'gcash',
+    paymentStatus: 'paid',
+  };
+
+  context.mock.method(orderRepository, 'findById', async () => ({ ...order }));
+  context.mock.method(
+    orderRepository,
+    'updateStatus',
+    async (id, newStatus) => {
+      order.status = newStatus;
+      return { id, status: newStatus };
+    }
+  );
+
+  for (const [fulfillment, readyStatus] of [
+    ['pickup', 'ready_for_pickup'],
+    ['delivery', 'ready_to_deliver'],
+  ]) {
+    order.status = 'pending';
+    order.fulfillment = fulfillment;
+
+    await assert.rejects(
+      updateOrderStatus('order-id', readyStatus),
+      (error) => error.statusCode === 409
+    );
+
+    const preparingOrder = await updateOrderStatus('order-id', 'preparing');
+    assert.equal(preparingOrder.status, 'preparing');
+
+    const readyOrder = await updateOrderStatus('order-id', readyStatus);
+    assert.equal(readyOrder.status, readyStatus);
+  }
+});
+
 test('expired pay-at-shop orders are cancelled and their reserved stock is restored', async (context) => {
   const now = new Date('2026-10-07T14:00:00.000Z');
   const order = {
