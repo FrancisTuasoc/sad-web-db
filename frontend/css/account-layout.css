@@ -387,28 +387,31 @@ body.profile-page .profile-layout.customer-area .account-loading-card {
 
 body.profile-page .profile-layout.customer-area #change-password-form {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
   width: 100%;
   max-width: none;
-  gap: 20px;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-body.profile-page .profile-layout.customer-area #change-password-form .security-field-card,
-body.profile-page .profile-layout.customer-area #change-password-form .security-form-actions {
-  display: grid;
-  gap: 10px;
-  min-width: 0;
+  gap: 16px;
   margin: 0 !important;
   padding: 20px !important;
   border: 1px solid var(--border) !important;
   border-radius: 8px !important;
   background: var(--surface) !important;
   box-shadow: var(--shadow-sm) !important;
+}
+
+body.profile-page .profile-layout.customer-area #change-password-form .security-field-card,
+body.profile-page .profile-layout.customer-area #change-password-form .security-form-actions {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 body.profile-page .profile-layout.customer-area #change-password-form .form-label {

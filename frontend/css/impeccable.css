@@ -5808,6 +5808,12 @@ body:has(.admin-layout) * {
   white-space: nowrap;
 }
 
+#section-dashboard .dashboard-sales-toggle .btn-sales-toggle.active {
+  border-color: var(--brand-primary) !important;
+  background: var(--brand-primary) !important;
+  color: #ffffff !important;
+}
+
 #section-dashboard .ops-chart-grid,
 #section-dashboard .ops-lower-grid {
   align-items: stretch;

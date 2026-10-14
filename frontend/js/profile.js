@@ -388,9 +388,9 @@ async function loadCustomerStats() {
         icon: 'fa-solid fa-hourglass-half',
       },
       {
-        label: 'Delivered orders',
+        label: 'Successful orders',
         value: stats.deliveredOrders || 0,
-        meta: 'Completed deliveries',
+        meta: 'Completed orders',
         variant: 'delivered',
         icon: 'fa-solid fa-circle-check',
       },

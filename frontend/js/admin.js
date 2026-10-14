@@ -1126,7 +1126,7 @@ async function loadAdminMenu() {
           <tr style="${rowClass}">
             <td>
               <div style="display:flex;align-items:center;gap:10px;">
-                <img src="${escapeHtml(imgUrl)}" style="width:40px;height:40px;border-radius:4px;object-fit:cover;" onerror="window.handleImageError(this)">
+                <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(p.name)}" style="width:40px;height:40px;border-radius:4px;object-fit:cover;" onerror="window.handleImageError(this)">
                 <div>
                   <strong>${escapeHtml(p.name)}</strong>
                   ${p.isAddon ? '<span class="badge" style="background:#E0E7FF;color:#3730A3;margin-left:4px;">Add-on</span>' : ''}
