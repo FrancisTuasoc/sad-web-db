@@ -11,6 +11,7 @@ const userRepository = require('../src/repositories/userRepository');
 
 let placeOrder;
 let updateOrderStatus;
+let completeOrder;
 let expirePayAtShopOrders;
 
 function mockSuccessfulOrderDependencies(context, settingsOverrides = {}) {
@@ -77,6 +78,7 @@ test('order placement is blocked when the admin pauses online ordering', async (
   ({
     placeOrder,
     updateOrderStatus,
+    completeOrder,
     expirePayAtShopOrders,
   } = require('../src/services/order.service'));
 
@@ -165,6 +167,31 @@ test('all orders must move through preparing before being marked ready', async (
     const readyOrder = await updateOrderStatus('order-id', readyStatus);
     assert.equal(readyOrder.status, readyStatus);
   }
+});
+
+test('customers cannot confirm pickup for pay-at-shop orders', async (context) => {
+  context.mock.method(orderRepository, 'findById', async () => ({
+    id: 'order-id',
+    status: 'ready_for_pickup',
+    fulfillment: 'pickup',
+    paymentMethod: 'pay_at_shop',
+    paymentStatus: 'unpaid',
+  }));
+  const updateStatus = context.mock.method(
+    orderRepository,
+    'updateStatus',
+    async () => {
+      throw new Error('A pay-at-shop order should not be completed by a customer.');
+    }
+  );
+
+  await assert.rejects(
+    completeOrder('order-id', 'customer-id'),
+    (error) =>
+      error.statusCode === 403 &&
+      /admin must confirm pickup/.test(error.message)
+  );
+  assert.equal(updateStatus.mock.callCount(), 0);
 });
 
 test('expired pay-at-shop orders are cancelled and their reserved stock is restored', async (context) => {

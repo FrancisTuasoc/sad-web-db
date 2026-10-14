@@ -8374,10 +8374,15 @@ body:not(.admin-page) .checkout-modal .tab-pill {
 }
 
 body:not(.admin-page) .checkout-modal .tab-pill.active {
-  border-color: var(--color-border) !important;
-  background: var(--color-surface) !important;
-  color: var(--brand-primary) !important;
-  box-shadow: 0 1px 3px color-mix(in srgb, var(--color-text-main) 10%, transparent) !important;
+  border-color: var(--brand-primary) !important;
+  background: var(--brand-primary) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--brand-primary) 24%, transparent) !important;
+}
+
+body:not(.admin-page) .checkout-modal .tab-pill:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 body:not(.admin-page) .checkout-modal .contact-section-heading {
@@ -8414,8 +8419,13 @@ body:not(.admin-page) .checkout-modal .payment-option-label {
 
 body:not(.admin-page) .checkout-modal .payment-option-label:hover,
 body:not(.admin-page) .checkout-modal .payment-option-label:has(input:checked) {
-  background: color-mix(in srgb, var(--brand-primary) 5%, var(--color-surface)) !important;
+  background: color-mix(in srgb, var(--brand-primary) 12%, var(--color-surface)) !important;
   color: var(--color-text-main) !important;
+}
+
+body:not(.admin-page) .checkout-modal .payment-option-label:has(input:checked) {
+  border-bottom-color: var(--brand-primary) !important;
+  box-shadow: inset 3px 0 0 var(--brand-primary) !important;
 }
 
 body:not(.admin-page) .checkout-modal .payment-option-label input {

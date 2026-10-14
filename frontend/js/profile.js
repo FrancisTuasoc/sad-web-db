@@ -811,7 +811,8 @@ function renderOrderCard(order, isLive = false) {
     (order.status === 'ready_for_pickup' ||
       order.status === 'ready_to_deliver' ||
       order.status === 'to_pickup' ||
-      order.status === 'to_ship')
+      order.status === 'to_ship') &&
+    !(order.fulfillment === 'pickup' && order.paymentMethod === 'pay_at_shop')
   ) {
     const actionLabel =
       order.fulfillment === 'pickup' ? 'Order Picked Up' : 'Order Received';
@@ -891,6 +892,13 @@ function renderOrderCard(order, isLive = false) {
                 ? 'Your order is being prepared. Please pay at the shop when you pick it up.'
                 : 'Please arrive at the shop within 1 hour of placing your order. We will prepare it when you arrive; otherwise, it will be cancelled automatically.'
             }</p>`
+          : ''
+      }
+      ${
+        isLive &&
+        order.status === 'ready_for_pickup' &&
+        order.paymentMethod === 'pay_at_shop'
+          ? '<p style="margin:8px 0 0;font-size:0.84rem;font-weight:600;color:var(--color-warning);">Please pay at the shop. An admin will confirm when your order has been picked up.</p>'
           : ''
       }
       ${

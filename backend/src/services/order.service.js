@@ -436,6 +436,12 @@ async function completeOrder(orderId, userId) {
   if (!order) {
     throw new AppError('Order not found.', 404);
   }
+  if (order.paymentMethod === 'pay_at_shop') {
+    throw new AppError(
+      'An admin must confirm pickup for orders paid at the shop.',
+      403
+    );
+  }
   const expectedStatus =
     order.fulfillment === 'pickup' ? 'ready_for_pickup' : 'ready_to_deliver';
   if (order.status !== expectedStatus) {
