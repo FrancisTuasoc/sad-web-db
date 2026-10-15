@@ -72,6 +72,31 @@ class SiteHeader extends HTMLElement {
         <a href="login.html" style="color: var(--color-accent); font-weight: 700">Login / Register</a>
       </div>
     `;
+
+    // Initialize active navigation highlight immediately upon mount
+    const path = window.location.pathname;
+    const hash = window.location.hash;
+    const isHome = path === '/' || path.endsWith('index.html') || path === '';
+    const isMenu = path.endsWith('menu.html');
+
+    this.querySelectorAll('.nav-links a, .mobile-drawer a').forEach((link) => {
+      const linkUrl = new URL(link.href, window.location.href);
+      if (isHome) {
+        if (hash) {
+          link.classList.toggle('active', linkUrl.hash === hash);
+        } else {
+          link.classList.toggle(
+            'active',
+            !linkUrl.hash &&
+              (link.getAttribute('href') === 'index.html' ||
+                link.getAttribute('href') === '/' ||
+                linkUrl.pathname.endsWith('index.html'))
+          );
+        }
+      } else if (isMenu && link.getAttribute('href')?.includes('menu.html')) {
+        link.classList.add('active');
+      }
+    });
   }
 }
 

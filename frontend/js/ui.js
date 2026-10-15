@@ -334,18 +334,29 @@ export function renderHeader(activeNav = '') {
   const isAdminProfile = document.body.classList.contains('admin-account');
 
   // Active navigation highlight
-  const navLinks = headerElem.querySelectorAll('.nav-links a');
+  const navLinks = document.querySelectorAll(
+    '#site-header .nav-links a, #mobile-drawer-menu a'
+  );
   navLinks.forEach((link) => {
     link.classList.remove('active');
     const href = link.getAttribute('href') || '';
-    if (activeNav === 'home' && (href === 'index.html' || href === '/'))
+    const hash = window.location.hash;
+    if (
+      activeNav === 'home' &&
+      !hash &&
+      (href === 'index.html' || href === '/' || href.endsWith('index.html'))
+    ) {
       link.classList.add('active');
-    if (activeNav === 'menu' && href.includes('menu.html'))
+    }
+    if (activeNav === 'menu' && href.includes('menu.html')) {
       link.classList.add('active');
-    if (activeNav === 'cart' && href.includes('cart.html'))
+    }
+    if (activeNav === 'cart' && href.includes('cart.html')) {
       link.classList.add('active');
-    if (activeNav === 'profile' && href.includes('profile.html'))
+    }
+    if (activeNav === 'profile' && href.includes('profile.html')) {
       link.classList.add('active');
+    }
   });
 
   // User slot dynamic update

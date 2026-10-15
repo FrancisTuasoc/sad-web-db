@@ -101,12 +101,12 @@
 .nav-links a:active::after {
   content: '';
   position: absolute;
-  bottom: -6px;
+  bottom: 0px;
   left: 0;
   width: 100%;
-  height: 2px;
-  background: #ffffff;
-  border-radius: 999px;
+  height: 2.5px;
+  background: #f3ad32;
+  border-radius: 2px;
 }
 
 .header-actions {
