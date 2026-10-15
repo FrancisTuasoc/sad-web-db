@@ -10,7 +10,8 @@ const {
   deductStockWithCompensation,
   restoreStockForOrder,
 } = require('./stock.service');
-const { broadcastStock } = require('./events');
+const { broadcastStock, sendToUser, sendToAdmins } = require('./events');
+const notificationRepository = require('../repositories/notificationRepository');
 
 const PAY_AT_SHOP_ARRIVAL_WINDOW_MS = 60 * 60 * 1000;
 const EXPIRY_SWEEP_BATCH_SIZE = 100;
@@ -303,6 +304,46 @@ async function placeOrder({
     }
   }
 
+  try {
+    const adminNotif = await notificationRepository.create({
+      forAdmin: true,
+      orderId: order.id,
+      title: 'New Order Received',
+      message: `Order #${order.orderNumber} placed by ${fullName || 'Customer'} (${order.fulfillment.toUpperCase()}) — ₱${order.total.toFixed(2)}`,
+      type: 'new_order',
+      status: 'pending',
+    });
+    sendToAdmins('admin_order', {
+      type: 'created',
+      order,
+      notification: adminNotif,
+    });
+    sendToAdmins('notification', adminNotif);
+  } catch (err) {
+    // Graceful fallback
+  }
+
+  try {
+    const userNotif = await notificationRepository.create({
+      userId,
+      forAdmin: false,
+      orderId: order.id,
+      title: 'Order Placed Successfully',
+      message: `Your order #${order.orderNumber} has been received and is waiting for store acceptance.`,
+      type: 'order_status',
+      status: 'pending',
+    });
+    sendToUser(userId, 'notification', userNotif);
+    sendToUser(userId, 'order_status', {
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      status: 'pending',
+      notification: userNotif,
+    });
+  } catch (err) {
+    // Graceful fallback
+  }
+
   return order;
 }
 
@@ -355,6 +396,65 @@ async function cancelOrder(
       product.isAvailable
     );
   }
+
+  try {
+    let customerTitle = 'Order Cancelled';
+    let customerMessage = `Your order #${order.orderNumber} has been cancelled. Reserved stock was returned.`;
+    let adminTitle = 'Order Cancelled';
+    let adminMessage = `Order #${order.orderNumber} has been cancelled.`;
+
+    if (role === 'admin') {
+      customerTitle = 'Order Cancelled / Rejected by Store';
+      customerMessage = `Your order #${order.orderNumber} was cancelled by the store. Reserved stock was returned.`;
+      adminMessage = `Order #${order.orderNumber} was cancelled by admin. Reserved stock was returned.`;
+    } else if (role === 'customer') {
+      adminTitle = 'Customer Cancelled Order';
+      adminMessage = `Order #${order.orderNumber} was cancelled by the customer. Reserved stock was returned.`;
+    } else if (role === 'system') {
+      customerTitle = 'Order Expired';
+      customerMessage = `Order #${order.orderNumber} was automatically cancelled because the 1-hour arrival window expired.`;
+      adminTitle = 'Order Expired & Cancelled';
+      adminMessage = `Order #${order.orderNumber} expired and was automatically cancelled.`;
+    }
+
+    const customerNotif = await notificationRepository.create({
+      userId: order.userId,
+      forAdmin: false,
+      orderId: order.id,
+      title: customerTitle,
+      message: customerMessage,
+      type: 'order_cancelled',
+      status: 'cancelled',
+    });
+    sendToUser(order.userId, 'notification', customerNotif);
+    sendToUser(order.userId, 'order_status', {
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      status: 'cancelled',
+      notification: customerNotif,
+    });
+
+    const adminNotif = await notificationRepository.create({
+      forAdmin: true,
+      orderId: order.id,
+      title: adminTitle,
+      message: adminMessage,
+      type: 'order_cancelled',
+      status: 'cancelled',
+    });
+    sendToAdmins('admin_order', {
+      type: 'cancelled',
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      status: 'cancelled',
+      order: cancelledOrder,
+      notification: adminNotif,
+    });
+    sendToAdmins('notification', adminNotif);
+  } catch (err) {
+    // Graceful fallback
+  }
+
   return cancelledOrder;
 }
 
@@ -428,6 +528,64 @@ async function updateOrderStatus(orderId, nextStatus) {
     { at: new Date() },
     extraUpdates
   );
+
+  try {
+    const statusLabels = {
+      preparing: {
+        title: 'Order Accepted & Preparing',
+        message: `Great news! Your order #${updated.orderNumber} was accepted by the shop and is now being freshly prepared.`,
+      },
+      ready_for_pickup: {
+        title: 'Order Ready for Pickup',
+        message: `Your order #${updated.orderNumber} is freshly cooked and ready for pickup at our shop!`,
+      },
+      ready_to_deliver: {
+        title: 'Order Out for Delivery',
+        message: `Your order #${updated.orderNumber} has been packed and is on its way to your address!`,
+      },
+      completed: {
+        title: 'Order Completed',
+        message: `Your order #${updated.orderNumber} has been marked as completed. Thank you for choosing GIGABITE!`,
+      },
+    };
+
+    const info = statusLabels[nextStatus] || {
+      title: `Order Status: ${nextStatus.replace(/_/g, ' ')}`,
+      message: `Your order #${updated.orderNumber} is now ${nextStatus.replace(/_/g, ' ')}.`,
+    };
+
+    const userNotif = await notificationRepository.create({
+      userId: updated.userId,
+      forAdmin: false,
+      orderId: updated.id,
+      title: info.title,
+      message: info.message,
+      type: 'order_status',
+      status: nextStatus,
+    });
+    sendToUser(updated.userId, 'notification', userNotif);
+    sendToUser(updated.userId, 'order_status', {
+      orderId: updated.id,
+      orderNumber: updated.orderNumber,
+      status: nextStatus,
+      notification: userNotif,
+    });
+  } catch (err) {
+    // Graceful fallback
+  }
+
+  try {
+    sendToAdmins('admin_order', {
+      type: 'status_updated',
+      orderId: updated.id,
+      orderNumber: updated.orderNumber,
+      status: nextStatus,
+      order: updated,
+    });
+  } catch (err) {
+    // Graceful fallback
+  }
+
   return updated;
 }
 
@@ -461,6 +619,46 @@ async function completeOrder(orderId, userId) {
     { at: new Date() },
     extraUpdates
   );
+
+  try {
+    const customerNotif = await notificationRepository.create({
+      userId: completed.userId,
+      forAdmin: false,
+      orderId: completed.id,
+      title: 'Order Completed',
+      message: `Thank you! You confirmed receipt of order #${completed.orderNumber}. Enjoy your meal!`,
+      type: 'order_status',
+      status: 'completed',
+    });
+    sendToUser(completed.userId, 'notification', customerNotif);
+    sendToUser(completed.userId, 'order_status', {
+      orderId: completed.id,
+      orderNumber: completed.orderNumber,
+      status: 'completed',
+      notification: customerNotif,
+    });
+
+    const adminNotif = await notificationRepository.create({
+      forAdmin: true,
+      orderId: completed.id,
+      title: 'Customer Confirmed Delivery',
+      message: `Order #${completed.orderNumber} was marked completed by the customer.`,
+      type: 'order_completed',
+      status: 'completed',
+    });
+    sendToAdmins('admin_order', {
+      type: 'status_updated',
+      orderId: completed.id,
+      orderNumber: completed.orderNumber,
+      status: 'completed',
+      order: completed,
+      notification: adminNotif,
+    });
+    sendToAdmins('notification', adminNotif);
+  } catch (err) {
+    // Graceful fallback
+  }
+
   return completed;
 }
 

@@ -1647,13 +1647,24 @@ function initProfile() {
     setProfileTab('overview');
   }
 
-  // 10-second polling for active order updates
+  // 10-second polling fallback for active order updates
   if (!adminAccount) {
     pollingTimer = setInterval(() => {
       if (activeTab === 'status') {
         loadStatusOrders();
       }
     }, 10000);
+
+    // Instant real-time update via SSE
+    window.addEventListener('gigabite:order-status-changed', () => {
+      if (activeTab === 'status') {
+        loadStatusOrders();
+      } else if (activeTab === 'history') {
+        loadHistoryOrders();
+      } else if (activeTab === 'overview') {
+        loadOverviewStats();
+      }
+    });
   }
 }
 

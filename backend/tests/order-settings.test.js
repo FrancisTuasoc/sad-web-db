@@ -8,6 +8,7 @@ const orderRepository = require('../src/repositories/orderRepository');
 const productRepository = require('../src/repositories/productRepository');
 const cartRepository = require('../src/repositories/cartRepository');
 const userRepository = require('../src/repositories/userRepository');
+const notificationRepository = require('../src/repositories/notificationRepository');
 
 let placeOrder;
 let updateOrderStatus;
@@ -66,6 +67,7 @@ function mockSuccessfulOrderDependencies(context, settingsOverrides = {}) {
   });
   context.mock.method(cartRepository, 'deleteMany', async () => {});
   context.mock.method(userRepository, 'findById', async () => null);
+  context.mock.method(notificationRepository, 'create', async () => ({}));
 
   return {
     dbQueries,
@@ -242,6 +244,7 @@ test('expired pay-at-shop orders are cancelled and their reserved stock is resto
       return { id: productId, _id: productId, stock: 10, isAvailable: true };
     }
   );
+  context.mock.method(notificationRepository, 'create', async () => ({}));
 
   assert.equal(await expirePayAtShopOrders(now), 1);
   assert.equal(order.status, 'cancelled');

@@ -8,6 +8,7 @@ const MIGRATIONS = [
   '20261011_store_location_highway.sql',
   '20261012_password_reset.sql',
   '20261012_order_checkout.sql',
+  '20261015_notifications.sql',
 ];
 
 async function runMigrations() {

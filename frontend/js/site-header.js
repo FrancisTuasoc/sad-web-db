@@ -30,6 +30,30 @@ class SiteHeader extends HTMLElement {
             <i class="fa-solid fa-cart-shopping fa-fw" aria-hidden="true"></i>
             <span id="header-cart-badge" class="cart-badge hidden">0</span>
           </a>
+          <div class="notification-center-wrapper hidden" id="header-notifications-wrapper" data-customer-only>
+            <button
+              type="button"
+              id="header-notification-btn"
+              class="notification-btn"
+              aria-label="Order Status Notifications"
+              title="Notifications"
+            >
+              <i class="fa-solid fa-bell fa-fw" aria-hidden="true"></i>
+              <span id="header-notification-badge" class="notification-badge hidden">0</span>
+            </button>
+            <div id="header-notification-dropdown" class="notification-dropdown">
+              <div class="notification-dropdown-header">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span class="notification-dropdown-title">Order Updates</span>
+                  <span class="badge badge-ready" style="font-size:0.65rem;padding:2px 6px;">LIVE</span>
+                </div>
+                <button type="button" id="header-mark-all-read-btn" class="btn-text-sm">Mark all read</button>
+              </div>
+              <div id="header-notification-list" class="notification-list">
+                <div class="notification-empty">No notifications yet.</div>
+              </div>
+            </div>
+          </div>
           <div id="header-user-slot">
             <a href="login.html" class="btn btn-primary btn-sm">Login</a>
           </div>

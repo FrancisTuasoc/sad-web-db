@@ -4,6 +4,7 @@ import {
   apiFetch,
   apiFetchBlob,
 } from './api.js';
+import { initCustomerNotifications } from './notifications.js';
 
 let headerAvatarObjectUrl = null;
 let headerAvatarRequestId = 0;
@@ -379,8 +380,11 @@ export function renderHeader(activeNav = '') {
         </div>
       `;
       loadHeaderAvatar(user, userSlot.querySelector('.avatar-circle'));
+      initCustomerNotifications();
     } else {
       userSlot.innerHTML = `<a href="login.html" class="btn btn-primary btn-sm">Login</a>`;
+      const notifWrapper = document.getElementById('header-notifications-wrapper');
+      if (notifWrapper) notifWrapper.classList.add('hidden');
     }
   }
 

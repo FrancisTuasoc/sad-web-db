@@ -9,6 +9,7 @@ import {
   setupBackToTop,
 } from './ui.js';
 import { requireAuth, getUser, resizeImageToDataUrl } from './auth.js';
+import { initAdminNotifications } from './notifications.js';
 
 let activeSection = 'dashboard';
 let dashboardStats = null;
@@ -2217,8 +2218,28 @@ function initAdmin() {
   setupAdminNavigation();
   attachAdminEventListeners();
   loadDashboardStats();
+  initAdminNotifications();
 
-  // Keep the visible dashboard and recent orders data current.
+  // Instant real-time refresh when customer orders change
+  window.addEventListener('gigabite:admin-order-changed', (e) => {
+    loadDashboardStats();
+    if (activeSection === 'orders') {
+      loadAdminOrders();
+    } else if (activeSection === 'recent-orders') {
+      loadDashboardRecentOrders();
+    }
+    const drawer = document.getElementById('order-drawer-modal');
+    if (
+      drawer &&
+      drawer.classList.contains('open') &&
+      e.detail &&
+      e.detail.orderId
+    ) {
+      openOrderDrawer(e.detail.orderId);
+    }
+  });
+
+  // Keep the visible dashboard and recent orders data current fallback
   setInterval(() => {
     if (activeSection === 'orders') {
       loadAdminOrders();

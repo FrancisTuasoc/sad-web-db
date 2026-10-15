@@ -32,6 +32,7 @@ const customerAccountRoutes = require('./src/routes/customerAccount.routes');
 const streamRoutes = require('./src/routes/stream.routes');
 const settingsRoutes = require('./src/routes/settings.routes');
 const adminRoutes = require('./src/routes/admin.routes');
+const notificationsRoutes = require('./src/routes/notifications.routes');
 
 const app = express();
 app.disable('x-powered-by');
@@ -93,6 +94,7 @@ app.use('/api/customer', customerAccountRoutes);
 app.use('/api/stream', streamRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 // 404 handler for unknown /api routes
 app.all('/api/*', (req, res) => {

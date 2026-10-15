@@ -46,6 +46,32 @@
             <span class="badge">ADMIN PORTAL</span>
           </div>
 
+          <div class="admin-header-actions header-actions">
+            <div class="notification-center-wrapper" id="admin-notifications-wrapper">
+              <button
+                type="button"
+                id="admin-notification-btn"
+                class="notification-btn"
+                aria-label="Admin Notifications"
+                title="Customer Order Alerts"
+              >
+                <i class="fa-solid fa-bell fa-fw" aria-hidden="true"></i>
+                <span id="admin-notification-badge" class="notification-badge hidden">0</span>
+              </button>
+              <div id="admin-notification-dropdown" class="notification-dropdown">
+                <div class="notification-dropdown-header">
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <span class="notification-dropdown-title">Customer Orders</span>
+                    <span class="badge badge-pending" style="font-size:0.65rem;padding:2px 6px;">LIVE</span>
+                  </div>
+                  <button type="button" id="admin-mark-all-read-btn" class="btn-text-sm">Mark all read</button>
+                </div>
+                <div id="admin-notification-list" class="notification-list">
+                  <div class="notification-empty">No order alerts yet.</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 

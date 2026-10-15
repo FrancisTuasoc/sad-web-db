@@ -3,8 +3,8 @@ const { addClient } = require('../services/events');
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  addClient(req, res);
+router.get('/', async (req, res) => {
+  await addClient(req, res);
 });
 
 module.exports = router;
