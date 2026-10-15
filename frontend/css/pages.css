@@ -7800,15 +7800,21 @@ body:has(.admin-layout) .site-header .header-container {
 }
 
 .receipt-secure-note {
-  display: grid;
-  grid-template-columns: 14px minmax(0, 1fr);
-  width: fit-content;
-  max-width: 100%;
-  align-items: start;
-  justify-content: center;
-  margin-right: auto;
-  margin-left: auto;
-  text-align: left;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 12px auto 0 !important;
+  text-align: center !important;
+  font-size: 0.8rem !important;
+  line-height: 1.45 !important;
+  color: var(--color-text-muted, #64748b) !important;
+}
+
+.receipt-secure-note span {
+  display: inline-block !important;
+  text-align: center !important;
+  font-size: inherit !important;
+  color: inherit !important;
 }
 
 @media (max-width: 600px) {

@@ -1499,6 +1499,20 @@ body.theme-dark .order-progress-circle.step-upcoming {
   border-color: #374151;
 }
 
+.order-progress-circle i {
+  font-size: 0.72rem !important;
+  line-height: 1 !important;
+  color: inherit !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.order-progress-circle.step-current i,
+.order-progress-circle.step-done i {
+  color: #ffffff !important;
+}
+
 .order-progress-label {
   font-size: clamp(0.68rem, 2.2vw, 0.78rem);
   font-weight: 600;

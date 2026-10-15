@@ -12229,3 +12229,18 @@ body.theme-dark .payment-method-dropdown {
   display: none !important;
 }
 
+/* Cart Checkout Secure Note Styling */
+.receipt-secure-note {
+  display: block !important;
+  width: 100% !important;
+  text-align: center !important;
+  margin: 10px auto 0 !important;
+  font-size: 0.82rem !important;
+  color: var(--color-text-muted, #53665a) !important;
+}
+
+.receipt-secure-note span {
+  display: inline-block !important;
+  text-align: center !important;
+}
+

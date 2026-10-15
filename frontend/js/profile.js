@@ -775,15 +775,19 @@ function renderOrderCard(order, isLive = false) {
     }
 
     const progressSteps = [
-      { label: 'Order Placed' },
-      { label: 'Being Prepared' },
+      { label: 'Order Placed', icon: 'fa-solid fa-receipt' },
+      { label: 'Being Prepared', icon: 'fa-solid fa-utensils' },
       {
         label:
           order.fulfillment === 'pickup'
             ? 'Ready to Pick Up'
             : 'Ready to Deliver',
+        icon:
+          order.fulfillment === 'pickup'
+            ? 'fa-solid fa-bag-shopping'
+            : 'fa-solid fa-truck-fast',
       },
-      { label: 'Completed' },
+      { label: 'Completed', icon: 'fa-solid fa-circle-check' },
     ];
 
     const fillPercent = Math.min(
@@ -798,7 +802,7 @@ function renderOrderCard(order, isLive = false) {
         desc: 'Your order was received and is waiting for store acceptance.',
       },
       preparing: {
-        icon: 'fa-solid fa-fire-burner',
+        icon: 'fa-solid fa-utensils',
         title: 'Kitchen is Cooking',
         desc: 'Our grill is sizzling! Your fresh items are actively being prepared.',
       },
@@ -847,11 +851,11 @@ function renderOrderCard(order, isLive = false) {
 
             let circleHtml = '';
             if (isDone) {
-              circleHtml = `<div class="order-progress-circle step-done" title="Step completed"><i class="fa-solid fa-check" aria-hidden="true"></i></div>`;
+              circleHtml = `<div class="order-progress-circle step-done" title="Step completed: ${escapeHtml(step.label)}"><i class="fa-solid fa-check" aria-hidden="true"></i></div>`;
             } else if (isCurrent) {
-              circleHtml = `<div class="order-progress-circle step-current" title="Current step">${index + 1}</div>`;
+              circleHtml = `<div class="order-progress-circle step-current" title="Current: ${escapeHtml(step.label)}"><i class="${step.icon}" aria-hidden="true"></i></div>`;
             } else {
-              circleHtml = `<div class="order-progress-circle step-upcoming" title="Upcoming step">${index + 1}</div>`;
+              circleHtml = `<div class="order-progress-circle step-upcoming" title="Upcoming: ${escapeHtml(step.label)}"><i class="${step.icon}" aria-hidden="true"></i></div>`;
             }
 
             return `
