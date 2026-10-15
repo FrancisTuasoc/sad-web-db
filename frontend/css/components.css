@@ -1025,10 +1025,15 @@ input[type='radio'] {
 
 .notification-btn:hover,
 .notification-btn:focus-visible {
-  color: var(--brand-primary, #e25822);
-  border-color: var(--brand-primary, #e25822);
-  background: color-mix(in srgb, var(--brand-primary, #e25822) 12%, transparent);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.18);
   transform: translateY(-1px);
+}
+
+.notification-btn i {
+  color: inherit;
+  font-size: 1rem;
 }
 
 body.admin-page .notification-btn {
@@ -1129,6 +1134,18 @@ body.theme-dark .notification-btn {
   color: var(--color-brand, #2A1E18);
 }
 
+body.theme-dark .notification-dropdown {
+  background: #1f2937;
+  border-color: #374151;
+  color: #f3f4f6;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+}
+
+body.theme-dark .notification-dropdown-header {
+  background: #111827;
+  border-bottom-color: #374151;
+}
+
 body.theme-dark .notification-dropdown-title {
   color: #f3f4f6;
 }
@@ -1212,8 +1229,8 @@ body.theme-dark .notification-item.unread {
 }
 
 .notification-icon-wrap {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1221,10 +1238,92 @@ body.theme-dark .notification-item.unread {
   flex-shrink: 0;
   font-size: 0.95rem;
   background: var(--color-surface-alt, #f3f4f6);
+  color: var(--color-text-main, #111827);
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
+.notification-icon-wrap svg {
+  display: block;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+/* Status-specific high-contrast styling for notification icons */
+.notification-icon-wrap.status-pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.notification-icon-wrap.status-preparing {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.notification-icon-wrap.status-ready {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.notification-icon-wrap.status-delivery {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.notification-icon-wrap.status-completed {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.notification-icon-wrap.status-cancelled {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.notification-icon-wrap.status-new-order {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+/* Dark mode status contrasts */
 body.theme-dark .notification-icon-wrap {
   background: #374151;
+  color: #e5e7eb;
+}
+
+body.theme-dark .notification-icon-wrap.status-pending {
+  background: rgba(245, 158, 11, 0.22);
+  color: #fbbf24;
+}
+
+body.theme-dark .notification-icon-wrap.status-preparing {
+  background: rgba(234, 88, 12, 0.22);
+  color: #fb923c;
+}
+
+body.theme-dark .notification-icon-wrap.status-ready {
+  background: rgba(99, 102, 241, 0.22);
+  color: #a5b4fc;
+}
+
+body.theme-dark .notification-icon-wrap.status-delivery {
+  background: rgba(14, 165, 233, 0.22);
+  color: #38bdf8;
+}
+
+body.theme-dark .notification-icon-wrap.status-completed {
+  background: rgba(34, 197, 94, 0.22);
+  color: #4ade80;
+}
+
+body.theme-dark .notification-icon-wrap.status-cancelled {
+  background: rgba(239, 68, 68, 0.22);
+  color: #f87171;
+}
+
+body.theme-dark .notification-icon-wrap.status-new-order {
+  background: rgba(168, 85, 247, 0.22);
+  color: #c084fc;
 }
 
 .notification-content {

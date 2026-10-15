@@ -328,8 +328,8 @@ async function placeOrder({
       userId,
       forAdmin: false,
       orderId: order.id,
-      title: 'Order Placed Successfully',
-      message: `Your order #${order.orderNumber} has been received and is waiting for store acceptance.`,
+      title: 'Order Placed',
+      message: `Order #${order.orderNumber} received. Awaiting store confirmation.`,
       type: 'order_status',
       status: 'pending',
     });
@@ -399,22 +399,22 @@ async function cancelOrder(
 
   try {
     let customerTitle = 'Order Cancelled';
-    let customerMessage = `Your order #${order.orderNumber} has been cancelled. Reserved stock was returned.`;
+    let customerMessage = `Order #${order.orderNumber} was cancelled.`;
     let adminTitle = 'Order Cancelled';
-    let adminMessage = `Order #${order.orderNumber} has been cancelled.`;
+    let adminMessage = `Order #${order.orderNumber} was cancelled.`;
 
     if (role === 'admin') {
-      customerTitle = 'Order Cancelled / Rejected by Store';
-      customerMessage = `Your order #${order.orderNumber} was cancelled by the store. Reserved stock was returned.`;
-      adminMessage = `Order #${order.orderNumber} was cancelled by admin. Reserved stock was returned.`;
+      customerTitle = 'Order Cancelled';
+      customerMessage = `Order #${order.orderNumber} was cancelled by the store.`;
+      adminMessage = `Order #${order.orderNumber} was cancelled by store admin.`;
     } else if (role === 'customer') {
-      adminTitle = 'Customer Cancelled Order';
-      adminMessage = `Order #${order.orderNumber} was cancelled by the customer. Reserved stock was returned.`;
+      adminTitle = 'Order Cancelled';
+      adminMessage = `Order #${order.orderNumber} was cancelled by the customer.`;
     } else if (role === 'system') {
       customerTitle = 'Order Expired';
-      customerMessage = `Order #${order.orderNumber} was automatically cancelled because the 1-hour arrival window expired.`;
-      adminTitle = 'Order Expired & Cancelled';
-      adminMessage = `Order #${order.orderNumber} expired and was automatically cancelled.`;
+      customerMessage = `Order #${order.orderNumber} expired and was cancelled.`;
+      adminTitle = 'Order Expired';
+      adminMessage = `Order #${order.orderNumber} expired and was cancelled.`;
     }
 
     const customerNotif = await notificationRepository.create({
@@ -532,26 +532,26 @@ async function updateOrderStatus(orderId, nextStatus) {
   try {
     const statusLabels = {
       preparing: {
-        title: 'Order Accepted & Preparing',
-        message: `Great news! Your order #${updated.orderNumber} was accepted by the shop and is now being freshly prepared.`,
+        title: 'Order Preparing',
+        message: `Order #${updated.orderNumber} is now being prepared.`,
       },
       ready_for_pickup: {
-        title: 'Order Ready for Pickup',
-        message: `Your order #${updated.orderNumber} is freshly cooked and ready for pickup at our shop!`,
+        title: 'Ready for Pickup',
+        message: `Order #${updated.orderNumber} is ready for pickup at the store.`,
       },
       ready_to_deliver: {
-        title: 'Order Out for Delivery',
-        message: `Your order #${updated.orderNumber} has been packed and is on its way to your address!`,
+        title: 'Out for Delivery',
+        message: `Order #${updated.orderNumber} is out for delivery.`,
       },
       completed: {
         title: 'Order Completed',
-        message: `Your order #${updated.orderNumber} has been marked as completed. Thank you for choosing GIGABITE!`,
+        message: `Order #${updated.orderNumber} has been completed.`,
       },
     };
 
     const info = statusLabels[nextStatus] || {
-      title: `Order Status: ${nextStatus.replace(/_/g, ' ')}`,
-      message: `Your order #${updated.orderNumber} is now ${nextStatus.replace(/_/g, ' ')}.`,
+      title: `Order ${nextStatus.replace(/_/g, ' ')}`,
+      message: `Order #${updated.orderNumber} is now ${nextStatus.replace(/_/g, ' ')}.`,
     };
 
     const userNotif = await notificationRepository.create({
@@ -626,7 +626,7 @@ async function completeOrder(orderId, userId) {
       forAdmin: false,
       orderId: completed.id,
       title: 'Order Completed',
-      message: `Thank you! You confirmed receipt of order #${completed.orderNumber}. Enjoy your meal!`,
+      message: `Order #${completed.orderNumber} delivery confirmed.`,
       type: 'order_status',
       status: 'completed',
     });
@@ -641,8 +641,8 @@ async function completeOrder(orderId, userId) {
     const adminNotif = await notificationRepository.create({
       forAdmin: true,
       orderId: completed.id,
-      title: 'Customer Confirmed Delivery',
-      message: `Order #${completed.orderNumber} was marked completed by the customer.`,
+      title: 'Delivery Confirmed',
+      message: `Order #${completed.orderNumber} delivery confirmed by customer.`,
       type: 'order_completed',
       status: 'completed',
     });

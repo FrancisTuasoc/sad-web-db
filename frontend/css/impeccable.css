@@ -93,17 +93,23 @@ h6 {
   gap: 4px;
 }
 
-.site-header .cart-btn {
+.site-header .cart-btn,
+.site-header .notification-btn {
   color: var(--color-surface) !important;
   background: rgba(255, 253, 250, 0.08) !important;
   border: 1px solid rgba(255, 253, 250, 0.2) !important;
   opacity: 1 !important;
 }
 
-.site-header .cart-btn:hover {
+.site-header .cart-btn:hover,
+.site-header .notification-btn:hover {
   color: var(--header-text) !important;
   border-color: var(--brand-primary-hover) !important;
   background: var(--brand-primary-hover) !important;
+}
+
+.site-header .notification-btn i {
+  color: inherit !important;
 }
 
 .site-header .cart-badge {
@@ -4685,6 +4691,11 @@ button,
 
 .site-header .cart-btn > .fa-solid {
   font-size: clamp(22px, 6vw, 26px);
+  line-height: 1;
+}
+
+.site-header .notification-btn > .fa-solid {
+  font-size: 20px;
   line-height: 1;
 }
 
@@ -9850,6 +9861,7 @@ body:not(.admin-page) .site-header .nav-links a:focus-visible,
 body:not(.admin-page) .site-header .cart-btn,
 body:not(.admin-page) .site-header .avatar-btn,
 body:not(.admin-page) .site-header .mobile-nav-toggle,
+body:not(.admin-page) .site-header .notification-btn,
 body:not(.admin-page) .site-header .mobile-drawer a,
 body:not(.admin-page) .site-header .header-actions svg,
 body:not(.admin-page) .site-header .header-actions i,
@@ -9862,6 +9874,7 @@ body.admin-page .site-header .nav-links a:focus-visible,
 body.admin-page .site-header .cart-btn,
 body.admin-page .site-header .avatar-btn,
 body.admin-page .site-header .mobile-nav-toggle,
+body.admin-page .site-header .notification-btn,
 body.admin-page .site-header .mobile-drawer a,
 body.admin-page .site-header .header-actions svg,
 body.admin-page .site-header .header-actions i,
@@ -9872,30 +9885,30 @@ body.admin-page .site-header #header-user-slot .btn-primary {
 body:not(.admin-page) .site-header .nav-links a:hover,
 body:not(.admin-page) .site-header .nav-links a.active,
 body:not(.admin-page) .site-header .nav-links a:focus-visible,
-body:not(.admin-page) .site-header :is(.cart-btn, .avatar-btn, .mobile-nav-toggle, #profile-sidebar-toggle),
+body:not(.admin-page) .site-header :is(.cart-btn, .avatar-btn, .mobile-nav-toggle, .notification-btn, #profile-sidebar-toggle),
 body:not(.admin-page) .site-header #header-user-slot .btn-primary,
 body.admin-page .site-header .nav-links a:hover,
 body.admin-page .site-header .nav-links a.active,
 body.admin-page .site-header .nav-links a:focus-visible,
-body.admin-page .site-header :is(.cart-btn, .avatar-btn, .mobile-nav-toggle, #profile-sidebar-toggle),
+body.admin-page .site-header :is(.cart-btn, .avatar-btn, .mobile-nav-toggle, .notification-btn, #profile-sidebar-toggle),
 body.admin-page .site-header #header-user-slot .btn-primary {
   background: var(--header-btn-bg) !important;
   border-color: var(--header-btn-border) !important;
 }
 
-body:not(.admin-page) .site-header :is(.cart-btn, .avatar-btn, .mobile-nav-toggle, #profile-sidebar-toggle):hover,
+body:not(.admin-page) .site-header :is(.cart-btn, .avatar-btn, .mobile-nav-toggle, .notification-btn, #profile-sidebar-toggle):hover,
 body:not(.admin-page) .site-header #header-user-slot .btn-primary:hover,
 body:not(.admin-page) .site-header .mobile-drawer a:hover,
 body:not(.admin-page) .site-header .mobile-drawer a.active,
-body.admin-page .site-header :is(.cart-btn, .avatar-btn, .mobile-nav-toggle, #profile-sidebar-toggle):hover,
+body.admin-page .site-header :is(.cart-btn, .avatar-btn, .mobile-nav-toggle, .notification-btn, #profile-sidebar-toggle):hover,
 body.admin-page .site-header #header-user-slot .btn-primary:hover,
 body.admin-page .site-header .mobile-drawer a:hover,
 body.admin-page .site-header .mobile-drawer a.active {
   background: var(--header-hover) !important;
 }
 
-body:not(.admin-page) .site-header :is(.cart-btn, .avatar-btn, .mobile-nav-toggle, #profile-sidebar-toggle),
-body.admin-page .site-header :is(.cart-btn, .avatar-btn, .mobile-nav-toggle, #profile-sidebar-toggle) {
+body:not(.admin-page) .site-header :is(.cart-btn, .avatar-btn, .mobile-nav-toggle, .notification-btn, #profile-sidebar-toggle),
+body.admin-page .site-header :is(.cart-btn, .avatar-btn, .mobile-nav-toggle, .notification-btn, #profile-sidebar-toggle) {
   border-color: var(--header-btn-border) !important;
 }
 
@@ -10032,12 +10045,14 @@ body:not(.admin-page) .site-header :is(
   .cart-btn,
   .avatar-btn,
   .mobile-nav-toggle,
+  .notification-btn,
   #profile-sidebar-toggle
 ),
 body:not(.admin-page) .site-header :is(
   .cart-btn,
   .avatar-btn,
   .mobile-nav-toggle,
+  .notification-btn,
   #profile-sidebar-toggle
 ):hover {
   border-color: transparent !important;
@@ -10536,6 +10551,7 @@ body:not(.admin-page).theme-dark .site-header .nav-links a:hover,
 body:not(.admin-page).theme-dark .site-header .nav-links a.active,
 body:not(.admin-page).theme-dark .site-header .nav-links a:focus-visible,
 body:not(.admin-page).theme-dark .site-header .cart-btn,
+body:not(.admin-page).theme-dark .site-header .notification-btn,
 body:not(.admin-page).theme-dark .site-header .avatar-btn,
 body:not(.admin-page).theme-dark .site-header .profile-control-button,
 body:not(.admin-page).theme-dark .site-header .mobile-nav-toggle,
@@ -10549,6 +10565,7 @@ body:not(.admin-page) .site-header.theme-dark .nav-links a:hover,
 body:not(.admin-page) .site-header.theme-dark .nav-links a.active,
 body:not(.admin-page) .site-header.theme-dark .nav-links a:focus-visible,
 body:not(.admin-page) .site-header.theme-dark .cart-btn,
+body:not(.admin-page) .site-header.theme-dark .notification-btn,
 body:not(.admin-page) .site-header.theme-dark .avatar-btn,
 body:not(.admin-page) .site-header.theme-dark .profile-control-button,
 body:not(.admin-page) .site-header.theme-dark .mobile-nav-toggle,

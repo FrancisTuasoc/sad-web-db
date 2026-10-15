@@ -53,8 +53,8 @@ async function backfill() {
       [
         order.user_id,
         order.id,
-        'Order Placed Successfully',
-        `Your order #${order.order_number} has been received and is waiting for store acceptance.`,
+        'Order Placed',
+        `Order #${order.order_number} received. Awaiting store confirmation.`,
         'order_status',
         'pending',
         order.created_at,
@@ -67,24 +67,24 @@ async function backfill() {
     for (const h of histories) {
       if (h.status === 'pending') continue; // already covered by placement
 
-      let title = `Order Status: ${h.status}`;
-      let message = `Your order #${order.order_number} is now ${h.status}.`;
+      let title = `Order ${h.status.replace(/_/g, ' ')}`;
+      let message = `Order #${order.order_number} is now ${h.status.replace(/_/g, ' ')}.`;
 
       if (h.status === 'preparing') {
-        title = 'Order Accepted & Preparing';
-        message = `Great news! Your order #${order.order_number} was accepted by the shop and is now being freshly prepared.`;
+        title = 'Order Preparing';
+        message = `Order #${order.order_number} is now being prepared.`;
       } else if (h.status === 'ready_for_pickup') {
-        title = 'Order Ready for Pickup';
-        message = `Your order #${order.order_number} is freshly cooked and ready for pickup at our shop!`;
+        title = 'Ready for Pickup';
+        message = `Order #${order.order_number} is ready for pickup at the store.`;
       } else if (h.status === 'ready_to_deliver') {
-        title = 'Order Out for Delivery';
-        message = `Your order #${order.order_number} has been packed and is on its way to your address!`;
+        title = 'Out for Delivery';
+        message = `Order #${order.order_number} is out for delivery.`;
       } else if (h.status === 'completed') {
         title = 'Order Completed';
-        message = `Your order #${order.order_number} has been marked as completed. Thank you for choosing GIGABITE!`;
+        message = `Order #${order.order_number} has been completed.`;
       } else if (h.status === 'cancelled') {
         title = 'Order Cancelled';
-        message = `Your order #${order.order_number} has been cancelled. Reserved stock was returned.`;
+        message = `Order #${order.order_number} was cancelled.`;
       }
 
       await query(

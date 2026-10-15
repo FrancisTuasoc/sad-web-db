@@ -57,26 +57,56 @@ function formatRelativeTime(dateInput) {
   return date.toLocaleDateString();
 }
 
-function getStatusIcon(type, status) {
-  switch (status) {
-    case 'pending':
-      return `<i class="fa-solid fa-clock" style="color:var(--color-warning, #d97706);" aria-hidden="true"></i>`;
-    case 'preparing':
-      return `<i class="fa-solid fa-fire-burner" style="color:#d97706;" aria-hidden="true"></i>`;
-    case 'ready_for_pickup':
-      return `<i class="fa-solid fa-store" style="color:#2563eb;" aria-hidden="true"></i>`;
-    case 'ready_to_deliver':
-      return `<i class="fa-solid fa-motorcycle" style="color:#2563eb;" aria-hidden="true"></i>`;
-    case 'completed':
-      return `<i class="fa-solid fa-circle-check" style="color:#16a34a;" aria-hidden="true"></i>`;
-    case 'cancelled':
-      return `<i class="fa-solid fa-circle-xmark" style="color:#dc2626;" aria-hidden="true"></i>`;
-    default:
-      if (type === 'new_order') {
-        return `<i class="fa-solid fa-receipt" style="color:#d97706;" aria-hidden="true"></i>`;
-      }
-      return `<i class="fa-solid fa-bell" style="color:var(--color-brand-secondary, #e25822);" aria-hidden="true"></i>`;
+export function getStatusMeta(type, status) {
+  const normStatus = (status || '').toLowerCase();
+  const normType = (type || '').toLowerCase();
+
+  if (normStatus === 'cancelled' || normType === 'order_cancelled') {
+    return {
+      cssClass: 'status-cancelled',
+      svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+    };
   }
+
+  if (normStatus === 'completed' || normType === 'order_completed') {
+    return {
+      cssClass: 'status-completed',
+      svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>`,
+    };
+  }
+
+  if (normStatus === 'ready_for_pickup' || normStatus === 'to_pickup') {
+    return {
+      cssClass: 'status-ready',
+      svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
+    };
+  }
+
+  if (normStatus === 'ready_to_deliver' || normStatus === 'to_ship') {
+    return {
+      cssClass: 'status-delivery',
+      svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`,
+    };
+  }
+
+  if (normStatus === 'preparing') {
+    return {
+      cssClass: 'status-preparing',
+      svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`,
+    };
+  }
+
+  if (normType === 'new_order') {
+    return {
+      cssClass: 'status-new-order',
+      svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
+    };
+  }
+
+  return {
+    cssClass: 'status-pending',
+    svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  };
 }
 
 // ---------------- CUSTOMER NOTIFICATIONS ----------------
@@ -168,12 +198,12 @@ function renderNotificationList(listElement, notifications, isAdminScope) {
   listElement.innerHTML = notifications
     .map((item) => {
       const isUnread = !item.isRead;
-      const icon = getStatusIcon(item.type, item.status);
+      const { cssClass, svg } = getStatusMeta(item.type, item.status);
       const timeAgo = formatRelativeTime(item.createdAt);
 
       return `
         <div class="notification-item ${isUnread ? 'unread' : ''}" data-id="${item.id}" data-order-id="${item.orderId || ''}">
-          <div class="notification-icon-wrap">${icon}</div>
+          <div class="notification-icon-wrap ${cssClass}">${svg}</div>
           <div class="notification-content">
             <div class="notification-item-title">${escapeHtml(item.title)}</div>
             <div class="notification-item-msg">${escapeHtml(item.message)}</div>
@@ -285,13 +315,13 @@ function handleCustomerIncomingNotification(notif) {
     const emptyNotice = list.querySelector('.notification-empty');
     if (emptyNotice) emptyNotice.remove();
 
-    const icon = getStatusIcon(notif.type, notif.status);
+    const { cssClass, svg } = getStatusMeta(notif.type, notif.status);
     const div = document.createElement('div');
     div.className = 'notification-item unread';
     div.setAttribute('data-id', notif.id);
     div.setAttribute('data-order-id', notif.orderId || '');
     div.innerHTML = `
-      <div class="notification-icon-wrap">${icon}</div>
+      <div class="notification-icon-wrap ${cssClass}">${svg}</div>
       <div class="notification-content">
         <div class="notification-item-title">${escapeHtml(notif.title)}</div>
         <div class="notification-item-msg">${escapeHtml(notif.message)}</div>
@@ -465,13 +495,13 @@ function handleAdminIncomingNotification(notif) {
     const emptyNotice = list.querySelector('.notification-empty');
     if (emptyNotice) emptyNotice.remove();
 
-    const icon = getStatusIcon(notif.type, notif.status);
+    const { cssClass, svg } = getStatusMeta(notif.type, notif.status);
     const div = document.createElement('div');
     div.className = 'notification-item unread';
     div.setAttribute('data-id', notif.id);
     div.setAttribute('data-order-id', notif.orderId || '');
     div.innerHTML = `
-      <div class="notification-icon-wrap">${icon}</div>
+      <div class="notification-icon-wrap ${cssClass}">${svg}</div>
       <div class="notification-content">
         <div class="notification-item-title">${escapeHtml(notif.title)}</div>
         <div class="notification-item-msg">${escapeHtml(notif.message)}</div>
