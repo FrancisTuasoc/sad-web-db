@@ -1415,24 +1415,33 @@ body.theme-dark .notification-item-msg {
   }
 }
 
-/* Customer Order Progress Tracker Responsive Typography */
+/* Customer Order Progress Tracker Responsive Typography & Visuals */
 .order-progress-tracker {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin: 14px 0 16px;
+  margin: 16px 0 14px;
   position: relative;
   width: 100%;
 }
 
 .order-progress-line {
   position: absolute;
-  top: 11px;
+  top: 14px;
   left: 12.5%;
   right: 12.5%;
-  height: 2px;
-  background: var(--color-border, #e5e7eb);
+  height: 3px;
+  background: var(--color-border, #e2e8f0);
   z-index: 1;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.order-progress-line-fill {
+  height: 100%;
+  background: var(--brand-primary, #216a3c);
+  border-radius: 3px;
+  transition: width 350ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .order-progress-step {
@@ -1441,10 +1450,10 @@ body.theme-dark .notification-item-msg {
   min-width: 0;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   z-index: 2;
   background: var(--color-surface, #ffffff);
-  padding: 0 2px;
+  padding: 0 4px;
   text-align: center;
 }
 
@@ -1453,29 +1462,122 @@ body.theme-dark .order-progress-step {
 }
 
 .order-progress-circle {
-  width: 22px;
-  height: 22px;
-  flex: 0 0 22px;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 700;
+  transition: all 180ms ease;
+}
+
+.order-progress-circle.step-done {
+  background: var(--brand-primary, #216a3c) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(33, 106, 60, 0.25);
+}
+
+.order-progress-circle.step-current {
+  background: var(--brand-primary, #216a3c) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 4px rgba(33, 106, 60, 0.22), 0 2px 8px rgba(33, 106, 60, 0.35);
+  font-weight: 800;
+}
+
+.order-progress-circle.step-upcoming {
+  background: var(--color-surface-alt, #f1f5f9);
+  color: #94a3b8;
+  border: 1.5px solid #cbd5e1;
+}
+
+body.theme-dark .order-progress-circle.step-upcoming {
+  background: #111827;
+  color: #6b7280;
+  border-color: #374151;
 }
 
 .order-progress-label {
-  font-size: clamp(0.64rem, 2.3vw, 0.76rem);
+  font-size: clamp(0.68rem, 2.2vw, 0.78rem);
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.25;
   word-break: break-word;
   hyphens: auto;
   max-width: 100%;
-  color: var(--color-text-main, #1f2937);
+  color: var(--color-text-muted, #64748b);
+  transition: color 180ms ease;
 }
 
-body.theme-dark .order-progress-label {
-  color: var(--color-text-main, #f3f4f6);
+.order-progress-step.is-done .order-progress-label,
+.order-progress-step.is-current .order-progress-label {
+  color: var(--color-text-main, #0f172a);
+  font-weight: 700;
+}
+
+body.theme-dark .order-progress-step.is-done .order-progress-label,
+body.theme-dark .order-progress-step.is-current .order-progress-label {
+  color: #f8fafc;
+}
+
+/* Order Status Guidance Banner */
+.order-status-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #edf7f0;
+  border: 1px solid #c9e3d1;
+  border-radius: 10px;
+  margin-top: 14px;
+}
+
+body.theme-dark .order-status-banner {
+  background: #172b1e;
+  border-color: #274b33;
+}
+
+.order-status-banner-icon {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 8px;
+  background: rgba(33, 106, 60, 0.15);
+  color: #216a3c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+body.theme-dark .order-status-banner-icon {
+  background: rgba(52, 211, 153, 0.2);
+  color: #6ee7b7;
+}
+
+.order-status-banner-text strong {
+  display: block;
+  font-size: 0.88rem;
+  color: #1b4329;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+body.theme-dark .order-status-banner-text strong {
+  color: #e2fbe8;
+}
+
+.order-status-banner-text span {
+  display: block;
+  font-size: 0.8rem;
+  color: #3e684d;
+  line-height: 1.35;
+  margin-top: 2px;
+}
+
+body.theme-dark .order-status-banner-text span {
+  color: #9cbca7;
 }
 
 

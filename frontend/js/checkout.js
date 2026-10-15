@@ -37,6 +37,10 @@ function hasValidGcashReference() {
 }
 
 function getSelectedPaymentMethod() {
+  const select = document.getElementById('payment-method-select');
+  if (select && select.value) {
+    return select.value;
+  }
   return (
     document.querySelector('input[name="payment_method"]:checked')?.value ||
     paymentMethod
@@ -499,7 +503,7 @@ function renderPaymentOptions() {
 
   if (!fulfillmentMethod) {
     container.innerHTML =
-      '<p class="text-muted">Choose pickup or delivery first.</p>';
+      '<p class="text-muted" style="margin:0;font-size:0.88rem;">Choose pickup or delivery first.</p>';
     document.getElementById('gcash-payment-box')?.classList.add('hidden');
     document
       .getElementById('pay-at-shop-arrival-note')
@@ -508,88 +512,87 @@ function renderPaymentOptions() {
     return;
   }
 
-  let optionsHtml = '';
+  const options = [];
 
   // GCash option
   if (publicSettings.gcashEnabled) {
-    optionsHtml += `
-      <label class="payment-option-label">
-        <input type="radio" name="payment_method" value="gcash" ${paymentMethod === 'gcash' ? 'checked' : ''}>
-        <div>
-          <span class="payment-option-title">GCash</span>
-        </div>
-      </label>
-    `;
+    options.push({
+      value: 'gcash',
+      label: 'GCash (Digital Wallet / QR Pay)',
+    });
   }
 
   // Pickup specific option: Pay at shop
   if (fulfillmentMethod === 'pickup' && publicSettings.payAtShopEnabled) {
-    optionsHtml += `
-      <label class="payment-option-label">
-        <input type="radio" name="payment_method" value="pay_at_shop" ${paymentMethod === 'pay_at_shop' ? 'checked' : ''}>
-        <div>
-          <span style="font-weight:700;">Pay at the Shop</span>
-          <div style="font-size:0.78rem;color:var(--color-text-muted);">Pay in cash when you pick up your hot order</div>
-        </div>
-      </label>
-    `;
+    options.push({
+      value: 'pay_at_shop',
+      label: 'Pay at the Shop (Cash on pickup)',
+    });
   }
 
   // Delivery specific option: Cash on Delivery (COD)
   if (fulfillmentMethod === 'delivery' && publicSettings.codEnabled) {
-    optionsHtml += `
-      <label class="payment-option-label">
-        <input type="radio" name="payment_method" value="cod" ${paymentMethod === 'cod' ? 'checked' : ''}>
-        <div>
-          <span style="font-weight:700;">Cash on Delivery (COD)</span>
-          <div style="font-size:0.78rem;color:var(--color-text-muted);">Pay directly to the delivery rider</div>
-        </div>
-      </label>
-    `;
-  }
-
-  container.innerHTML = optionsHtml;
-
-  // Ensure selected payment method is valid for the current fulfillment
-  const availableValues = Array.from(
-    container.querySelectorAll('input[name="payment_method"]')
-  ).map((el) => el.value);
-  if (!availableValues.includes(paymentMethod)) {
-    paymentMethod = null;
-  }
-
-  // GCash details box visibility
-  const gcashBox = document.getElementById('gcash-payment-box');
-  if (gcashBox) {
-    if (paymentMethod === 'gcash') {
-      gcashBox.classList.remove('hidden');
-    } else {
-      gcashBox.classList.add('hidden');
-    }
-  }
-  document
-    .getElementById('pay-at-shop-arrival-note')
-    ?.classList.toggle('hidden', paymentMethod !== 'pay_at_shop');
-  if (availableValues.length === 0) {
-    container.innerHTML =
-      '<p class="text-muted">No payment methods are currently available for this order type. Please contact the shop.</p>';
-  }
-
-  // Bind change events
-  container
-    .querySelectorAll('input[name="payment_method"]')
-    .forEach((radio) => {
-      radio.addEventListener('change', () => {
-        paymentMethod = radio.value;
-        if (gcashBox) {
-          gcashBox.classList.toggle('hidden', paymentMethod !== 'gcash');
-        }
-        document
-          .getElementById('pay-at-shop-arrival-note')
-          ?.classList.toggle('hidden', paymentMethod !== 'pay_at_shop');
-        updateReceipt();
-      });
+    options.push({
+      value: 'cod',
+      label: 'Cash on Delivery (COD)',
     });
+  }
+
+  if (options.length === 0) {
+    container.innerHTML =
+      '<p class="text-muted" style="margin:0;font-size:0.88rem;">No payment methods are currently available for this order type. Please contact the shop.</p>';
+    document.getElementById('gcash-payment-box')?.classList.add('hidden');
+    document
+      .getElementById('pay-at-shop-arrival-note')
+      ?.classList.add('hidden');
+    paymentMethod = null;
+    return;
+  }
+
+  const validValues = options.map((opt) => opt.value);
+  if (!paymentMethod || !validValues.includes(paymentMethod)) {
+    paymentMethod = options[0].value;
+  }
+
+  container.innerHTML = `
+    <div class="form-group payment-select-wrap" style="margin: 0; width: 100%;">
+      <label for="payment-method-select" class="form-label" style="font-weight: 600; font-size: 0.88rem; margin-bottom: 6px; display: block;">
+        Payment Option
+      </label>
+      <select id="payment-method-select" name="payment_method" class="form-select payment-method-dropdown" style="width: 100%; min-height: 42px; font-weight: 600; cursor: pointer; border-radius: 8px;">
+        ${options
+          .map(
+            (opt) =>
+              `<option value="${opt.value}" ${paymentMethod === opt.value ? 'selected' : ''}>${opt.label}</option>`
+          )
+          .join('')}
+      </select>
+    </div>
+  `;
+
+  const gcashBox = document.getElementById('gcash-payment-box');
+  const arrivalNote = document.getElementById('pay-at-shop-arrival-note');
+
+  if (gcashBox) {
+    gcashBox.classList.toggle('hidden', paymentMethod !== 'gcash');
+  }
+  if (arrivalNote) {
+    arrivalNote.classList.toggle('hidden', paymentMethod !== 'pay_at_shop');
+  }
+
+  const select = container.querySelector('#payment-method-select');
+  if (select) {
+    select.addEventListener('change', (e) => {
+      paymentMethod = e.target.value;
+      if (gcashBox) {
+        gcashBox.classList.toggle('hidden', paymentMethod !== 'gcash');
+      }
+      if (arrivalNote) {
+        arrivalNote.classList.toggle('hidden', paymentMethod !== 'pay_at_shop');
+      }
+      updateReceipt();
+    });
+  }
 }
 
 function initContactDetails() {

@@ -538,11 +538,13 @@ async function loadCustomerStats() {
       if (!activeOrders.length) {
         tracker.innerHTML = `
           <div class="mini-tracker-title">Current active order</div>
-          <div class="mini-tracker-card">
-            <div class="mini-tracker-icon">✓</div>
+          <div class="mini-tracker-card" style="opacity: 0.85;">
+            <div class="mini-tracker-icon" style="background: #f1f5f9; color: #64748b; font-size: 1.1rem; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="fa-solid fa-burger" aria-hidden="true"></i>
+            </div>
             <div class="mini-tracker-meta">
               <strong>No active order</strong>
-              <span>Browse the menu to place one.</span>
+              <span>Browse the menu to place an order.</span>
             </div>
           </div>
         `;
@@ -552,21 +554,31 @@ async function loadCustomerStats() {
       const activeOrder = activeOrders[0];
       const statusLabel =
         {
-          pending: 'Pending',
-          preparing: 'Being prepared',
-          ready_for_pickup: 'Ready for pickup',
-          ready_to_deliver: 'Ready to deliver',
-          to_pickup: 'To pick up',
-          to_ship: 'To ship',
+          pending: 'Pending Acceptance',
+          preparing: 'Being Prepared',
+          ready_for_pickup: 'Ready for Pickup',
+          ready_to_deliver: 'Ready to Deliver',
+          to_pickup: 'Ready for Pickup',
+          to_ship: 'Ready to Deliver',
         }[activeOrder.status] || activeOrder.status;
+
+      const fulfillmentIcon =
+        activeOrder.fulfillment === 'pickup'
+          ? 'fa-solid fa-bag-shopping'
+          : 'fa-solid fa-truck-fast';
 
       tracker.innerHTML = `
         <div class="mini-tracker-title">Current active order</div>
         <div class="mini-tracker-card">
-          <div class="mini-tracker-icon">${activeOrder.fulfillment === 'pickup' ? 'P' : 'D'}</div>
-          <div class="mini-tracker-meta">
-            <strong>#${escapeHtml(activeOrder.orderNumber)}</strong>
-            <span>${escapeHtml(statusLabel)} · ₱${Number(activeOrder.total || 0).toFixed(2)}</span>
+          <div class="mini-tracker-icon" style="background: #eaf3ed; color: #216a3c; font-size: 1.15rem; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <i class="${fulfillmentIcon}" aria-hidden="true"></i>
+          </div>
+          <div class="mini-tracker-meta" style="flex: 1;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <strong>#${escapeHtml(activeOrder.orderNumber)}</strong>
+              <span class="badge badge-${escapeHtml(activeOrder.status)}" style="font-size: 0.74rem;">${escapeHtml(statusLabel)}</span>
+            </div>
+            <span style="font-size: 0.82rem; color: var(--color-text-muted);">${activeOrder.fulfillment === 'pickup' ? 'Pick Up' : 'Delivery'} · ₱${Number(activeOrder.total || 0).toFixed(2)}</span>
           </div>
         </div>
       `;
@@ -750,45 +762,113 @@ function renderOrderCard(order, isLive = false) {
       'to_ship',
       'completed',
     ].includes(order.status);
+
+    let currentStepIndex = 0;
+    if (order.status === 'completed') {
+      currentStepIndex = 3;
+    } else if (orderIsReady) {
+      currentStepIndex = 2;
+    } else if (order.status === 'preparing') {
+      currentStepIndex = 1;
+    } else {
+      currentStepIndex = 0;
+    }
+
     const progressSteps = [
-      { label: 'Order Placed', active: true },
-      {
-        label: 'Being Prepared',
-        active: order.status === 'preparing' || orderIsReady,
-      },
+      { label: 'Order Placed' },
+      { label: 'Being Prepared' },
       {
         label:
           order.fulfillment === 'pickup'
             ? 'Ready to Pick Up'
             : 'Ready to Deliver',
-        active: orderIsReady,
       },
-      { label: 'Completed', active: order.status === 'completed' },
+      { label: 'Completed' },
     ];
+
+    const fillPercent = Math.min(
+      100,
+      Math.max(0, (currentStepIndex / (progressSteps.length - 1)) * 100)
+    );
+
+    const statusContextMap = {
+      pending: {
+        icon: 'fa-solid fa-clock-rotate-left',
+        title: 'Order Confirmed',
+        desc: 'Your order was received and is waiting for store acceptance.',
+      },
+      preparing: {
+        icon: 'fa-solid fa-fire-burner',
+        title: 'Kitchen is Cooking',
+        desc: 'Our grill is sizzling! Your fresh items are actively being prepared.',
+      },
+      ready_for_pickup: {
+        icon: 'fa-solid fa-bag-shopping',
+        title: 'Ready for Pick Up!',
+        desc: 'Your hot meal is freshly packed at the counter. Please show your order number.',
+      },
+      to_pickup: {
+        icon: 'fa-solid fa-bag-shopping',
+        title: 'Ready for Pick Up!',
+        desc: 'Your hot meal is freshly packed at the counter. Please show your order number.',
+      },
+      ready_to_deliver: {
+        icon: 'fa-solid fa-truck-fast',
+        title: 'Out for Delivery!',
+        desc: 'Your freshly prepared meal is on its way with our rider.',
+      },
+      to_ship: {
+        icon: 'fa-solid fa-truck-fast',
+        title: 'Out for Delivery!',
+        desc: 'Your freshly prepared meal is on its way with our rider.',
+      },
+      completed: {
+        icon: 'fa-solid fa-circle-check',
+        title: 'Order Completed',
+        desc: 'Thank you for ordering with Gigabite! Enjoy your meal.',
+      },
+    };
+
+    const ctx = statusContextMap[order.status] || {
+      icon: 'fa-solid fa-info-circle',
+      title: statusLabels[order.status] || 'Order Status',
+      desc: 'Your order is progressing smoothly.',
+    };
 
     progressTracker = `
       <div class="order-progress-tracker">
-        <div class="order-progress-line"></div>
+        <div class="order-progress-line">
+          <div class="order-progress-line-fill" style="width: ${fillPercent}%;"></div>
+        </div>
         ${progressSteps
-          .map(
-            (step, index) => {
-              const isFinalStep = index === progressSteps.length - 1;
-              const circleColor = step.active
-                ? isFinalStep
-                  ? 'var(--color-success)'
-                  : 'var(--color-accent)'
-                : 'var(--color-border)';
-              const circleTextColor =
-                step.active && isFinalStep ? '#fff' : '#2A1E18';
-              return `
-                <div class="order-progress-step">
-                  <div class="order-progress-circle" style="background:${circleColor};color:${circleTextColor};">${index + 1}</div>
-                  <span class="order-progress-label">${step.label}</span>
-                </div>
-              `;
+          .map((step, index) => {
+            const isDone = index < currentStepIndex || order.status === 'completed';
+            const isCurrent = index === currentStepIndex && order.status !== 'completed';
+
+            let circleHtml = '';
+            if (isDone) {
+              circleHtml = `<div class="order-progress-circle step-done" title="Step completed"><i class="fa-solid fa-check" aria-hidden="true"></i></div>`;
+            } else if (isCurrent) {
+              circleHtml = `<div class="order-progress-circle step-current" title="Current step">${index + 1}</div>`;
+            } else {
+              circleHtml = `<div class="order-progress-circle step-upcoming" title="Upcoming step">${index + 1}</div>`;
             }
-          )
+
+            return `
+              <div class="order-progress-step ${isDone ? 'is-done' : ''} ${isCurrent ? 'is-current' : ''}">
+                ${circleHtml}
+                <span class="order-progress-label">${step.label}</span>
+              </div>
+            `;
+          })
           .join('')}
+      </div>
+      <div class="order-status-banner">
+        <div class="order-status-banner-icon"><i class="${ctx.icon}" aria-hidden="true"></i></div>
+        <div class="order-status-banner-text">
+          <strong>${escapeHtml(ctx.title)}</strong>
+          <span>${escapeHtml(ctx.desc)}</span>
+        </div>
       </div>
     `;
   }

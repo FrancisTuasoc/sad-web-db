@@ -12134,3 +12134,98 @@ body.theme-dark .logout-modal-card p {
   color: #9ca3af !important;
 }
 
+/* Logout Confirmation Modal Button Colors */
+#logout-confirm-modal .logout-modal-yes,
+#logout-confirm-btn.logout-modal-yes,
+.logout-modal-card .logout-modal-yes {
+  background: #991b1b !important; /* dark red */
+  color: #ffffff !important;
+  border: 1px solid #7f1d1d !important;
+  font-weight: 700 !important;
+  transition: all 180ms ease !important;
+}
+
+#logout-confirm-modal .logout-modal-yes:hover,
+#logout-confirm-modal .logout-modal-yes:focus-visible,
+#logout-confirm-btn.logout-modal-yes:hover,
+#logout-confirm-btn.logout-modal-yes:focus-visible,
+.logout-modal-card .logout-modal-yes:hover,
+.logout-modal-card .logout-modal-yes:focus-visible {
+  background: #ef4444 !important; /* light red */
+  color: #ffffff !important;
+  border-color: #dc2626 !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
+}
+
+#logout-confirm-modal .logout-modal-yes:is(:active, :focus, .active) {
+  background: #b91c1c !important;
+  color: #ffffff !important;
+  border-color: #991b1b !important;
+}
+
+#logout-confirm-modal .logout-modal-no,
+#logout-cancel-btn.logout-modal-no,
+.logout-modal-card .logout-modal-no {
+  background: #14532d !important; /* dark green */
+  color: #ffffff !important;
+  border: 1px solid #0f3d21 !important;
+  font-weight: 700 !important;
+  transition: all 180ms ease !important;
+}
+
+#logout-confirm-modal .logout-modal-no:hover,
+#logout-confirm-modal .logout-modal-no:focus-visible,
+#logout-cancel-btn.logout-modal-no:hover,
+#logout-cancel-btn.logout-modal-no:focus-visible,
+.logout-modal-card .logout-modal-no:hover,
+.logout-modal-card .logout-modal-no:focus-visible {
+  background: #22c55e !important; /* light green */
+  color: #ffffff !important;
+  border-color: #16a34a !important;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4) !important;
+}
+
+#logout-confirm-modal .logout-modal-no:is(:active, :focus, .active) {
+  background: #166534 !important;
+  color: #ffffff !important;
+  border-color: #14532d !important;
+}
+
+/* Payment Method Dropdown styling */
+.payment-select-wrap {
+  width: 100% !important;
+}
+
+.payment-method-dropdown {
+  background-color: var(--color-surface, #ffffff) !important;
+  color: var(--color-text-main, #1f2937) !important;
+  border: 1px solid var(--color-border, #d1d5db) !important;
+  font-size: 0.92rem !important;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+}
+
+body.theme-dark .payment-method-dropdown {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+  border-color: #374151 !important;
+}
+
+/* Footer Facebook Link & Text Adjustments */
+.footer-facebook-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  text-decoration: none !important;
+}
+
+.footer-facebook-text {
+  font-size: 0.8rem !important;
+  color: inherit !important;
+  line-height: 1.4 !important;
+}
+
+.footer-facebook-arrow {
+  display: none !important;
+}
+

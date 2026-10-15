@@ -89,9 +89,9 @@ export function promptLogout() {
         <p style="margin: 0 0 24px 0; color: var(--color-text-muted, #4b5563); font-size: 0.95rem; line-height: 1.45;">
           Are you sure you want to log out?
         </p>
-        <div style="display: flex; gap: 12px; justify-content: center;">
-          <button type="button" id="logout-cancel-btn" class="btn btn-secondary" style="flex: 1; min-height: 42px; font-weight: 700;">No</button>
-          <button type="button" id="logout-confirm-btn" class="btn btn-danger" style="flex: 1; min-height: 42px; font-weight: 700;">Yes</button>
+        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 8px;">
+          <button type="button" id="logout-cancel-btn" class="btn logout-modal-btn logout-modal-no" style="flex: 1; min-height: 44px; font-weight: 700;">No</button>
+          <button type="button" id="logout-confirm-btn" class="btn logout-modal-btn logout-modal-yes" style="flex: 1; min-height: 44px; font-weight: 700;">Yes</button>
         </div>
       </div>
     `;
