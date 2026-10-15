@@ -1261,38 +1261,58 @@ textarea,
 
 .profile-page .profile-layout.customer-area .profile-nav-btn :is(i, svg) {
   display: inline-flex;
-  width: 32px;
-  height: 32px;
-  flex: 0 0 32px;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--brand-primary) 16%, transparent);
-  border-radius: var(--radius-btn);
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 18%, transparent);
+  border-radius: 9px;
   background: color-mix(in srgb, var(--brand-primary) 8%, transparent);
   color: var(--brand-primary);
-  font-size: 0.9rem;
+  font-size: 0.92rem;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.18s ease, color 0.18s ease;
+}
+
+.profile-page .profile-layout.customer-area .profile-nav-btn:hover:not(.active) :is(i, svg) {
+  transform: scale(1.08);
+  background: color-mix(in srgb, var(--brand-primary) 16%, transparent);
+  color: var(--brand-primary);
 }
 
 .profile-page .profile-layout.customer-area .profile-nav-btn.active,
-.profile-page .profile-layout.customer-area .profile-nav-btn.active span,
-.profile-page .profile-layout.customer-area .profile-nav-btn.active :is(i, svg) {
+.profile-page .profile-layout.customer-area .profile-nav-btn.active span {
   border-color: var(--brand-primary) !important;
   background: var(--brand-primary) !important;
   color: var(--brand-on-primary) !important;
-  box-shadow: none !important;
+  box-shadow: 0 2px 8px rgba(33, 106, 60, 0.22) !important;
+}
+
+.profile-page .profile-layout.customer-area .profile-nav-btn.active :is(i, svg) {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+  color: var(--brand-primary) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18) !important;
+  transform: scale(1.05);
 }
 
 body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn.active,
-body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn.active span,
-body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn.active :is(i, svg) {
+body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn.active span {
   border-color: var(--brand-primary) !important;
   background: var(--brand-primary) !important;
   color: var(--brand-on-primary) !important;
 }
 
+body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn.active :is(i, svg) {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+  color: var(--brand-primary) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18) !important;
+}
+
 body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn:not(.active) :is(i, svg) {
-  border-color: color-mix(in srgb, var(--brand-primary) 16%, transparent) !important;
+  border-color: color-mix(in srgb, var(--brand-primary) 18%, transparent) !important;
   background: color-mix(in srgb, var(--brand-primary) 8%, transparent) !important;
   color: var(--brand-primary) !important;
 }
@@ -9123,15 +9143,76 @@ body.cart-page #cart-empty-state {
 }
 
 .profile-page .profile-layout.customer-area .customer-stat-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-btn);
-  background: color-mix(in srgb, var(--brand-primary) 10%, transparent) !important;
-  color: var(--brand-primary) !important;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-radius: 13px !important;
+  font-size: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
 }
 
-body.profile-page .profile-layout.customer-area .customer-stat-card .customer-stat-icon {
-  color: var(--brand-primary) !important;
+body.profile-page .profile-layout.customer-area .customer-stat-card:hover .customer-stat-icon {
+  transform: scale(1.08) translateY(-1px);
+}
+
+/* Orders KPI icon */
+body.profile-page .profile-layout.customer-area .customer-stat-orders .customer-stat-icon {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border: 1.5px solid #bfdbfe !important;
+  box-shadow: 0 2px 8px rgba(29, 78, 216, 0.12) !important;
+}
+
+/* Pending KPI icon */
+body.profile-page .profile-layout.customer-area .customer-stat-pending .customer-stat-icon {
+  background: #fffbeb !important;
+  color: #b45309 !important;
+  border: 1.5px solid #fde68a !important;
+  box-shadow: 0 2px 8px rgba(180, 83, 9, 0.12) !important;
+}
+
+/* Delivered KPI icon */
+body.profile-page .profile-layout.customer-area .customer-stat-delivered .customer-stat-icon {
+  background: #f0fdf4 !important;
+  color: #15803d !important;
+  border: 1.5px solid #bbf7d0 !important;
+  box-shadow: 0 2px 8px rgba(21, 128, 61, 0.12) !important;
+}
+
+/* Spent KPI icon */
+body.profile-page .profile-layout.customer-area .customer-stat-spent .customer-stat-icon {
+  background: #ecfdf5 !important;
+  color: #047857 !important;
+  border: 1.5px solid #a7f3d0 !important;
+  box-shadow: 0 2px 8px rgba(4, 120, 87, 0.12) !important;
+}
+
+/* Dark mode contrasts */
+body.theme-dark.profile-page .customer-stat-orders .customer-stat-icon {
+  background: rgba(37, 99, 235, 0.22) !important;
+  color: #93c5fd !important;
+  border-color: rgba(147, 197, 253, 0.3) !important;
+}
+
+body.theme-dark.profile-page .customer-stat-pending .customer-stat-icon {
+  background: rgba(217, 119, 6, 0.22) !important;
+  color: #fde68a !important;
+  border-color: rgba(253, 230, 138, 0.3) !important;
+}
+
+body.theme-dark.profile-page .customer-stat-delivered .customer-stat-icon {
+  background: rgba(22, 163, 74, 0.22) !important;
+  color: #86efac !important;
+  border-color: rgba(134, 239, 172, 0.3) !important;
+}
+
+body.theme-dark.profile-page .customer-stat-spent .customer-stat-icon {
+  background: rgba(5, 150, 105, 0.22) !important;
+  color: #6ee7b7 !important;
+  border-color: rgba(110, 231, 183, 0.3) !important;
 }
 
 .profile-page .profile-layout.customer-area .customer-stat-value {
@@ -10665,6 +10746,19 @@ body.theme-dark.profile-page .customer-sidebar .profile-nav-btn:hover:not(.activ
   background: #3a2d23 !important;
 }
 
+body.theme-dark.profile-page .customer-sidebar .profile-nav-btn:not(.active) :is(i, svg) {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f5eee5 !important;
+}
+
+body.theme-dark.profile-page .customer-sidebar .profile-nav-btn.active :is(i, svg) {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+  color: var(--brand-primary, #216a3c) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
 
 body.theme-dark.profile-page .status-pill {
   border-color: #574333 !important;
@@ -11747,67 +11841,71 @@ body.admin-page .admin-header-brand .brand-logo img {
 }
 
 body.admin-page .admin-layout .admin-sidebar .admin-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px !important;
+  border-radius: 10px !important;
   font-size: 0.9rem !important;
   font-weight: 600 !important;
+  color: rgba(255, 255, 255, 0.78) !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease, transform 0.18s ease !important;
+}
+
+body.admin-page .admin-layout .admin-sidebar .admin-nav-item:not(.active):hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  transform: translateX(2px);
+}
+
+body.admin-page .admin-layout .admin-sidebar .admin-nav-item.active {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
 }
 
 body.admin-page .admin-layout .admin-sidebar .admin-nav-item > i {
-  width: 34px;
-  height: 34px;
-  flex-basis: 34px;
-  border-radius: 10px;
-  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 9px;
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 
-body.admin-page .admin-layout .admin-sidebar .admin-nav-item[data-section="dashboard"] > i {
-  background: rgba(96, 165, 250, 0.2) !important;
-  color: #bfdbfe !important;
-}
-
-body.admin-page .admin-layout .admin-sidebar .admin-nav-item[data-section="orders"] > i {
-  background: rgba(251, 146, 60, 0.2) !important;
-  color: #fed7aa !important;
-}
-
-body.admin-page .admin-layout .admin-sidebar .admin-nav-item[data-section="recent-orders"] > i {
-  background: rgba(167, 139, 250, 0.2) !important;
-  color: #ddd6fe !important;
-}
-
-body.admin-page .admin-layout .admin-sidebar .admin-nav-item[data-section="top-items"] > i {
-  background: rgba(250, 204, 21, 0.2) !important;
-  color: #fef08a !important;
-}
-
-body.admin-page .admin-layout .admin-sidebar .admin-nav-item[data-section="menu"] > i {
-  background: rgba(74, 222, 128, 0.2) !important;
-  color: #bbf7d0 !important;
-}
-
-body.admin-page .admin-layout .admin-sidebar .admin-nav-item[data-section="categories"] > i {
-  background: rgba(45, 212, 191, 0.2) !important;
-  color: #99f6e4 !important;
-}
-
-body.admin-page .admin-layout .admin-sidebar .admin-nav-item[data-section="customers"] > i {
-  background: rgba(56, 189, 248, 0.2) !important;
-  color: #bae6fd !important;
-}
-
-body.admin-page .admin-layout .admin-sidebar .admin-nav-item[data-section="settings"] > i {
-  background: rgba(203, 213, 225, 0.2) !important;
-  color: #e2e8f0 !important;
-}
-
-body.admin-page .admin-layout .admin-sidebar .admin-nav-item[data-section="security"] > i {
-  background: rgba(248, 113, 113, 0.2) !important;
-  color: #fecaca !important;
+body.admin-page .admin-layout .admin-sidebar .admin-nav-item:not(.active):hover > i {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  transform: scale(1.08);
 }
 
 body.admin-page .admin-layout .admin-sidebar .admin-nav-item.active > i {
-  border-color: rgba(255, 255, 255, 0.22) !important;
-  background: rgba(255, 255, 255, 0.16) !important;
-  color: #ffffff !important;
+  background: #ffffff !important;
+  color: var(--brand-primary, #216a3c) !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22) !important;
+  transform: scale(1.05);
+}
+
+/* Modern Admin KPI Stat Cards */
+body.admin-page #section-dashboard .stat-card {
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+}
+
+body.admin-page #section-dashboard .stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 body.admin-page #section-dashboard .stat-title {
@@ -11820,41 +11918,108 @@ body.admin-page #section-dashboard .stat-title {
 }
 
 body.admin-page #section-dashboard .stat-icon {
-  display: grid;
-  width: 46px;
-  height: 46px;
-  place-items: center;
-  border: 0;
-  border-radius: 12px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  flex: 0 0 50px;
+  border-radius: 14px !important;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
 }
 
 body.admin-page #section-dashboard .stat-icon > i {
-  font-size: 1.1rem;
+  font-size: 1.25rem;
 }
 
+body.admin-page #section-dashboard .stat-card:hover .stat-icon {
+  transform: scale(1.08) translateY(-1px);
+}
+
+/* Lifetime Revenue KPI Icon */
 body.admin-page #section-dashboard .stat-card-revenue .stat-icon {
-  background: #e2f3e7 !important;
-  color: #216a3c !important;
+  background: #ecfdf5 !important;
+  color: #047857 !important;
+  border: 1.5px solid #a7f3d0 !important;
+  box-shadow: 0 2px 8px rgba(4, 120, 87, 0.12) !important;
 }
 
-body.admin-page #section-dashboard .stat-card:not(.stat-card-revenue):not(.stat-card-pending):not(.stat-card-completed):not(.stat-card-cancelled) .stat-icon {
-  background: #e8f0fb !important;
-  color: #245d8a !important;
+/* All Orders KPI Icon */
+body.admin-page #section-dashboard .stat-card-orders .stat-icon,
+body.admin-page #section-dashboard .stat-card:not(.stat-card-revenue):not(.stat-card-pending):not(.stat-card-completed):not(.stat-card-cancelled):not(.stat-card-customers) .stat-icon {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border: 1.5px solid #bfdbfe !important;
+  box-shadow: 0 2px 8px rgba(29, 78, 216, 0.12) !important;
 }
 
+/* Pending Orders KPI Icon */
 body.admin-page #section-dashboard .stat-card-pending .stat-icon {
-  background: #fff1d6 !important;
-  color: #9d5c12 !important;
+  background: #fffbeb !important;
+  color: #b45309 !important;
+  border: 1.5px solid #fde68a !important;
+  box-shadow: 0 2px 8px rgba(180, 83, 9, 0.12) !important;
 }
 
+/* Completed Orders KPI Icon */
 body.admin-page #section-dashboard .stat-card-completed .stat-icon {
-  background: #e2f3e7 !important;
-  color: #216a3c !important;
+  background: #f0fdf4 !important;
+  color: #15803d !important;
+  border: 1.5px solid #bbf7d0 !important;
+  box-shadow: 0 2px 8px rgba(21, 128, 61, 0.12) !important;
 }
 
+/* Cancelled Orders KPI Icon */
 body.admin-page #section-dashboard .stat-card-cancelled .stat-icon {
-  background: #fdeae8 !important;
-  color: #a73b2f !important;
+  background: #fff1f2 !important;
+  color: #be123c !important;
+  border: 1.5px solid #fecdd3 !important;
+  box-shadow: 0 2px 8px rgba(190, 18, 60, 0.12) !important;
+}
+
+/* Customers KPI Icon */
+body.admin-page #section-dashboard .stat-card-customers .stat-icon {
+  background: #faf5ff !important;
+  color: #7e22ce !important;
+  border: 1.5px solid #e9d5ff !important;
+  box-shadow: 0 2px 8px rgba(126, 34, 206, 0.12) !important;
+}
+
+/* Dark mode admin KPI contrast */
+body.theme-dark .admin-layout #section-dashboard .stat-card-revenue .stat-icon {
+  background: rgba(5, 150, 105, 0.22) !important;
+  color: #6ee7b7 !important;
+  border: 1.5px solid rgba(110, 231, 183, 0.3) !important;
+}
+
+body.theme-dark .admin-layout #section-dashboard :is(.stat-card-orders, .stat-card:not(.stat-card-revenue):not(.stat-card-pending):not(.stat-card-completed):not(.stat-card-cancelled):not(.stat-card-customers)) .stat-icon {
+  background: rgba(37, 99, 235, 0.22) !important;
+  color: #93c5fd !important;
+  border: 1.5px solid rgba(147, 197, 253, 0.3) !important;
+}
+
+body.theme-dark .admin-layout #section-dashboard .stat-card-pending .stat-icon {
+  background: rgba(217, 119, 6, 0.22) !important;
+  color: #fde68a !important;
+  border: 1.5px solid rgba(253, 230, 138, 0.3) !important;
+}
+
+body.theme-dark .admin-layout #section-dashboard .stat-card-completed .stat-icon {
+  background: rgba(22, 163, 74, 0.22) !important;
+  color: #86efac !important;
+  border: 1.5px solid rgba(134, 239, 172, 0.3) !important;
+}
+
+body.theme-dark .admin-layout #section-dashboard .stat-card-cancelled .stat-icon {
+  background: rgba(225, 29, 72, 0.22) !important;
+  color: #fda4af !important;
+  border: 1.5px solid rgba(253, 164, 175, 0.3) !important;
+}
+
+body.theme-dark .admin-layout #section-dashboard .stat-card-customers .stat-icon {
+  background: rgba(147, 51, 234, 0.22) !important;
+  color: #d8b4fe !important;
+  border: 1.5px solid rgba(216, 180, 254, 0.3) !important;
 }
 
 /* Section Anchor Scroll Margin for Sticky Header */

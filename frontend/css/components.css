@@ -1229,101 +1229,116 @@ body.theme-dark .notification-item.unread {
 }
 
 .notification-icon-wrap {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 0.95rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   background: var(--color-surface-alt, #f3f4f6);
-  color: var(--color-text-main, #111827);
-  transition: background 0.15s ease, color 0.15s ease;
+  color: var(--color-text-main, #0f172a);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .notification-icon-wrap svg {
   display: block;
   flex-shrink: 0;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
-/* Status-specific high-contrast styling for notification icons */
+/* High-contrast status badges: dark icons with prominent borders */
 .notification-icon-wrap.status-pending {
-  background: #fef3c7;
-  color: #b45309;
+  background: #fde68a;
+  border: 1.5px solid #b45309;
+  color: #451a03;
 }
 
 .notification-icon-wrap.status-preparing {
-  background: #ffedd5;
-  color: #c2410c;
+  background: #fed7aa;
+  border: 1.5px solid #c2410c;
+  color: #431407;
 }
 
 .notification-icon-wrap.status-ready {
-  background: #e0e7ff;
-  color: #4338ca;
+  background: #c7d2fe;
+  border: 1.5px solid #4338ca;
+  color: #1e1b4b;
 }
 
 .notification-icon-wrap.status-delivery {
-  background: #e0f2fe;
-  color: #0369a1;
+  background: #bae6fd;
+  border: 1.5px solid #0369a1;
+  color: #082f49;
 }
 
 .notification-icon-wrap.status-completed {
-  background: #dcfce7;
-  color: #15803d;
+  background: #bbf7d0;
+  border: 1.5px solid #15803d;
+  color: #052e16;
 }
 
 .notification-icon-wrap.status-cancelled {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: #fecaca;
+  border: 1.5px solid #b91c1c;
+  color: #450a0a;
 }
 
 .notification-icon-wrap.status-new-order {
-  background: #f3e8ff;
-  color: #7e22ce;
+  background: #e9d5ff;
+  border: 1.5px solid #7e22ce;
+  color: #3b0764;
 }
 
 /* Dark mode status contrasts */
 body.theme-dark .notification-icon-wrap {
-  background: #374151;
-  color: #e5e7eb;
+  background: #1e293b;
+  border: 1.5px solid #334155;
+  color: #f1f5f9;
 }
 
 body.theme-dark .notification-icon-wrap.status-pending {
-  background: rgba(245, 158, 11, 0.22);
-  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.28);
+  border: 1.5px solid #f59e0b;
+  color: #fef08a;
 }
 
 body.theme-dark .notification-icon-wrap.status-preparing {
-  background: rgba(234, 88, 12, 0.22);
-  color: #fb923c;
+  background: rgba(234, 88, 12, 0.28);
+  border: 1.5px solid #ea580c;
+  color: #fed7aa;
 }
 
 body.theme-dark .notification-icon-wrap.status-ready {
-  background: rgba(99, 102, 241, 0.22);
-  color: #a5b4fc;
+  background: rgba(99, 102, 241, 0.28);
+  border: 1.5px solid #6366f1;
+  color: #c7d2fe;
 }
 
 body.theme-dark .notification-icon-wrap.status-delivery {
-  background: rgba(14, 165, 233, 0.22);
-  color: #38bdf8;
+  background: rgba(14, 165, 233, 0.28);
+  border: 1.5px solid #0ea5e9;
+  color: #bae6fd;
 }
 
 body.theme-dark .notification-icon-wrap.status-completed {
-  background: rgba(34, 197, 94, 0.22);
-  color: #4ade80;
+  background: rgba(34, 197, 94, 0.28);
+  border: 1.5px solid #22c55e;
+  color: #bbf7d0;
 }
 
 body.theme-dark .notification-icon-wrap.status-cancelled {
-  background: rgba(239, 68, 68, 0.22);
-  color: #f87171;
+  background: rgba(239, 68, 68, 0.28);
+  border: 1.5px solid #ef4444;
+  color: #fecaca;
 }
 
 body.theme-dark .notification-icon-wrap.status-new-order {
-  background: rgba(168, 85, 247, 0.22);
-  color: #c084fc;
+  background: rgba(168, 85, 247, 0.28);
+  border: 1.5px solid #a855f7;
+  color: #e9d5ff;
 }
 
 .notification-content {
@@ -1334,7 +1349,7 @@ body.theme-dark .notification-icon-wrap.status-new-order {
 .notification-item-title {
   font-weight: 700;
   font-size: 0.85rem;
-  color: var(--color-text-main, #111827);
+  color: #0f172a;
   margin-bottom: 2px;
 }
 
@@ -1344,7 +1359,7 @@ body.theme-dark .notification-item-title {
 
 .notification-item-msg {
   font-size: 0.8rem;
-  color: var(--color-text-muted, #4b5563);
+  color: #334155;
   line-height: 1.35;
   margin-bottom: 4px;
 }

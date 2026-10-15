@@ -385,7 +385,7 @@ async function loadCustomerStats() {
         value: stats.pendingOrders || 0,
         meta: 'Waiting for action',
         variant: 'pending',
-        icon: 'fa-solid fa-hourglass-half',
+        icon: 'fa-solid fa-clock',
       },
       {
         label: 'Successful orders',
@@ -402,7 +402,7 @@ async function loadCustomerStats() {
         }).format(Number(stats.totalSpent || 0)),
         meta: 'Completed orders only',
         variant: 'spent',
-        icon: 'fa-solid fa-wallet',
+        icon: 'fa-solid fa-coins',
       },
     ];
 
