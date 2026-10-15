@@ -71,6 +71,62 @@ export function logout() {
   window.location.href = 'index.html';
 }
 
+export function promptLogout() {
+  let modal = document.getElementById('logout-confirm-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'logout-confirm-modal';
+    modal.className = 'modal-overlay';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'logout-dialog-title');
+    modal.innerHTML = `
+      <div class="modal-card logout-modal-card" style="max-width: 380px; width: 90%; text-align: center; padding: 28px 24px; border-radius: 14px; box-shadow: 0 16px 36px rgba(0,0,0,0.25);">
+        <div style="width: 52px; height: 52px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: inline-flex; align-items: center; justify-content: center; font-size: 1.35rem; margin: 0 auto 16px;">
+          <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+        </div>
+        <h3 id="logout-dialog-title" style="margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 700; color: var(--color-text-main, #111827);">Log Out</h3>
+        <p style="margin: 0 0 24px 0; color: var(--color-text-muted, #4b5563); font-size: 0.95rem; line-height: 1.45;">
+          Are you sure you want to log out?
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          <button type="button" id="logout-cancel-btn" class="btn btn-secondary" style="flex: 1; min-height: 42px; font-weight: 700;">No</button>
+          <button type="button" id="logout-confirm-btn" class="btn btn-danger" style="flex: 1; min-height: 42px; font-weight: 700;">Yes</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const cancelBtn = modal.querySelector('#logout-cancel-btn');
+    const confirmBtn = modal.querySelector('#logout-confirm-btn');
+
+    const closeModal = () => {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    };
+
+    cancelBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('open')) {
+        closeModal();
+      }
+    });
+
+    confirmBtn.addEventListener('click', () => {
+      logout();
+    });
+  }
+
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  const cancelBtn = modal.querySelector('#logout-cancel-btn');
+  if (cancelBtn) cancelBtn.focus();
+}
+
 export function getAvatarColor(username = '') {
   let hash = 0;
   for (let i = 0; i < username.length; i++) {

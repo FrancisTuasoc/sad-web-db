@@ -1,5 +1,5 @@
 // UI Components, Toast, Modal, Header & Footer Renderer
-import { isLoggedIn, isAdmin, getUser, logout, renderAvatar } from './auth.js';
+import { isLoggedIn, isAdmin, getUser, logout, promptLogout, renderAvatar } from './auth.js';
 import {
   apiFetch,
   apiFetchBlob,
@@ -450,7 +450,7 @@ export function renderHeader(activeNav = '') {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      logout();
+      promptLogout();
     });
   }
 
@@ -458,7 +458,7 @@ export function renderHeader(activeNav = '') {
   if (mobileLogoutBtn) {
     mobileLogoutBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      logout();
+      promptLogout();
     });
   }
 

@@ -3364,20 +3364,51 @@ textarea:focus {
 }
 
 .tab-pill-group {
-  padding: 4px;
+  padding: 4px !important;
   background: #edf4ee !important;
+  border: 1px solid #d8e6db !important;
   border-radius: 10px !important;
 }
 
 .tab-pill {
-  color: #53665a !important;
+  color: #4b6354 !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
   border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 180ms ease !important;
+  cursor: pointer;
+}
+
+.tab-pill:not(.active):hover {
+  background: rgba(33, 106, 60, 0.08) !important;
+  color: #1b4d2e !important;
 }
 
 .tab-pill.active {
-  color: var(--brand-primary-hover) !important;
-  background: #ffffff !important;
-  box-shadow: 0 1px 4px rgba(21, 55, 34, 0.12) !important;
+  color: #ffffff !important;
+  background: var(--brand-primary, #216a3c) !important;
+  border-color: var(--brand-primary, #216a3c) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(33, 106, 60, 0.28) !important;
+}
+
+.tab-pill.active :is(span, strong, i, svg) {
+  color: #ffffff !important;
+}
+
+/* Specific button chart range toggle */
+.btn-chart-range {
+  font-weight: 600 !important;
+  transition: all 180ms ease !important;
+}
+
+.btn-chart-range.active {
+  background: var(--brand-primary, #216a3c) !important;
+  border-color: var(--brand-primary, #216a3c) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(33, 106, 60, 0.28) !important;
 }
 
 .payment-options-grid {
@@ -6047,9 +6078,11 @@ body:has(.admin-layout) * {
 }
 
 .admin-layout #section-dashboard .dashboard-tab.active {
-  border-color: #d1fae5;
-  background: #ecfdf5;
-  color: #047857;
+  border-color: var(--brand-primary, #216a3c) !important;
+  background: var(--brand-primary, #216a3c) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(33, 106, 60, 0.28) !important;
 }
 
 .admin-layout #section-dashboard .dashboard-tab:focus-visible {
@@ -12042,5 +12075,62 @@ body.theme-dark .admin-layout #section-dashboard .stat-card-customers .stat-icon
   border-left: 3px solid #f3ad32 !important;
   padding-left: 14px !important;
   background: rgba(243, 173, 50, 0.1) !important;
+}
+
+/* Universal tab styling in dark mode */
+body.theme-dark .tab-pill-group,
+body.theme-dark .admin-layout #section-dashboard > .dashboard-tabs {
+  background: #18221b !important;
+  border-color: #27382d !important;
+}
+
+body.theme-dark .tab-pill:not(.active),
+body.theme-dark .admin-layout #section-dashboard .dashboard-tab:not(.active),
+body.theme-dark .btn-chart-range:not(.active) {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: #94a3b8 !important;
+}
+
+body.theme-dark .tab-pill:not(.active):hover,
+body.theme-dark .admin-layout #section-dashboard .dashboard-tab:not(.active):hover,
+body.theme-dark .btn-chart-range:not(.active):hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #f8fafc !important;
+}
+
+body.theme-dark .tab-pill.active,
+body.theme-dark .admin-layout #section-dashboard .dashboard-tab.active,
+body.theme-dark .btn-chart-range.active {
+  background: var(--brand-primary, #216a3c) !important;
+  border-color: var(--brand-primary, #216a3c) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45) !important;
+}
+
+body.theme-dark .tab-pill.active :is(span, strong, i, svg),
+body.theme-dark .admin-layout #section-dashboard .dashboard-tab.active :is(span, strong, i, svg) {
+  color: #ffffff !important;
+}
+
+/* Logout Confirmation Modal Styling */
+.logout-modal-card {
+  border: 1px solid var(--color-border, #e2e8f0) !important;
+  background: var(--color-surface, #ffffff) !important;
+  color: var(--color-text-main, #0f172a) !important;
+}
+
+body.theme-dark .logout-modal-card {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+body.theme-dark .logout-modal-card #logout-dialog-title {
+  color: #f9fafb !important;
+}
+
+body.theme-dark .logout-modal-card p {
+  color: #9ca3af !important;
 }
 

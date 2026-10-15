@@ -13,6 +13,7 @@ import {
   setUser,
   renderAvatar,
   logout,
+  promptLogout,
   resizeImageToDataUrl,
   saveAvatarCache,
   clearAvatarCache,
@@ -1487,7 +1488,7 @@ function setupProfileTabs() {
 
   const logoutButton = document.getElementById('sidebar-logout-btn');
   if (logoutButton) {
-    logoutButton.addEventListener('click', () => logout());
+    logoutButton.addEventListener('click', () => promptLogout());
   }
 
   setupProfileSidebar();
