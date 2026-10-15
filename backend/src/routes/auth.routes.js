@@ -8,6 +8,7 @@ const {
   BREVO_API_KEY,
   BREVO_SENDER_EMAIL,
   PASSWORD_RESET_EMAIL_ENABLED,
+  PASSWORD_RESET_API_KEY,
 } = require('../config/env');
 
 const userRepository = require('../repositories/userRepository');
@@ -166,7 +167,8 @@ router.post(
         503
       );
     }
-    if (!BREVO_API_KEY || !BREVO_SENDER_EMAIL) {
+    const resetApiKey = PASSWORD_RESET_API_KEY || BREVO_API_KEY;
+    if (!resetApiKey || !BREVO_SENDER_EMAIL) {
       throw new AppError(
         'Password recovery email is not configured on the server. Please contact the shop.',
         503

@@ -124,3 +124,34 @@ test('validates and consumes a reset token while saving a bcrypt password hash',
   assert.equal(await bcrypt.compare('NewPassword123', savedPasswordHash), true);
   assert.notEqual(savedPasswordHash, 'NewPassword123');
 });
+
+test('uses PASSWORD_RESET_API_KEY when configured with the same sender email', async () => {
+  const previousResetKey = process.env.PASSWORD_RESET_API_KEY;
+  const previousSender = process.env.BREVO_SENDER_EMAIL;
+  process.env.PASSWORD_RESET_API_KEY = 'dedicated-reset-key';
+  process.env.BREVO_SENDER_EMAIL = 'shop-sender@example.com';
+
+  const sendPasswordResetEmail = require('../src/utils/passwordResetEmail');
+  let capturedOptions;
+  global.fetch = async (url, options) => {
+    capturedOptions = options;
+    return { ok: true, json: async () => ({ messageId: 'dedicated-test' }) };
+  };
+
+  try {
+    await sendPasswordResetEmail(
+      'customer@example.test',
+      'https://frontend.example.test/reset-password.html?token=abc'
+    );
+    assert.equal(capturedOptions.headers['api-key'], 'dedicated-reset-key');
+    const body = JSON.parse(capturedOptions.body);
+    assert.equal(body.sender.email, 'shop-sender@example.com');
+  } finally {
+    if (previousResetKey === undefined) {
+      delete process.env.PASSWORD_RESET_API_KEY;
+    } else {
+      process.env.PASSWORD_RESET_API_KEY = previousResetKey;
+    }
+    process.env.BREVO_SENDER_EMAIL = previousSender;
+  }
+});

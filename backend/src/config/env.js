@@ -47,12 +47,13 @@ const envSchema = z.object({
     emptyToUndefined,
     z.string().trim().email().optional()
   ),
+  PASSWORD_RESET_API_KEY: z.preprocess(
+    emptyToUndefined,
+    z.string().trim().min(1).optional()
+  ),
   PASSWORD_RESET_EMAIL_ENABLED: z.preprocess(
     emptyToUndefined,
-    z
-      .enum(['true', 'false'])
-      .default('false')
-      .transform((value) => value === 'true')
+    z.enum(['true', 'false']).optional()
   ),
   FRONTEND_URL: z.preprocess(
     emptyToUndefined,
@@ -86,6 +87,11 @@ checkEnv();
 
 const env = validation.data;
 
+const passwordResetEmailEnabled =
+  env.PASSWORD_RESET_EMAIL_ENABLED !== undefined
+    ? env.PASSWORD_RESET_EMAIL_ENABLED === 'true'
+    : Boolean(env.PASSWORD_RESET_API_KEY);
+
 module.exports = {
   checkEnv,
   DATABASE_URL: env.DATABASE_URL,
@@ -98,6 +104,7 @@ module.exports = {
   ADMIN_USERNAME: env.ADMIN_USERNAME,
   BREVO_API_KEY: env.BREVO_API_KEY,
   BREVO_SENDER_EMAIL: env.BREVO_SENDER_EMAIL,
-  PASSWORD_RESET_EMAIL_ENABLED: env.PASSWORD_RESET_EMAIL_ENABLED,
+  PASSWORD_RESET_API_KEY: env.PASSWORD_RESET_API_KEY,
+  PASSWORD_RESET_EMAIL_ENABLED: passwordResetEmailEnabled,
   FRONTEND_URL: new URL(env.FRONTEND_URL || env.CORS_ORIGINS[0]).origin,
 };

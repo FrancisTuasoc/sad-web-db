@@ -1,12 +1,27 @@
+const {
+  PASSWORD_RESET_API_KEY,
+  BREVO_API_KEY,
+  BREVO_SENDER_EMAIL,
+} = require('../config/env');
+
 async function sendPasswordResetEmail(toEmail, resetUrl) {
+  const apiKey =
+    process.env.PASSWORD_RESET_API_KEY ||
+    PASSWORD_RESET_API_KEY ||
+    process.env.BREVO_API_KEY ||
+    BREVO_API_KEY;
+  const senderEmail =
+    process.env.BREVO_SENDER_EMAIL ||
+    BREVO_SENDER_EMAIL;
+
   const response = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
     headers: {
-      'api-key': process.env.BREVO_API_KEY,
+      'api-key': apiKey,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      sender: { email: process.env.BREVO_SENDER_EMAIL },
+      sender: { email: senderEmail },
       to: [{ email: toEmail }],
       subject: 'Reset your GIGABITE password',
       htmlContent: `
@@ -19,7 +34,16 @@ async function sendPasswordResetEmail(toEmail, resetUrl) {
     }),
   });
   if (!response.ok) {
-    throw new Error(`Password reset email request failed with status ${response.status}.`);
+    let detail = '';
+    try {
+      const err = await response.json();
+      detail = `: ${JSON.stringify(err)}`;
+    } catch {
+      // Ignore JSON parse error
+    }
+    throw new Error(
+      `Password reset email request failed with status ${response.status}${detail}.`
+    );
   }
   return response.json();
 }
