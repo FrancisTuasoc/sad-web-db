@@ -1259,3 +1259,109 @@ body.theme-dark .notification-item-msg {
   color: var(--color-text-light, #9ca3af);
 }
 
+/* ========================================================
+   RESPONSIVE ENHANCEMENTS: NOTIFICATIONS, ADMIN & TRACKER
+   ======================================================== */
+@media (max-width: 576px) {
+  .notification-dropdown {
+    position: fixed;
+    top: calc(var(--admin-header-height, var(--header-height, 64px)) + 8px);
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-width: none;
+    max-height: calc(100dvh - var(--admin-header-height, var(--header-height, 64px)) - 20px);
+    border-radius: 12px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
+  }
+}
+
+/* Admin Mobile Sidebar Backdrop */
+.admin-sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .admin-sidebar-backdrop:not(.hidden) {
+    display: block;
+    position: fixed;
+    inset: var(--admin-header-height, var(--header-height, 64px)) 0 0;
+    z-index: 104;
+    border: 0;
+    background: rgba(13, 17, 25, 0.55);
+    backdrop-filter: blur(2px);
+    cursor: pointer;
+  }
+}
+
+/* Admin Header Compact Mode on Narrow Screens */
+@media (max-width: 480px) {
+  body.admin-page .admin-header-brand > .badge {
+    display: none !important;
+  }
+}
+
+/* Customer Order Progress Tracker Responsive Typography */
+.order-progress-tracker {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin: 14px 0 16px;
+  position: relative;
+  width: 100%;
+}
+
+.order-progress-line {
+  position: absolute;
+  top: 11px;
+  left: 12.5%;
+  right: 12.5%;
+  height: 2px;
+  background: var(--color-border, #e5e7eb);
+  z-index: 1;
+}
+
+.order-progress-step {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  z-index: 2;
+  background: var(--color-surface, #ffffff);
+  padding: 0 2px;
+  text-align: center;
+}
+
+body.theme-dark .order-progress-step {
+  background: var(--color-surface, #1f2937);
+}
+
+.order-progress-circle {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.order-progress-label {
+  font-size: clamp(0.64rem, 2.3vw, 0.76rem);
+  font-weight: 600;
+  line-height: 1.2;
+  word-break: break-word;
+  hyphens: auto;
+  max-width: 100%;
+  color: var(--color-text-main, #1f2937);
+}
+
+body.theme-dark .order-progress-label {
+  color: var(--color-text-main, #f3f4f6);
+}
+
+

@@ -766,8 +766,8 @@ function renderOrderCard(order, isLive = false) {
     ];
 
     progressTracker = `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 16px;position:relative;">
-        <div style="position:absolute;top:11px;left:12.5%;right:12.5%;height:2px;background:var(--color-border);z-index:1;"></div>
+      <div class="order-progress-tracker">
+        <div class="order-progress-line"></div>
         ${progressSteps
           .map(
             (step, index) => {
@@ -780,9 +780,9 @@ function renderOrderCard(order, isLive = false) {
               const circleTextColor =
                 step.active && isFinalStep ? '#fff' : '#2A1E18';
               return `
-                <div style="display:flex;flex:1;flex-direction:column;align-items:center;gap:4px;z-index:2;background:var(--color-surface);padding:0 2px;text-align:center;">
-                  <div style="width:22px;height:22px;flex:0 0 22px;border-radius:50%;background:${circleColor};color:${circleTextColor};display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;">${index + 1}</div>
-                  <span style="font-size:0.75rem;font-weight:600;">${step.label}</span>
+                <div class="order-progress-step">
+                  <div class="order-progress-circle" style="background:${circleColor};color:${circleTextColor};">${index + 1}</div>
+                  <span class="order-progress-label">${step.label}</span>
                 </div>
               `;
             }

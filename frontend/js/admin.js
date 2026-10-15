@@ -355,7 +355,9 @@ function setupAdminNavigation() {
 
       // Close mobile sidebar if open
       const sidebar = document.getElementById('admin-sidebar');
+      const backdrop = document.getElementById('admin-sidebar-backdrop');
       if (sidebar) sidebar.classList.remove('open-mobile');
+      if (backdrop) backdrop.classList.add('hidden');
       updateSidebarToggleState();
 
       // Refresh target section
@@ -392,17 +394,45 @@ function setupAdminNavigation() {
 
   const toggleSidebarBtn = document.getElementById('admin-toggle-sidebar-btn');
   const sidebar = document.getElementById('admin-sidebar');
+  const backdrop = document.getElementById('admin-sidebar-backdrop');
   if (toggleSidebarBtn && sidebar) {
     toggleSidebarBtn.addEventListener('click', () => {
       const adminLayout = document.querySelector('.admin-layout');
       if (window.matchMedia('(max-width: 900px)').matches) {
         sidebar.classList.toggle('open-mobile');
+        if (backdrop) {
+          backdrop.classList.toggle(
+            'hidden',
+            !sidebar.classList.contains('open-mobile')
+          );
+        }
       } else if (adminLayout) {
         adminLayout.classList.toggle('is-sidebar-collapsed');
       }
       updateSidebarToggleState();
     });
   }
+
+  if (backdrop && sidebar) {
+    backdrop.addEventListener('click', () => {
+      sidebar.classList.remove('open-mobile');
+      backdrop.classList.add('hidden');
+      updateSidebarToggleState();
+    });
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if (
+      event.key === 'Escape' &&
+      sidebar &&
+      sidebar.classList.contains('open-mobile')
+    ) {
+      sidebar.classList.remove('open-mobile');
+      if (backdrop) backdrop.classList.add('hidden');
+      updateSidebarToggleState();
+      toggleSidebarBtn?.focus();
+    }
+  });
 
   window.addEventListener('resize', updateSidebarToggleState);
   updateSidebarToggleState();
@@ -412,6 +442,7 @@ function updateSidebarToggleState() {
   const toggleButton = document.getElementById('admin-toggle-sidebar-btn');
   const sidebar = document.getElementById('admin-sidebar');
   const adminLayout = document.querySelector('.admin-layout');
+  const backdrop = document.getElementById('admin-sidebar-backdrop');
   if (!toggleButton || !sidebar || !adminLayout) return;
 
   const header = document.querySelector('.admin-site-header');
@@ -423,6 +454,16 @@ function updateSidebarToggleState() {
   }
 
   const isMobile = window.matchMedia('(max-width: 900px)').matches;
+  if (!isMobile) {
+    sidebar.classList.remove('open-mobile');
+    if (backdrop) backdrop.classList.add('hidden');
+  } else if (backdrop) {
+    backdrop.classList.toggle(
+      'hidden',
+      !sidebar.classList.contains('open-mobile')
+    );
+  }
+
   const isExpanded = isMobile
     ? sidebar.classList.contains('open-mobile')
     : !adminLayout.classList.contains('is-sidebar-collapsed');
