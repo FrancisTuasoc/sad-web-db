@@ -34,8 +34,7 @@ export const DEFAULT_FEATURED_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'cdo-burger',
-    description:
-      'Classic grilled beef patty in a toasted sesame bun with our special dressing.',
+    description: 'Grilled beef patty with special dressing.',
   },
   {
     _id: 'prod-burger-bacon',
@@ -47,7 +46,7 @@ export const DEFAULT_FEATURED_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'burger-with-bacon',
-    description: 'Savory burger patty crowned with crispy smoked bacon strips.',
+    description: 'Beef patty with crispy smoked bacon.',
   },
   {
     _id: 'prod-cheese-bacon',
@@ -59,8 +58,7 @@ export const DEFAULT_FEATURED_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'cheese-burger-with-bacon',
-    description:
-      'Smokey crispy bacon layered over golden melted cheese and beef patty.',
+    description: 'Cheesy beef patty with crunchy bacon.',
   },
   {
     _id: 'prod-complete-bacon',
@@ -72,8 +70,7 @@ export const DEFAULT_FEATURED_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'complete-with-bacon',
-    description:
-      'The ultimate monster burger: beef patty, ham, egg, cheese, slaw, and crispy bacon.',
+    description: 'Monster burger with patty, ham, egg, cheese & bacon.',
   },
 ];
 
@@ -127,11 +124,9 @@ export function renderProductCard(
   const avgRating = Number(product.averageRating || 0);
   const reviewCount = Number(product.reviewCount || 0);
 
-  // Short description (first 60 characters)
-  const fullDesc =
-    product.description || 'Delicious freshly grilled burger specialty.';
-  const isLongDesc = fullDesc.length > 60;
-  const shortDesc = isLongDesc ? fullDesc.slice(0, 60).trim() + '...' : fullDesc;
+  // Concise description to prevent bloated card height
+  const fullDesc = (product.description || 'Freshly grilled specialty.').trim();
+  const shortDesc = fullDesc.length > 50 ? fullDesc.slice(0, 48).trim() + '...' : fullDesc;
 
   let buttonHtml = '';
   const canPlaceOrder = canOrder && onlineOrderingEnabled;
@@ -198,21 +193,8 @@ export function renderProductCard(
           </div>
         </div>
         <h3 class="card-title">${escapeHtml(product.name)}</h3>
-        <div class="card-desc-container" data-expanded="false">
-          <div class="card-desc-wrapper">
-            <p class="card-desc card-desc-short">${escapeHtml(shortDesc)}</p>
-            ${isLongDesc ? `<p class="card-desc card-desc-full hidden">${escapeHtml(fullDesc)}</p>` : ''}
-          </div>
-          ${
-            isLongDesc
-              ? `
-            <button type="button" class="btn-desc-toggle" aria-expanded="false" aria-label="Toggle full description">
-              <span class="desc-toggle-label">See more</span>
-              ${lucideIcon('chevron-down', { size: 14, className: 'desc-toggle-icon', ariaHidden: true })}
-            </button>
-          `
-              : ''
-          }
+        <div class="card-desc-container">
+          <p class="card-desc">${escapeHtml(shortDesc)}</p>
         </div>
         <div class="card-footer">
           <span class="card-price">₱${Number(product.price).toFixed(2)}</span>

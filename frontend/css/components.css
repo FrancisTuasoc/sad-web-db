@@ -1661,20 +1661,34 @@ body.theme-dark .order-status-banner-text span {
   transform: none !important;
 }
 
+/* ---------------- Card Meta Row & Rating Alignment ---------------- */
+.card-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
 .product-rating-row {
-  margin: 4px 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
 }
 
 .card-rating-clickable {
   background: none;
   border: none;
   padding: 2px 4px;
-  margin-left: -4px;
+  margin: 0;
   border-radius: 4px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   transition: background-color 0.15s ease;
 }
 
@@ -1690,46 +1704,55 @@ body.theme-dark .order-status-banner-text span {
 .rating-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   font-size: 0.82rem;
   line-height: 1;
 }
 
+.rating-stars-group,
 .rating-stars-wrap {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 1.5px;
+  line-height: 1;
+  vertical-align: middle;
 }
 
 .star-icon {
   display: inline-block;
   vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .rating-score {
   font-weight: 700;
   color: var(--color-text-main);
-  font-size: 0.85rem;
+  font-size: 0.78rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
 }
 
 .rating-count {
   color: var(--color-text-muted);
-  font-size: 0.78rem;
+  font-size: 0.74rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
 }
 
-/* ---------------- Card Description Inline Expansion ---------------- */
+/* ---------------- Card Description ---------------- */
 .card-desc-container {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   position: relative;
 }
 
-.card-desc-text {
-  font-size: 0.84rem;
+.card-desc-text,
+.card-desc {
+  font-size: 0.78rem;
   color: var(--color-text-muted);
-  line-height: 1.4;
+  line-height: 1.35;
   margin: 0;
-  transition: max-height 0.28s ease;
-  overflow: hidden;
 }
 
 .btn-card-desc-toggle {

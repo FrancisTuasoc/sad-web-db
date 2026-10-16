@@ -27,8 +27,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'cdo-burger',
-    description:
-      'Classic grilled beef patty in a toasted sesame bun with our special dressing.',
+    description: 'Classic grilled beef patty with special dressing.',
   },
   {
     _id: 'prod-burger-ham',
@@ -40,8 +39,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: false,
     slug: 'burger-with-ham',
-    description:
-      'Juicy beef patty topped with sweet savory sliced ham and fresh dressing.',
+    description: 'Beef patty topped with savory sliced ham.',
   },
   {
     _id: 'prod-burger-egg',
@@ -53,8 +51,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: false,
     slug: 'burger-with-egg',
-    description:
-      'Grilled patty paired with a sunny fried egg and creamy shop sauce.',
+    description: 'Grilled beef patty with a sunny fried egg.',
   },
   {
     _id: 'prod-burger-bacon',
@@ -66,7 +63,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'burger-with-bacon',
-    description: 'Savory burger patty crowned with crispy smoked bacon strips.',
+    description: 'Beef patty crowned with crispy smoked bacon.',
   },
   {
     _id: 'prod-burger-bacon-ham',
@@ -78,8 +75,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'burger-bacon-ham',
-    description:
-      'The triple delight: beef patty, smoked bacon, and sweet ham loaded in a warm bun.',
+    description: 'Beef patty loaded with bacon and sweet ham.',
   },
 
   // Cheese Burgers
@@ -93,8 +89,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: false,
     slug: 'cheese-burger',
-    description:
-      'Tender beef patty melted under a slice of rich cheddar cheese.',
+    description: 'Tender beef patty with melted cheddar cheese.',
   },
   {
     _id: 'prod-cheese-ham',
@@ -106,7 +101,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: false,
     slug: 'cheese-burger-with-ham',
-    description: 'Cheddar cheese melted over a beef patty and savory ham.',
+    description: 'Cheddar beef patty with savory sliced ham.',
   },
   {
     _id: 'prod-cheese-egg',
@@ -118,7 +113,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: false,
     slug: 'cheese-burger-with-egg',
-    description: 'Melted cheese burger topped with a perfectly cooked egg.',
+    description: 'Cheddar beef patty topped with a fried egg.',
   },
   {
     _id: 'prod-cheese-bacon',
@@ -130,8 +125,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'cheese-burger-with-bacon',
-    description:
-      'Smokey crispy bacon layered over golden melted cheese and beef patty.',
+    description: 'Cheesy beef patty with crunchy smoked bacon.',
   },
 
   // Sandwiches
@@ -296,8 +290,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'complete',
-    description:
-      'All-in burger specialty loaded with patty, ham, egg, cheese, and fresh slaw.',
+    description: 'Burger loaded with patty, ham, egg, cheese, and slaw.',
   },
   {
     _id: 'prod-complete-change-bacon',
@@ -309,8 +302,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: false,
     slug: 'complete-change-bacon',
-    description:
-      'Complete specialty sandwich customized with bacon substitute for extra crunch.',
+    description: 'Complete burger with crunchy bacon substitute.',
   },
   {
     _id: 'prod-complete-bacon',
@@ -322,8 +314,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'complete-with-bacon',
-    description:
-      'The ultimate monster burger: beef patty, ham, egg, cheese, slaw, and crispy bacon.',
+    description: 'Monster burger with patty, ham, egg, cheese & bacon.',
   },
 
   // Footlong
@@ -650,6 +641,51 @@ function initMenu() {
       filterAndRenderProducts();
     });
   }
+
+  // Initialize hero banner slideshow (auto-rotates every 2s)
+  initMenuHeroSlider();
+}
+
+function initMenuHeroSlider() {
+  const slides = document.querySelectorAll('.menu-hero-slide');
+  const dots = document.querySelectorAll('.menu-hero-dot');
+  if (!slides || slides.length === 0) return;
+
+  let currentSlide = 0;
+  let autoplayTimer = null;
+
+  function goToSlide(index) {
+    slides[currentSlide].classList.remove('active');
+    if (dots[currentSlide]) dots[currentSlide].classList.remove('active');
+
+    currentSlide = (index + slides.length) % slides.length;
+
+    slides[currentSlide].classList.add('active');
+    if (dots[currentSlide]) dots[currentSlide].classList.add('active');
+  }
+
+  function startAutoplay() {
+    stopAutoplay();
+    autoplayTimer = setInterval(() => {
+      goToSlide(currentSlide + 1);
+    }, 2000);
+  }
+
+  function stopAutoplay() {
+    if (autoplayTimer) {
+      clearInterval(autoplayTimer);
+      autoplayTimer = null;
+    }
+  }
+
+  dots.forEach((dot, idx) => {
+    dot.addEventListener('click', () => {
+      goToSlide(idx);
+      startAutoplay();
+    });
+  });
+
+  startAutoplay();
 }
 
 if (document.readyState === 'loading') {

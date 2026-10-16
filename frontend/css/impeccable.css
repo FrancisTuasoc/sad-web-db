@@ -3252,11 +3252,52 @@ textarea:focus {
   padding: 0 2px !important;
 }
 
+.card-meta-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  margin-bottom: 4px !important;
+}
+
 .card-category {
   color: var(--brand-primary) !important;
   font-size: 0.7rem !important;
   letter-spacing: 0.05em !important;
-  margin-bottom: 3px !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+
+.card-rating-clickable {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 2px 4px !important;
+  margin: 0 !important;
+}
+
+.product-rating-row {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+.rating-stars-group {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 1.5px !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+}
+
+.rating-stars-group svg,
+.rating-stars-group .star-icon {
+  display: inline-block !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
 }
 
 .card-title {
@@ -3267,11 +3308,15 @@ textarea:focus {
   margin-bottom: 4px !important;
 }
 
+.card-desc-container {
+  margin-bottom: 6px !important;
+}
+
 .card-desc,
 .card-desc-short {
   font-size: 0.78rem !important;
   line-height: 1.35 !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 6px !important;
   color: #5d6d62 !important;
   -webkit-line-clamp: 2 !important;
   line-clamp: 2 !important;

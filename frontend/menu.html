@@ -33,6 +33,15 @@
       ></div>
       <section class="menu-page-hero" aria-labelledby="menu-page-title">
         <div class="container menu-page-hero-inner">
+          <!-- Background Banner Slideshow (Changes every 2 seconds) -->
+          <div class="menu-hero-slider" id="menu-hero-slider" aria-hidden="true">
+            <div class="menu-hero-slide active" style="background-image: url('assets/items/images/burgers_right_flames.jpg');"></div>
+            <div class="menu-hero-slide" style="background-image: url('assets/items/images/footlongs_flames.jpg');"></div>
+            <div class="menu-hero-slide" style="background-image: url('assets/items/images/siomai_food_banner.jpg');"></div>
+          </div>
+          <!-- Blur overlay to preserve clear text readability -->
+          <div class="menu-hero-blur-overlay" aria-hidden="true"></div>
+
           <div class="menu-page-hero-copy">
             <p class="menu-page-eyebrow">Made fresh to order</p>
             <h1 id="menu-page-title">Good food. Great mood.</h1>
@@ -65,8 +74,12 @@
             </div>
           </div>
           <div class="menu-page-art" aria-hidden="true">
-            <img src="assets/items/three-burgers-transparent.png" alt="" />
             <span class="menu-page-art-badge">Hot off<br />the grill</span>
+            <div class="menu-hero-dots" aria-hidden="true">
+              <span class="menu-hero-dot active" data-index="0"></span>
+              <span class="menu-hero-dot" data-index="1"></span>
+              <span class="menu-hero-dot" data-index="2"></span>
+            </div>
           </div>
         </div>
       </section>
