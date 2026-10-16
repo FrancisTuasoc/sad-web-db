@@ -526,7 +526,7 @@ textarea,
   position: relative !important;
   z-index: 2 !important;
   max-width: 540px !important;
-  margin-left: clamp(20px, 4vw, 56px) !important;
+  margin-left: clamp(40px, 8vw, 100px) !important;
   padding-left: 0 !important;
 }
 
@@ -1033,17 +1033,19 @@ textarea,
 }
 
 .site-footer .container {
-  max-width: 1040px !important;
+  max-width: 980px !important;
   margin-left: auto !important;
   margin-right: auto !important;
+  padding-left: clamp(16px, 3vw, 32px) !important;
+  padding-right: clamp(16px, 3vw, 32px) !important;
 }
 
 .site-footer .footer-grid {
   display: grid !important;
-  grid-template-columns: 1.2fr 1fr 1fr 1.3fr !important;
-  gap: clamp(24px, 4vw, 48px) !important;
+  grid-template-columns: 1.4fr 0.9fr 0.9fr 1.2fr !important;
+  gap: clamp(16px, 2.5vw, 28px) !important;
   align-items: start !important;
-  margin-bottom: 32px !important;
+  margin-bottom: 24px !important;
   text-align: left !important;
 }
 
@@ -1052,22 +1054,32 @@ textarea,
   flex-direction: column !important;
   align-items: flex-start !important;
   text-align: left !important;
-  gap: 12px !important;
+  gap: 8px !important;
 }
 
 .site-footer .footer-brand-title {
   color: var(--color-accent) !important;
-  font-size: 1.3rem !important;
+  font-size: 1.25rem !important;
   font-weight: 800 !important;
   margin: 0 !important;
+  line-height: 1.2 !important;
+}
+
+.site-footer .footer-brand-text {
+  font-size: 0.84rem !important;
+  color: #b4cab9 !important;
+  line-height: 1.5 !important;
+  margin: 0 !important;
+  max-width: 240px !important;
 }
 
 .site-footer .footer-col-title {
   color: #fffdfa !important;
-  font-size: 0.96rem !important;
+  font-size: 0.92rem !important;
   font-weight: 700 !important;
   text-align: left !important;
-  margin: 0 0 2px 0 !important;
+  line-height: 1.2 !important;
+  margin: 0 0 4px 0 !important;
 }
 
 .site-footer .footer-links-list {
@@ -1077,32 +1089,34 @@ textarea,
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
-  gap: 8px !important;
+  gap: 6px !important;
 }
 
 .site-footer .footer-links-list a,
 .site-footer .footer-services-list li,
 .site-footer .footer-contact-row {
   color: #d3c1af !important;
-  font-size: 0.86rem !important;
+  font-size: 0.85rem !important;
+  line-height: 1.45 !important;
 }
 
 .site-footer .footer-links-list a:hover {
   color: #ffffff !important;
+  text-decoration: underline !important;
 }
 
 .site-footer .footer-social-wrap {
   display: flex !important;
   align-items: center !important;
-  margin-top: 4px !important;
+  margin-top: 2px !important;
 }
 
 .site-footer .footer-facebook-link {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  width: 36px !important;
-  height: 36px !important;
+  width: 34px !important;
+  height: 34px !important;
   border-radius: 50% !important;
   background: rgba(255, 255, 255, 0.08) !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
@@ -1113,21 +1127,31 @@ textarea,
   border-color: #1877f2 !important;
 }
 
+.site-footer .footer-facebook-icon {
+  width: 17px !important;
+  height: 17px !important;
+  fill: #ffffff !important;
+}
+
 .site-footer .footer-contact-items {
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
-  gap: 10px !important;
+  gap: 8px !important;
 }
 
 .site-footer .footer-contact-row {
   display: flex !important;
   align-items: flex-start !important;
   text-align: left !important;
-  gap: 10px !important;
+  gap: 8px !important;
 }
 
 .site-footer .footer-contact-icon {
+  width: 15px !important;
+  height: 15px !important;
+  flex-shrink: 0 !important;
+  margin-top: 2px !important;
   color: var(--color-accent) !important;
 }
 
@@ -1135,7 +1159,8 @@ textarea,
   text-align: center !important;
   border-top: 1px solid rgba(255, 253, 250, 0.16) !important;
   color: #d3c1af !important;
-  padding-top: 20px !important;
+  padding-top: 16px !important;
+  font-size: 0.8rem !important;
 }
 
 @media (max-width: 820px) {

@@ -5825,20 +5825,20 @@ body:not(.home-page):not(.auth-page):not(:has(.admin-layout)) {
   top: 0;
   left: 0;
   bottom: 0;
-  width: 70%;
+  width: 78%;
   z-index: 1;
   pointer-events: none;
   background: linear-gradient(
     90deg,
     rgba(9, 18, 12, 0.96) 0%,
-    rgba(9, 18, 12, 0.88) 58%,
-    rgba(9, 18, 12, 0.4) 84%,
+    rgba(9, 18, 12, 0.9) 62%,
+    rgba(9, 18, 12, 0.45) 86%,
     transparent 100%
   );
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  mask-image: linear-gradient(to right, black 0%, black 65%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, black 0%, black 65%, transparent 100%);
+  mask-image: linear-gradient(to right, black 0%, black 68%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 0%, black 68%, transparent 100%);
 }
 
 @media (max-width: 768px) {
@@ -5868,7 +5868,7 @@ body:not(.home-page):not(.auth-page):not(:has(.admin-layout)) {
   position: relative;
   z-index: 2;
   max-width: 540px;
-  margin-left: clamp(20px, 4vw, 56px);
+  margin-left: clamp(40px, 8vw, 100px);
   padding-left: 0;
 }
 
