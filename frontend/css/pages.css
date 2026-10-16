@@ -5806,8 +5806,8 @@ body:not(.home-page):not(.auth-page):not(:has(.admin-layout)) {
   inset: 0;
   width: 100%;
   height: 100%;
-  background-size: auto 76%;
-  background-position: right clamp(20px, 4vw, 56px) center;
+  background-size: cover;
+  background-position: center right;
   background-repeat: no-repeat;
   opacity: 0;
   transform: scale(1.02);
@@ -5819,26 +5819,24 @@ body:not(.home-page):not(.auth-page):not(:has(.admin-layout)) {
   transform: scale(1);
 }
 
-/* Blur overlay behind the text side */
+/* Scrim overlay behind the text side to keep text readable */
 .menu-hero-blur-overlay {
   position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
-  width: 78%;
+  width: 75%;
   z-index: 1;
   pointer-events: none;
   background: linear-gradient(
     90deg,
-    rgba(9, 18, 12, 0.96) 0%,
-    rgba(9, 18, 12, 0.9) 62%,
-    rgba(9, 18, 12, 0.45) 86%,
+    rgba(8, 16, 11, 0.88) 0%,
+    rgba(8, 16, 11, 0.72) 48%,
+    rgba(8, 16, 11, 0.35) 78%,
     transparent 100%
   );
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  mask-image: linear-gradient(to right, black 0%, black 68%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, black 0%, black 68%, transparent 100%);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 @media (max-width: 768px) {
@@ -5848,19 +5846,17 @@ body:not(.home-page):not(.auth-page):not(:has(.admin-layout)) {
     padding: 28px 18px;
   }
   .menu-hero-slide {
-    background-size: auto 60%;
-    background-position: right 10px bottom 10px;
+    background-size: cover;
+    background-position: center;
   }
   .menu-hero-blur-overlay {
     width: 100%;
     background: linear-gradient(
       180deg,
-      rgba(9, 18, 12, 0.95) 0%,
-      rgba(9, 18, 12, 0.88) 75%,
-      rgba(9, 18, 12, 0.6) 100%
+      rgba(8, 16, 11, 0.9) 0%,
+      rgba(8, 16, 11, 0.8) 70%,
+      rgba(8, 16, 11, 0.5) 100%
     );
-    mask-image: none;
-    -webkit-mask-image: none;
   }
 }
 
