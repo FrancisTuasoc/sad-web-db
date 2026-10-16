@@ -144,7 +144,7 @@ export function renderRatingBadge(averageRating = 0, reviewCount = 0, options = 
     <div class="product-rating-row" data-rating="${score.toFixed(1)}" data-reviews="${count}">
       ${stars}
       ${showScore && score > 0 ? `<span class="rating-score">${score.toFixed(1)}</span>` : ''}
-      <span class="rating-count">(${count} ${count === 1 ? 'review' : 'reviews'})</span>
+      <span class="rating-count">(${count})</span>
     </div>
   `;
 }

@@ -27,7 +27,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'cdo-burger',
-    description: 'Classic grilled beef patty with special dressing.',
+    description: 'Grilled beef patty.',
   },
   {
     _id: 'prod-burger-ham',
@@ -39,7 +39,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: false,
     slug: 'burger-with-ham',
-    description: 'Beef patty topped with savory sliced ham.',
+    description: 'Beef patty with sliced ham.',
   },
   {
     _id: 'prod-burger-egg',
@@ -51,7 +51,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: false,
     slug: 'burger-with-egg',
-    description: 'Grilled beef patty with a sunny fried egg.',
+    description: 'Beef patty with fried egg.',
   },
   {
     _id: 'prod-burger-bacon',
@@ -63,7 +63,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'burger-with-bacon',
-    description: 'Beef patty crowned with crispy smoked bacon.',
+    description: 'Beef patty with crispy bacon.',
   },
   {
     _id: 'prod-burger-bacon-ham',
@@ -75,7 +75,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'burger-bacon-ham',
-    description: 'Beef patty loaded with bacon and sweet ham.',
+    description: 'Patty with bacon and ham.',
   },
 
   // Cheese Burgers
@@ -89,7 +89,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: false,
     slug: 'cheese-burger',
-    description: 'Tender beef patty with melted cheddar cheese.',
+    description: 'Beef patty with cheddar.',
   },
   {
     _id: 'prod-cheese-ham',
@@ -101,7 +101,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: false,
     slug: 'cheese-burger-with-ham',
-    description: 'Cheddar beef patty with savory sliced ham.',
+    description: 'Cheddar patty with ham.',
   },
   {
     _id: 'prod-cheese-egg',
@@ -113,7 +113,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: false,
     slug: 'cheese-burger-with-egg',
-    description: 'Cheddar beef patty topped with a fried egg.',
+    description: 'Cheddar patty with egg.',
   },
   {
     _id: 'prod-cheese-bacon',
@@ -125,7 +125,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'cheese-burger-with-bacon',
-    description: 'Cheesy beef patty with crunchy smoked bacon.',
+    description: 'Cheddar patty with bacon.',
   },
 
   // Sandwiches
@@ -290,7 +290,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'complete',
-    description: 'Burger loaded with patty, ham, egg, cheese, and slaw.',
+    description: 'Patty, ham, egg, cheese & slaw.',
   },
   {
     _id: 'prod-complete-change-bacon',
@@ -302,7 +302,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: false,
     slug: 'complete-change-bacon',
-    description: 'Complete burger with crunchy bacon substitute.',
+    description: 'Burger with bacon substitute.',
   },
   {
     _id: 'prod-complete-bacon',
@@ -314,7 +314,7 @@ export const ALL_MENU_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'complete-with-bacon',
-    description: 'Monster burger with patty, ham, egg, cheese & bacon.',
+    description: 'Patty, ham, egg, cheese & bacon.',
   },
 
   // Footlong

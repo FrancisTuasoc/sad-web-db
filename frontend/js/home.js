@@ -34,7 +34,7 @@ export const DEFAULT_FEATURED_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'cdo-burger',
-    description: 'Grilled beef patty with special dressing.',
+    description: 'Grilled beef patty.',
   },
   {
     _id: 'prod-burger-bacon',
@@ -46,7 +46,7 @@ export const DEFAULT_FEATURED_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'burger-with-bacon',
-    description: 'Beef patty with crispy smoked bacon.',
+    description: 'Beef patty with crispy bacon.',
   },
   {
     _id: 'prod-cheese-bacon',
@@ -58,7 +58,7 @@ export const DEFAULT_FEATURED_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'cheese-burger-with-bacon',
-    description: 'Cheesy beef patty with crunchy bacon.',
+    description: 'Cheesy patty with bacon.',
   },
   {
     _id: 'prod-complete-bacon',
@@ -70,7 +70,7 @@ export const DEFAULT_FEATURED_PRODUCTS = [
     isAvailable: true,
     isFeatured: true,
     slug: 'complete-with-bacon',
-    description: 'Monster burger with patty, ham, egg, cheese & bacon.',
+    description: 'Patty, ham, egg, cheese & bacon.',
   },
 ];
 
@@ -124,9 +124,9 @@ export function renderProductCard(
   const avgRating = Number(product.averageRating || 0);
   const reviewCount = Number(product.reviewCount || 0);
 
-  // Concise description to prevent bloated card height
+  // Ultra-concise description (under 35 chars) to keep item cards compact and consistent
   const fullDesc = (product.description || 'Freshly grilled specialty.').trim();
-  const shortDesc = fullDesc.length > 50 ? fullDesc.slice(0, 48).trim() + '...' : fullDesc;
+  const shortDesc = fullDesc.length > 36 ? fullDesc.slice(0, 34).trim() + '...' : fullDesc;
 
   let buttonHtml = '';
   const canPlaceOrder = canOrder && onlineOrderingEnabled;
