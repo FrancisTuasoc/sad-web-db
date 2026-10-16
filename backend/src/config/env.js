@@ -59,6 +59,22 @@ const envSchema = z.object({
     emptyToUndefined,
     z.string().trim().url().optional()
   ),
+  CLOUDINARY_URL: z.preprocess(
+    emptyToUndefined,
+    z.string().trim().min(1).optional()
+  ),
+  CLOUDINARY_CLOUD_NAME: z.preprocess(
+    emptyToUndefined,
+    z.string().trim().min(1).optional()
+  ),
+  CLOUDINARY_API_KEY: z.preprocess(
+    emptyToUndefined,
+    z.string().trim().min(1).optional()
+  ),
+  CLOUDINARY_API_SECRET: z.preprocess(
+    emptyToUndefined,
+    z.string().trim().min(1).optional()
+  ),
 });
 
 const validation = envSchema.safeParse(process.env);
@@ -107,4 +123,8 @@ module.exports = {
   PASSWORD_RESET_API_KEY: env.PASSWORD_RESET_API_KEY,
   PASSWORD_RESET_EMAIL_ENABLED: passwordResetEmailEnabled,
   FRONTEND_URL: new URL(env.FRONTEND_URL || env.CORS_ORIGINS[0]).origin,
+  CLOUDINARY_URL: env.CLOUDINARY_URL,
+  CLOUDINARY_CLOUD_NAME: env.CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY: env.CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET: env.CLOUDINARY_API_SECRET,
 };

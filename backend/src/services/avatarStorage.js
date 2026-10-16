@@ -1,7 +1,9 @@
 const avatarRepository = require('../repositories/avatarRepository');
+const cloudinaryService = require('./cloudinary.service');
 const AppError = require('../utils/AppError');
 
 async function reserveAvatarBytes(bytes) {
+  if (cloudinaryService.isConfigured()) return;
   const usage = await avatarRepository.getStorageUsage();
   if (usage.usedBytes + bytes > avatarRepository.AVATAR_STORAGE_CAP_BYTES) {
     throw new AppError(
@@ -16,6 +18,14 @@ async function releaseAvatarBytes(bytes) {
 }
 
 async function deleteAvatarByUrl(avatarUrl) {
+  if (!avatarUrl) return;
+  if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) {
+    const publicId = cloudinaryService.extractPublicId(avatarUrl);
+    if (publicId) {
+      await cloudinaryService.deleteImage(publicId);
+    }
+    return;
+  }
   await avatarRepository.deleteAvatarByUrl(avatarUrl);
 }
 

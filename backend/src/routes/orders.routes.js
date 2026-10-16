@@ -94,6 +94,10 @@ router.get(
       throw new AppError('Payment proof not found.', 404);
     }
 
+    if (proof.image_url) {
+      return res.redirect(proof.image_url);
+    }
+
     res
       .type(proof.mime_type)
       .set('Cache-Control', 'private, no-store')

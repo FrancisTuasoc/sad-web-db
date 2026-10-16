@@ -10,6 +10,7 @@ const MIGRATIONS = [
   '20261012_order_checkout.sql',
   '20261015_notifications.sql',
   '20261016_reviews_favorites.sql',
+  '20261016_cloudinary_storage.sql',
 ];
 
 async function runMigrations() {

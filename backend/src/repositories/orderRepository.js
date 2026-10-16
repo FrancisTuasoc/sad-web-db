@@ -182,9 +182,20 @@ const orderRepository = {
       CREATE TABLE IF NOT EXISTS order_payment_proofs (
         order_id UUID PRIMARY KEY REFERENCES orders(id) ON DELETE CASCADE,
         mime_type VARCHAR(30) NOT NULL,
-        image_data BYTEA NOT NULL,
+        image_data BYTEA,
+        image_url VARCHAR(500),
+        public_id VARCHAR(255),
         created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
+      ALTER TABLE order_payment_proofs
+        ADD COLUMN IF NOT EXISTS image_url VARCHAR(500),
+        ADD COLUMN IF NOT EXISTS public_id VARCHAR(255);
+      DO $$
+      BEGIN
+        ALTER TABLE order_payment_proofs ALTER COLUMN image_data DROP NOT NULL;
+      EXCEPTION
+        WHEN OTHERS THEN NULL;
+      END $$;
     `);
   },
 
@@ -196,7 +207,7 @@ const orderRepository = {
       ownership = ` AND o.user_id = $${params.length}`;
     }
     const result = await query(
-      `SELECT proof.mime_type, proof.image_data
+      `SELECT proof.mime_type, proof.image_data, proof.image_url, proof.public_id
        FROM orders o
        JOIN order_payment_proofs proof ON proof.order_id = o.id
        WHERE o.id = $1${ownership}`,
@@ -343,11 +354,25 @@ const orderRepository = {
       orderId = orderRes.rows[0].id;
 
       if (paymentProof) {
-        await q(
-          `INSERT INTO order_payment_proofs (order_id, mime_type, image_data)
-           VALUES ($1, $2, $3)`,
-          [orderId, paymentProof.mimeType, paymentProof.buffer]
-        );
+        if (paymentProof.imageUrl) {
+          await q(
+            `INSERT INTO order_payment_proofs (order_id, mime_type, image_data, image_url, public_id)
+             VALUES ($1, $2, $3, $4, $5)`,
+            [
+              orderId,
+              paymentProof.mimeType,
+              null,
+              paymentProof.imageUrl,
+              paymentProof.publicId || null,
+            ]
+          );
+        } else {
+          await q(
+            `INSERT INTO order_payment_proofs (order_id, mime_type, image_data)
+             VALUES ($1, $2, $3)`,
+            [orderId, paymentProof.mimeType, paymentProof.buffer]
+          );
+        }
       }
 
       for (const item of items) {

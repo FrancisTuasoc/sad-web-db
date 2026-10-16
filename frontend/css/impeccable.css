@@ -11851,9 +11851,9 @@ body.admin-page .admin-layout .admin-sidebar .admin-nav-item:not(.active):hover 
 }
 
 body.admin-page .admin-layout .admin-sidebar .admin-nav-item :is(svg, i) {
-  border-color: rgba(255, 255, 255, 0.14) !important;
-  background: rgba(255, 255, 255, 0.12) !important;
-  color: #bce7c8 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.88) !important;
 }
 
 body.admin-page .admin-layout .admin-sidebar .admin-nav-item.active {
@@ -11863,9 +11863,9 @@ body.admin-page .admin-layout .admin-sidebar .admin-nav-item.active {
 }
 
 body.admin-page .admin-layout .admin-sidebar .admin-nav-item.active :is(svg, i) {
-  border-color: rgba(255, 255, 255, 0.22) !important;
-  background: rgba(255, 255, 255, 0.16) !important;
-  color: var(--brand-on-primary) !important;
+  border-color: #ffffff !important;
+  background: #ffffff !important;
+  color: var(--brand-primary, #216a3c) !important;
 }
 
 body.admin-page .admin-header-brand .brand-logo,
@@ -11926,7 +11926,7 @@ body.admin-page .admin-layout .admin-sidebar .admin-nav-item.active {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
 }
 
-body.admin-page .admin-layout .admin-sidebar .admin-nav-item > i {
+body.admin-page .admin-layout .admin-sidebar .admin-nav-item > :is(i, svg) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -11941,14 +11941,19 @@ body.admin-page .admin-layout .admin-sidebar .admin-nav-item > i {
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 
-body.admin-page .admin-layout .admin-sidebar .admin-nav-item:not(.active):hover > i {
+body.admin-page .admin-layout .admin-sidebar .admin-nav-item > svg {
+  width: 18px;
+  height: 18px;
+}
+
+body.admin-page .admin-layout .admin-sidebar .admin-nav-item:not(.active):hover > :is(i, svg) {
   background: rgba(255, 255, 255, 0.16) !important;
   color: #ffffff !important;
   border-color: rgba(255, 255, 255, 0.22) !important;
   transform: scale(1.08);
 }
 
-body.admin-page .admin-layout .admin-sidebar .admin-nav-item.active > i {
+body.admin-page .admin-layout .admin-sidebar .admin-nav-item.active > :is(i, svg) {
   background: #ffffff !important;
   color: var(--brand-primary, #216a3c) !important;
   border-color: #ffffff !important;

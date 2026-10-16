@@ -7,6 +7,7 @@ const path = require('path');
 const userRepository = require('../repositories/userRepository');
 const orderRepository = require('../repositories/orderRepository');
 const avatarRepository = require('../repositories/avatarRepository');
+const cloudinaryService = require('../services/cloudinary.service');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 const validate = require('../middleware/validate');
@@ -297,7 +298,6 @@ router.post(
   asyncHandler(async (req, res) => {
     const photo = parseAvatarMultipart(req.body, req.headers['content-type']);
     const lockToken = await acquireAvatarUserLock(req.user.id);
-    let uploadedAvatar = null;
     let responseAvatarUrl = '';
 
     try {
@@ -305,26 +305,22 @@ router.post(
       if (!user) throw new AppError('Your account could not be found.', 404);
       const previousAvatarUrl = user.avatarUrl;
 
-      await reserveAvatarBytes(photo.buffer.length);
-
-      uploadedAvatar = await avatarRepository.saveAvatar(req.user.id, {
-        filename: photo.filename,
-        contentType: photo.contentType,
-        buffer: photo.buffer,
-      });
-
-      const uploadedAvatarUrl = `pgavatar:${uploadedAvatar.id}`;
-      await userRepository.update(req.user.id, {
-        avatarUrl: uploadedAvatarUrl,
-      });
-
-      await deleteAvatarByUrl(previousAvatarUrl);
-      responseAvatarUrl = uploadedAvatarUrl;
-    } catch (error) {
-      if (uploadedAvatar) {
-        await avatarRepository.deleteAvatar(uploadedAvatar.id);
+      if (cloudinaryService.isConfigured()) {
+        const uploadResult = await cloudinaryService.uploadBuffer(
+          photo.buffer,
+          {
+            folder: 'casestudy/avatars',
+            tags: ['avatar', `user_${req.user.id}`],
+          }
+        );
+        responseAvatarUrl = uploadResult.secureUrl;
+        await userRepository.update(req.user.id, {
+          avatarUrl: responseAvatarUrl,
+        });
+        await deleteAvatarByUrl(previousAvatarUrl);
+      } else {
+        cloudinaryService.assertConfigured();
       }
-      throw error;
     } finally {
       await releaseAvatarUserLock(req.user.id, lockToken);
     }
@@ -364,6 +360,13 @@ router.get(
     const user = await userRepository.findById(req.user.id);
     if (!user || !user.avatarUrl) {
       throw new AppError('No profile photo is available.', 404);
+    }
+
+    if (
+      user.avatarUrl.startsWith('http://') ||
+      user.avatarUrl.startsWith('https://')
+    ) {
+      return res.redirect(user.avatarUrl);
     }
 
     let fileId = user.avatarUrl;

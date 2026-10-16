@@ -12,6 +12,7 @@ const {
 } = require('./stock.service');
 const { broadcastStock, sendToUser, sendToAdmins } = require('./events');
 const notificationRepository = require('../repositories/notificationRepository');
+const cloudinaryService = require('./cloudinary.service');
 
 const PAY_AT_SHOP_ARRIVAL_WINDOW_MS = 60 * 60 * 1000;
 const EXPIRY_SWEEP_BATCH_SIZE = 100;
@@ -82,6 +83,21 @@ async function placeOrder({
         data: gcashProofData,
         mimeType: gcashProofMimeType,
       });
+
+      if (cloudinaryService.isConfigured()) {
+        const uploadResult = await cloudinaryService.uploadBuffer(
+          paymentProof.buffer,
+          {
+            folder: 'casestudy/gcash_proofs',
+            tags: ['gcash_proof', `user_${userId}`],
+          }
+        );
+        paymentProof = {
+          ...paymentProof,
+          imageUrl: uploadResult.secureUrl,
+          publicId: uploadResult.publicId,
+        };
+      }
     } else if (!gcashReference || !/^\d{13}$/.test(gcashReference)) {
       throw new AppError(
         'Enter the 13-digit demo reference or attach an image for admin review.',
