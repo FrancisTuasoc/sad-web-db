@@ -163,7 +163,7 @@ export function escapeHtml(str) {
 }
 
 // ---------------- Toast System ----------------
-export function showToast(message, type = 'info', duration = 4000) {
+export function showToast(message, type = 'info', duration = 3500) {
   let container = document.getElementById('toast-container');
   if (!container) {
     container = document.createElement('div');
@@ -173,36 +173,42 @@ export function showToast(message, type = 'info', duration = 4000) {
 
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
+  toast.setAttribute('role', 'alert');
+  toast.setAttribute('aria-live', 'polite');
 
   const iconSvg =
     {
-      success: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#287D3C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
-      error: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A4262C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
-      warning: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D97A07" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
-      info: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D6FB8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`,
+      success: `<svg class="toast-symbol" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`,
+      error: `<svg class="toast-symbol" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>`,
+      warning: `<svg class="toast-symbol" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+      info: `<svg class="toast-symbol" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`,
     }[type] || '';
 
   toast.innerHTML = `
-    <div style="flex-shrink:0;">${iconSvg}</div>
-    <div class="toast-message">${escapeHtml(message)}</div>
-    <button class="toast-close" aria-label="Close message" style="background:none;border:none;cursor:pointer;padding:0;font-size:1.2rem;line-height:1;">&times;</button>
+    <span class="toast-icon-wrap" aria-hidden="true">${iconSvg}</span>
+    <span class="toast-message">${escapeHtml(message)}</span>
+    <button class="toast-close" type="button" aria-label="Dismiss notification">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
   `;
 
-  const closeBtn = toast.querySelector('.toast-close');
-  closeBtn.addEventListener('click', () => {
+  const dismiss = () => {
     toast.style.opacity = '0';
-    toast.style.transform = 'translateY(10px)';
-    setTimeout(() => toast.remove(), 250);
-  });
+    toast.style.transform = 'translateY(-14px) scale(0.96)';
+    setTimeout(() => toast.remove(), 220);
+  };
+
+  const closeBtn = toast.querySelector('.toast-close');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', dismiss);
+  }
 
   container.appendChild(toast);
 
   if (duration > 0) {
     setTimeout(() => {
       if (toast.parentElement) {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(10px)';
-        setTimeout(() => toast.remove(), 250);
+        dismiss();
       }
     }, duration);
   }

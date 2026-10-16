@@ -642,7 +642,7 @@ function initMenu() {
     });
   }
 
-  // Initialize hero banner slideshow (auto-rotates every 2s)
+  // Initialize hero banner slideshow (auto-rotates every 3s)
   initMenuHeroSlider();
 }
 
@@ -668,7 +668,7 @@ function initMenuHeroSlider() {
     stopAutoplay();
     autoplayTimer = setInterval(() => {
       goToSlide(currentSlide + 1);
-    }, 2000);
+    }, 3000);
   }
 
   function stopAutoplay() {
