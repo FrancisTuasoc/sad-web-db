@@ -3575,6 +3575,89 @@ textarea:focus {
   color: #123d2a !important;
 }
 
+body.auth-page {
+  min-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 24px 16px !important;
+  box-sizing: border-box !important;
+}
+
+body.auth-page main.auth-main,
+body.auth-page main.auth-main--register,
+body.auth-page main.auth-main--login {
+  flex: none !important;
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 0 !important;
+  margin: auto !important;
+}
+
+.auth-page main > .auth-panel {
+  width: min(100%, 460px) !important;
+  padding: clamp(22px, 4vw, 30px) !important;
+}
+
+.auth-page .auth-panel .form-group {
+  margin-bottom: 12px !important;
+}
+
+.auth-page .auth-panel .form-label {
+  margin-bottom: 4px !important;
+  font-size: 0.73rem !important;
+}
+
+.auth-page .auth-panel .form-input {
+  min-height: 38px !important;
+  height: 38px !important;
+  padding: 6px 12px !important;
+  font-size: 0.88rem !important;
+  line-height: 1.4 !important;
+  border-radius: 6px !important;
+}
+
+.auth-page .auth-panel .password-field-wrapper .form-input {
+  padding-right: 36px !important;
+}
+
+.auth-page .auth-panel .toggle-password-btn {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  right: 4px !important;
+  border-radius: 4px !important;
+}
+
+.auth-page .auth-panel .toggle-password-btn > .fa-solid {
+  font-size: 14px !important;
+}
+
+.auth-page .auth-panel form > .btn {
+  min-height: 40px !important;
+  height: 40px !important;
+  font-size: 0.92rem !important;
+  margin-top: 6px !important;
+  border-radius: 6px !important;
+}
+
+.auth-page .auth-heading {
+  margin-bottom: 18px !important;
+}
+
+.auth-page .auth-heading h2 {
+  font-size: 1.6rem !important;
+  margin-bottom: 4px !important;
+}
+
+.auth-page .auth-heading p {
+  font-size: 0.88rem !important;
+}
+
 .auth-page .site-header .container.header-container {
   min-height: 72px;
 }

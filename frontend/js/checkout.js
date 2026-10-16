@@ -56,13 +56,20 @@ const CONTACT_ADDRESS_FIELDS = [
 ];
 
 function splitSavedName(user) {
+  if (!user) return { firstName: '', lastName: '' };
+  if (user.firstName || user.lastName) {
+    return {
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+    };
+  }
   const savedParts = String(user.fullName || '')
     .trim()
     .split(/\s+/)
     .filter(Boolean);
   return {
-    firstName: user.firstName || savedParts.shift() || '',
-    lastName: user.lastName || savedParts.join(' '),
+    firstName: savedParts.shift() || '',
+    lastName: savedParts.join(' '),
   };
 }
 

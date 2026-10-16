@@ -118,10 +118,19 @@ const pendingVerificationRepository = {
       const registration = row.user_data;
       const created = await client.query(
         `INSERT INTO users (
-           username, email, password_hash, role, status, is_verified
-         ) VALUES ($1, $2, $3, 'customer', 'active', TRUE)
+           username, email, password_hash, role, status, is_verified,
+           first_name, last_name, full_name
+         ) VALUES ($1, $2, $3, 'customer', 'active', TRUE, $4, $5, $6)
          RETURNING *`,
-        [registration.username, row.email, registration.passwordHash]
+        [
+          registration.username,
+          row.email,
+          registration.passwordHash,
+          registration.firstName || '',
+          registration.lastName || '',
+          registration.fullName ||
+            `${registration.firstName || ''} ${registration.lastName || ''}`.trim(),
+        ]
       );
       await client.query(
         'DELETE FROM pending_verifications WHERE LOWER(email) = LOWER($1)',

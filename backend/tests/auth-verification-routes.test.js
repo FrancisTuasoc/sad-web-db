@@ -114,6 +114,33 @@ test('registration stores a pending non-Gmail account and sends verification wit
   assert.equal(body.user, undefined);
 });
 
+test('registration accepts firstName and lastName and generates a valid username', async () => {
+  const response = await fetch(`${baseUrl}/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      firstName: 'Maria',
+      lastName: 'Santos',
+      email: 'maria.santos@example.com',
+      password: 'password123',
+      confirmPassword: 'password123',
+    }),
+  });
+  const body = await response.json();
+
+  assert.equal(response.status, 202);
+  assert.match(
+    body.message,
+    /A verification email has been sent to your inbox/
+  );
+  assert.equal(pendingData.email, 'maria.santos@example.com');
+  assert.equal(pendingData.userData.firstName, 'Maria');
+  assert.equal(pendingData.userData.lastName, 'Santos');
+  assert.equal(pendingData.userData.fullName, 'Maria Santos');
+  assert.equal(pendingData.userData.username, 'mariasantos');
+  assert.match(pendingData.userData.passwordHash, /^\$2[aby]\$/);
+});
+
 test('verification status reports whether Brevo is configured', async () => {
   const response = await fetch(`${baseUrl}/verification-status`);
   const body = await response.json();

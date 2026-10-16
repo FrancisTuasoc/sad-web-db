@@ -33,8 +33,44 @@ const {
 
 const router = express.Router();
 
+function buildBaseUsername(firstName, lastName, email) {
+  const cleanFirst = (firstName || '').replace(/[^a-zA-Z0-9]/g, '');
+  const cleanLast = (lastName || '').replace(/[^a-zA-Z0-9]/g, '');
+  let base = `${cleanFirst}${cleanLast}`.toLowerCase();
+
+  if (!base || !/^[a-zA-Z]/.test(base)) {
+    const emailPrefix = (email || '')
+      .split('@')[0]
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .toLowerCase();
+    base = /^[a-zA-Z]/.test(emailPrefix)
+      ? emailPrefix
+      : `user${cleanFirst || cleanLast || ''}`;
+  }
+  if (!/^[a-zA-Z]/.test(base)) {
+    base = `u${base}`;
+  }
+  base = base.slice(0, 14);
+  if (base.length < 3) {
+    base = (base + 'gigabite').slice(0, 14);
+  }
+  return base;
+}
+
 const registerSchema = z
   .object({
+    firstName: z
+      .string()
+      .trim()
+      .min(1, 'First name is required')
+      .max(100, 'First name cannot exceed 100 characters')
+      .optional(),
+    lastName: z
+      .string()
+      .trim()
+      .min(1, 'Last name is required')
+      .max(100, 'Last name cannot exceed 100 characters')
+      .optional(),
     username: z
       .string()
       .trim()
@@ -43,7 +79,8 @@ const registerSchema = z
       .refine(
         isValidUsername,
         'Username must start with a letter and can only contain letters, numbers, and underscores'
-      ),
+      )
+      .optional(),
     email: z
       .string()
       .trim()
@@ -59,7 +96,21 @@ const registerSchema = z
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
     path: ['confirmPassword'],
-  });
+  })
+  .refine(
+    (data) =>
+      Boolean(
+        (data.username && data.username.trim()) ||
+          (data.firstName &&
+            data.firstName.trim() &&
+            data.lastName &&
+            data.lastName.trim())
+      ),
+    {
+      message: 'Please provide both first name and last name.',
+      path: ['firstName'],
+    }
+  );
 
 const loginSchema = z.object({
   email: z
@@ -249,7 +300,10 @@ router.post(
   rateLimitAuth(10, 15),
   validate(registerSchema),
   asyncHandler(async (req, res) => {
-    const { username, email, password } = req.body;
+    let { username, firstName, lastName, email, password } = req.body;
+    firstName = firstName ? firstName.trim() : '';
+    lastName = lastName ? lastName.trim() : '';
+    const fullName = [firstName, lastName].filter(Boolean).join(' ');
 
     const existingByEmail = await userRepository.findByEmail(email);
     if (existingByEmail) {
@@ -259,29 +313,56 @@ router.post(
       );
     }
 
-    const existingByUsername = await userRepository.findByUsername(username);
-    if (existingByUsername) {
-      throw new AppError(
-        'This username is already taken. Please choose another.',
-        400
-      );
+    if (username && username.trim()) {
+      username = username.trim();
+      const existingByUsername = await userRepository.findByUsername(username);
+      if (existingByUsername) {
+        throw new AppError(
+          'This username is already taken. Please choose another.',
+          400
+        );
+      }
+
+      const pendingUsername =
+        await pendingVerificationRepository.findPendingUsername(
+          username,
+          email
+        );
+      if (pendingUsername) {
+        throw new AppError(
+          'This username is already being used for another pending registration.',
+          400
+        );
+      }
+    } else {
+      const base = buildBaseUsername(firstName, lastName, email);
+      username = base;
+      let counter = 1;
+      while (
+        (await userRepository.findByUsername(username)) ||
+        (await pendingVerificationRepository.findPendingUsername(
+          username,
+          email
+        ))
+      ) {
+        const suffix = String(counter);
+        username = `${base.slice(0, 20 - suffix.length)}${suffix}`;
+        counter++;
+      }
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
-    const pendingUsername = await pendingVerificationRepository.findPendingUsername(
-      username,
-      email
-    );
-    if (pendingUsername) {
-      throw new AppError(
-        'This username is already being used for another pending registration.',
-        400
-      );
-    }
 
     await createAndEmailVerification(
       email,
-      { username, email, passwordHash },
+      {
+        username,
+        firstName,
+        lastName,
+        fullName,
+        email,
+        passwordHash,
+      },
       false
     );
 

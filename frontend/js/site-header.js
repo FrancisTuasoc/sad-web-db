@@ -55,7 +55,7 @@ class SiteHeader extends HTMLElement {
             </div>
           </div>
           <div id="header-user-slot">
-            <a href="login.html" class="btn btn-primary btn-sm">Login</a>
+            <a href="login.html" class="btn btn-primary btn-sm">Sign In</a>
           </div>
           <button id="mobile-nav-btn" class="mobile-nav-toggle" type="button" aria-label="Toggle mobile menu">
             <i class="fa-solid fa-bars" aria-hidden="true"></i>
@@ -69,7 +69,7 @@ class SiteHeader extends HTMLElement {
         <a href="index.html#about">About Us</a>
         <a href="index.html#contact">Contact &amp; Store Hours</a>
         <a href="cart.html">My Cart</a>
-        <a href="login.html" style="color: var(--color-accent); font-weight: 700">Login / Register</a>
+        <a href="login.html" style="color: var(--color-accent); font-weight: 700">Sign In / Sign Up</a>
       </div>
     `;
 

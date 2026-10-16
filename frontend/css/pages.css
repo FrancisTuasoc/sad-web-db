@@ -7429,26 +7429,31 @@ body:has(.admin-layout) .site-header .header-container {
 }
 
 .auth-page .auth-panel .form-group {
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .auth-page .auth-panel .form-label {
-  margin-bottom: 7px;
+  margin-bottom: 5px;
   color: var(--color-text-main);
-  font-size: 0.7rem !important;
+  font-size: 0.73rem !important;
   font-weight: 600;
-  letter-spacing: 0.075em;
-  line-height: 1.4 !important;
+  letter-spacing: 0.05em;
+  line-height: 1.3 !important;
 }
 
 .auth-page .auth-panel .form-input {
-  min-height: 48px;
-  padding: 11px 13px;
+  min-height: 38px;
+  height: 38px;
+  padding: 6px 12px;
   border-color: rgba(40, 27, 20, 0.17);
-  border-radius: 5px;
+  border-radius: 6px;
   background: #fffdf9;
-  font-size: 0.94rem !important;
+  font-size: 0.88rem !important;
   line-height: 1.4 !important;
+}
+
+.auth-page .auth-panel .password-field-wrapper .form-input {
+  padding-right: 36px;
 }
 
 .auth-page .auth-panel .form-input::placeholder {
@@ -7462,15 +7467,24 @@ body:has(.admin-layout) .site-header .header-container {
 }
 
 .auth-page .auth-panel .form-hint {
-  margin-top: 6px;
+  margin-top: 5px;
   color: var(--color-text-muted);
   font-size: 0.73rem !important;
-  line-height: 1.5 !important;
+  line-height: 1.4 !important;
 }
 
 .auth-page .auth-panel .toggle-password-btn {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  right: 4px;
   color: var(--color-text-muted);
   transition: color 180ms ease;
+}
+
+.auth-page .auth-panel .toggle-password-btn > .fa-solid {
+  font-size: 14px;
 }
 
 .auth-page .auth-panel .toggle-password-btn:hover {
@@ -7479,8 +7493,10 @@ body:has(.admin-layout) .site-header .header-container {
 
 .auth-page .auth-panel form > .btn {
   width: 100%;
-  min-height: 48px;
+  min-height: 40px;
+  height: 40px;
   margin-top: 4px;
+  font-size: 0.92rem !important;
   box-shadow: none !important;
   transition:
     background-color 180ms ease,
@@ -7488,9 +7504,22 @@ body:has(.admin-layout) .site-header .header-container {
     border-color 180ms ease;
 }
 
+.auth-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .auth-row-2col {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
 .auth-page .auth-switch {
-  margin-top: 22px;
-  padding-top: 16px;
+  margin-top: 18px;
+  padding-top: 14px;
   border-top: 1px solid rgba(40, 27, 20, 0.1);
   color: var(--color-text-muted);
   font-size: 0.86rem !important;
@@ -7514,6 +7543,27 @@ body:has(.admin-layout) .site-header .header-container {
 .auth-page .auth-switch a:hover {
   color: var(--color-brand-secondary-hover);
   text-decoration-color: currentColor;
+}
+
+.auth-page .auth-home-link {
+  margin-top: 10px;
+  text-align: left;
+}
+
+.auth-page .auth-home-link a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 180ms ease;
+}
+
+.auth-page .auth-home-link a:hover {
+  color: var(--color-brand);
+  text-decoration: underline;
 }
 
 .auth-page .auth-result-title {

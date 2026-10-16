@@ -393,7 +393,7 @@ export function renderHeader(activeNav = '') {
       loadHeaderAvatar(user, userSlot.querySelector('.avatar-circle'));
       initCustomerNotifications();
     } else {
-      userSlot.innerHTML = `<a href="login.html" class="btn btn-primary btn-sm">Login</a>`;
+      userSlot.innerHTML = `<a href="login.html" class="btn btn-primary btn-sm">Sign In</a>`;
       const notifWrapper = document.getElementById('header-notifications-wrapper');
       if (notifWrapper) notifWrapper.classList.add('hidden');
     }
@@ -428,7 +428,7 @@ export function renderHeader(activeNav = '') {
         <a href="index.html#about">About Us</a>
         <a href="index.html#contact">Contact &amp; Store Hours</a>
         <a href="cart.html">My Cart</a>
-        <a href="login.html" style="color:var(--color-accent);font-weight:700;">Login / Register</a>
+        <a href="login.html" style="color:var(--color-accent);font-weight:700;">Sign In / Sign Up</a>
       `;
     }
   }

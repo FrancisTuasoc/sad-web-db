@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Customer &amp; Admin Login - GIGABITE</title>
+    <title>Sign In - GIGABITE</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -18,12 +18,8 @@
       src="https://kit.fontawesome.com/32d4994703.js"
       crossorigin="anonymous"
     ></script>
-    <script type="module" src="js/site-header.js"></script>
   </head>
   <body class="auth-page">
-    <!-- Header with static markup fallback -->
-    <site-header id="site-header"></site-header>
-
     <main class="auth-main auth-main--login">
       <div class="modal-card auth-panel auth-panel--login">
         <div class="auth-heading">
@@ -44,6 +40,7 @@
               class="form-input"
               required
               placeholder="Enter your email address"
+              autocomplete="email"
               autofocus
             />
           </div>
@@ -59,6 +56,7 @@
                 class="form-input"
                 required
                 placeholder="Enter your password"
+                autocomplete="current-password"
               />
               <button
                 type="button"
@@ -80,87 +78,33 @@
             id="login-submit-btn"
             class="btn btn-primary btn-lg"
           >
-            Log In
+            Sign In
           </button>
         </form>
 
         <div class="auth-switch">
           Don't have an account?
-          <a href="register.html">Create one now</a>
+          <a href="register.html">Sign Up</a>
+        </div>
+        <div class="auth-home-link">
+          <a href="index.html">← Go back to Home</a>
         </div>
       </div>
     </main>
 
-    <footer id="site-footer" class="site-footer">
-      <div class="container">
-        <div class="footer-grid">
-          <div class="footer-col">
-            <h4 id="footer-store-name">GIGABITE</h4>
-            <p id="footer-store-tagline">
-              Flavor on Wheels - Freshly Grilled Everyday
-            </p>
-            <p class="footer-description">
-              Serving handcrafted hot burgers, specialty sandwiches, footlongs,
-              and sizzling sides with premium local ingredients.
-            </p>
-          </div>
-          <div class="footer-col">
-            <h4>Find us on</h4>
-            <a
-              class="footer-facebook-link"
-              href="https://www.facebook.com/cecilia.rublico"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Visit our Facebook page"
-            >
-              <svg
-                class="footer-facebook-icon"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073c0 6.019 4.388 11.018 10.125 11.927v-8.437H7.078v-3.49h3.047V9.411c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.977h-1.513c-1.49 0-1.956.931-1.956 1.886v2.26h3.328l-.532 3.49h-2.796V24C19.612 23.091 24 18.092 24 12.073Z"
-                />
-              </svg>
-              <span class="footer-facebook-text">Visit our Facebook page</span>
-            </a>
-          </div>
-          <div class="footer-col">
-            <h4>Contact &amp; Location</h4>
-            <p>
-              <strong>Address:</strong><br /><span id="footer-store-address"
-                >Abangan Norte 599, McArthur Highway</span
-              >
-            </p>
-            <p style="margin-top: 8px">
-              <strong>Phone:</strong><br /><span id="footer-store-phone"
-                >09309189124</span
-              >
-            </p>
-          </div>
-        </div>
-        <div class="footer-bottom">
-          &copy; 2026 GIGABITE. All rights reserved.
-        </div>
-      </div>
-    </footer>
-
     <script type="module">
       import { apiFetch } from './js/api.js';
       import { setToken, setUser, isLoggedIn, isAdmin } from './js/auth.js';
-      import { renderHeader, renderFooter, showToast } from './js/ui.js';
+      import { showToast } from './js/ui.js';
 
       function init() {
-        renderHeader('login');
-        renderFooter();
-
         // Check if session was expired
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('expired') === '1') {
-          showToast('Your session has expired. Please log in again.', 'info');
+          showToast('Your session has expired. Please sign in again.', 'info');
         }
         if (urlParams.get('verified') === '1') {
-          showToast('Email verified. You can now log in.', 'success');
+          showToast('Email verified. You can now sign in.', 'success');
         }
 
         // Password eye toggle
@@ -181,7 +125,7 @@
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
           submitBtn.disabled = true;
-          submitBtn.textContent = 'Logging in...';
+          submitBtn.textContent = 'Signing in...';
 
           const email = document.getElementById('login-email').value.trim();
           const password = document.getElementById('login-password').value;
@@ -198,7 +142,7 @@
             setToken(res.token);
             setUser(res.user);
 
-            showToast('Login successful! Redirecting...', 'success');
+            showToast('Sign in successful! Redirecting...', 'success');
 
             // Role-based redirection
             setTimeout(() => {
@@ -226,12 +170,12 @@
           } catch (err) {
             showToast(
               controller.signal.aborted
-                ? 'Login request timed out. Check your connection and try again.'
+                ? 'Sign in request timed out. Check your connection and try again.'
                 : err.message,
               'error'
             );
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Log In';
+            submitBtn.textContent = 'Sign In';
           } finally {
             window.clearTimeout(timeout);
           }
