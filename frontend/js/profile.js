@@ -18,6 +18,12 @@ import {
   saveAvatarCache,
   clearAvatarCache,
 } from './auth.js';
+import { lucideIcon, renderRatingBadge, renderRatingStars } from './icons.js';
+import {
+  openReviewModalForProduct,
+  toggleFavorite,
+  ensureReviewModalDOM,
+} from './reviews-favorites.js';
 
 let activeTab = 'overview';
 let statusSubTab = 'pickup';
@@ -1187,9 +1193,293 @@ async function handleBuyAgain(orderId, button) {
   }
 }
 
+// ---------------- Customer Favorites Tab ----------------
+async function loadCustomerFavoritesTab() {
+  const container = document.getElementById('favorites-grid-container');
+  if (!container) return;
+
+  container.setAttribute('aria-busy', 'true');
+  container.innerHTML = `
+    <div class="account-loading-card" aria-hidden="true" style="grid-column: 1 / -1;">
+      <div class="skeleton skeleton-title"></div>
+      <div class="skeleton skeleton-text"></div>
+      <div class="skeleton skeleton-text"></div>
+    </div>
+  `;
+
+  try {
+    const res = await apiFetch('/favorites/my');
+    container.setAttribute('aria-busy', 'false');
+    const favorites = res.favorites || [];
+
+    if (!favorites.length) {
+      container.innerHTML = `
+        <div class="state-box" style="grid-column: 1 / -1;">
+          <div class="state-icon-wrap" style="color:var(--color-primary);margin-bottom:12px;">
+            ${lucideIcon('heart', { size: 48, stroke: '#9CA3AF', fill: 'none' })}
+          </div>
+          <h4 class="state-title">You haven't added any favorites yet.</h4>
+          <p class="state-desc">Browse the menu to find items you love.</p>
+          <a href="menu.html" class="btn btn-primary btn-sm" style="margin-top:14px;">Browse Menu</a>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = favorites
+      .map((fav) => {
+        const p = fav.product || {};
+        const pid = p.id || p._id || fav.itemId;
+        const img = p.image || 'assets/placeholder-burger.png';
+        const price = Number(p.price || 0).toFixed(2);
+        const rating = Number(p.averageRating || 0);
+        const count = Number(p.reviewCount || 0);
+
+        return `
+          <article class="customer-favorite-card" data-favorite-item-id="${pid}">
+            <div class="customer-fav-image-wrap">
+              <img src="${escapeHtml(img)}" alt="${escapeHtml(p.name || 'Menu item')}" class="customer-fav-img" onerror="this.onerror=null;this.src='assets/placeholder-burger.png';" />
+              <button
+                type="button"
+                class="customer-fav-unfav-btn"
+                data-unfavorite-id="${pid}"
+                aria-label="Remove from favorites"
+                title="Remove from favorites"
+              >
+                ${lucideIcon('heart', { size: 20, fill: '#E53E3E', stroke: '#E53E3E', ariaHidden: true })}
+              </button>
+            </div>
+            <div class="customer-fav-info">
+              <a href="menu.html#item-${pid}" class="customer-fav-title">${escapeHtml(p.name || 'Item')}</a>
+              <div class="customer-fav-rating">
+                ${renderRatingBadge(rating, count, { size: 14 })}
+              </div>
+              <div class="customer-fav-footer">
+                <span class="customer-fav-price">₱${price}</span>
+                <a href="menu.html#item-${pid}" class="btn btn-secondary btn-sm">Order Now</a>
+              </div>
+            </div>
+          </article>
+        `;
+      })
+      .join('');
+
+    // Attach unfavorite click handlers
+    container.querySelectorAll('[data-unfavorite-id]').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const itemId = btn.getAttribute('data-unfavorite-id');
+        btn.disabled = true;
+        try {
+          await toggleFavorite(itemId, btn);
+          // Animate card removal
+          const card = container.querySelector(`[data-favorite-item-id="${itemId}"]`);
+          if (card) {
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+              card.remove();
+              if (!container.querySelector('.customer-favorite-card')) {
+                loadCustomerFavoritesTab();
+              }
+            }, 250);
+          }
+        } catch (err) {
+          showToast(err.message || 'Could not update favorites.', 'error');
+          btn.disabled = false;
+        }
+      });
+    });
+  } catch (err) {
+    container.setAttribute('aria-busy', 'false');
+    container.innerHTML = `
+      <div class="state-box" style="grid-column: 1 / -1;">
+        <h4 class="state-title">Error loading favorites</h4>
+        <p class="state-desc">${escapeHtml(err.message)}</p>
+        <button id="retry-favorites-btn" class="btn btn-secondary btn-sm" style="margin-top:10px;">Try Again</button>
+      </div>
+    `;
+    const btn = document.getElementById('retry-favorites-btn');
+    if (btn) btn.addEventListener('click', loadCustomerFavoritesTab);
+  }
+}
+
+// ---------------- Customer Reviews Tab ----------------
+async function loadCustomerReviewsTab() {
+  const container = document.getElementById('customer-reviews-container');
+  if (!container) return;
+
+  container.setAttribute('aria-busy', 'true');
+  container.innerHTML = `
+    <div class="account-loading-card" aria-hidden="true">
+      <div class="skeleton skeleton-title"></div>
+      <div class="skeleton skeleton-text"></div>
+    </div>
+  `;
+
+  try {
+    const res = await apiFetch('/reviews/my');
+    container.setAttribute('aria-busy', 'false');
+    const reviews = res.reviews || [];
+
+    if (!reviews.length) {
+      container.innerHTML = `
+        <div class="state-box">
+          <div class="state-icon-wrap" style="color:var(--color-primary);margin-bottom:12px;">
+            ${lucideIcon('star', { size: 48, stroke: '#9CA3AF', fill: 'none' })}
+          </div>
+          <h4 class="state-title">You haven't written any reviews yet.</h4>
+          <p class="state-desc">Share your experience on your favorite burgers and meals from the menu!</p>
+          <a href="menu.html" class="btn btn-primary btn-sm" style="margin-top:14px;">Browse Menu</a>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = reviews
+      .map((r) => {
+        const dateStr = new Date(r.createdAt).toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        });
+        const rating = Number(r.rating || 0);
+
+        return `
+          <article class="customer-review-card" data-review-id="${r.id}">
+            <div class="customer-review-header">
+              <div class="customer-review-item-meta">
+                <a href="menu.html#item-${r.itemId}" class="customer-review-item-name">${escapeHtml(r.itemName || 'Menu Item')}</a>
+                <div class="customer-review-stars">
+                  ${renderRatingStars(rating, { size: 16 })}
+                </div>
+              </div>
+              <span class="customer-review-date">${escapeHtml(dateStr)}</span>
+            </div>
+            <div class="customer-review-comment">
+              ${r.comment ? escapeHtml(r.comment) : '<span class="text-muted italic">(No written comment)</span>'}
+            </div>
+            <div class="customer-review-actions">
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm btn-edit-review"
+                data-review-id="${r.id}"
+                data-item-id="${r.itemId}"
+                data-item-name="${escapeHtml(r.itemName || '')}"
+                data-item-image="${escapeHtml(r.itemImage || '')}"
+                data-item-price="${r.itemPrice || 0}"
+                aria-label="Edit review for ${escapeHtml(r.itemName || '')}"
+              >
+                ${lucideIcon('edit-3', { size: 14 })}
+                <span>Edit</span>
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm btn-delete-review"
+                data-review-id="${r.id}"
+                aria-label="Delete review"
+              >
+                ${lucideIcon('trash-2', { size: 14 })}
+                <span>Delete</span>
+              </button>
+            </div>
+          </article>
+        `;
+      })
+      .join('');
+
+    // Attach Edit button listeners
+    container.querySelectorAll('.btn-edit-review').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const itemId = btn.getAttribute('data-item-id');
+        const name = btn.getAttribute('data-item-name');
+        const image = btn.getAttribute('data-item-image');
+        const price = Number(btn.getAttribute('data-item-price')) || 0;
+
+        openReviewModalForProduct({
+          id: itemId,
+          _id: itemId,
+          name,
+          image,
+          price,
+        });
+      });
+    });
+
+    // Attach Delete button listeners with inline confirmation
+    container.querySelectorAll('.btn-delete-review').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const reviewId = btn.getAttribute('data-review-id');
+
+        if (btn.getAttribute('data-confirming') !== 'true') {
+          btn.setAttribute('data-confirming', 'true');
+          btn.classList.add('btn-danger');
+          btn.innerHTML = `
+            ${lucideIcon('trash-2', { size: 14 })}
+            <span>Confirm Delete?</span>
+          `;
+          setTimeout(() => {
+            if (btn.getAttribute('data-confirming') === 'true') {
+              btn.removeAttribute('data-confirming');
+              btn.classList.remove('btn-danger');
+              btn.innerHTML = `
+                ${lucideIcon('trash-2', { size: 14 })}
+                <span>Delete</span>
+              `;
+            }
+          }, 3500);
+          return;
+        }
+
+        btn.removeAttribute('data-confirming');
+        btn.disabled = true;
+        btn.innerHTML = `
+          ${lucideIcon('loader-2', { size: 16, className: 'spin' })}
+          <span>Deleting...</span>
+        `;
+
+        try {
+          await apiFetch(`/reviews/${reviewId}`, { method: 'DELETE' });
+          showToast('Review removed.', 'info');
+          const card = container.querySelector(`[data-review-id="${reviewId}"]`);
+          if (card) {
+            card.style.opacity = '0';
+            setTimeout(() => {
+              card.remove();
+              if (!container.querySelector('.customer-review-card')) {
+                loadCustomerReviewsTab();
+              }
+            }, 250);
+          }
+        } catch (err) {
+          showToast(err.message || 'Could not delete review.', 'error');
+          btn.disabled = false;
+          btn.innerHTML = `
+            ${lucideIcon('trash-2', { size: 14 })}
+            <span>Delete</span>
+          `;
+          btn.classList.remove('btn-danger');
+        }
+      });
+    });
+  } catch (err) {
+    container.setAttribute('aria-busy', 'false');
+    container.innerHTML = `
+      <div class="state-box">
+        <h4 class="state-title">Error loading reviews</h4>
+        <p class="state-desc">${escapeHtml(err.message)}</p>
+        <button id="retry-reviews-btn" class="btn btn-secondary btn-sm" style="margin-top:10px;">Try Again</button>
+      </div>
+    `;
+    const btn = document.getElementById('retry-reviews-btn');
+    if (btn) btn.addEventListener('click', loadCustomerReviewsTab);
+  }
+}
+
 // Setup Event Listeners
 function setProfileTab(tab) {
-  if (isAdminAccount() && ['status', 'history', 'recent'].includes(tab)) {
+  if (isAdminAccount() && ['status', 'history', 'recent', 'favorites', 'reviews'].includes(tab)) {
     tab = 'overview';
   }
 
@@ -1213,6 +1503,8 @@ function setProfileTab(tab) {
 
   if (activeTab === 'status') loadStatusOrders();
   if (activeTab === 'history') loadHistoryOrders();
+  if (activeTab === 'favorites') loadCustomerFavoritesTab();
+  if (activeTab === 'reviews') loadCustomerReviewsTab();
 }
 
 function setupProfileTabs() {
@@ -1725,12 +2017,15 @@ function initProfile() {
   const requestedTab = params.get('tab');
   const allowedTabs = adminAccount
     ? ['overview', 'details', 'security']
-    : ['overview', 'status', 'history', 'recent', 'details', 'security'];
+    : ['overview', 'favorites', 'reviews', 'status', 'history', 'recent', 'details', 'security'];
   if (allowedTabs.includes(requestedTab)) {
     setProfileTab(requestedTab);
   } else {
     setProfileTab('overview');
   }
+
+  // Ensure review modal is mounted for editing reviews
+  ensureReviewModalDOM();
 
   // 10-second polling fallback for active order updates
   if (!adminAccount) {
@@ -1740,7 +2035,7 @@ function initProfile() {
       }
     }, 10000);
 
-    // Instant real-time update via SSE
+    // Instant real-time updates
     window.addEventListener('gigabite:order-status-changed', () => {
       if (activeTab === 'status') {
         loadStatusOrders();
@@ -1749,6 +2044,16 @@ function initProfile() {
       } else if (activeTab === 'overview') {
         loadOverviewStats();
       }
+    });
+
+    window.addEventListener('gigabite:review-saved', () => {
+      if (activeTab === 'reviews') loadCustomerReviewsTab();
+    });
+    window.addEventListener('gigabite:review-deleted', () => {
+      if (activeTab === 'reviews') loadCustomerReviewsTab();
+    });
+    window.addEventListener('gigabite:favorites-updated', () => {
+      if (activeTab === 'favorites') loadCustomerFavoritesTab();
     });
   }
 }

@@ -1594,4 +1594,656 @@ body.theme-dark .order-status-banner-text span {
   color: #9cbca7;
 }
 
+/* ---------------- Product Card Reviews & Favorites ---------------- */
+.product-card {
+  position: relative;
+}
+
+.card-fav-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  color: #64748b;
+  padding: 0;
+}
+
+.card-fav-btn:hover {
+  transform: scale(1.1);
+  background: #ffffff;
+  color: #e53e3e;
+}
+
+.card-fav-btn:focus-visible {
+  outline: 2px solid #e53e3e;
+  outline-offset: 2px;
+}
+
+.card-fav-btn.is-favorited {
+  color: #e53e3e;
+  background: #ffffff;
+}
+
+.product-rating-row {
+  margin: 4px 0 8px;
+}
+
+.card-rating-clickable {
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  margin-left: -4px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.15s ease;
+}
+
+.card-rating-clickable:hover {
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.card-rating-clickable:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.rating-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.rating-stars-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.star-icon {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.rating-score {
+  font-weight: 700;
+  color: var(--color-text-main);
+  font-size: 0.85rem;
+}
+
+.rating-count {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+}
+
+/* ---------------- Card Description Inline Expansion ---------------- */
+.card-desc-container {
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.card-desc-text {
+  font-size: 0.84rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+  margin: 0;
+  transition: max-height 0.28s ease;
+  overflow: hidden;
+}
+
+.btn-card-desc-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 4px;
+  color: var(--color-primary, #e25822);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.15s ease;
+}
+
+.btn-card-desc-toggle:hover {
+  text-decoration: underline;
+}
+
+.btn-card-desc-toggle:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ---------------- Review Modal & Interactive Star Picker ---------------- */
+.item-review-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.item-review-modal-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.review-modal-card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--color-surface, #ffffff);
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modalScaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalScaleUp {
+  from {
+    transform: scale(0.94);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.review-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+}
+
+.review-modal-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.review-modal-subtitle {
+  margin: 3px 0 0;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close-btn:hover {
+  color: var(--color-text-main);
+  background: var(--color-surface-alt, #f1f5f9);
+}
+
+.review-modal-body {
+  padding: 22px;
+  overflow-y: auto;
+  max-height: calc(85vh - 70px);
+}
+
+.review-product-preview {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  background: var(--color-surface-alt, #f8fafc);
+  border-radius: 8px;
+  margin-bottom: 18px;
+}
+
+.review-product-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--color-border, #e2e8f0);
+}
+
+.review-product-meta {
+  flex: 1;
+}
+
+.review-product-name {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.review-existing-banner {
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.review-existing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+  color: #92400e;
+}
+
+.review-existing-text {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #78350f;
+  font-style: italic;
+}
+
+.interactive-star-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.star-picker-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: transform 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.star-picker-btn:hover {
+  transform: scale(1.22);
+}
+
+.star-picker-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.review-comment-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.char-counter {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.review-textarea {
+  width: 100%;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  color: var(--color-text-main);
+  font-family: inherit;
+  resize: vertical;
+}
+
+.review-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(242, 164, 19, 0.2);
+}
+
+.review-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.form-error-msg {
+  color: #dc2626;
+  font-size: 0.78rem;
+  margin-top: 4px;
+}
+
+/* ---------------- Customer Account Favorites & Reviews Tabs ---------------- */
+.customer-favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.customer-favorite-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, opacity 0.25s ease;
+}
+
+.customer-favorite-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.customer-fav-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  background: var(--color-surface-alt, #f8fafc);
+  overflow: hidden;
+}
+
+.customer-fav-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.customer-fav-unfav-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.15s ease;
+  padding: 0;
+}
+
+.customer-fav-unfav-btn:hover {
+  transform: scale(1.15);
+}
+
+.customer-fav-info {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.customer-fav-title {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--color-text-main);
+  text-decoration: none;
+  margin-bottom: 6px;
+}
+
+.customer-fav-title:hover {
+  color: var(--color-primary, #e25822);
+}
+
+.customer-fav-rating {
+  margin-bottom: 10px;
+}
+
+.customer-fav-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border, #e2e8f0);
+}
+
+.customer-fav-price {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text-main);
+}
+
+.customer-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.customer-review-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 10px;
+  padding: 16px;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.customer-review-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.customer-review-item-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text-main);
+  text-decoration: none;
+}
+
+.customer-review-item-name:hover {
+  color: var(--color-primary, #e25822);
+}
+
+.customer-review-stars {
+  margin-top: 4px;
+}
+
+.customer-review-date {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.customer-review-comment {
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--color-text-main);
+  margin-bottom: 12px;
+}
+
+.customer-review-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ---------------- Admin Rankings & Reviews ---------------- */
+.admin-reviews-table th,
+.admin-reviews-table td {
+  padding: 12px 14px;
+  vertical-align: middle;
+}
+
+.admin-rankings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-ranking-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-ranking-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.ranking-card-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ranking-badge-container {
+  flex-shrink: 0;
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.rank-badge-gold {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.rank-badge-silver {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+
+.rank-badge-bronze {
+  background: #ffedd5;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
+}
+
+.rank-badge-regular {
+  background: var(--color-surface-alt, #f8fafc);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border, #e2e8f0);
+}
+
+.admin-ranking-card.rank-gold {
+  border-left: 4px solid #f59e0b;
+  background: #fffdfa;
+}
+
+.admin-ranking-card.rank-silver {
+  border-left: 4px solid #94a3b8;
+  background: #fdfdfd;
+}
+
+.admin-ranking-card.rank-bronze {
+  border-left: 4px solid #ea580c;
+  background: #fffcfb;
+}
+
+.ranking-item-thumb {
+  width: 46px;
+  height: 46px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--color-border, #e2e8f0);
+  flex-shrink: 0;
+}
+
+.ranking-item-info {
+  min-width: 0;
+}
+
+.ranking-item-name {
+  margin: 0 0 3px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ranking-item-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+
+.ranking-item-price {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.ranking-card-stats {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.ranking-stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.ranking-stat-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.ranking-stat-value {
+  font-size: 1.15rem;
+}
+
 

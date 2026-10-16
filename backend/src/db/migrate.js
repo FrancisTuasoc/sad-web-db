@@ -9,6 +9,7 @@ const MIGRATIONS = [
   '20261012_password_reset.sql',
   '20261012_order_checkout.sql',
   '20261015_notifications.sql',
+  '20261016_reviews_favorites.sql',
 ];
 
 async function runMigrations() {

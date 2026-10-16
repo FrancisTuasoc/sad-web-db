@@ -10,6 +10,7 @@ import {
 } from './ui.js';
 import { requireAuth, getUser, resizeImageToDataUrl } from './auth.js';
 import { initAdminNotifications } from './notifications.js';
+import { lucideIcon, renderRatingBadge, renderRatingStars } from './icons.js';
 
 let activeSection = 'dashboard';
 let dashboardStats = null;
@@ -23,6 +24,9 @@ let dashboardRecentOrdersRequestId = 0;
 let dashboardRecentOrdersErrorNotified = false;
 let activeGcashProofPreviewUrl = null;
 let opsCharts = null;
+
+let adminReviewsSearchQuery = '';
+let adminReviewsRatingFilter = 'all';
 
 const ADMIN_CHART_COLORS = {
   completed: '#16a34a',
@@ -365,6 +369,12 @@ function setupAdminNavigation() {
         case 'dashboard':
           loadDashboardStats();
           break;
+        case 'all-reviews':
+          loadAdminReviews();
+          break;
+        case 'top-favorites':
+          loadAdminTopFavorites();
+          break;
         case 'orders':
           loadAdminOrders();
           break;
@@ -601,6 +611,287 @@ function formatTableDate(value) {
     month: 'short',
     day: '2-digit',
   }).format(new Date(value));
+}
+
+// ---------------- Admin Customer Reviews ----------------
+async function loadAdminReviews() {
+  const tbody = document.getElementById('admin-reviews-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="6" class="text-center text-muted" style="padding:32px;">
+        <span style="display:inline-flex;align-items:center;gap:8px;">
+          ${lucideIcon('loader-2', { size: 18, className: 'spin' })}
+          <span>Loading reviews...</span>
+        </span>
+      </td>
+    </tr>
+  `;
+
+  try {
+    const params = new URLSearchParams();
+    if (adminReviewsSearchQuery) params.set('search', adminReviewsSearchQuery);
+    if (adminReviewsRatingFilter && adminReviewsRatingFilter !== 'all') {
+      params.set('rating', adminReviewsRatingFilter);
+    }
+
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    const res = await apiFetch(`/reviews/admin/all${queryString}`);
+    const reviews = res.reviews || [];
+
+    if (!reviews.length) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" class="text-center text-muted" style="padding:32px;">
+            No reviews found matching your filter.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = reviews
+      .map((r) => {
+        const dateStr = new Date(r.createdAt).toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        });
+        const rating = Number(r.rating || 0);
+        const comment = r.comment || '';
+        const isLongComment = comment.length > 80;
+        const shortComment = isLongComment ? comment.slice(0, 80) + '...' : comment;
+
+        return `
+          <tr data-admin-review-id="${r.id}">
+            <td style="font-weight:600;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                ${r.itemImage ? `<img src="${escapeHtml(r.itemImage)}" alt="" style="width:30px;height:30px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />` : ''}
+                <span>${escapeHtml(r.itemName || 'Item')}</span>
+              </div>
+            </td>
+            <td>${escapeHtml(r.customerName || 'Customer')}</td>
+            <td>
+              <div class="admin-review-stars-wrap" style="display:inline-flex;align-items:center;gap:3px;" title="${rating} out of 5 stars">
+                ${renderRatingStars(rating, { size: 16 })}
+                <span style="font-size:0.8rem;font-weight:600;margin-left:4px;color:var(--color-text-muted);">${rating.toFixed(1)}</span>
+              </div>
+            </td>
+            <td class="admin-review-text-cell">
+              ${comment ? `
+                <span class="review-text-short">${escapeHtml(shortComment)}</span>
+                ${isLongComment ? `
+                  <button type="button" class="btn-text-sm btn-expand-admin-review" data-full-text="${escapeHtml(comment)}" style="font-size:0.75rem;margin-left:4px;color:var(--color-primary);text-decoration:underline;">See more</button>
+                ` : ''}
+              ` : '<span class="text-muted italic" style="font-size:0.8rem;">(No comment)</span>'}
+            </td>
+            <td style="font-size:0.85rem;color:var(--color-text-muted);">${escapeHtml(dateStr)}</td>
+            <td style="text-align:right;">
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm btn-admin-delete-review"
+                data-review-id="${r.id}"
+                data-item-name="${escapeHtml(r.itemName || '')}"
+                title="Delete review"
+                aria-label="Delete review"
+                style="color:var(--color-danger,#DC2626);"
+              >
+                ${lucideIcon('trash-2', { size: 15 })}
+                <span class="btn-label">Delete</span>
+              </button>
+            </td>
+          </tr>
+        `;
+      })
+      .join('');
+
+    // Attach expandable review text handler
+    tbody.querySelectorAll('.btn-expand-admin-review').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const cell = btn.closest('.admin-review-text-cell');
+        const full = btn.getAttribute('data-full-text');
+        if (cell) {
+          cell.innerHTML = `<span>${escapeHtml(full)}</span>`;
+        }
+      });
+    });
+
+    // Attach inline delete confirmation
+    tbody.querySelectorAll('.btn-admin-delete-review').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const reviewId = btn.getAttribute('data-review-id');
+        const isConfirming = btn.getAttribute('data-confirming') === 'true';
+
+        if (!isConfirming) {
+          btn.setAttribute('data-confirming', 'true');
+          btn.classList.add('btn-danger');
+          btn.innerHTML = `
+            ${lucideIcon('alert-circle', { size: 14 })}
+            <span>Confirm?</span>
+          `;
+          setTimeout(() => {
+            if (btn.getAttribute('data-confirming') === 'true') {
+              btn.removeAttribute('data-confirming');
+              btn.classList.remove('btn-danger');
+              btn.innerHTML = `
+                ${lucideIcon('trash-2', { size: 15 })}
+                <span class="btn-label">Delete</span>
+              `;
+            }
+          }, 3500);
+          return;
+        }
+
+        btn.removeAttribute('data-confirming');
+        btn.disabled = true;
+        btn.innerHTML = `
+          ${lucideIcon('loader-2', { size: 14, className: 'spin' })}
+          <span>Removing...</span>
+        `;
+
+        try {
+          await apiFetch(`/reviews/${reviewId}`, { method: 'DELETE' });
+          showToast('Review removed.', 'success');
+          const row = tbody.querySelector(`tr[data-admin-review-id="${reviewId}"]`);
+          if (row) {
+            row.style.opacity = '0';
+            setTimeout(() => {
+              row.remove();
+              if (!tbody.querySelectorAll('tr[data-admin-review-id]').length) {
+                loadAdminReviews();
+              }
+            }, 200);
+          }
+        } catch (err) {
+          showToast(err.message || 'Could not remove review.', 'error');
+          btn.disabled = false;
+          btn.innerHTML = `
+            ${lucideIcon('trash-2', { size: 15 })}
+            <span class="btn-label">Delete</span>
+          `;
+          btn.classList.remove('btn-danger');
+        }
+      });
+    });
+  } catch (err) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="text-center text-danger" style="padding:24px;">
+          Failed to load reviews: ${escapeHtml(err.message)}
+        </td>
+      </tr>
+    `;
+  }
+}
+
+// ---------------- Admin Top Favorites Rankings ----------------
+async function loadAdminTopFavorites() {
+  const container = document.getElementById('admin-favorites-rankings-container');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="padding:32px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--color-text-muted);">
+      ${lucideIcon('loader-2', { size: 20, className: 'spin' })}
+      <span>Loading top favorited items...</span>
+    </div>
+  `;
+
+  try {
+    const res = await apiFetch('/favorites/rankings');
+    const rankings = res.rankings || [];
+
+    if (!rankings.length) {
+      container.innerHTML = `
+        <div class="state-box">
+          <div class="state-icon-wrap" style="color:var(--color-primary);margin-bottom:12px;">
+            ${lucideIcon('heart', { size: 48, stroke: '#9CA3AF', fill: 'none' })}
+          </div>
+          <h4 class="state-title">No favorites data yet.</h4>
+          <p class="state-desc">When customers save items to their favorites, they will appear ranked here.</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="admin-rankings-grid">
+        ${rankings
+          .map((item, index) => {
+            const rank = index + 1;
+            let rankClass = '';
+            let rankBadge = '';
+
+            if (rank === 1) {
+              rankClass = 'rank-highlight rank-gold';
+              rankBadge = '<span class="rank-badge rank-badge-gold">🥇 Rank #1</span>';
+            } else if (rank === 2) {
+              rankClass = 'rank-highlight rank-silver';
+              rankBadge = '<span class="rank-badge rank-badge-silver">🥈 Rank #2</span>';
+            } else if (rank === 3) {
+              rankClass = 'rank-highlight rank-bronze';
+              rankBadge = '<span class="rank-badge rank-badge-bronze">🥉 Rank #3</span>';
+            } else {
+              rankBadge = `<span class="rank-badge rank-badge-regular">#${rank}</span>`;
+            }
+
+            const img = item.image || 'assets/placeholder-burger.png';
+            const favCount = Number(item.favoriteCount || 0);
+            const avgRating = Number(item.averageRating || 0);
+            const revCount = Number(item.reviewCount || 0);
+            const price = Number(item.price || 0).toFixed(2);
+
+            return `
+              <article class="admin-ranking-card ${rankClass}">
+                <div class="ranking-card-left">
+                  <div class="ranking-badge-container">
+                    ${rankBadge}
+                  </div>
+                  <img
+                    src="${escapeHtml(img)}"
+                    alt="${escapeHtml(item.name)}"
+                    class="ranking-item-thumb"
+                    onerror="this.onerror=null;this.src='assets/placeholder-burger.png';"
+                  />
+                  <div class="ranking-item-info">
+                    <h4 class="ranking-item-name">${escapeHtml(item.name)}</h4>
+                    <div class="ranking-item-sub">
+                      ${item.categoryName ? `<span class="badge" style="font-size:0.7rem;">${escapeHtml(item.categoryName)}</span>` : ''}
+                      <span class="ranking-item-price">₱${price}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ranking-card-stats">
+                  <div class="ranking-stat-box ranking-favorites-box">
+                    <span class="ranking-stat-label">Customer Favorites</span>
+                    <div class="ranking-stat-value" style="display:inline-flex;align-items:center;gap:6px;color:#E53E3E;">
+                      ${lucideIcon('heart', { size: 20, fill: '#E53E3E', stroke: '#E53E3E', ariaHidden: true })}
+                      <strong>${favCount}</strong>
+                    </div>
+                  </div>
+
+                  <div class="ranking-stat-box ranking-rating-box">
+                    <span class="ranking-stat-label">Customer Rating</span>
+                    <div>
+                      ${renderRatingBadge(avgRating, revCount, { size: 16 })}
+                    </div>
+                  </div>
+                </div>
+              </article>
+            `;
+          })
+          .join('')}
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `
+      <div class="state-box">
+        <h4 class="state-title text-danger">Error loading rankings</h4>
+        <p class="state-desc">${escapeHtml(err.message)}</p>
+      </div>
+    `;
+  }
 }
 
 function getStoreDateKey(date) {
@@ -1738,6 +2029,37 @@ function attachAdminEventListeners() {
       clearTimeout(t);
       t = setTimeout(() => loadAdminCustomers(), 300);
     });
+  }
+
+  // Reviews search & rating filters
+  const reviewsSearch = document.getElementById('admin-reviews-search');
+  if (reviewsSearch) {
+    let t = null;
+    reviewsSearch.addEventListener('input', (e) => {
+      clearTimeout(t);
+      t = setTimeout(() => {
+        adminReviewsSearchQuery = e.target.value.trim();
+        loadAdminReviews();
+      }, 300);
+    });
+  }
+
+  const reviewsRatingFilter = document.getElementById('admin-reviews-rating-filter');
+  if (reviewsRatingFilter) {
+    reviewsRatingFilter.addEventListener('change', (e) => {
+      adminReviewsRatingFilter = e.target.value;
+      loadAdminReviews();
+    });
+  }
+
+  const reviewsRefreshBtn = document.getElementById('admin-reviews-refresh-btn');
+  if (reviewsRefreshBtn) {
+    reviewsRefreshBtn.addEventListener('click', () => loadAdminReviews());
+  }
+
+  const favoritesRefreshBtn = document.getElementById('admin-favorites-refresh-btn');
+  if (favoritesRefreshBtn) {
+    favoritesRefreshBtn.addEventListener('click', () => loadAdminTopFavorites());
   }
 
   // Orders pagination

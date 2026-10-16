@@ -10,6 +10,10 @@ import {
   setAvailableAddons,
   setOnlineOrderingEnabled,
 } from './home.js';
+import {
+  loadCustomerFavorites,
+  ensureReviewModalDOM,
+} from './reviews-favorites.js';
 
 export const ALL_MENU_PRODUCTS = [
   // Burgers
@@ -614,12 +618,15 @@ async function loadOrderingSettings() {
 function initMenu() {
   renderHeader('menu');
   renderFooter();
+  ensureReviewModalDOM();
   setupAddToCartModal();
   attachProductGridListeners('menu-grid', (id) =>
     liveProducts.find((p) => p._id === id)
   );
   loadCategories();
-  loadOrderingSettings().then(loadProducts);
+  loadCustomerFavorites().then(() => {
+    loadOrderingSettings().then(loadProducts);
+  });
   stockStream.init();
 
   // Search input with debounce

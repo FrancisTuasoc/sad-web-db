@@ -91,8 +91,28 @@
           aria-label="Dashboard"
           title="Dashboard"
         >
-          <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
           <span class="admin-nav-label">Dashboard</span>
+        </button>
+        <button
+          type="button"
+          class="admin-nav-item"
+          data-section="all-reviews"
+          aria-label="All Reviews"
+          title="All Reviews"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="admin-nav-label">All Reviews</span>
+        </button>
+        <button
+          type="button"
+          class="admin-nav-item"
+          data-section="top-favorites"
+          aria-label="Top Favorites"
+          title="Top Favorites"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          <span class="admin-nav-label">Top Favorites</span>
         </button>
         <button
           type="button"
@@ -514,6 +534,84 @@
             </div>
           </div>
           </div>
+        </div>
+
+        <!-- SECTION: ALL REVIEWS -->
+        <div id="section-all-reviews" class="admin-section hidden">
+          <section class="step-card" aria-labelledby="all-reviews-heading">
+            <div class="admin-insights-heading" style="flex-wrap:wrap;gap:16px;">
+              <div>
+                <h2 id="all-reviews-heading" style="display:flex;align-items:center;gap:8px;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  <span>Customer Reviews</span>
+                </h2>
+                <p class="text-muted" style="font-size:0.875rem;margin-top:2px;">All customer reviews across menu items, newest first.</p>
+              </div>
+              <div class="admin-reviews-toolbar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <input
+                  type="search"
+                  id="admin-reviews-search"
+                  class="form-input"
+                  placeholder="Filter by item or customer..."
+                  style="width:240px;padding:6px 12px;font-size:0.85rem;"
+                />
+                <select id="admin-reviews-rating-filter" class="form-select" style="font-size:0.85rem;padding:6px 12px;width:150px;">
+                  <option value="all">All Ratings</option>
+                  <option value="5">5 Stars only</option>
+                  <option value="4">4 Stars only</option>
+                  <option value="3">3 Stars only</option>
+                  <option value="2">2 Stars only</option>
+                  <option value="1">1 Star only</option>
+                </select>
+                <button type="button" id="admin-reviews-refresh-btn" class="btn btn-secondary btn-sm" title="Refresh Reviews">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-cw"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="table-responsive-wrapper" style="overflow-x:auto;margin-top:16px;">
+              <table class="admin-table admin-reviews-table" style="width:100%;min-width:760px;">
+                <thead>
+                  <tr>
+                    <th style="width:22%;">Item Name</th>
+                    <th style="width:18%;">Customer Name</th>
+                    <th style="width:18%;">Star Rating</th>
+                    <th style="width:26%;">Review Text</th>
+                    <th style="width:10%;">Date</th>
+                    <th style="width:6%;text-align:right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-reviews-tbody" aria-live="polite">
+                  <tr>
+                    <td colspan="6" class="text-center text-muted" style="padding:32px;">Loading reviews...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <!-- SECTION: TOP FAVORITES RANKING -->
+        <div id="section-top-favorites" class="admin-section hidden">
+          <section class="step-card" aria-labelledby="top-favorites-heading">
+            <div class="admin-insights-heading">
+              <div>
+                <h2 id="top-favorites-heading" style="display:flex;align-items:center;gap:8px;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                  <span>Most Favorited Items</span>
+                </h2>
+                <p class="text-muted" style="font-size:0.875rem;margin-top:2px;">Menu items ranked by customer favorite saves</p>
+              </div>
+              <button type="button" id="admin-favorites-refresh-btn" class="btn btn-secondary btn-sm" title="Refresh Rankings">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-cw"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                <span>Refresh</span>
+              </button>
+            </div>
+
+            <div id="admin-favorites-rankings-container" class="admin-rankings-container" style="margin-top:20px;" aria-live="polite">
+              <p class="text-muted">Loading top favorites...</p>
+            </div>
+          </section>
         </div>
 
         <div id="section-recent-orders" class="admin-section hidden">

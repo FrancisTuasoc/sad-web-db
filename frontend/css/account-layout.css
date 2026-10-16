@@ -706,3 +706,84 @@ body.profile-page .profile-layout.customer-area .customer-shortcut-link:focus-vi
   outline: 3px solid color-mix(in srgb, var(--brand-primary) 32%, transparent);
   outline-offset: 2px;
 }
+
+/* Sidebar Lucide tab icons & active states */
+body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn[data-tab="overview"]:not(.active) > :is(i, svg) {
+  background: #e2f3e7 !important;
+  color: #216a3c !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn[data-tab="favorites"]:not(.active) > :is(i, svg) {
+  background: #fde8e8 !important;
+  color: #e53e3e !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn[data-tab="reviews"]:not(.active) > :is(i, svg) {
+  background: #fef3c7 !important;
+  color: #d97706 !important;
+}
+
+body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-btn[data-tab="history"]:not(.active) > :is(i, svg) {
+  background: #f0eafb !important;
+  color: #6941a5 !important;
+}
+
+/* Mobile Sidebar Collapse to Horizontal Scrollable Tab Bar */
+@media (max-width: 900px) {
+  body.profile-page .profile-layout.customer-area {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  body.profile-page .customer-sidebar {
+    width: 100% !important;
+    position: static !important;
+    transform: none !important;
+    box-shadow: none !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    background: var(--surface) !important;
+    padding: 8px 10px !important;
+    overflow: hidden !important;
+  }
+
+  body.profile-page .profile-sidebar-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    gap: 8px !important;
+    padding: 4px 2px !important;
+    scrollbar-width: thin;
+    max-width: 100%;
+  }
+
+  body.profile-page .profile-sidebar-nav::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  body.profile-page .profile-sidebar-nav::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+
+  body.profile-page .customer-sidebar .profile-nav-btn {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    padding: 8px 14px !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  body.profile-page #sidebar-logout-btn {
+    display: none !important;
+  }
+
+  body.profile-page #profile-sidebar-backdrop {
+    display: none !important;
+  }
+}

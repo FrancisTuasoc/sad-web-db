@@ -8,6 +8,7 @@ function getPool(connectionString = DATABASE_URL) {
     pool = new Pool({
       connectionString,
       connectionTimeoutMillis: 10000,
+      idleTimeoutMillis: 30000,
       max: 10,
       ssl: {
         rejectUnauthorized: false,

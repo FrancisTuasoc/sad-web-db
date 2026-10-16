@@ -14,6 +14,14 @@ import {
 } from './ui.js';
 import { isLoggedIn } from './auth.js';
 import { stockStream } from './stock-stream.js';
+import { lucideIcon, renderRatingBadge } from './icons.js';
+import {
+  isItemFavorited,
+  toggleFavorite,
+  openReviewModalForProduct,
+  loadCustomerFavorites,
+  ensureReviewModalDOM,
+} from './reviews-favorites.js';
 
 export const DEFAULT_FEATURED_PRODUCTS = [
   {
@@ -77,7 +85,12 @@ export function setOnlineOrderingEnabled(enabled) {
   onlineOrderingEnabled = Boolean(enabled);
 }
 
-export function renderProductCard(product, isGuest = false, canOrder = true) {
+export function renderProductCard(
+  product,
+  isGuest = false,
+  canOrder = true,
+  isFavoritedParam = null
+) {
   const isAvailable = product.isAvailable && product.stock > 0;
   const isOutOfStock = product.stock <= 0;
   const isLowStock =
@@ -102,6 +115,23 @@ export function renderProductCard(product, isGuest = false, canOrder = true) {
       ? product.category.name
       : '';
   const imgUrl = getProductImageUrl(product);
+  const productId = product._id || product.id;
+
+  // Favorites state
+  const isFavorited =
+    isFavoritedParam !== null
+      ? Boolean(isFavoritedParam)
+      : isItemFavorited(productId);
+
+  // Ratings
+  const avgRating = Number(product.averageRating || 0);
+  const reviewCount = Number(product.reviewCount || 0);
+
+  // Short description (first 60 characters)
+  const fullDesc =
+    product.description || 'Delicious freshly grilled burger specialty.';
+  const isLongDesc = fullDesc.length > 60;
+  const shortDesc = isLongDesc ? fullDesc.slice(0, 60).trim() + '...' : fullDesc;
 
   let buttonHtml = '';
   const canPlaceOrder = canOrder && onlineOrderingEnabled;
@@ -113,13 +143,13 @@ export function renderProductCard(product, isGuest = false, canOrder = true) {
       '<button type="button" class="btn btn-primary btn-sm" disabled>Unavailable</button>';
   } else if (isGuest) {
     buttonHtml = `
-      <button type="button" class="btn btn-primary btn-sm btn-add-to-cart" data-is-guest="true" data-product-id="${product._id}" ${!isAvailable ? 'disabled' : ''}>
+      <button type="button" class="btn btn-primary btn-sm btn-add-to-cart" data-is-guest="true" data-product-id="${productId}" ${!isAvailable ? 'disabled' : ''}>
         Login to order
       </button>
     `;
   } else {
     buttonHtml = `
-      <button type="button" class="btn btn-primary btn-sm btn-add-to-cart" data-is-guest="false" data-product-id="${product._id}" ${!isAvailable ? 'disabled' : ''}>
+      <button type="button" class="btn btn-primary btn-sm btn-add-to-cart" data-is-guest="false" data-product-id="${productId}" ${!isAvailable ? 'disabled' : ''}>
         ${!product.isAvailable ? 'Unavailable' : isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
       </button>
     `;
@@ -127,22 +157,63 @@ export function renderProductCard(product, isGuest = false, canOrder = true) {
 
   return `
     <article class="product-card ${!isAvailable ? 'unavailable' : ''}" 
-             data-product-id="${product._id}" 
+             data-product-id="${productId}" 
              data-stock="${product.stock}" 
              data-threshold="${product.lowStockThreshold || 10}"
              data-available="${product.isAvailable}"
              data-ordering-allowed="${canPlaceOrder}">
       <div class="card-img-wrap">
         <span class="card-badge-pos badge ${badgeClass} stock-badge">${badgeText}</span>
+        <button type="button" 
+                class="card-fav-btn ${isFavorited ? 'is-favorited' : ''}" 
+                data-favorite-btn="true" 
+                data-product-id="${productId}" 
+                aria-label="${isFavorited ? 'Remove from favorites' : 'Add to favorites'}" 
+                title="${isFavorited ? 'Remove from favorites' : 'Add to favorites'}">
+          ${lucideIcon('heart', {
+            size: 18,
+            fill: isFavorited ? '#E53E3E' : 'none',
+            stroke: isFavorited ? '#E53E3E' : 'currentColor',
+            strokeWidth: 2,
+            className: 'fav-icon',
+            ariaHidden: true,
+          })}
+        </button>
         <img src="${escapeHtml(imgUrl)}" 
              alt="${escapeHtml(product.name)}" 
              loading="lazy" 
              onerror="if(window.handleImageError){window.handleImageError(this);}else{this.onerror=null;this.src='${BURGER_PLACEHOLDER}';}">
       </div>
       <div class="card-content">
-        ${categoryName ? `<span class="card-category">${escapeHtml(categoryName)}</span>` : ''}
+        <div class="card-meta-row">
+          ${categoryName ? `<span class="card-category">${escapeHtml(categoryName)}</span>` : '<span class="card-category">Specialty</span>'}
+          <div class="card-rating-clickable" 
+               data-open-review-btn="true" 
+               data-product-id="${productId}"
+               role="button"
+               tabindex="0"
+               title="Click to write or view review"
+               aria-label="Rating: ${avgRating.toFixed(1)} stars out of 5 from ${reviewCount} reviews. Click to review.">
+            ${renderRatingBadge(avgRating, reviewCount, { size: 14 })}
+          </div>
+        </div>
         <h3 class="card-title">${escapeHtml(product.name)}</h3>
-        <p class="card-desc">${escapeHtml(product.description || 'Delicious freshly grilled burger specialty.')}</p>
+        <div class="card-desc-container" data-expanded="false">
+          <div class="card-desc-wrapper">
+            <p class="card-desc card-desc-short">${escapeHtml(shortDesc)}</p>
+            ${isLongDesc ? `<p class="card-desc card-desc-full hidden">${escapeHtml(fullDesc)}</p>` : ''}
+          </div>
+          ${
+            isLongDesc
+              ? `
+            <button type="button" class="btn-desc-toggle" aria-expanded="false" aria-label="Toggle full description">
+              <span class="desc-toggle-label">See more</span>
+              ${lucideIcon('chevron-down', { size: 14, className: 'desc-toggle-icon', ariaHidden: true })}
+            </button>
+          `
+              : ''
+          }
+        </div>
         <div class="card-footer">
           <span class="card-price">₱${Number(product.price).toFixed(2)}</span>
           ${buttonHtml}
@@ -507,7 +578,65 @@ export function attachProductGridListeners(
   const container = document.getElementById(containerId);
   if (!container) return;
 
-  container.addEventListener('click', (e) => {
+  container.addEventListener('click', async (e) => {
+    // 1. Description Expand / Collapse Toggle
+    const descToggleBtn = e.target.closest('.btn-desc-toggle');
+    if (descToggleBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const descContainer = descToggleBtn.closest('.card-desc-container');
+      if (descContainer) {
+        const isExpanded = descContainer.getAttribute('data-expanded') === 'true';
+        const nextState = !isExpanded;
+        descContainer.setAttribute('data-expanded', String(nextState));
+        descToggleBtn.setAttribute('aria-expanded', String(nextState));
+
+        const shortP = descContainer.querySelector('.card-desc-short');
+        const fullP = descContainer.querySelector('.card-desc-full');
+
+        if (nextState) {
+          if (shortP) shortP.classList.add('hidden');
+          if (fullP) fullP.classList.remove('hidden');
+          descToggleBtn.innerHTML = `
+            <span class="desc-toggle-label">See less</span>
+            ${lucideIcon('chevron-up', { size: 14, className: 'desc-toggle-icon', ariaHidden: true })}
+          `;
+        } else {
+          if (shortP) shortP.classList.remove('hidden');
+          if (fullP) fullP.classList.add('hidden');
+          descToggleBtn.innerHTML = `
+            <span class="desc-toggle-label">See more</span>
+            ${lucideIcon('chevron-down', { size: 14, className: 'desc-toggle-icon', ariaHidden: true })}
+          `;
+        }
+      }
+      return;
+    }
+
+    // 2. Favorite Heart Button Toggle
+    const favBtn = e.target.closest('[data-favorite-btn="true"]');
+    if (favBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const productId = favBtn.getAttribute('data-product-id');
+      await toggleFavorite(productId, favBtn);
+      return;
+    }
+
+    // 3. Rate & Review Click Trigger
+    const reviewTrigger = e.target.closest('[data-open-review-btn="true"]');
+    if (reviewTrigger) {
+      e.preventDefault();
+      e.stopPropagation();
+      const productId = reviewTrigger.getAttribute('data-product-id');
+      const card = reviewTrigger.closest('.product-card');
+      const cardTitle = card ? card.querySelector('.card-title')?.textContent : 'Menu Item';
+      const productObj = getProductById ? getProductById(productId) : { _id: productId, name: cardTitle };
+      await openReviewModalForProduct(productObj || { _id: productId, name: cardTitle });
+      return;
+    }
+
+    // 4. Add to Cart Button
     const btn = e.target.closest('.btn-add-to-cart');
     if (btn) {
       e.preventDefault();
@@ -524,13 +653,27 @@ export function attachProductGridListeners(
       }
     }
   });
+
+  // Keyboard accessibility for Enter / Space
+  container.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      const target = e.target.closest('[data-favorite-btn="true"], [data-open-review-btn="true"]');
+      if (target) {
+        e.preventDefault();
+        target.click();
+      }
+    }
+  });
 }
 
 function initHome() {
   renderHeader('home');
   setupHomeSectionNavigation();
   renderFooter();
-  loadStoreInfo().then(() => loadFeaturedProducts());
+  ensureReviewModalDOM();
+  loadCustomerFavorites().then(() => {
+    loadStoreInfo().then(() => loadFeaturedProducts());
+  });
   setupAddToCartModal();
   attachProductGridListeners('featured-grid', (id) =>
     DEFAULT_FEATURED_PRODUCTS.find((p) => p._id === id)

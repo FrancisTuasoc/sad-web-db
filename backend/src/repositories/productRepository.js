@@ -23,6 +23,9 @@ function mapProduct(row) {
     isAddon: Boolean(row.is_addon),
     isAvailable: Boolean(row.is_available),
     isFeatured: Boolean(row.is_featured),
+    averageRating: Number(row.average_rating || 0),
+    reviewCount: Number(row.review_count || 0),
+    favoriteCount: Number(row.favorite_count || 0),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -35,9 +38,24 @@ const productRepository = {
     const { category, isAddon, isAvailable, isFeatured, search, sort } =
       options;
     let sql = `
-      SELECT p.*, c.name as category_name
+      SELECT p.*, c.name as category_name,
+             COALESCE(r.average_rating, 0.0) as average_rating,
+             COALESCE(r.review_count, 0) as review_count,
+             COALESCE(f.favorite_count, 0) as favorite_count
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
+      LEFT JOIN (
+        SELECT item_id,
+               ROUND(AVG(rating)::numeric, 1) as average_rating,
+               COUNT(*)::int as review_count
+        FROM reviews
+        GROUP BY item_id
+      ) r ON r.item_id = p.id
+      LEFT JOIN (
+        SELECT item_id, COUNT(*)::int as favorite_count
+        FROM favorites
+        GROUP BY item_id
+      ) f ON f.item_id = p.id
       WHERE 1=1
     `;
     const params = [];
@@ -88,9 +106,24 @@ const productRepository = {
 
   async findById(id) {
     const sql = `
-      SELECT p.*, c.name as category_name
+      SELECT p.*, c.name as category_name,
+             COALESCE(r.average_rating, 0.0) as average_rating,
+             COALESCE(r.review_count, 0) as review_count,
+             COALESCE(f.favorite_count, 0) as favorite_count
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
+      LEFT JOIN (
+        SELECT item_id,
+               ROUND(AVG(rating)::numeric, 1) as average_rating,
+               COUNT(*)::int as review_count
+        FROM reviews
+        GROUP BY item_id
+      ) r ON r.item_id = p.id
+      LEFT JOIN (
+        SELECT item_id, COUNT(*)::int as favorite_count
+        FROM favorites
+        GROUP BY item_id
+      ) f ON f.item_id = p.id
       WHERE p.id = $1
     `;
     const res = await query(sql, [id]);
@@ -99,9 +132,24 @@ const productRepository = {
 
   async findBySlug(slug) {
     const sql = `
-      SELECT p.*, c.name as category_name
+      SELECT p.*, c.name as category_name,
+             COALESCE(r.average_rating, 0.0) as average_rating,
+             COALESCE(r.review_count, 0) as review_count,
+             COALESCE(f.favorite_count, 0) as favorite_count
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
+      LEFT JOIN (
+        SELECT item_id,
+               ROUND(AVG(rating)::numeric, 1) as average_rating,
+               COUNT(*)::int as review_count
+        FROM reviews
+        GROUP BY item_id
+      ) r ON r.item_id = p.id
+      LEFT JOIN (
+        SELECT item_id, COUNT(*)::int as favorite_count
+        FROM favorites
+        GROUP BY item_id
+      ) f ON f.item_id = p.id
       WHERE p.slug = $1
     `;
     const res = await query(sql, [slug]);
