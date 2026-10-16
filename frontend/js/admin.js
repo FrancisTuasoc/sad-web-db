@@ -9,7 +9,10 @@ import {
   setupBackToTop,
 } from './ui.js';
 import { requireAuth, getUser, resizeImageToDataUrl } from './auth.js';
-import { initAdminNotifications } from './notifications.js';
+import {
+  initAdminNotifications,
+  markAdminNotificationReadByOrderId,
+} from './notifications.js';
 import { lucideIcon, renderRatingBadge, renderRatingStars } from './icons.js';
 
 let activeSection = 'dashboard';
@@ -1270,6 +1273,7 @@ function statusLabel(status) {
 // Order Detail Drawer
 async function openOrderDrawer(orderId) {
   try {
+    markAdminNotificationReadByOrderId(orderId);
     const res = await apiFetch(`/admin/orders/${orderId}`);
     const order = res.order;
     const body = document.getElementById('order-drawer-content');
@@ -2580,6 +2584,7 @@ function initAdmin() {
   setupBackToTop();
   setupAdminNavigation();
   attachAdminEventListeners();
+  window.openAdminOrderDrawer = openOrderDrawer;
   loadDashboardStats();
   initAdminNotifications();
 

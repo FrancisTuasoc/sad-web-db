@@ -75,6 +75,7 @@ const notificationRepository = {
   },
 
   async markAsRead(id, userId = null, forAdmin = false) {
+    if (!id) return null;
     if (forAdmin) {
       const sql = `UPDATE notifications SET is_read = true WHERE id = $1 AND for_admin = true RETURNING *`;
       const res = await db.query(sql, [id]);
@@ -83,6 +84,18 @@ const notificationRepository = {
     const sql = `UPDATE notifications SET is_read = true WHERE id = $1 AND user_id = $2 RETURNING *`;
     const res = await db.query(sql, [id, userId]);
     return mapNotification(res.rows[0]);
+  },
+
+  async markAsReadByOrderId(orderId, userId = null, forAdmin = false) {
+    if (!orderId) return [];
+    if (forAdmin) {
+      const sql = `UPDATE notifications SET is_read = true WHERE order_id = $1 AND for_admin = true RETURNING *`;
+      const res = await db.query(sql, [orderId]);
+      return res.rows.map(mapNotification);
+    }
+    const sql = `UPDATE notifications SET is_read = true WHERE order_id = $1 AND user_id = $2 RETURNING *`;
+    const res = await db.query(sql, [orderId, userId]);
+    return res.rows.map(mapNotification);
   },
 
   async markAllAsRead(userId = null, forAdmin = false) {

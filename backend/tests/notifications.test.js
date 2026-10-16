@@ -88,3 +88,67 @@ test('notificationRepository retrieves user and admin notifications and unread c
   const userUnread = await notificationRepository.getUnreadCount('user-1', false);
   assert.equal(userUnread, 1);
 });
+
+test('notificationRepository marks individual, by-order, and all notifications as read', async (context) => {
+  const readRow = {
+    id: 'notif-1',
+    user_id: 'user-1',
+    for_admin: false,
+    order_id: 'order-1',
+    title: 'Order Preparing',
+    message: 'Your order is being prepared',
+    type: 'order_status',
+    status: 'preparing',
+    is_read: true,
+    created_at: new Date(),
+  };
+
+  const adminReadRow = {
+    ...readRow,
+    id: 'notif-admin',
+    user_id: null,
+    for_admin: true,
+  };
+
+  let lastSql = '';
+  let lastParams = [];
+  context.mock.method(db, 'query', async (sql, params) => {
+    lastSql = sql;
+    lastParams = params;
+    if (sql.includes('for_admin = true') && sql.includes('UPDATE')) {
+      if (sql.includes('order_id = $1')) {
+        return { rows: [adminReadRow], rowCount: 1 };
+      }
+      return { rows: [adminReadRow], rowCount: 1 };
+    }
+    if (sql.includes('UPDATE notifications SET is_read = true WHERE user_id = $1')) {
+      return { rows: [], rowCount: 2 };
+    }
+    return { rows: [readRow], rowCount: 1 };
+  });
+
+  // Mark single as read
+  const resUser = await notificationRepository.markAsRead('notif-1', 'user-1', false);
+  assert.equal(resUser.isRead, true);
+  assert.ok(lastSql.includes('user_id = $2'));
+
+  const resAdmin = await notificationRepository.markAsRead('notif-admin', null, true);
+  assert.equal(resAdmin.isRead, true);
+  assert.ok(lastSql.includes('for_admin = true'));
+
+  // Mark by order id
+  const resOrderAdmin = await notificationRepository.markAsReadByOrderId('order-1', null, true);
+  assert.equal(resOrderAdmin.length, 1);
+  assert.ok(lastSql.includes('order_id = $1'));
+  assert.ok(lastSql.includes('for_admin = true'));
+
+  // Mark all as read
+  const adminCount = await notificationRepository.markAllAsRead(null, true);
+  assert.equal(adminCount, 1);
+  assert.ok(lastSql.includes('for_admin = true AND is_read = false'));
+
+  const userCount = await notificationRepository.markAllAsRead('user-1', false);
+  assert.equal(userCount, 2);
+  assert.ok(lastSql.includes('user_id = $1 AND is_read = false'));
+});
+

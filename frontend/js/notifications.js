@@ -139,12 +139,15 @@ export function initCustomerNotifications() {
   if (markAllBtn) {
     markAllBtn.onclick = async (e) => {
       e.stopPropagation();
+      badge.textContent = '0';
+      badge.classList.add('hidden');
+      const unreadItems = list.querySelectorAll('.notification-item.unread');
+      unreadItems.forEach((el) => el.classList.remove('unread'));
       try {
-        await apiFetch('/notifications/read-all', { method: 'PATCH' });
-        badge.textContent = '0';
-        badge.classList.add('hidden');
-        const unreadItems = list.querySelectorAll('.notification-item.unread');
-        unreadItems.forEach((el) => el.classList.remove('unread'));
+        await apiFetch('/notifications/read-all', {
+          method: 'PATCH',
+          body: { scope: 'customer' },
+        });
       } catch (err) {
         // ignore
       }
@@ -218,32 +221,44 @@ function renderNotificationList(listElement, notifications, isAdminScope) {
   listElement.querySelectorAll('.notification-item').forEach((row) => {
     row.onclick = async () => {
       const id = row.getAttribute('data-id');
+      const orderId = row.getAttribute('data-order-id');
+
       if (row.classList.contains('unread')) {
         row.classList.remove('unread');
+        const badgeId = isAdminScope
+          ? 'admin-notification-badge'
+          : 'header-notification-badge';
+        const badge = document.getElementById(badgeId);
+        if (badge) {
+          const current = parseInt(badge.textContent, 10) || 0;
+          const next = Math.max(0, current - 1);
+          badge.textContent = next > 0 ? (next > 99 ? '99+' : String(next)) : '0';
+          if (next === 0) badge.classList.add('hidden');
+        }
         try {
-          await apiFetch(`/notifications/${id}/read`, {
+          const query = isAdminScope ? '?scope=admin' : '';
+          await apiFetch(`/notifications/${id}/read${query}`, {
             method: 'PATCH',
-            body: isAdminScope ? { scope: 'admin' } : {},
+            body: isAdminScope ? { scope: 'admin' } : { scope: 'customer' },
           });
-          const badgeId = isAdminScope
-            ? 'admin-notification-badge'
-            : 'header-notification-badge';
-          const badge = document.getElementById(badgeId);
-          if (badge) {
-            const current = parseInt(badge.textContent, 10) || 0;
-            const next = Math.max(0, current - 1);
-            badge.textContent = next > 0 ? String(next) : '0';
-            if (next === 0) badge.classList.add('hidden');
-          }
         } catch (e) {
           // ignore
         }
       }
 
+      const dropdownId = isAdminScope
+        ? 'admin-notification-dropdown'
+        : 'header-notification-dropdown';
+      const dropdown = document.getElementById(dropdownId);
+      if (dropdown) dropdown.classList.remove('open');
+
       if (isAdminScope) {
         // In admin view, switch to orders section
         const ordersTabBtn = document.querySelector('.admin-nav-item[data-section="orders"]');
         if (ordersTabBtn) ordersTabBtn.click();
+        if (orderId && typeof window.openAdminOrderDrawer === 'function') {
+          window.openAdminOrderDrawer(orderId);
+        }
       } else {
         // In customer view, navigate or switch to orders in profile
         if (window.location.pathname.includes('profile.html')) {
@@ -328,16 +343,28 @@ function handleCustomerIncomingNotification(notif) {
         <div class="notification-item-time">Just now</div>
       </div>
     `;
-    div.onclick = () => {
-      div.classList.remove('unread');
-      apiFetch(`/notifications/${notif.id}/read`, { method: 'PATCH' }).catch(() => {});
-      const b = document.getElementById('header-notification-badge');
-      if (b) {
-        const cur = parseInt(b.textContent, 10) || 0;
-        const nxt = Math.max(0, cur - 1);
-        b.textContent = nxt > 0 ? String(nxt) : '0';
-        if (nxt === 0) b.classList.add('hidden');
+    div.onclick = async () => {
+      if (div.classList.contains('unread')) {
+        div.classList.remove('unread');
+        const b = document.getElementById('header-notification-badge');
+        if (b) {
+          const cur = parseInt(b.textContent, 10) || 0;
+          const nxt = Math.max(0, cur - 1);
+          b.textContent = nxt > 0 ? (nxt > 99 ? '99+' : String(nxt)) : '0';
+          if (nxt === 0) b.classList.add('hidden');
+        }
+        try {
+          await apiFetch(`/notifications/${notif.id}/read`, {
+            method: 'PATCH',
+            body: { scope: 'customer' },
+          });
+        } catch (e) {
+          // ignore
+        }
       }
+      const dropdown = document.getElementById('header-notification-dropdown');
+      if (dropdown) dropdown.classList.remove('open');
+
       if (window.location.pathname.includes('profile.html')) {
         const statusTabBtn = document.querySelector('.profile-tab[data-tab="status"]');
         if (statusTabBtn) statusTabBtn.click();
@@ -389,15 +416,15 @@ export function initAdminNotifications() {
   if (markAllBtn) {
     markAllBtn.onclick = async (e) => {
       e.stopPropagation();
+      badge.textContent = '0';
+      badge.classList.add('hidden');
+      const unreadItems = list.querySelectorAll('.notification-item.unread');
+      unreadItems.forEach((el) => el.classList.remove('unread'));
       try {
-        await apiFetch('/notifications/read-all', {
+        await apiFetch('/notifications/read-all?scope=admin', {
           method: 'PATCH',
           body: { scope: 'admin' },
         });
-        badge.textContent = '0';
-        badge.classList.add('hidden');
-        const unreadItems = list.querySelectorAll('.notification-item.unread');
-        unreadItems.forEach((el) => el.classList.remove('unread'));
       } catch (err) {
         // ignore
       }
@@ -508,21 +535,34 @@ function handleAdminIncomingNotification(notif) {
         <div class="notification-item-time">Just now</div>
       </div>
     `;
-    div.onclick = () => {
-      div.classList.remove('unread');
-      apiFetch(`/notifications/${notif.id}/read`, {
-        method: 'PATCH',
-        body: { scope: 'admin' },
-      }).catch(() => {});
-      const b = document.getElementById('admin-notification-badge');
-      if (b) {
-        const cur = parseInt(b.textContent, 10) || 0;
-        const nxt = Math.max(0, cur - 1);
-        b.textContent = nxt > 0 ? String(nxt) : '0';
-        if (nxt === 0) b.classList.add('hidden');
+    div.onclick = async () => {
+      if (div.classList.contains('unread')) {
+        div.classList.remove('unread');
+        const b = document.getElementById('admin-notification-badge');
+        if (b) {
+          const cur = parseInt(b.textContent, 10) || 0;
+          const nxt = Math.max(0, cur - 1);
+          b.textContent = nxt > 0 ? (nxt > 99 ? '99+' : String(nxt)) : '0';
+          if (nxt === 0) b.classList.add('hidden');
+        }
+        try {
+          await apiFetch(`/notifications/${notif.id}/read?scope=admin`, {
+            method: 'PATCH',
+            body: { scope: 'admin' },
+          });
+        } catch (e) {
+          // ignore
+        }
       }
+
+      const dropdown = document.getElementById('admin-notification-dropdown');
+      if (dropdown) dropdown.classList.remove('open');
+
       const ordersTabBtn = document.querySelector('.admin-nav-item[data-section="orders"]');
       if (ordersTabBtn) ordersTabBtn.click();
+      if (notif.orderId && typeof window.openAdminOrderDrawer === 'function') {
+        window.openAdminOrderDrawer(notif.orderId);
+      }
     };
     list.prepend(div);
   }
@@ -533,6 +573,37 @@ function handleAdminIncomingNotification(notif) {
       detail: { type: notif.type, orderId: notif.orderId, status: notif.status },
     })
   );
+}
+
+export async function markAdminNotificationReadByOrderId(orderId) {
+  if (!orderId) return;
+  const list = document.getElementById('admin-notification-list');
+  const badge = document.getElementById('admin-notification-badge');
+
+  let markedCount = 0;
+  if (list) {
+    const matchingItems = list.querySelectorAll(`.notification-item.unread[data-order-id="${orderId}"]`);
+    matchingItems.forEach((item) => {
+      item.classList.remove('unread');
+      markedCount++;
+    });
+  }
+
+  if (markedCount > 0 && badge) {
+    const cur = parseInt(badge.textContent, 10) || 0;
+    const nxt = Math.max(0, cur - markedCount);
+    badge.textContent = nxt > 0 ? (nxt > 99 ? '99+' : String(nxt)) : '0';
+    if (nxt === 0) badge.classList.add('hidden');
+  }
+
+  try {
+    await apiFetch(`/notifications/by-order/${orderId}/read?scope=admin`, {
+      method: 'PATCH',
+      body: { scope: 'admin' },
+    });
+  } catch (err) {
+    // ignore
+  }
 }
 
 function startAdminPollingFallback() {

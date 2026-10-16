@@ -3575,7 +3575,8 @@
   }
 
   .home-page .hero-highlight {
-    flex: 1 1 140px;
+    flex: 1 1 180px;
+    min-width: 0;
   }
 
   .home-page .section {
@@ -3625,6 +3626,16 @@
 
   .home-page .hero-cta .btn {
     flex: 1 1 auto;
+  }
+
+  .home-page .hero-highlights {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .home-page .hero-highlight {
+    flex: 1 1 100%;
+    width: 100%;
   }
 }
 
@@ -4154,7 +4165,7 @@
 
 .store-availability-notice {
   position: relative;
-  width: min(100% - 32px, 1200px);
+  width: min(calc(100% - clamp(20px, 3vw, 36px)), var(--container-max));
   margin: 16px auto;
   padding: 16px 20px 16px 54px;
   border: 1px solid #f1d7a7;
@@ -5753,7 +5764,7 @@ body:not(.home-page):not(.auth-page):not(:has(.admin-layout)) {
   overflow: hidden;
   isolation: isolate;
   margin: 24px auto 0;
-  width: min(calc(100% - 32px), var(--container-max));
+  width: min(calc(100% - clamp(20px, 3vw, 36px)), var(--container-max));
   border: 1px solid rgba(255, 250, 243, 0.1);
   border-radius: var(--radius-xl);
   background:
@@ -6786,32 +6797,44 @@ h6 * {
 h1 {
   font-size: var(--text-2xl) !important;
   letter-spacing: -0.03em !important;
-  line-height: 1.05 !important;
+  line-height: 1.08 !important;
+  overflow-wrap: break-word;
+  text-wrap: balance;
 }
 
 h2 {
   font-size: var(--text-xl) !important;
+  overflow-wrap: break-word;
+  text-wrap: balance;
 }
 
 h3,
 h4 {
   font-size: var(--text-lg) !important;
+  overflow-wrap: break-word;
 }
 
 h5,
 h6 {
   font-size: var(--text-md) !important;
+  overflow-wrap: break-word;
 }
 
 .hero-title {
   font-size: var(--text-3xl) !important;
-  line-height: 1.05 !important;
+  line-height: 1.08 !important;
   letter-spacing: -0.03em !important;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: auto;
+  text-wrap: balance;
 }
 
 .section-title,
 .menu-catalog-heading .section-title {
   font-size: var(--text-xl) !important;
+  overflow-wrap: break-word;
+  text-wrap: balance;
 }
 
 .hero-subtitle,
@@ -6819,10 +6842,12 @@ h6 {
   max-width: 55ch !important;
   font-size: var(--text-md) !important;
   line-height: 1.5 !important;
+  overflow-wrap: break-word;
 }
 
 .card-title {
   font-size: var(--text-lg) !important;
+  overflow-wrap: break-word;
 }
 
 .card-desc,
@@ -7124,9 +7149,9 @@ em {
 
 .home-page .site-header .container.header-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: var(--container-max);
   margin: 0 auto;
-  padding: 0 clamp(18px, 4vw, 32px);
+  padding: 0 clamp(14px, 2vw, 24px);
 }
 
 .site-header .brand-logo {
@@ -7207,11 +7232,11 @@ html {
 body:has(.admin-layout) .site-header .header-container {
   box-sizing: border-box;
   width: 100%;
-  max-width: 1200px;
+  max-width: var(--container-max);
   height: 56px;
   min-height: 56px;
   margin: 0 auto;
-  padding: 0 clamp(18px, 4vw, 32px);
+  padding: 0 clamp(14px, 2vw, 24px);
 }
 
 .site-header .nav-links a {
@@ -7245,13 +7270,13 @@ body:has(.admin-layout) .site-header .header-container {
   .site-header .container.header-container,
   body:has(.admin-layout) .site-header .header-container {
     max-width: none;
-    padding-right: 18px;
-    padding-left: 18px;
+    padding-right: 14px;
+    padding-left: 14px;
   }
 
   .home-page .site-header .container.header-container {
-    padding-right: clamp(18px, 4vw, 32px);
-    padding-left: clamp(18px, 4vw, 32px);
+    padding-right: clamp(14px, 2vw, 24px);
+    padding-left: clamp(14px, 2vw, 24px);
   }
 }
 

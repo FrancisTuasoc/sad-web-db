@@ -42,10 +42,22 @@ export async function apiFetch(endpoint, options = {}) {
   const method = String(options.method || 'GET').toUpperCase();
 
   const headers = { ...(options.headers || {}) };
+  let body = options.body;
   const isFormData =
-    typeof FormData !== 'undefined' && options.body instanceof FormData;
-  if (!isFormData && options.body !== undefined && !headers['Content-Type']) {
-    headers['Content-Type'] = 'application/json';
+    typeof FormData !== 'undefined' && body instanceof FormData;
+  if (!isFormData && body !== undefined) {
+    if (
+      typeof body === 'object' &&
+      body !== null &&
+      !(typeof Blob !== 'undefined' && body instanceof Blob) &&
+      !(typeof URLSearchParams !== 'undefined' && body instanceof URLSearchParams) &&
+      !(typeof ArrayBuffer !== 'undefined' && body instanceof ArrayBuffer)
+    ) {
+      body = JSON.stringify(body);
+    }
+    if (!headers['Content-Type']) {
+      headers['Content-Type'] = 'application/json';
+    }
   }
 
   const token = localStorage.getItem('token');
@@ -55,10 +67,14 @@ export async function apiFetch(endpoint, options = {}) {
 
   let response;
   try {
-    response = await fetch(url, {
+    const fetchOptions = {
       ...options,
       headers,
-    });
+    };
+    if (body !== undefined) {
+      fetchOptions.body = body;
+    }
+    response = await fetch(url, fetchOptions);
   } catch (err) {
     throw new Error("Can't reach the server. Check your connection.");
   }

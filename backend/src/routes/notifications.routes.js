@@ -12,7 +12,8 @@ router.get(
   '/',
   asyncHandler(async (req, res) => {
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 20));
-    const isAdminScope = req.user.role === 'admin' && req.query.scope === 'admin';
+    const scope = req.query.scope || (req.body && req.body.scope);
+    const isAdminScope = req.user.role === 'admin' && scope === 'admin';
 
     let notifications;
     let unreadCount;
@@ -42,7 +43,8 @@ router.get(
 router.patch(
   '/read-all',
   asyncHandler(async (req, res) => {
-    const isAdminScope = req.user.role === 'admin' && req.body.scope === 'admin';
+    const scope = (req.body && req.body.scope) || req.query.scope;
+    const isAdminScope = req.user.role === 'admin' && scope === 'admin';
 
     if (isAdminScope) {
       await notificationRepository.markAllAsRead(null, true);
@@ -57,11 +59,50 @@ router.patch(
   })
 );
 
+// PATCH /api/notifications/by-order/:orderId/read
+router.patch(
+  '/by-order/:orderId/read',
+  asyncHandler(async (req, res) => {
+    const scope = (req.body && req.body.scope) || req.query.scope;
+    const isAdminUser = req.user.role === 'admin';
+    const isAdminScope = isAdminUser && scope === 'admin';
+
+    let notifications = [];
+    if (isAdminScope) {
+      notifications = await notificationRepository.markAsReadByOrderId(
+        req.params.orderId,
+        null,
+        true
+      );
+    } else {
+      notifications = await notificationRepository.markAsReadByOrderId(
+        req.params.orderId,
+        req.user.id,
+        false
+      );
+      if ((!notifications || notifications.length === 0) && isAdminUser) {
+        notifications = await notificationRepository.markAsReadByOrderId(
+          req.params.orderId,
+          null,
+          true
+        );
+      }
+    }
+
+    res.json({
+      success: true,
+      notifications,
+    });
+  })
+);
+
 // PATCH /api/notifications/:id/read
 router.patch(
   '/:id/read',
   asyncHandler(async (req, res) => {
-    const isAdminScope = req.user.role === 'admin' && req.body.scope === 'admin';
+    const scope = (req.body && req.body.scope) || req.query.scope;
+    const isAdminUser = req.user.role === 'admin';
+    const isAdminScope = isAdminUser && scope === 'admin';
 
     let notification;
     if (isAdminScope) {
@@ -76,6 +117,13 @@ router.patch(
         req.user.id,
         false
       );
+      if (!notification && isAdminUser) {
+        notification = await notificationRepository.markAsRead(
+          req.params.id,
+          null,
+          true
+        );
+      }
     }
 
     if (!notification) {

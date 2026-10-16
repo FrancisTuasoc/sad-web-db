@@ -4,14 +4,14 @@
    ======================================================== */
 
 :root {
-  --text-xs: 11px;
-  --text-sm: 13px;
-  --text-base: 16px;
-  --text-md: 20px;
-  --text-lg: 28px;
-  --text-xl: 40px;
-  --text-2xl: 56px;
-  --text-3xl: 72px;
+  --text-xs: clamp(0.6875rem, 0.65rem + 0.2vw, 0.75rem);
+  --text-sm: clamp(0.78125rem, 0.75rem + 0.25vw, 0.84375rem);
+  --text-base: clamp(0.9375rem, 0.9rem + 0.3vw, 1rem);
+  --text-md: clamp(1.0625rem, 1rem + 0.4vw, 1.25rem);
+  --text-lg: clamp(1.25rem, 1.15rem + 0.6vw, 1.625rem);
+  --text-xl: clamp(1.5rem, 1.35rem + 1vw, 2.25rem);
+  --text-2xl: clamp(1.85rem, 1.6rem + 1.8vw, 3.25rem);
+  --text-3xl: clamp(2.15rem, 1.8rem + 3.2vw, 4.25rem);
 
   --color-bg: #f7f1ea;
   --color-surface: #fffdfb;
@@ -100,8 +100,8 @@
   --z-modal: 1000;
 
   --header-height: 72px;
-  --header-padding-x: clamp(16px, 2.6vw, 32px);
-  --container-max: 1180px;
+  --header-padding-x: clamp(14px, 2vw, 24px);
+  --container-max: 1440px;
 }
 
 *,
@@ -218,7 +218,7 @@ textarea:focus-visible {
   width: 100%;
   max-width: var(--container-max);
   margin: 0 auto;
-  padding: 0 12px;
+  padding: 0 clamp(14px, 2vw, 24px);
 }
 
 /* Base Buttons */
