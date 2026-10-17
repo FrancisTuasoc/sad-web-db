@@ -883,9 +883,9 @@ function setupHomeSectionNavigation() {
         const targetElem = document.getElementById(hash);
         if (targetElem) {
           const headerElem = document.getElementById('site-header');
-          const headerHeight = headerElem ? headerElem.offsetHeight : 72;
+          const headerHeight = headerElem ? headerElem.offsetHeight : 68;
           const rect = targetElem.getBoundingClientRect();
-          targetY = window.scrollY + rect.top - headerHeight + 2;
+          targetY = window.scrollY + rect.top - headerHeight;
         }
       }
 

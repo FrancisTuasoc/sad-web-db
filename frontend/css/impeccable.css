@@ -14207,7 +14207,7 @@ body {
 }
 
 html:not(:has(body.menu-page)):not(:has(.menu-page)) {
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: none;
   scroll-padding-top: var(--header-height, 68px) !important;
   scroll-behavior: smooth;
   overflow-x: clip;
@@ -14215,7 +14215,7 @@ html:not(:has(body.menu-page)):not(:has(.menu-page)) {
 
 @supports not (selector(:has(*))) {
   html {
-    scroll-snap-type: y mandatory;
+    scroll-snap-type: none;
     scroll-padding-top: var(--header-height, 68px) !important;
     scroll-behavior: smooth;
   }
@@ -14251,9 +14251,9 @@ body.home-page .hero-section {
   overflow: hidden !important;
 }
 
-body.home-page > main > section:not(.hero-section),
-body.home-page section:not(.hero-section):not(.add-to-cart-addons):not(#product-modal section),
-body:not(.menu-page):not(.admin-page):not(.cart-page):not(.profile-page):not(.auth-page) > main > section:not(.hero-section):not(.add-to-cart-addons):not(.menu-page-hero):not(.menu-toolbar) {
+body.home-page > main > section:not(.hero-section):not(#featured):not(#about):not(#testimonials):not(#contact),
+body.home-page section:not(.hero-section):not(#featured):not(#about):not(#testimonials):not(#contact):not(.add-to-cart-addons):not(#product-modal section),
+body:not(.menu-page):not(.admin-page):not(.cart-page):not(.profile-page):not(.auth-page) > main > section:not(.hero-section):not(#featured):not(#about):not(#testimonials):not(#contact):not(.add-to-cart-addons):not(.menu-page-hero):not(.menu-toolbar) {
   min-height: 100vh !important;
   min-height: 100dvh !important;
   scroll-snap-align: start !important;
@@ -15415,21 +15415,44 @@ body.home-page #about .about-card {
   margin-top: 0 !important;
   margin-inline: auto !important;
   box-sizing: border-box !important;
-  padding: clamp(20px, 3vw, 32px) !important;
+  padding: clamp(14px, 1.8vw, 18px) clamp(18px, 2.5vw, 28px) !important;
 }
 
 body.home-page #about .about-details {
   margin-top: 0 !important;
+  gap: 12px !important;
+}
+
+body.home-page #about .home-section-eyebrow {
+  margin-top: 0 !important;
+  margin-bottom: 2px !important;
 }
 
 body.home-page #about .about-proof-card {
   margin-top: 0 !important;
 }
 
+body.home-page #testimonials .testimonials-section-header {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  margin-bottom: clamp(12px, 1.8vw, 18px) !important;
+}
+
+body.home-page #testimonials .hero-badge {
+  margin-top: 0 !important;
+  margin-bottom: 4px !important;
+}
+
 body.home-page #testimonials .testimonials-grid {
   width: 100% !important;
   margin-top: 0 !important;
   margin-inline: auto !important;
+}
+
+body.home-page #contact .section-header {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  margin-bottom: clamp(12px, 1.8vw, 18px) !important;
 }
 
 body.home-page #contact .contact-grid {
