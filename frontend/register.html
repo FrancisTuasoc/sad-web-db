@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -19,152 +19,174 @@
       crossorigin="anonymous"
     ></script>
   </head>
-  <body class="auth-page">
-    <main class="auth-main auth-main--register">
-      <div class="modal-card auth-panel auth-panel--register">
-        <div class="auth-heading">
-          <h2>Sign Up</h2>
-          <p class="text-muted">
-            Join GIGABITE to order quickly and track deliveries
-          </p>
+  <body class="auth-page auth-split-body">
+    <div class="auth-split-wrapper">
+      <!-- Left Panel: Brand Showcase with Burger Image -->
+      <aside class="auth-brand-panel">
+        <div class="auth-brand-top">
+          <a href="index.html" class="auth-brand-logo-link" aria-label="GIGABITE Home">
+            <img src="assets/logo-white.svg" alt="GIGABITE" class="auth-brand-logo-img" />
+          </a>
         </div>
 
-        <form id="register-form">
-          <div class="auth-row-2col">
-            <div class="form-group">
-              <label class="form-label" for="reg-first-name"
-                >First Name</label
-              >
-              <input
-                type="text"
-                id="reg-first-name"
-                class="form-input"
-                required
-                maxlength="50"
-                placeholder="Enter first name"
-                autocomplete="given-name"
-                autofocus
-              />
-            </div>
+        <div class="auth-brand-middle">
+          <span class="auth-brand-eyebrow">FRESH OFF THE GRILL</span>
+          <h1 class="auth-brand-heading">Your next favorite bite<br />starts here.</h1>
+          <p class="auth-brand-description">Sign up for juicy burgers, fresh flavors, and easy ordering.</p>
+          <div class="auth-brand-rule"></div>
 
-            <div class="form-group">
-              <label class="form-label" for="reg-last-name"
-                >Last Name</label
-              >
-              <input
-                type="text"
-                id="reg-last-name"
-                class="form-input"
-                required
-                maxlength="50"
-                placeholder="Enter last name"
-                autocomplete="family-name"
-              />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="reg-email"
-              >Email Address</label
-            >
-            <input
-              type="email"
-              id="reg-email"
-              class="form-input"
-              required
-              placeholder="Enter your email address"
-              autocomplete="email"
+          <div class="auth-brand-image-container">
+            <img
+              src="assets/items/images/login-signup-image.png"
+              alt="Fresh gourmet GIGABITE burger"
+              class="auth-brand-image"
             />
           </div>
+        </div>
 
-          <div class="form-group">
-            <label class="form-label" for="reg-password"
-              >Password</label
-            >
-            <div class="password-field-wrapper">
-              <input
-                type="password"
-                id="reg-password"
-                class="form-input"
-                required
-                placeholder="Create a password"
-                autocomplete="new-password"
-              />
-              <button
-                type="button"
-                class="toggle-password-btn"
-                data-target="reg-password"
-                aria-label="Toggle password visibility"
-              >
-                <i class="fa-solid fa-eye" aria-hidden="true"></i>
-              </button>
-            </div>
+        <div class="auth-brand-bottom">
+          <p class="auth-brand-tagline">Grilled fresh. Made for you.</p>
+        </div>
+      </aside>
+
+      <!-- Right Panel: Registration Form -->
+      <main class="auth-form-panel">
+        <div class="auth-form-container">
+          <div class="auth-form-header">
+            <h2 class="auth-form-title">Create an Account</h2>
+            <p class="auth-form-subtitle">Join GIGABITE to order quickly and track deliveries</p>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="reg-confirm-password"
-              >Confirm Password</label
-            >
-            <div class="password-field-wrapper">
-              <input
-                type="password"
-                id="reg-confirm-password"
-                class="form-input"
-                required
-                placeholder="Confirm your password"
-                autocomplete="new-password"
-              />
-              <button
-                type="button"
-                class="toggle-password-btn"
-                data-target="reg-confirm-password"
-                aria-label="Toggle password visibility"
-              >
-                <i class="fa-solid fa-eye" aria-hidden="true"></i>
-              </button>
+          <form id="register-form" class="auth-form">
+            <div class="auth-name-row">
+              <div class="auth-form-group">
+                <label class="auth-form-label" for="reg-first-name">First Name</label>
+                <input
+                  type="text"
+                  id="reg-first-name"
+                  class="auth-form-input"
+                  required
+                  maxlength="50"
+                  placeholder="First name"
+                  autocomplete="given-name"
+                  autofocus
+                />
+              </div>
+
+              <div class="auth-form-group">
+                <label class="auth-form-label" for="reg-last-name">Last Name</label>
+                <input
+                  type="text"
+                  id="reg-last-name"
+                  class="auth-form-input"
+                  required
+                  maxlength="50"
+                  placeholder="Last name"
+                  autocomplete="family-name"
+                />
+              </div>
             </div>
-          </div>
 
-          <button
-            type="submit"
-            id="register-submit-btn"
-            class="btn btn-primary btn-lg"
-          >
-            Sign Up
-          </button>
-        </form>
+            <div class="auth-form-group">
+              <label class="auth-form-label" for="reg-email">Email Address</label>
+              <input
+                type="email"
+                id="reg-email"
+                class="auth-form-input"
+                required
+                placeholder="Enter your email address"
+                autocomplete="email"
+              />
+            </div>
 
-        <div
-          id="verification-result"
-          class="hidden"
-          role="status"
-          aria-live="polite"
-        >
-          <h2 class="auth-result-title">Check your email</h2>
-          <p id="verification-message" class="text-muted"></p>
-          <button
-            type="button"
-            id="resend-verification-btn"
-            class="btn btn-secondary"
-          >
-            Resend verification email
-          </button>
-          <p
-            id="resend-verification-message"
-            class="text-muted"
+            <div class="auth-form-group">
+              <label class="auth-form-label" for="reg-password">Password</label>
+              <div class="auth-password-wrapper">
+                <input
+                  type="password"
+                  id="reg-password"
+                  class="auth-form-input"
+                  required
+                  placeholder="Create a password"
+                  autocomplete="new-password"
+                />
+                <button
+                  type="button"
+                  class="toggle-password-btn"
+                  data-target="reg-password"
+                  aria-label="Toggle password visibility"
+                >
+                  <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="auth-form-group">
+              <label class="auth-form-label" for="reg-confirm-password">Confirm Password</label>
+              <div class="auth-password-wrapper">
+                <input
+                  type="password"
+                  id="reg-confirm-password"
+                  class="auth-form-input"
+                  required
+                  placeholder="Confirm your password"
+                  autocomplete="new-password"
+                />
+                <button
+                  type="button"
+                  class="toggle-password-btn"
+                  data-target="reg-confirm-password"
+                  aria-label="Toggle password visibility"
+                >
+                  <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              id="register-submit-btn"
+              class="auth-submit-button"
+            >
+              Sign Up
+            </button>
+          </form>
+
+          <div
+            id="verification-result"
+            class="hidden"
+            role="status"
             aria-live="polite"
-          ></p>
-        </div>
+          >
+            <h2 class="auth-result-title">Check your email</h2>
+            <p id="verification-message" class="text-muted"></p>
+            <button
+              type="button"
+              id="resend-verification-btn"
+              class="btn btn-secondary"
+            >
+              Resend verification email
+            </button>
+            <p
+              id="resend-verification-message"
+              class="text-muted"
+              aria-live="polite"
+            ></p>
+          </div>
 
-        <div class="auth-switch">
-          Already have an account?
-          <a href="login.html">Sign In</a>
+          <div class="auth-divider-line"></div>
+
+          <div class="auth-switch-row">
+            Already have an account?
+            <a href="login.html" class="auth-switch-link">Sign In</a>
+          </div>
+
+          <div class="auth-back-row">
+            <a href="index.html" class="auth-back-link">← Go back to Home</a>
+          </div>
         </div>
-        <div class="auth-home-link">
-          <a href="index.html">← Go back to Home</a>
-        </div>
-      </div>
-    </main>
+      </main>
+    </div>
 
     <script type="module">
       import { apiFetch } from './js/api.js';
@@ -178,7 +200,18 @@
               btn.getAttribute('data-target')
             );
             if (target) {
-              target.type = target.type === 'password' ? 'text' : 'password';
+              const isPassword = target.type === 'password';
+              target.type = isPassword ? 'text' : 'password';
+              const icon = btn.querySelector('i');
+              if (icon) {
+                if (isPassword) {
+                  icon.classList.remove('fa-eye');
+                  icon.classList.add('fa-eye-slash');
+                } else {
+                  icon.classList.remove('fa-eye-slash');
+                  icon.classList.add('fa-eye');
+                }
+              }
             }
           });
         });

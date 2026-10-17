@@ -641,7 +641,6 @@ export async function submitDirectProductRating(productId, rating, sourceBtn = n
     }
   }
 }
-}
 
 export function updateProductCardInteractiveRating(productId, avgRating, reviewCount, userRating) {
   const cardContainers = document.querySelectorAll(

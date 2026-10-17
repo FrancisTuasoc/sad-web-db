@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -19,78 +19,105 @@
       crossorigin="anonymous"
     ></script>
   </head>
-  <body class="auth-page">
-    <main class="auth-main auth-main--login">
-      <div class="modal-card auth-panel auth-panel--login">
-        <div class="auth-heading">
-          <h2>Welcome Back</h2>
-          <p class="text-muted">
-            Sign in to your GIGABITE account to order
-          </p>
+  <body class="auth-page auth-split-body">
+    <div class="auth-split-wrapper">
+      <!-- Left Panel: Brand Showcase with Burger Image -->
+      <aside class="auth-brand-panel">
+        <div class="auth-brand-top">
+          <a href="index.html" class="auth-brand-logo-link" aria-label="GIGABITE Home">
+            <img src="assets/logo-white.svg" alt="GIGABITE" class="auth-brand-logo-img" />
+          </a>
         </div>
 
-        <form id="login-form">
-          <div class="form-group">
-            <label class="form-label" for="login-email"
-              >Email Address</label
-            >
-            <input
-              type="email"
-              id="login-email"
-              class="form-input"
-              required
-              placeholder="Enter your email address"
-              autocomplete="email"
-              autofocus
+        <div class="auth-brand-middle">
+          <span class="auth-brand-eyebrow">FRESH OFF THE GRILL</span>
+          <h1 class="auth-brand-heading">Your next favorite bite<br />starts here.</h1>
+          <p class="auth-brand-description">Sign in for juicy burgers, fresh flavors, and easy ordering.</p>
+          <div class="auth-brand-rule"></div>
+
+          <div class="auth-brand-image-container">
+            <img
+              src="assets/items/images/login-signup-image.png"
+              alt="Fresh gourmet GIGABITE burger"
+              class="auth-brand-image"
             />
           </div>
+        </div>
 
-          <div class="form-group">
-            <label class="form-label" for="login-password"
-              >Password</label
-            >
-            <div class="password-field-wrapper">
+        <div class="auth-brand-bottom">
+          <p class="auth-brand-tagline">Grilled fresh. Made for you.</p>
+        </div>
+      </aside>
+
+      <!-- Right Panel: Login Form -->
+      <main class="auth-form-panel">
+        <div class="auth-form-container">
+          <div class="auth-form-header">
+            <h2 class="auth-form-title">Welcome Back</h2>
+            <p class="auth-form-subtitle">Sign in to your GIGABITE account to order</p>
+          </div>
+
+          <form id="login-form" class="auth-form">
+            <div class="auth-form-group">
+              <label class="auth-form-label" for="login-email">EMAIL ADDRESS</label>
               <input
-                type="password"
-                id="login-password"
-                class="form-input"
+                type="email"
+                id="login-email"
+                class="auth-form-input"
                 required
-                placeholder="Enter your password"
-                autocomplete="current-password"
+                placeholder="Enter your email address"
+                autocomplete="email"
+                autofocus
               />
-              <button
-                type="button"
-                class="toggle-password-btn"
-                data-target="login-password"
-                aria-label="Toggle password visibility"
-              >
-                <i class="fa-solid fa-eye" aria-hidden="true"></i>
-              </button>
             </div>
+
+            <div class="auth-form-group">
+              <label class="auth-form-label" for="login-password">PASSWORD</label>
+              <div class="auth-password-wrapper">
+                <input
+                  type="password"
+                  id="login-password"
+                  class="auth-form-input"
+                  required
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                />
+                <button
+                  type="button"
+                  class="toggle-password-btn"
+                  data-target="login-password"
+                  aria-label="Toggle password visibility"
+                >
+                  <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="auth-forgot-row">
+                <a href="forgot-password.html" class="auth-forgot-link">Forgot password?</a>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              id="login-submit-btn"
+              class="auth-submit-button"
+            >
+              Sign In
+            </button>
+          </form>
+
+          <div class="auth-divider-line"></div>
+
+          <div class="auth-switch-row">
+            Don't have an account?
+            <a href="register.html" class="auth-switch-link">Sign Up</a>
           </div>
 
-          <div class="auth-reset-link">
-            <a href="forgot-password.html">Forgot password?</a>
+          <div class="auth-back-row">
+            <a href="index.html" class="auth-back-link">← Go back to Home</a>
           </div>
-
-          <button
-            type="submit"
-            id="login-submit-btn"
-            class="btn btn-primary btn-lg"
-          >
-            Sign In
-          </button>
-        </form>
-
-        <div class="auth-switch">
-          Don't have an account?
-          <a href="register.html">Sign Up</a>
         </div>
-        <div class="auth-home-link">
-          <a href="index.html">← Go back to Home</a>
-        </div>
-      </div>
-    </main>
+      </main>
+    </div>
 
     <script type="module">
       import { apiFetch } from './js/api.js';
@@ -114,7 +141,18 @@
               btn.getAttribute('data-target')
             );
             if (target) {
-              target.type = target.type === 'password' ? 'text' : 'password';
+              const isPassword = target.type === 'password';
+              target.type = isPassword ? 'text' : 'password';
+              const icon = btn.querySelector('i');
+              if (icon) {
+                if (isPassword) {
+                  icon.classList.remove('fa-eye');
+                  icon.classList.add('fa-eye-slash');
+                } else {
+                  icon.classList.remove('fa-eye-slash');
+                  icon.classList.add('fa-eye');
+                }
+              }
             }
           });
         });
