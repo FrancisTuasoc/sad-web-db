@@ -13254,8 +13254,9 @@ body.theme-dark .admin-layout #section-dashboard .stat-card-customers .stat-icon
 /* Section Anchor Scroll Margin for Sticky Header */
 #featured,
 #about,
+#testimonials,
 #contact {
-  scroll-margin-top: calc(var(--header-height, 72px) + 14px);
+  scroll-margin-top: var(--header-height, 60px) !important;
 }
 
 /* Mobile Drawer Navigation Active State */
@@ -15293,8 +15294,8 @@ body.admin-page #product-modal :is(.form-input, .form-select, .form-textarea):fo
 }
 
 /* ==========================================================================
-   CUSTOMER STOREFRONT: POPULAR CROWD FAVORITES VERTICAL SPACING & DEAD SPACE FIX
-   Eliminates excessive gap/white space between sticky black nav bar and heading
+   CUSTOMER STOREFRONT: ALL LANDING SECTIONS (FEATURED, ABOUT, REVIEWS, CONTACT)
+   Pull content up to eliminate dead space at top; keep cleanly centered on nav click
    ========================================================================== */
 body.home-page main {
   margin-top: 0 !important;
@@ -15308,9 +15309,19 @@ body.home-page main {
   height: 0 !important;
 }
 
+/* 1. All sections: remove 100vh viewport expansion, pull content up, and eliminate top dead space */
 body.home-page #featured,
+body.home-page #about,
+body.home-page #testimonials,
+body.home-page #contact,
 body.home-page > main > #featured,
-body.home-page section#featured {
+body.home-page > main > #about,
+body.home-page > main > #testimonials,
+body.home-page > main > #contact,
+body.home-page section#featured,
+body.home-page section#about,
+body.home-page section#testimonials,
+body.home-page section#contact {
   min-height: auto !important;
   min-height: unset !important;
   display: flex !important;
@@ -15320,14 +15331,23 @@ body.home-page section#featured {
   align-items: stretch !important;
   margin-top: 0 !important;
   padding-top: clamp(16px, 2.5vw, 24px) !important;
-  padding-bottom: clamp(20px, 3vh, 32px) !important;
+  padding-bottom: clamp(24px, 3.5vh, 40px) !important;
   scroll-margin-top: var(--header-height, 60px) !important;
+  box-sizing: border-box !important;
 }
 
+/* 2. Desktop breakpoint: override grid align-content: center and min-height */
 @media (min-width: 901px) {
   body.home-page main > #featured.section,
-  body.home-page #featured {
+  body.home-page main > #about.section,
+  body.home-page main > #testimonials.section,
+  body.home-page main > #contact.section,
+  body.home-page #featured,
+  body.home-page #about,
+  body.home-page #testimonials,
+  body.home-page #contact {
     min-height: auto !important;
+    min-height: unset !important;
     display: flex !important;
     flex-direction: column !important;
     align-content: flex-start !important;
@@ -15338,24 +15358,90 @@ body.home-page section#featured {
   }
 }
 
-body.home-page #featured .container {
+/* 3. Containers: horizontally centered, zero top gap */
+body.home-page #featured > .container,
+body.home-page #about > .container,
+body.home-page #testimonials > .container,
+body.home-page #contact > .container,
+body.home-page #featured .container,
+body.home-page #about .container,
+body.home-page #testimonials .container,
+body.home-page #contact .container {
   width: 100% !important;
-  box-sizing: border-box !important;
+  max-width: var(--container-max, 1200px) !important;
+  margin-inline: auto !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
   margin-top: 0 !important;
   padding-top: 0 !important;
+  box-sizing: border-box !important;
 }
 
-body.home-page #featured .section-header {
+/* 4. Section headers & titles: pull up to top edge */
+body.home-page #featured .section-header,
+body.home-page #about .section-header,
+body.home-page #testimonials .section-header,
+body.home-page #contact .section-header,
+body.home-page .testimonials-section-header {
   margin-top: 0 !important;
   padding-top: 0 !important;
   margin-bottom: clamp(14px, 2vw, 20px) !important;
 }
 
 body.home-page #featured .section-title,
-body.home-page #featured h2 {
+body.home-page #about .section-title,
+body.home-page #testimonials .section-title,
+body.home-page #contact .section-title,
+body.home-page #featured h2,
+body.home-page #about h2,
+body.home-page #testimonials h2,
+body.home-page #contact h2,
+body.home-page #about .home-section-eyebrow,
+body.home-page #testimonials .hero-badge {
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
+
+/* 5. Specific card grids: centered horizontally and pulled up */
+body.home-page #featured #featured-grid.product-grid {
+  width: 100% !important;
+  margin-top: 0 !important;
+  margin-inline: auto !important;
+}
+
+body.home-page #about .about-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-top: 0 !important;
+  margin-inline: auto !important;
+  box-sizing: border-box !important;
+  padding: clamp(20px, 3vw, 32px) !important;
+}
+
+body.home-page #about .about-details {
+  margin-top: 0 !important;
+}
+
+body.home-page #about .about-proof-card {
+  margin-top: 0 !important;
+}
+
+body.home-page #testimonials .testimonials-grid {
+  width: 100% !important;
+  margin-top: 0 !important;
+  margin-inline: auto !important;
+}
+
+body.home-page #contact .contact-grid {
+  width: 100% !important;
+  margin-top: 0 !important;
+  margin-inline: auto !important;
+}
+
+body.home-page #contact .contact-card {
+  margin-top: 0 !important;
+}
+
 
 
 
