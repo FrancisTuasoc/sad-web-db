@@ -740,10 +740,22 @@ function setupHomeSectionNavigation() {
     { id: 'testimonials', element: document.getElementById('testimonials') },
     { id: 'contact', element: document.getElementById('contact') },
   ].filter((section) => section.element);
+  const isolatedSectionIds = ['featured', 'about', 'testimonials', 'contact'];
 
   let isClickScrolling = false;
   let clickLockTimer = null;
   let currentActiveId = null;
+
+  function setHomePageView(targetId) {
+    if (!isolatedSectionIds.includes(targetId)) {
+      delete document.body.dataset.homeView;
+      return;
+    }
+
+    document.body.dataset.homeView = targetId;
+    const targetSection = document.getElementById(targetId);
+    if (targetSection) targetSection.scrollTop = 0;
+  }
 
   function setActiveSection(targetId) {
     currentActiveId = targetId;
@@ -844,7 +856,7 @@ function setupHomeSectionNavigation() {
 
   document.addEventListener('click', (event) => {
     const link = event.target.closest(
-      'site-header .nav-links a, #site-header .nav-links a, .site-header .nav-links a, #mobile-drawer-menu a, .mobile-drawer a'
+      'site-header .nav-links a, #site-header .nav-links a, .site-header .nav-links a, #mobile-drawer-menu a, .mobile-drawer a, a[href="#featured"], a[href="#about"], a[href="#testimonials"], a[href="#contact"]'
     );
     if (!link) return;
 
@@ -873,24 +885,14 @@ function setupHomeSectionNavigation() {
       if (mobileDrawer) mobileDrawer.classList.remove('open');
 
       setActiveSection(hash);
+      setHomePageView(hash);
 
       isClickScrolling = true;
       if (clickLockTimer) clearTimeout(clickLockTimer);
       clickLockTimer = setTimeout(releaseLock, 850);
 
-      let targetY = 0;
-      if (hash) {
-        const targetElem = document.getElementById(hash);
-        if (targetElem) {
-          const headerElem = document.getElementById('site-header');
-          const headerHeight = headerElem ? headerElem.offsetHeight : 68;
-          const rect = targetElem.getBoundingClientRect();
-          targetY = window.scrollY + rect.top - headerHeight;
-        }
-      }
-
       window.scrollTo({
-        top: Math.max(0, targetY),
+        top: 0,
         behavior: 'smooth',
       });
 
@@ -907,6 +909,13 @@ function setupHomeSectionNavigation() {
   window.addEventListener('hashchange', () => {
     const hash = window.location.hash ? window.location.hash.slice(1) : '';
     setActiveSection(hash);
+    setHomePageView(hash);
+  });
+
+  window.addEventListener('popstate', () => {
+    const hash = window.location.hash ? window.location.hash.slice(1) : '';
+    setActiveSection(hash);
+    setHomePageView(hash);
   });
 
   window.addEventListener('resize', handleScroll);
@@ -916,8 +925,10 @@ function setupHomeSectionNavigation() {
     : '';
   if (initialHash && ['featured', 'about', 'testimonials', 'contact'].includes(initialHash)) {
     setActiveSection(initialHash);
+    setHomePageView(initialHash);
   } else {
     setActiveSection('');
+    setHomePageView('');
   }
 }
 

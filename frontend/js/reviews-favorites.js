@@ -880,7 +880,11 @@ function attachWebsiteReviewModalListeners(modal) {
           prependTestimonialCard(res.review);
           const testimonialsSec = document.getElementById('testimonials');
           if (testimonialsSec) {
-            testimonialsSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (window.location.hash === '#testimonials') {
+              testimonialsSec.scrollTop = 0;
+            } else {
+              window.location.hash = 'testimonials';
+            }
           }
         }
       } catch (err) {

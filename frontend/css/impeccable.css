@@ -15465,6 +15465,78 @@ body.home-page #contact .contact-card {
   margin-top: 0 !important;
 }
 
+/* Show one landing destination at a time when reached through its hash route. */
+body.home-page[data-home-view] {
+  --container-max: 1200px;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
 
+body.home-page[data-home-view] > .site-header {
+  flex: 0 0 auto !important;
+}
+
+body.home-page[data-home-view] > main {
+  display: flex !important;
+  flex: 1 1 0% !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  height: auto !important;
+  overflow: hidden !important;
+}
+
+body.home-page[data-home-view] > main > .hero-section,
+body.home-page[data-home-view] > main > .section:not([id="featured"]):not([id="about"]):not([id="testimonials"]):not([id="contact"]) {
+  display: none !important;
+}
+
+body.home-page[data-home-view="featured"] > main > #about,
+body.home-page[data-home-view="featured"] > main > #testimonials,
+body.home-page[data-home-view="featured"] > main > #contact,
+body.home-page[data-home-view="about"] > main > #featured,
+body.home-page[data-home-view="about"] > main > #testimonials,
+body.home-page[data-home-view="about"] > main > #contact,
+body.home-page[data-home-view="testimonials"] > main > #featured,
+body.home-page[data-home-view="testimonials"] > main > #about,
+body.home-page[data-home-view="testimonials"] > main > #contact,
+body.home-page[data-home-view="contact"] > main > #featured,
+body.home-page[data-home-view="contact"] > main > #about,
+body.home-page[data-home-view="contact"] > main > #testimonials {
+  display: none !important;
+}
+
+body.home-page[data-home-view="featured"] > main > #featured,
+body.home-page[data-home-view="about"] > main > #about,
+body.home-page[data-home-view="testimonials"] > main > #testimonials,
+body.home-page[data-home-view="contact"] > main > #contact {
+  display: flex !important;
+  flex: 1 1 0% !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: clamp(16px, 3vh, 32px) 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  box-sizing: border-box !important;
+}
+
+body.home-page[data-home-view="featured"] > main > #featured > .container,
+body.home-page[data-home-view="about"] > main > #about > .container,
+body.home-page[data-home-view="testimonials"] > main > #testimonials > .container,
+body.home-page[data-home-view="contact"] > main > #contact > .container {
+  width: 100% !important;
+  max-width: 1200px !important;
+  margin: auto !important;
+  padding-inline: clamp(16px, 3vw, 32px) !important;
+  box-sizing: border-box !important;
+}
+
+body.home-page[data-home-view] > footer {
+  display: none !important;
+}
 
 
