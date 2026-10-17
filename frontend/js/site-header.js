@@ -39,7 +39,6 @@ class SiteHeader extends HTMLElement {
         <nav class="admin-store-navigation" data-admin-only aria-label="Admin Navigation">
           <ul class="nav-links">
             <li><a href="admin.html">Admin Dashboard</a></li>
-            <li><a href="profile.html">My Profile</a></li>
           </ul>
         </nav>`
             : `
@@ -101,7 +100,6 @@ class SiteHeader extends HTMLElement {
           isAdmin
             ? `
         <a href="admin.html">Admin Dashboard</a>
-        <a href="profile.html">My Profile</a>
         <a href="#" id="mobile-logout-btn">Log Out</a>`
             : `
         <a href="index.html">Home</a>
@@ -122,14 +120,11 @@ class SiteHeader extends HTMLElement {
     const isHome = path === '/' || path.endsWith('index.html') || path === '';
     const isMenu = path.endsWith('menu.html');
     const isDashboard = path.endsWith('admin.html');
-    const isProfile = path.endsWith('profile.html');
 
     this.querySelectorAll('.nav-links a, .mobile-drawer a').forEach((link) => {
       const linkUrl = new URL(link.href, window.location.href);
       if (isAdmin) {
         if (isDashboard && linkUrl.pathname.endsWith('admin.html')) {
-          link.classList.add('active');
-        } else if (isProfile && linkUrl.pathname.endsWith('profile.html')) {
           link.classList.add('active');
         }
       } else if (isHome) {

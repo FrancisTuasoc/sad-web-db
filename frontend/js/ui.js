@@ -412,10 +412,15 @@ export function renderHeader(activeNav = '') {
             ${renderAvatar(user, 30)}
           </button>
           <div id="user-dropdown-menu" class="user-dropdown">
+            ${
+              !adminUser
+                ? `
             <a href="profile.html">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              ${adminUser ? 'My Profile' : 'My Profile &amp; Orders'}
-            </a>
+              My Profile &amp; Orders
+            </a>`
+                : ''
+            }
             ${
               adminUser
                 ? `
@@ -450,7 +455,6 @@ export function renderHeader(activeNav = '') {
     if (adminUser && userLoggedIn && user) {
       mobileDrawer.innerHTML = `
         <a href="admin.html"${activeNav === 'admin' ? ' class="active"' : ''}>Admin Dashboard</a>
-        <a href="profile.html"${activeNav === 'profile' ? ' class="active"' : ''}>My Profile</a>
         <a href="#" id="mobile-logout-btn">Log Out</a>
       `;
     } else if (userLoggedIn && user) {

@@ -2572,9 +2572,51 @@ function attachAdminEventListeners() {
   }
 }
 
+function enforceAdminRoleUI() {
+  const adminUser = getUser();
+  const isAdminRole = Boolean(
+    adminUser && String(adminUser.role).toLowerCase() === 'admin'
+  );
+  if (!isAdminRole) return;
+
+  // Completely remove store-facing features like "View Store" and "User Profile" for Admin role
+  const storeFacingSelectors = [
+    '.view-store',
+    '.admin-view-store-btn',
+    '.user-profile',
+    '.admin-header-profile-btn',
+    '[data-store-facing]',
+    '[data-customer-only]',
+  ];
+  storeFacingSelectors.forEach((selector) => {
+    document.querySelectorAll(selector).forEach((el) => el.remove());
+  });
+
+  // Check header / sidebar elements for store-facing text or profile links
+  document
+    .querySelectorAll(
+      '.site-header a, .admin-sidebar a, .admin-header-actions a, .admin-sidebar button'
+    )
+    .forEach((el) => {
+      if (el.classList.contains('brand-logo')) return;
+      const text = (el.textContent || '').trim().toLowerCase();
+      const href = (el.getAttribute('href') || '').toLowerCase();
+      if (
+        text.includes('view store') ||
+        text === 'user profile' ||
+        text === 'my profile' ||
+        text === 'profile' ||
+        (href && href.includes('profile.html'))
+      ) {
+        el.remove();
+      }
+    });
+}
+
 // ---------------- INITIALIZE ADMIN ----------------
 function initAdmin() {
   if (!requireAuth('admin')) return;
+  enforceAdminRoleUI();
   const adminUser = getUser();
   const greetingName = document.getElementById('admin-greeting-name');
   if (greetingName && adminUser) {

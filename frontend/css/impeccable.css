@@ -4641,24 +4641,32 @@ body.auth-page:has(#site-header) .site-footer {
   border-color: var(--color-border) !important;
 }
 
-/* Admin workspace - Black Header & Clean Container Layout */
+/* Admin workspace - Black Header (#000000) & Fit Layout */
 .admin-site-header,
-.site-header.admin-site-header {
-  background: #0f0f11 !important;
+.site-header.admin-site-header,
+body.admin-page .admin-site-header {
+  background: #000000 !important;
   color: #ffffff !important;
-  border-bottom: 1px solid #232326 !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+  border-bottom: 1px solid #1f1f1f !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4) !important;
   height: 60px !important;
+  min-height: 60px !important;
+  max-height: 60px !important;
+  width: 100% !important;
+  flex: 0 0 60px !important;
+  box-sizing: border-box !important;
 }
 
 .admin-site-header .container,
 .admin-site-header .header-container {
-  height: 100% !important;
+  height: 60px !important;
+  min-height: 60px !important;
+  max-width: 100% !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
+  padding: 0 20px !important;
+  box-sizing: border-box !important;
 }
 
 .admin-site-header .admin-header-brand {
@@ -4670,29 +4678,38 @@ body.auth-page:has(#site-header) .site-footer {
 .admin-site-header .brand-logo img {
   height: 30px !important;
   width: auto !important;
+  filter: none !important;
 }
 
-.admin-site-header .admin-header-brand .btn {
-  background: #1f1f23 !important;
+.admin-site-header .admin-header-brand .btn,
+.admin-site-header #admin-toggle-sidebar-btn {
+  background: #181818 !important;
   color: #ffffff !important;
-  border: 1px solid #2e2e33 !important;
+  border: 1px solid #333333 !important;
   border-radius: 6px !important;
   padding: 6px 10px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+  cursor: pointer !important;
 }
 
-.admin-site-header .admin-header-brand .btn:hover {
-  background: #2a2a30 !important;
+.admin-site-header .admin-header-brand .btn i,
+.admin-site-header #admin-toggle-sidebar-btn i {
   color: #ffffff !important;
-  border-color: #3f3f46 !important;
+}
+
+.admin-site-header .admin-header-brand .btn:hover,
+.admin-site-header #admin-toggle-sidebar-btn:hover {
+  background: #282828 !important;
+  color: #ffffff !important;
+  border-color: #444444 !important;
 }
 
 .admin-site-header .badge {
-  color: #e5e5e5 !important;
-  background: #1f1f23 !important;
-  border: 1px solid #2e2e33 !important;
+  color: #ffffff !important;
+  background: #181818 !important;
+  border: 1px solid #333333 !important;
   font-weight: 700 !important;
   font-size: 0.72rem !important;
   letter-spacing: 0.05em !important;
@@ -4706,37 +4723,94 @@ body.auth-page:has(#site-header) .site-footer {
   gap: 8px !important;
 }
 
-.admin-site-header .notification-btn {
-  background: #1f1f23 !important;
+.admin-site-header .notification-btn,
+.admin-site-header #admin-notification-btn {
+  background: #181818 !important;
   color: #ffffff !important;
-  border: 1px solid #2e2e33 !important;
+  border: 1px solid #333333 !important;
   border-radius: 6px !important;
   width: 34px !important;
   height: 34px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+  cursor: pointer !important;
 }
 
-.admin-site-header .notification-btn:hover {
-  background: #2a2a30 !important;
+.admin-site-header .notification-btn i,
+.admin-site-header #admin-notification-btn i {
   color: #ffffff !important;
-  border-color: #3f3f46 !important;
 }
 
-.admin-layout {
-  grid-template-columns: 236px minmax(0, 1fr) !important;
+.admin-site-header .notification-btn:hover,
+.admin-site-header #admin-notification-btn:hover {
+  background: #282828 !important;
+  color: #ffffff !important;
+  border-color: #444444 !important;
+}
+
+/* Proper Flex Layout: Header on top, Row below */
+.admin-layout,
+body.admin-page .admin-layout {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
   background: #f4f5f7 !important;
+  box-sizing: border-box !important;
 }
 
-.admin-sidebar {
-  color: #d1d5db !important;
+.admin-workspace-row,
+body.admin-page .admin-workspace-row {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: calc(100vh - 60px) !important;
+  height: calc(100dvh - 60px) !important;
+  flex: 1 1 auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.admin-sidebar,
+body.admin-page .admin-sidebar,
+body.admin-page .admin-workspace-row > .admin-sidebar {
+  width: 240px !important;
+  min-width: 240px !important;
+  max-width: 240px !important;
+  flex: 0 0 240px !important;
+  height: 100% !important;
   background: #141416 !important;
   border-right: 1px solid #232326 !important;
+  color: #d1d5db !important;
   padding: 12px 10px !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 4px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+body.admin-page .admin-layout.is-sidebar-collapsed .admin-sidebar,
+body.admin-page .admin-layout.is-sidebar-collapsed .admin-workspace-row > .admin-sidebar {
+  width: 78px !important;
+  min-width: 78px !important;
+  max-width: 78px !important;
+  flex: 0 0 78px !important;
 }
 
 .admin-nav-item {
@@ -4800,32 +4874,57 @@ body.auth-page:has(#site-header) .site-footer {
   font-weight: 700 !important;
 }
 
-/* Admin Main: Clean, Centered, No Deadspaces */
-.admin-main {
-  padding: 16px 20px !important;
+/* Admin Main: Fits Remaining Screen Width next to Sidebar without Overflow or Deadspace */
+.admin-main,
+body.admin-page .admin-main,
+body.admin-page .admin-workspace-row > .admin-main {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  width: calc(100% - 240px) !important;
+  max-width: calc(100% - 240px) !important;
+  height: 100% !important;
+  padding: 20px 24px !important;
   background: #f4f5f7 !important;
-  overflow-x: hidden !important;
   overflow-y: auto !important;
+  overflow-x: hidden !important;
   box-sizing: border-box !important;
+  margin: 0 !important;
 }
 
-/* Sections: transparent flex wrapper, centered, no double carding */
-.admin-main .admin-section {
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  margin: 0 auto !important;
-  max-width: 1200px !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
+body.admin-page .admin-layout.is-sidebar-collapsed .admin-main,
+body.admin-page .admin-layout.is-sidebar-collapsed .admin-workspace-row > .admin-main {
+  width: calc(100% - 78px) !important;
+  max-width: calc(100% - 78px) !important;
+}
+
+/* Sections: full remaining width, no overflow, clean vertical gap */
+.admin-main .admin-section,
+.admin-main > .admin-section:not(.hidden) {
   display: flex !important;
   flex-direction: column !important;
-  gap: 12px !important;
+  gap: 16px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
 }
 
 .admin-main .admin-section.hidden {
+  display: none !important;
+}
+
+/* Role-based restriction: completely hide store-facing features from admin account */
+body.admin-page .view-store,
+body.admin-page .admin-view-store-btn,
+body.admin-page .user-profile,
+body.admin-page .admin-header-profile-btn,
+body.admin-page [data-store-facing],
+body.admin-account [data-customer-only] {
   display: none !important;
 }
 
@@ -4955,8 +5054,35 @@ body.auth-page:has(#site-header) .site-footer {
 }
 
 @media (max-width: 900px) {
-  .admin-layout {
-    grid-template-columns: minmax(0, 1fr);
+  .admin-layout,
+  body.admin-page .admin-layout {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .admin-main,
+  body.admin-page .admin-main,
+  body.admin-page .admin-workspace-row > .admin-main {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px 12px !important;
+  }
+
+  .admin-sidebar,
+  body.admin-page .admin-sidebar,
+  body.admin-page .admin-workspace-row > .admin-sidebar {
+    position: fixed !important;
+    top: 60px !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    z-index: 105 !important;
+    display: none !important;
+  }
+
+  .admin-sidebar.open-mobile,
+  body.admin-page .admin-sidebar.open-mobile,
+  body.admin-page .admin-workspace-row > .admin-sidebar.open-mobile {
+    display: flex !important;
   }
 }
 
@@ -6321,13 +6447,26 @@ body.admin-account nav[data-admin-only] {
   margin: 0 !important;
 }
 
-.admin-layout #section-dashboard .stats-grid {
+.admin-layout #section-dashboard .stats-grid,
+.admin-layout #section-dashboard > .ops-kpi-card > .stats-grid,
+.admin-main #section-dashboard .stats-grid,
+#section-dashboard .stats-grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
-  gap: 12px !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 16px !important;
   margin: 0 !important;
   width: 100% !important;
   box-sizing: border-box !important;
+}
+
+@media (max-width: 640px) {
+  .admin-layout #section-dashboard .stats-grid,
+  .admin-layout #section-dashboard > .ops-kpi-card > .stats-grid,
+  .admin-main #section-dashboard .stats-grid,
+  #section-dashboard .stats-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
 }
 
 .admin-layout #section-dashboard .stat-card {
@@ -6826,7 +6965,7 @@ body:has(.admin-layout) * {
 }
 
 .admin-layout #section-dashboard > .ops-kpi-card > .stats-grid {
-  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -7036,7 +7175,7 @@ body:has(.admin-layout) * {
 
 @media (max-width: 1100px) {
   .admin-layout #section-dashboard > .ops-kpi-card > .stats-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -14850,8 +14989,35 @@ body.home-page #featured .section-header a.btn {
   align-self: flex-end !important;
 }
 
+/* Admin Dashboard KPI Cards: Exactly 2 cards per row on desktop/tablet, responsive on mobile */
+.admin-layout #section-dashboard .stats-grid,
+.admin-layout #section-dashboard > .ops-kpi-card > .stats-grid,
+.admin-main #section-dashboard .stats-grid,
+#section-dashboard .stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
 
+@media (max-width: 640px) {
+  .admin-layout #section-dashboard .stats-grid,
+  .admin-layout #section-dashboard > .ops-kpi-card > .stats-grid,
+  .admin-main #section-dashboard .stats-grid,
+  #section-dashboard .stats-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+}
 
-
-
-
+/* Role-Based UI: Completely hide store-facing elements for Admin role */
+body.admin-page .view-store,
+body.admin-page .admin-view-store-btn,
+body.admin-page .user-profile,
+body.admin-page .admin-header-profile-btn,
+body.admin-page [data-store-facing],
+body.admin-page [data-customer-only],
+body.admin-account [data-customer-only] {
+  display: none !important;
+}
