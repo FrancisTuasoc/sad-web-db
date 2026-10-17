@@ -5581,7 +5581,10 @@ button,
 }
 
 @media (max-width: 900px) {
-  .site-header .nav-links {
+  body:not(.admin-page) .site-header .nav-links,
+  site-header.site-header .nav-links,
+  .site-header .nav-links,
+  .customer-store-navigation {
     display: none !important;
   }
 
