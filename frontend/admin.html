@@ -120,16 +120,7 @@
             >0</span
           >
         </button>
-        <button
-          type="button"
-          class="admin-nav-item"
-          data-section="recent-orders"
-          aria-label="Recent Orders"
-          title="Recent Orders"
-        >
-          <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
-          <span class="admin-nav-label">Recent Orders</span>
-        </button>
+
         <button
           type="button"
           class="admin-nav-item"
@@ -308,6 +299,18 @@
               tabindex="-1"
             >
               Store performance
+            </button>
+            <button
+              type="button"
+              id="dashboard-recent-orders-tab"
+              class="dashboard-tab"
+              role="tab"
+              aria-selected="false"
+              aria-controls="dashboard-recent-orders-panel"
+              data-dashboard-tab="recent-orders"
+              tabindex="-1"
+            >
+              Recent orders
             </button>
           </div>
 
@@ -514,6 +517,70 @@
             </div>
           </div>
           </div>
+
+          <div
+            id="dashboard-recent-orders-panel"
+            class="dashboard-tab-panel hidden"
+            role="tabpanel"
+            aria-labelledby="dashboard-recent-orders-tab"
+            hidden
+            tabindex="0"
+          >
+            <section class="admin-insights-section step-card" aria-labelledby="recent-orders-heading">
+              <div class="admin-insights-heading">
+                <h2 id="recent-orders-heading">Recent Orders</h2>
+                <label class="admin-recent-orders-tools" for="orders-insights-status">
+                  <span>Status</span>
+                  <select
+                    id="orders-insights-status"
+                    class="form-select"
+                    aria-label="Filter recent orders by status"
+                  >
+                    <option value="all">All statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="preparing">Preparing</option>
+                    <option value="ready_for_pickup">Ready for pickup</option>
+                    <option value="ready_to_deliver">Ready to deliver</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </label>
+              </div>
+              <div
+                id="recent-orders-list"
+                class="admin-recent-orders-list"
+                role="list"
+                aria-busy="false"
+              >
+                <p class="text-muted">Select Recent Orders to load the latest orders.</p>
+              </div>
+              <div class="dashboard-recent-orders-pagination">
+                <span id="orders-insights-pagination-info" aria-live="polite">
+                  Recent orders
+                </span>
+                <div>
+                  <button
+                    type="button"
+                    id="orders-insights-prev"
+                    class="btn btn-secondary btn-sm"
+                    aria-label="Previous recent orders page"
+                    disabled
+                  >
+                    &larr; Previous
+                  </button>
+                  <button
+                    type="button"
+                    id="orders-insights-next"
+                    class="btn btn-secondary btn-sm"
+                    aria-label="Next recent orders page"
+                    disabled
+                  >
+                    Next &rarr;
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
         </div>
 
         <div id="section-all-reviews" class="admin-section hidden" style="display:none;" aria-hidden="true"></div>
@@ -632,62 +699,7 @@
           </section>
         </div>
 
-        <div id="section-recent-orders" class="admin-section hidden">
-          <section class="admin-insights-section step-card" aria-labelledby="recent-orders-heading">
-            <div class="admin-insights-heading">
-              <h2 id="recent-orders-heading">Recent Orders</h2>
-              <label class="admin-recent-orders-tools" for="orders-insights-status">
-                <span>Status</span>
-                <select
-                  id="orders-insights-status"
-                  class="form-select"
-                  aria-label="Filter recent orders by status"
-                >
-                  <option value="all">All statuses</option>
-                  <option value="pending">Pending</option>
-                  <option value="preparing">Preparing</option>
-                  <option value="ready_for_pickup">Ready for pickup</option>
-                  <option value="ready_to_deliver">Ready to deliver</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </label>
-            </div>
-            <div
-              id="recent-orders-list"
-              class="admin-recent-orders-list"
-              role="list"
-              aria-busy="false"
-            >
-              <p class="text-muted">Select Recent Orders to load the latest orders.</p>
-            </div>
-            <div class="dashboard-recent-orders-pagination">
-              <span id="orders-insights-pagination-info" aria-live="polite">
-                Recent orders
-              </span>
-              <div>
-                <button
-                  type="button"
-                  id="orders-insights-prev"
-                  class="btn btn-secondary btn-sm"
-                  aria-label="Previous recent orders page"
-                  disabled
-                >
-                  &larr; Previous
-                </button>
-                <button
-                  type="button"
-                  id="orders-insights-next"
-                  class="btn btn-secondary btn-sm"
-                  aria-label="Next recent orders page"
-                  disabled
-                >
-                  Next &rarr;
-                </button>
-              </div>
-            </div>
-          </section>
-        </div>
+        <div id="section-recent-orders" class="admin-section hidden" style="display:none;" aria-hidden="true"></div>
 
         <div id="section-top-items" class="admin-section hidden" style="display:none;" aria-hidden="true"></div>
 

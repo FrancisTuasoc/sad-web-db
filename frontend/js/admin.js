@@ -386,7 +386,15 @@ function setupAdminNavigation() {
           loadAdminOrders();
           break;
         case 'recent-orders':
-          loadDashboardRecentOrders();
+          activeSection = 'dashboard';
+          const dashboardSec = document.getElementById('section-dashboard');
+          if (dashboardSec) dashboardSec.classList.remove('hidden');
+          const recentOrdersTab = document.getElementById('dashboard-recent-orders-tab');
+          if (recentOrdersTab) {
+            recentOrdersTab.click();
+          } else {
+            loadDashboardRecentOrders();
+          }
           break;
         case 'menu':
           loadAdminMenu();
@@ -1881,6 +1889,8 @@ function attachAdminEventListeners() {
 
       if (selectedTab === 'performance') {
         opsCharts?.forEach((chart) => chart.resize());
+      } else if (selectedTab === 'recent-orders') {
+        loadDashboardRecentOrders();
       }
     });
 
@@ -2703,7 +2713,11 @@ function initAdmin() {
     loadDashboardStats();
     if (activeSection === 'orders') {
       loadAdminOrders();
-    } else if (activeSection === 'recent-orders') {
+    } else if (
+      activeSection === 'recent-orders' ||
+      (activeSection === 'dashboard' &&
+        !document.getElementById('dashboard-recent-orders-panel')?.hidden)
+    ) {
       loadDashboardRecentOrders();
     }
     const drawer = document.getElementById('order-drawer-modal');
@@ -2722,7 +2736,11 @@ function initAdmin() {
     if (activeSection === 'orders') {
       loadAdminOrders();
     }
-    if (activeSection === 'recent-orders') {
+    if (
+      activeSection === 'recent-orders' ||
+      (activeSection === 'dashboard' &&
+        !document.getElementById('dashboard-recent-orders-panel')?.hidden)
+    ) {
       loadDashboardRecentOrders();
     } else if (
       activeSection === 'dashboard' ||
