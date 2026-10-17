@@ -5,7 +5,7 @@
  */
 
 import { apiFetch } from './api.js';
-import { isLoggedIn } from './auth.js';
+import { isLoggedIn, getUser } from './auth.js';
 import { showToast, escapeHtml, getProductImageUrl, BURGER_PLACEHOLDER } from './ui.js';
 import { lucideIcon, renderRatingBadge, renderRatingStars } from './icons.js';
 
@@ -909,18 +909,21 @@ export function openWebsiteReviewModal() {
   }
 
   const modal = ensureWebsiteReviewModalDOM();
-  let user = null;
-  try {
-    const raw = localStorage.getItem('user');
-    user = raw ? JSON.parse(raw) : null;
-  } catch (e) {}
-
+  const user = getUser();
   const userPreview = document.getElementById('website-review-user-preview');
   if (userPreview && user) {
-    const name = user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username || 'Customer';
-    const avatarHtml = user.avatar
-      ? `<img src="${escapeHtml(user.avatar)}" alt="${escapeHtml(name)}" class="preview-avatar-img">`
-      : `<div class="preview-avatar-circle">${escapeHtml(name.charAt(0).toUpperCase())}</div>`;
+    const name = user.fullName || user.full_name || `${user.firstName || user.first_name || ''} ${user.lastName || user.last_name || ''}`.trim() || user.username || 'Customer';
+    let userAvatar = '';
+    try {
+      userAvatar = localStorage.getItem(`gigabite:avatar:${user.id || user._id}`) || '';
+    } catch {}
+    userAvatar = userAvatar || user.avatarUrl || user.avatar || '';
+    const initial = (name.charAt(0) || 'C').toUpperCase();
+    const hasValidDirectImage = userAvatar && !userAvatar.startsWith('pgavatar:') && !userAvatar.startsWith('gridfs:') && (userAvatar.startsWith('http://') || userAvatar.startsWith('https://') || userAvatar.startsWith('data:') || userAvatar.startsWith('/'));
+
+    const avatarHtml = hasValidDirectImage
+      ? `<img src="${escapeHtml(userAvatar)}" alt="${escapeHtml(name)}" class="preview-avatar-img" onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\\'preview-avatar-circle\\'>${escapeHtml(initial)}</div>';">`
+      : `<div class="preview-avatar-circle">${escapeHtml(initial)}</div>`;
 
     userPreview.innerHTML = `
       <div class="user-preview-card">
@@ -950,7 +953,7 @@ export function openWebsiteReviewModal() {
 
 export function renderTestimonialCard(rev) {
   const rating = Number(rev.rating) || 5;
-  const name = rev.customerName || 'Happy Customer';
+  const name = rev.customerName || rev.customer_name || 'Happy Customer';
   const comment = rev.comment || '';
   const dateStr = rev.createdAt ? new Date(rev.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent';
 
@@ -966,8 +969,20 @@ export function renderTestimonialCard(rev) {
   }
 
   const initial = (name.charAt(0) || 'C').toUpperCase();
-  const avatarHtml = rev.customerAvatar
-    ? `<img src="${escapeHtml(rev.customerAvatar)}" alt="${escapeHtml(name)}" class="testimonial-avatar-img">`
+  let avatarUrl = rev.customerAvatar || rev.customer_avatar || rev.avatarUrl || rev.avatar || (rev.user && (rev.user.avatarUrl || rev.user.avatar)) || '';
+
+  // If avatar is not directly populated on the review row, check if current user matches
+  const currentUser = getUser();
+  if (!avatarUrl && currentUser && (currentUser.id === rev.customerId || currentUser._id === rev.customerId)) {
+    try {
+      avatarUrl = localStorage.getItem(`gigabite:avatar:${currentUser.id || currentUser._id}`) || currentUser.avatarUrl || '';
+    } catch {}
+  }
+
+  const hasValidDirectImage = avatarUrl && !avatarUrl.startsWith('pgavatar:') && !avatarUrl.startsWith('gridfs:') && (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://') || avatarUrl.startsWith('data:') || avatarUrl.startsWith('/'));
+
+  const avatarHtml = hasValidDirectImage
+    ? `<img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(name)}" class="testimonial-avatar-img" onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\\'testimonial-avatar-fallback\\'>${escapeHtml(initial)}</div>';">`
     : `<div class="testimonial-avatar-fallback">${escapeHtml(initial)}</div>`;
 
   return `

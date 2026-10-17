@@ -65,7 +65,7 @@ router.post(
     }
 
     const customerName = getDisplayName(req.user);
-    const customerAvatar = req.user.avatar || req.user.profile_image || '';
+    const customerAvatar = req.user.avatarUrl || req.user.avatar || req.user.profile_image || '';
 
     const review = await reviewRepository.createWebsiteReview({
       customerId: req.user.id,

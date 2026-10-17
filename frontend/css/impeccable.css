@@ -14811,10 +14811,29 @@ body.auth-split-body {
 }
 
 /* --------------------------------------------------------------------------
-   RIGHT PANEL: FORM CONTAINER (CLEAN WHITE THEME, REDUCED SIZES)
+   RIGHT PANEL: FORM CONTAINER (CLEAN PURE WHITE THEME, NO BACKGROUND DESIGNS)
    -------------------------------------------------------------------------- */
+.auth-page main::before,
+.auth-page main::after,
+.auth-form-panel::before,
+.auth-form-panel::after,
+.auth-split-wrapper::before,
+.auth-split-wrapper::after,
+.auth-form-container::before,
+.auth-form-container::after {
+  display: none !important;
+  content: none !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 .auth-form-panel {
+  background: #ffffff !important;
   background-color: #ffffff !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14943,7 +14962,7 @@ body.auth-split-body {
 
 .auth-forgot-link {
   color: #D14B2D;
-  font-size: 0.8rem;
+  font-size: 0.72rem !important;
   font-weight: 600;
   text-decoration: none;
   display: inline-block;
@@ -15018,7 +15037,7 @@ body.auth-split-body {
 
 .auth-back-link {
   color: #4B5563;
-  font-size: 0.82rem;
+  font-size: 0.72rem !important;
   font-weight: 600;
   text-decoration: none;
   transition: color 0.15s ease;
@@ -16664,6 +16683,257 @@ body.theme-dark .receipt-caption,
 body.theme-dark .cart-page-description {
   color: #a8a29e !important;
 }
+
+/* ==========================================================================
+   POLISH: REVIEWS SECTION SPACING & ELEVATED TESTIMONIAL CARDS
+   ========================================================================== */
+body.home-page #testimonials,
+body.home-page > main > #testimonials,
+body.home-page section#testimonials,
+body.home-page main > #testimonials.section {
+  justify-content: flex-start !important;
+  padding-top: clamp(28px, 4.5vh, 48px) !important;
+}
+
+body.home-page #testimonials .testimonials-section-header {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  margin-bottom: clamp(16px, 2.5vh, 26px) !important;
+}
+
+body.home-page #testimonials .section-title {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+body.home-page #testimonials .section-desc {
+  margin-top: 6px !important;
+}
+
+/* Polished Testimonial Card Visuals */
+.testimonial-card,
+body.home-page #testimonials .testimonial-card {
+  background: var(--color-surface, #ffffff) !important;
+  border: 1px solid rgba(220, 210, 200, 0.8) !important;
+  border-radius: 16px !important;
+  padding: 22px 24px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  box-shadow: 0 4px 18px rgba(35, 25, 20, 0.04) !important;
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease !important;
+  box-sizing: border-box !important;
+}
+
+.testimonial-card:hover,
+body.home-page #testimonials .testimonial-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 10px 28px rgba(35, 25, 20, 0.08) !important;
+  border-color: rgba(209, 75, 45, 0.35) !important;
+}
+
+.testimonial-avatar-wrap,
+body.home-page #testimonials .testimonial-avatar-wrap {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+  border: 2px solid #ffffff !important;
+  background: linear-gradient(135deg, #d14b2d, #ea580c) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.testimonial-avatar-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+.testimonial-avatar-fallback {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: var(--font-heading, 'Montserrat', sans-serif) !important;
+  font-weight: 700 !important;
+  font-size: 1.2rem !important;
+  color: #ffffff !important;
+  text-transform: uppercase !important;
+}
+
+.testimonial-author-name {
+  font-family: var(--font-heading, 'Montserrat', sans-serif) !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  color: #1f2937 !important;
+}
+
+.testimonial-date {
+  font-size: 0.8rem !important;
+  color: #6b7280 !important;
+  margin-top: 2px !important;
+}
+
+.testimonial-badge-verified {
+  background: rgba(34, 197, 94, 0.1) !important;
+  color: #15803d !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  padding: 4px 10px !important;
+  border-radius: 9999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.testimonial-text {
+  font-size: 0.94rem !important;
+  line-height: 1.6 !important;
+  color: #374151 !important;
+}
+
+/* ==========================================================================
+   POLISH: CART PAGE UI ELEVATION
+   ========================================================================== */
+body.cart-page .cart-box {
+  background: #ffffff !important;
+  border: 1px solid #ede5dc !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 20px rgba(35, 25, 20, 0.04) !important;
+  padding: 24px !important;
+  box-sizing: border-box !important;
+}
+
+body.cart-page .cart-header-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding-bottom: 16px !important;
+  margin-bottom: 16px !important;
+  border-bottom: 1px solid #f0e9e1 !important;
+}
+
+body.cart-page .cart-line-item {
+  background: #ffffff !important;
+  border: 1px solid #ede5dc !important;
+  border-radius: 14px !important;
+  padding: 18px 20px !important;
+  margin-bottom: 14px !important;
+  box-shadow: 0 2px 8px rgba(35, 25, 20, 0.02) !important;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease !important;
+  box-sizing: border-box !important;
+}
+
+body.cart-page .cart-line-item:hover {
+  transform: translateY(-2px) !important;
+  border-color: #dfcbb3 !important;
+  box-shadow: 0 8px 24px rgba(35, 25, 20, 0.06) !important;
+}
+
+body.cart-page .cart-item-img {
+  width: 82px !important;
+  height: 82px !important;
+  min-width: 82px !important;
+  border-radius: 12px !important;
+  border: 1px solid #ede5dc !important;
+  overflow: hidden !important;
+  background: #faf6f0 !important;
+}
+
+body.cart-page .cart-item-img img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+body.cart-page .cart-item-name {
+  font-family: var(--font-heading, 'Montserrat', sans-serif) !important;
+  font-weight: 700 !important;
+  font-size: 1.05rem !important;
+  color: #1f2937 !important;
+}
+
+body.cart-page .cart-item-addons-list {
+  margin-top: 6px !important;
+  font-size: 0.8rem !important;
+  color: #8c5b36 !important;
+  line-height: 1.5 !important;
+}
+
+body.cart-page .receipt-sidebar {
+  background: #ffffff !important;
+  border: 1px solid #ede5dc !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 20px rgba(35, 25, 20, 0.04) !important;
+  padding: 24px !important;
+  box-sizing: border-box !important;
+}
+
+body.cart-page .receipt-heading {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding-bottom: 16px !important;
+  margin-bottom: 18px !important;
+  border-bottom: 1px solid #f0e9e1 !important;
+}
+
+body.cart-page .receipt-icon {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  border-radius: 12px !important;
+  background: rgba(209, 75, 45, 0.08) !important;
+  color: #d14b2d !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body.cart-page .receipt-title {
+  font-family: var(--font-heading, 'Montserrat', sans-serif) !important;
+  font-size: 1.3rem !important;
+  font-weight: 700 !important;
+  color: #1f2937 !important;
+  margin: 0 !important;
+}
+
+body.cart-page .btn-checkout {
+  background-color: #d14b2d !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 10px !important;
+  min-height: 48px !important;
+  font-family: var(--font-heading, 'Montserrat', sans-serif) !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 14px rgba(209, 75, 45, 0.28) !important;
+  transition: background-color 160ms ease, transform 120ms ease, box-shadow 160ms ease !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+body.cart-page .btn-checkout:hover {
+  background-color: #b93e23 !important;
+  box-shadow: 0 6px 18px rgba(209, 75, 45, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+body.cart-page .btn-checkout:active {
+  transform: scale(0.99) !important;
+}
+
 
 
 

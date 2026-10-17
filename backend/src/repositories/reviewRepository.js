@@ -211,9 +211,12 @@ const reviewRepository = {
   // --- Website Testimonials / Reviews ---
   async getWebsiteReviews(limit = 30) {
     const sql = `
-      SELECT id, customer_id, customer_name, customer_avatar, rating, comment, created_at
-      FROM website_reviews
-      ORDER BY created_at DESC
+      SELECT wr.id, wr.customer_id, wr.customer_name,
+             COALESCE(NULLIF(wr.customer_avatar, ''), u.avatar_url, '') AS customer_avatar,
+             wr.rating, wr.comment, wr.created_at
+      FROM website_reviews wr
+      LEFT JOIN users u ON u.id = wr.customer_id
+      ORDER BY wr.created_at DESC
       LIMIT $1
     `;
     const res = await query(sql, [Math.min(Number(limit) || 30, 100)]);
