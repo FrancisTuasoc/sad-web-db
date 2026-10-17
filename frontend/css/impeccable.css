@@ -13438,23 +13438,30 @@ site-header.site-header.site-header-scrolled .brand-logo img {
 
 .contact-order-cta .btn-contact-order,
 .contact-order-cta a.btn-primary {
+  background: #c54424 !important;
+  background-color: #c54424 !important;
+  color: #ffffff !important;
+  border: none !important;
   border-radius: 9999px !important;
-  padding: 11px 26px !important;
+  padding: 12px 28px !important;
   font-family: var(--font-heading, inherit) !important;
   font-size: 0.95rem !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
   text-decoration: none !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  box-shadow: 0 3px 10px rgba(200, 72, 37, 0.28) !important;
+  box-shadow: 0 3px 14px rgba(197, 68, 36, 0.35) !important;
   transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease !important;
 }
 
 .contact-order-cta .btn-contact-order:hover,
 .contact-order-cta a.btn-primary:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 5px 16px rgba(200, 72, 37, 0.42) !important;
+  background: #d44d2b !important;
+  background-color: #d44d2b !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 22px rgba(197, 68, 36, 0.5) !important;
 }
 
 .contact-order-cta .btn-contact-review,
