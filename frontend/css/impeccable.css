@@ -3064,7 +3064,7 @@ body.profile-page .profile-layout.customer-area .profile-tab-content .account-fo
 }
 
 .home-page #featured .card-price {
-  color: var(--brand-primary);
+  color: #000000;
   font-weight: 800;
 }
 
@@ -3982,7 +3982,7 @@ textarea:focus {
 .card-price {
   font-size: 1.08rem !important;
   font-weight: 800 !important;
-  color: var(--brand-primary) !important;
+  color: #000000 !important;
 }
 
 .card-footer .btn {
@@ -9100,7 +9100,7 @@ body:not(.admin-page) .product-card .card-price {
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  color: var(--brand-primary);
+  color: #000000 !important;
 }
 
 body:not(.admin-page) .menu-toolbar {
@@ -13851,4 +13851,15 @@ body {
   cursor: not-allowed !important;
   transform: none !important;
 }
+
+/* ==========================================================================
+   ITEM CARD PRICE COLOR (BLACK)
+   ========================================================================== */
+.card-price,
+.product-card .card-price,
+#menu-grid .card-price,
+#featured-grid .card-price {
+  color: #000000 !important;
+}
+
 
