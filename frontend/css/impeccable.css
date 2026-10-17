@@ -548,6 +548,44 @@ textarea,
   border: 1px solid #d2e4d7 !important;
 }
 
+.home-page .contact-detail {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.home-page .contact-detail > div {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  min-width: 0 !important;
+}
+
+.home-page .contact-detail strong {
+  color: var(--home-ink, #19261d) !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0.01em !important;
+}
+
+.home-page .contact-detail a,
+.home-page .contact-detail div > span {
+  color: var(--color-text-muted, #62564f) !important;
+  font-size: var(--text-sm, 0.875rem) !important;
+  font-weight: 400 !important;
+  line-height: 1.65 !important;
+  overflow-wrap: anywhere !important;
+  text-decoration: none !important;
+}
+
+.home-page .contact-detail a:hover {
+  color: var(--brand-primary, #216a3c) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+}
+
 .home-page .contact-detail-icon {
   border-color: #d2e4d7 !important;
   background: #e8f4ec !important;
@@ -1220,7 +1258,7 @@ textarea,
 
 .site-footer .footer-contact-row {
   display: flex !important;
-  align-items: flex-start !important;
+  align-items: center !important;
   text-align: left !important;
   gap: 8px !important;
 }
@@ -1229,7 +1267,7 @@ textarea,
   width: 15px !important;
   height: 15px !important;
   flex-shrink: 0 !important;
-  margin-top: 2px !important;
+  margin-top: 0 !important;
   color: var(--color-accent) !important;
 }
 
@@ -11589,6 +11627,8 @@ body.theme-dark .admin-layout #section-dashboard .admin-last-updated {
 }
 
 
+body.theme-dark .home-page .contact-card,
+body.theme-dark .home-page .about-card,
 body.theme-dark .product-card,
 body.theme-dark .cart-box,
 body.theme-dark .receipt-sidebar,
@@ -11607,6 +11647,32 @@ body.theme-dark .verify-card {
   color: #f9fafb !important;
   background: #1f2937 !important;
   border-color: #374151 !important;
+}
+
+body.theme-dark .home-page .contact-detail strong {
+  color: #f9fafb !important;
+}
+
+body.theme-dark .home-page .contact-detail a,
+body.theme-dark .home-page .contact-detail div > span {
+  color: #d1d5db !important;
+}
+
+body.theme-dark .home-page .contact-detail a:hover {
+  color: #86efac !important;
+}
+
+body.theme-dark .home-page .contact-detail-icon,
+body.theme-dark .home-page .contact-card-icon {
+  background: #273449 !important;
+  border-color: #4b5563 !important;
+  color: #4ade80 !important;
+}
+
+body.theme-dark .home-page .contact-detail-icon svg,
+body.theme-dark .home-page .contact-card-icon svg {
+  color: #4ade80 !important;
+  stroke: #4ade80 !important;
 }
 
 
