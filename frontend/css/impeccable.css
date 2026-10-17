@@ -15292,4 +15292,70 @@ body.admin-page #product-modal :is(.form-input, .form-select, .form-textarea):fo
   box-shadow: 0 0 0 2px rgba(209, 75, 45, 0.2) !important;
 }
 
+/* ==========================================================================
+   CUSTOMER STOREFRONT: POPULAR CROWD FAVORITES VERTICAL SPACING & DEAD SPACE FIX
+   Eliminates excessive gap/white space between sticky black nav bar and heading
+   ========================================================================== */
+body.home-page main {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+#home-ordering-notice.hidden {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 0 !important;
+}
+
+body.home-page #featured,
+body.home-page > main > #featured,
+body.home-page section#featured {
+  min-height: auto !important;
+  min-height: unset !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  align-content: flex-start !important;
+  align-items: stretch !important;
+  margin-top: 0 !important;
+  padding-top: clamp(16px, 2.5vw, 24px) !important;
+  padding-bottom: clamp(20px, 3vh, 32px) !important;
+  scroll-margin-top: var(--header-height, 60px) !important;
+}
+
+@media (min-width: 901px) {
+  body.home-page main > #featured.section,
+  body.home-page #featured {
+    min-height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-content: flex-start !important;
+    justify-content: flex-start !important;
+    padding-block-start: clamp(16px, 2.5vw, 24px) !important;
+    padding-top: clamp(16px, 2.5vw, 24px) !important;
+    margin-top: 0 !important;
+  }
+}
+
+body.home-page #featured .container {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+body.home-page #featured .section-header {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  margin-bottom: clamp(14px, 2vw, 20px) !important;
+}
+
+body.home-page #featured .section-title,
+body.home-page #featured h2 {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+
 
