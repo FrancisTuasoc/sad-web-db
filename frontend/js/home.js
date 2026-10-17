@@ -743,7 +743,7 @@ function setupHomeSectionNavigation() {
   function setActiveSection(targetId) {
     currentActiveId = targetId;
     const links = document.querySelectorAll(
-      '#site-header .nav-links a, #mobile-drawer-menu a'
+      'site-header .nav-links a, #site-header .nav-links a, .site-header .nav-links a, #mobile-drawer-menu a, .mobile-drawer a'
     );
     links.forEach((link) => {
       const href = link.getAttribute('href') || '';
@@ -783,7 +783,7 @@ function setupHomeSectionNavigation() {
     const headerHeight = headerElem ? headerElem.offsetHeight : 72;
     const scrollPos = window.scrollY + headerHeight + 80;
 
-    const orderedSectionIds = ['contact', 'about', 'featured'];
+    const orderedSectionIds = ['contact', 'testimonials', 'about', 'featured'];
     for (const id of orderedSectionIds) {
       const elem = document.getElementById(id);
       if (elem) {
@@ -831,7 +831,7 @@ function setupHomeSectionNavigation() {
 
   document.addEventListener('click', (event) => {
     const link = event.target.closest(
-      '#site-header .nav-links a, #mobile-drawer-menu a'
+      'site-header .nav-links a, #site-header .nav-links a, .site-header .nav-links a, #mobile-drawer-menu a, .mobile-drawer a'
     );
     if (!link) return;
 
@@ -901,7 +901,7 @@ function setupHomeSectionNavigation() {
   const initialHash = window.location.hash
     ? window.location.hash.slice(1)
     : '';
-  if (initialHash && ['featured', 'about', 'contact'].includes(initialHash)) {
+  if (initialHash && ['featured', 'about', 'testimonials', 'contact'].includes(initialHash)) {
     setActiveSection(initialHash);
   } else {
     setActiveSection('');

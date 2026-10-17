@@ -14002,7 +14002,7 @@ body.menu-page section,
 }
 
 /* ==========================================================================
-   FOOTER: DARK GRAY BACKGROUND & ALL TEXT WHITE (LAYOUT/BEHAVIOR PRESERVED)
+   FOOTER: DARK GRAY BACKGROUND, PURE WHITE TEXT & CONSISTENT TYPOGRAPHY
    ========================================================================== */
 footer.site-footer,
 .site-footer,
@@ -14015,6 +14015,8 @@ body.theme-dark .site-footer {
   background-image: none !important;
   border-top: 1px solid #333333 !important;
   color: #ffffff !important;
+  scroll-snap-align: end !important;
+  scroll-snap-stop: normal !important;
 }
 
 footer.site-footer *,
@@ -14026,13 +14028,28 @@ body.theme-dark .site-footer * {
   color: #ffffff !important;
 }
 
-footer.site-footer :is(h1, h2, h3, h4, h5, h6, p, a, span, li, div, strong, em, small, label),
-.site-footer :is(h1, h2, h3, h4, h5, h6, p, a, span, li, div, strong, em, small, label),
+/* Consistent Footer Headings */
+.site-footer .footer-col-title {
+  color: #ffffff !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  margin-bottom: 14px !important;
+  line-height: 1.3 !important;
+}
+
 .site-footer .footer-brand-title,
-.site-footer #footer-store-name,
+.site-footer #footer-store-name {
+  color: #ffffff !important;
+  font-size: 1.15rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+  margin-bottom: 14px !important;
+  line-height: 1.3 !important;
+}
+
+/* Consistent Footer Body Text, Links, and Items */
 .site-footer .footer-brand-text,
-.site-footer .footer-col-title,
-.site-footer .footer-links-list,
 .site-footer .footer-links-list li,
 .site-footer .footer-links-list a,
 .site-footer .footer-services-list li,
@@ -14040,9 +14057,10 @@ footer.site-footer :is(h1, h2, h3, h4, h5, h6, p, a, span, li, div, strong, em, 
 .site-footer .footer-contact-row,
 .site-footer .footer-contact-row span,
 .site-footer .footer-contact-row a,
-.site-footer .footer-facebook-link,
-.site-footer .footer-bottom {
+.site-footer .footer-facebook-link {
   color: #ffffff !important;
+  font-size: 0.9rem !important;
+  line-height: 1.6 !important;
 }
 
 .site-footer a:hover,
@@ -14050,6 +14068,7 @@ footer.site-footer :is(h1, h2, h3, h4, h5, h6, p, a, span, li, div, strong, em, 
 .site-footer .footer-facebook-link:hover {
   color: #ffffff !important;
   opacity: 0.85;
+  text-decoration: underline !important;
 }
 
 .site-footer svg,
@@ -14060,15 +14079,28 @@ footer.site-footer :is(h1, h2, h3, h4, h5, h6, p, a, span, li, div, strong, em, 
   stroke: currentColor;
 }
 
+.site-footer .footer-contact-icon {
+  width: 17px !important;
+  height: 17px !important;
+  min-width: 17px !important;
+  margin-top: 3px !important;
+}
+
 .site-footer svg path,
 .site-footer svg circle,
 .site-footer svg rect {
   color: #ffffff !important;
 }
 
+/* Consistent Footer Bottom Copyright */
 .site-footer .footer-bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
   color: #ffffff !important;
+  font-size: 0.85rem !important;
+  line-height: 1.5 !important;
+  padding-top: 18px !important;
+  margin-top: 24px !important;
+  opacity: 0.85 !important;
 }
 
 
