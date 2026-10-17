@@ -551,8 +551,8 @@ body.profile-page .profile-layout.customer-area #saved-details-form .form-group 
 
   body.profile-page .profile-layout.customer-area .customer-actions > .btn:last-child {
     grid-column: 1 / -1;
-    width: auto;
-    justify-self: center;
+    width: 100%;
+    justify-self: stretch;
     white-space: nowrap;
   }
 
@@ -585,8 +585,45 @@ body.profile-page .profile-layout.customer-area #saved-details-form .form-group 
   }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 560px) {
   body.profile-page .profile-layout.customer-area .customer-kpi-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.profile-page .profile-layout.customer-area .order-history-primary {
+    grid-template-columns: 1fr auto !important;
+    gap: 8px 12px !important;
+  }
+
+  body.profile-page .profile-layout.customer-area .order-history-identity {
+    grid-column: 1;
+  }
+
+  body.profile-page .profile-layout.customer-area .order-history-price {
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  body.profile-page .profile-layout.customer-area .order-history-status {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-top: 2px;
+  }
+
+  body.profile-page .profile-layout.customer-area .tab-pill-group {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  body.profile-page .profile-layout.customer-area .tab-pill {
+    min-height: 44px !important;
+    padding: 8px 10px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  body.profile-page .profile-layout.customer-area .customer-actions {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -728,59 +765,25 @@ body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-b
   color: #6941a5 !important;
 }
 
-/* Mobile Sidebar Collapse to Horizontal Scrollable Tab Bar */
-@media (max-width: 900px) {
-  body.profile-page .profile-layout.customer-area {
+/* ==========================================================================
+   CUSTOMER ACCOUNT SIDEBAR REFINEMENT (SIDEBAR ONLY)
+   ========================================================================== */
+@media (min-width: 901px) {
+  body.profile-page .customer-sidebar,
+  body.profile-page .profile-nav.customer-sidebar {
+    position: sticky !important;
+    top: calc(var(--header-height, 72px) + 16px) !important;
+    width: 260px !important;
+    background: var(--surface, #ffffff) !important;
+    border: 1px solid var(--border, #e2e8f0) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
+    padding: 16px !important;
     display: flex !important;
     flex-direction: column !important;
-    gap: 16px !important;
-  }
-
-  body.profile-page .customer-sidebar {
-    width: 100% !important;
-    position: static !important;
-    transform: none !important;
-    box-shadow: none !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-    background: var(--surface) !important;
-    padding: 8px 10px !important;
-    overflow: hidden !important;
-  }
-
-  body.profile-page .profile-sidebar-nav {
-    display: flex !important;
-    flex-direction: row !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
-    gap: 8px !important;
-    padding: 4px 2px !important;
-    scrollbar-width: thin;
-    max-width: 100%;
-  }
-
-  body.profile-page .profile-sidebar-nav::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  body.profile-page .profile-sidebar-nav::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-  }
-
-  body.profile-page .customer-sidebar .profile-nav-btn {
-    flex: 0 0 auto !important;
-    white-space: nowrap !important;
-    padding: 8px 14px !important;
-    border-radius: 6px !important;
-    font-size: 13px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-  }
-
-  body.profile-page #sidebar-logout-btn {
-    display: none !important;
+    gap: 10px !important;
+    box-sizing: border-box !important;
+    transition: all 200ms ease !important;
   }
 
   body.profile-page #profile-sidebar-backdrop {
@@ -788,23 +791,67 @@ body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-b
   }
 }
 
-/* ==========================================================================
-   CUSTOMER ACCOUNT SIDEBAR REFINEMENT (SIDEBAR ONLY)
-   ========================================================================== */
-body.profile-page .customer-sidebar,
-body.profile-page .profile-nav.customer-sidebar {
-  position: sticky !important;
-  top: 88px !important;
-  background: var(--surface, #ffffff) !important;
-  border: 1px solid var(--border, #e2e8f0) !important;
-  border-radius: 16px !important;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
-  padding: 16px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 10px !important;
-  box-sizing: border-box !important;
-  transition: all 200ms ease !important;
+/* Mobile & Tablet Drawer Layout (<= 900px) */
+@media (max-width: 900px) {
+  body.profile-page .profile-layout.customer-area {
+    display: block !important;
+    width: 100% !important;
+    gap: 0 !important;
+  }
+
+  body.profile-page .profile-layout.customer-area > .customer-content {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body.profile-page .customer-sidebar,
+  body.profile-page .profile-nav.customer-sidebar {
+    position: fixed !important;
+    top: var(--header-height, 72px) !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: min(300px, 86vw) !important;
+    height: calc(100vh - var(--header-height, 72px)) !important;
+    max-height: 100vh !important;
+    z-index: 105 !important;
+    background: var(--surface, #ffffff) !important;
+    border: none !important;
+    border-right: 1px solid var(--border, #e2e8f0) !important;
+    border-radius: 0 16px 16px 0 !important;
+    box-shadow: 6px 0 28px rgba(0, 0, 0, 0.16) !important;
+    padding: 20px 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    transform: translateX(-105%) !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1), visibility 240ms ease !important;
+  }
+
+  body.profile-page .customer-sidebar.open-mobile,
+  body.profile-page .profile-nav.customer-sidebar.open-mobile {
+    transform: translateX(0) !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  body.profile-page #profile-sidebar-backdrop:not(.hidden) {
+    display: block !important;
+    position: fixed !important;
+    inset: var(--header-height, 72px) 0 0 0 !important;
+    z-index: 104 !important;
+    background: rgba(15, 23, 42, 0.5) !important;
+    backdrop-filter: blur(2px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
+  }
+
+  body.profile-page #sidebar-logout-btn {
+    display: flex !important;
+  }
 }
 
 /* Sidebar Header */
