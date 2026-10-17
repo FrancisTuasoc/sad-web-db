@@ -1,7 +1,7 @@
 const express = require('express');
 const reviewRepository = require('../repositories/reviewRepository');
 const productRepository = require('../repositories/productRepository');
-const { requireAuth, requireAdmin } = require('../middleware/auth');
+const { requireAuth, optionalAuth, requireAdmin } = require('../middleware/auth');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 
@@ -86,7 +86,7 @@ router.post(
 // 1d. Quick-rate a product directly (1-5 stars without dialog modal)
 router.post(
   '/rate',
-  requireAuth,
+  optionalAuth,
   asyncHandler(async (req, res) => {
     const { itemId, rating } = req.body;
     if (!itemId) {
@@ -102,10 +102,11 @@ router.post(
       throw new AppError('Menu item not found.', 404);
     }
 
-    const customerName = getDisplayName(req.user);
+    const customerId = req.user ? req.user.id : null;
+    const customerName = req.user ? getDisplayName(req.user) : 'Guest Customer';
     const review = await reviewRepository.quickRate({
       itemId,
-      customerId: req.user.id,
+      customerId,
       customerName,
       rating: ratingNum,
     });

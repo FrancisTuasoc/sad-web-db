@@ -610,7 +610,10 @@ export function attachProductGridListeners(
       e.stopPropagation();
       const starVal = parseInt(starBtn.getAttribute('data-star-val'), 10);
       const group = starBtn.closest('.card-stars-group');
-      const productId = group ? group.getAttribute('data-product-id') : starBtn.getAttribute('data-product-id');
+      const productId =
+        starBtn.getAttribute('data-product-id') ||
+        group?.getAttribute('data-product-id') ||
+        starBtn.closest('[data-product-id]')?.getAttribute('data-product-id');
       if (productId && starVal >= 1 && starVal <= 5) {
         await submitDirectProductRating(productId, starVal, starBtn);
       }
@@ -671,7 +674,9 @@ export function attachProductGridListeners(
     const related = e.relatedTarget;
     if (related && group.contains(related)) return;
 
-    const productId = group.getAttribute('data-product-id');
+    const productId =
+      group.getAttribute('data-product-id') ||
+      group.closest('[data-product-id]')?.getAttribute('data-product-id');
     const myRating = getUserRatingForItem(productId);
     const avgScore = parseFloat(group.closest('.card-inline-rating')?.querySelector('.rating-score')?.textContent) || 0;
 
@@ -768,10 +773,11 @@ function setupHomeSectionNavigation() {
   }
 
   function getSectionInView() {
+    const contactElem = document.getElementById('contact');
     const isAtPageBottom =
       window.scrollY + window.innerHeight >=
-      document.documentElement.scrollHeight - 35;
-    if (isAtPageBottom && document.getElementById('contact')) {
+      document.documentElement.scrollHeight - 40;
+    if (isAtPageBottom && contactElem && contactElem.getBoundingClientRect().top <= window.innerHeight * 0.6) {
       return 'contact';
     }
 
@@ -779,16 +785,23 @@ function setupHomeSectionNavigation() {
       return '';
     }
 
-    const headerElem = document.getElementById('site-header');
-    const headerHeight = headerElem ? headerElem.offsetHeight : 72;
-    const scrollPos = window.scrollY + headerHeight + 80;
-
+    const midY = window.innerHeight * 0.45;
     const orderedSectionIds = ['contact', 'testimonials', 'about', 'featured'];
     for (const id of orderedSectionIds) {
       const elem = document.getElementById(id);
       if (elem) {
-        const top = elem.getBoundingClientRect().top + window.scrollY;
-        if (scrollPos >= top) {
+        const rect = elem.getBoundingClientRect();
+        if (rect.top <= midY && rect.bottom >= midY) {
+          return id;
+        }
+      }
+    }
+
+    for (const id of orderedSectionIds) {
+      const elem = document.getElementById(id);
+      if (elem) {
+        const rect = elem.getBoundingClientRect();
+        if (rect.top <= window.innerHeight * 0.7 && rect.bottom > 0) {
           return id;
         }
       }

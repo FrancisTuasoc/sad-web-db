@@ -13521,40 +13521,57 @@ body:not(.theme-dark) .contact-order-cta button.btn-secondary:hover {
 /* ==========================================================================
    WHAT CUSTOMERS SAY ABOUT US (TESTIMONIALS SECTION)
    ========================================================================== */
-.testimonials-section {
+.testimonials-section,
+#testimonials.testimonials-section,
+body.home-page #testimonials {
   background: var(--color-surface, #ffffff);
-  padding: clamp(48px, 6vw, 84px) 0;
+  padding: clamp(28px, 4.5vh, 48px) 0 !important;
   border-top: 1px solid var(--color-border, #e5e7eb);
   border-bottom: 1px solid var(--color-border, #e5e7eb);
   width: 100%;
   box-sizing: border-box;
+  justify-content: flex-start !important;
+}
+
+#testimonials .container {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
 }
 
 .testimonials-section-header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  margin-bottom: 32px;
+  margin-bottom: clamp(14px, 2vh, 24px);
   gap: 16px;
   flex-wrap: wrap;
 }
 
-.testimonials-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
+.testimonials-grid,
+#testimonials .testimonials-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: clamp(14px, 1.8vw, 24px) !important;
   width: 100%;
   box-sizing: border-box;
+}
+
+@media (max-width: 900px) {
+  .testimonials-grid,
+  #testimonials .testimonials-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 .testimonial-card {
   background: var(--color-surface, #ffffff);
   border: 1px solid var(--color-border, #e5e7eb);
   border-radius: 16px;
-  padding: 24px;
+  padding: clamp(16px, 2.2vh, 22px);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
   box-sizing: border-box;
@@ -13565,6 +13582,86 @@ body:not(.theme-dark) .contact-order-cta button.btn-secondary:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   border-color: rgba(200, 72, 37, 0.35);
+}
+
+/* Testimonials Pagination */
+.testimonials-pagination-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: clamp(16px, 2.5vh, 28px);
+  width: 100%;
+}
+
+.testimonials-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.testimonials-pagination .pagination-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #374151;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.testimonials-pagination .pagination-btn:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #D14B2D;
+  color: #D14B2D;
+}
+
+.testimonials-pagination .pagination-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.testimonials-pagination .pagination-numbers {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.testimonials-pagination .pagination-num {
+  min-width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #4b5563;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 160ms ease;
+}
+
+.testimonials-pagination .pagination-num:hover:not(.active) {
+  background: rgba(209, 75, 45, 0.08);
+  color: #D14B2D;
+}
+
+.testimonials-pagination .pagination-num.active {
+  background: #D14B2D !important;
+  color: #ffffff !important;
+  border-color: #D14B2D !important;
+  box-shadow: 0 2px 8px rgba(209, 75, 45, 0.35);
 }
 
 .testimonial-header {

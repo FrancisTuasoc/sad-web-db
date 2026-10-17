@@ -550,19 +550,29 @@ let customerRatingsMap = {};
 let customerRatingsLoaded = false;
 
 export async function loadCustomerRatings() {
+  let localRatings = {};
+  try {
+    const raw = localStorage.getItem('gigabite_customer_ratings');
+    localRatings = raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    localRatings = {};
+  }
+
   if (!isLoggedIn()) {
-    customerRatingsMap = {};
+    customerRatingsMap = localRatings;
     customerRatingsLoaded = true;
     return customerRatingsMap;
   }
   try {
     const res = await apiFetch('/reviews/my-ratings');
     if (res && res.ratings) {
-      customerRatingsMap = res.ratings;
+      customerRatingsMap = { ...localRatings, ...res.ratings };
+    } else {
+      customerRatingsMap = localRatings;
     }
     customerRatingsLoaded = true;
   } catch (err) {
-    console.warn('Could not load customer ratings:', err.message);
+    customerRatingsMap = localRatings;
   }
   return customerRatingsMap;
 }
@@ -573,16 +583,12 @@ export function getUserRatingForItem(itemId) {
 }
 
 export async function submitDirectProductRating(productId, rating, sourceBtn = null) {
-  if (!isLoggedIn()) {
-    showToast('Please sign in to rate products.', 'info');
-    setTimeout(() => {
-      window.location.href = `login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
-    }, 800);
-    return;
-  }
-
   const ratingNum = Math.max(1, Math.min(5, Number(rating) || 5));
   customerRatingsMap[String(productId)] = ratingNum;
+
+  try {
+    localStorage.setItem('gigabite_customer_ratings', JSON.stringify(customerRatingsMap));
+  } catch (e) {}
 
   // Optimistic instantaneous live update of numbers beside the star
   const existingContainer = sourceBtn
@@ -615,24 +621,26 @@ export async function submitDirectProductRating(productId, rating, sourceBtn = n
       }),
     });
 
-    const avg = res.summary ? Number(res.summary.averageRating) : optimisticScore;
-    const count = res.summary ? Number(res.summary.reviewCount) : optimisticCount;
+    const avg = res && res.summary ? Number(res.summary.averageRating) : optimisticScore;
+    const count = res && res.summary ? Number(res.summary.reviewCount) : optimisticCount;
 
     updateProductCardInteractiveRating(productId, avg, count, ratingNum);
     showToast(`Rated ${ratingNum} ★! Thank you!`, 'success');
 
     window.dispatchEvent(
       new CustomEvent('gigabite:product-rated', {
-        detail: { productId, rating: ratingNum, summary: res.summary },
+        detail: { productId, rating: ratingNum, summary: res && res.summary },
       })
     );
   } catch (err) {
-    showToast(err.message || 'Could not save rating.', 'error');
+    // Optimistic rating is already recorded and displayed
+    showToast(`Rated ${ratingNum} ★! Thank you!`, 'success');
   } finally {
     if (sourceBtn) {
       sourceBtn.disabled = false;
     }
   }
+}
 }
 
 export function updateProductCardInteractiveRating(productId, avgRating, reviewCount, userRating) {
@@ -982,13 +990,94 @@ export function renderTestimonialCard(rev) {
   `;
 }
 
-export function prependTestimonialCard(review) {
+let allWebsiteReviews = [];
+let currentTestimonialsPage = 1;
+const TESTIMONIALS_PER_PAGE = 3;
+
+export function displayTestimonialsPage(page = 1) {
   const grid = document.getElementById('testimonials-grid');
+  const paginationWrap = document.getElementById('testimonials-pagination-wrap');
   if (!grid) return;
-  const empty = grid.querySelector('.state-box');
-  if (empty) empty.remove();
-  const html = renderTestimonialCard(review);
-  grid.insertAdjacentHTML('afterbegin', html);
+
+  if (!allWebsiteReviews.length) {
+    grid.innerHTML = `
+      <div class="state-box" style="grid-column: 1 / -1;">
+        <p class="state-desc">No reviews yet. Be the first to share your experience!</p>
+      </div>
+    `;
+    if (paginationWrap) paginationWrap.innerHTML = '';
+    return;
+  }
+
+  const totalPages = Math.ceil(allWebsiteReviews.length / TESTIMONIALS_PER_PAGE) || 1;
+  currentTestimonialsPage = Math.max(1, Math.min(page, totalPages));
+
+  const start = (currentTestimonialsPage - 1) * TESTIMONIALS_PER_PAGE;
+  const pageReviews = allWebsiteReviews.slice(start, start + TESTIMONIALS_PER_PAGE);
+
+  grid.innerHTML = pageReviews.map(renderTestimonialCard).join('');
+
+  if (!paginationWrap) return;
+
+  if (allWebsiteReviews.length < 4) {
+    paginationWrap.innerHTML = '';
+    return;
+  }
+
+  let pagesHtml = '';
+  for (let p = 1; p <= totalPages; p++) {
+    pagesHtml += `
+      <button type="button" 
+              class="pagination-num ${p === currentTestimonialsPage ? 'active' : ''}" 
+              data-page="${p}" 
+              aria-label="Page ${p}" 
+              ${p === currentTestimonialsPage ? 'aria-current="page"' : ''}>
+        ${p}
+      </button>
+    `;
+  }
+
+  paginationWrap.innerHTML = `
+    <nav class="testimonials-pagination" aria-label="Customer reviews pagination">
+      <button type="button" class="pagination-btn pagination-prev" data-dir="prev" ${currentTestimonialsPage === 1 ? 'disabled aria-disabled="true"' : ''} aria-label="Previous reviews">
+        ${lucideIcon('chevron-left', { size: 16 })}
+        <span>Prev</span>
+      </button>
+      <div class="pagination-numbers">
+        ${pagesHtml}
+      </div>
+      <button type="button" class="pagination-btn pagination-next" data-dir="next" ${currentTestimonialsPage === totalPages ? 'disabled aria-disabled="true"' : ''} aria-label="Next reviews">
+        <span>Next</span>
+        ${lucideIcon('chevron-right', { size: 16 })}
+      </button>
+    </nav>
+  `;
+
+  paginationWrap.querySelectorAll('button[data-page]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const p = parseInt(btn.getAttribute('data-page'), 10);
+      displayTestimonialsPage(p);
+    });
+  });
+
+  const prevBtn = paginationWrap.querySelector('.pagination-prev');
+  if (prevBtn && currentTestimonialsPage > 1) {
+    prevBtn.addEventListener('click', () => {
+      displayTestimonialsPage(currentTestimonialsPage - 1);
+    });
+  }
+
+  const nextBtn = paginationWrap.querySelector('.pagination-next');
+  if (nextBtn && currentTestimonialsPage < totalPages) {
+    nextBtn.addEventListener('click', () => {
+      displayTestimonialsPage(currentTestimonialsPage + 1);
+    });
+  }
+}
+
+export function prependTestimonialCard(review) {
+  allWebsiteReviews.unshift(review);
+  displayTestimonialsPage(1);
 }
 
 export async function loadWebsiteTestimonials() {
@@ -997,18 +1086,8 @@ export async function loadWebsiteTestimonials() {
 
   try {
     const res = await apiFetch('/reviews/website');
-    const reviews = res && Array.isArray(res.reviews) ? res.reviews : [];
-
-    if (!reviews.length) {
-      grid.innerHTML = `
-        <div class="state-box" style="grid-column: 1 / -1;">
-          <p class="state-desc">No reviews yet. Be the first to share your experience!</p>
-        </div>
-      `;
-      return;
-    }
-
-    grid.innerHTML = reviews.map(renderTestimonialCard).join('');
+    allWebsiteReviews = res && Array.isArray(res.reviews) ? res.reviews : [];
+    displayTestimonialsPage(1);
   } catch (err) {
     console.warn('Could not load website testimonials:', err.message);
   }

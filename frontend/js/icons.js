@@ -49,6 +49,15 @@ export function lucideIcon(name, options = {}) {
     case 'chevron-up':
       return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" class="${cls}" ${ariaAttrs}><path d="m18 15-6-6-6 6"/></svg>`;
 
+    case 'chevron-left':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" class="${cls}" ${ariaAttrs}><path d="m15 18-6-6 6-6"/></svg>`;
+
+    case 'chevron-right':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" class="${cls}" ${ariaAttrs}><path d="m9 18 6-6-6-6"/></svg>`;
+
+    case 'check-circle':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" class="${cls}" ${ariaAttrs}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+
     case 'user':
       return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" class="${cls}" ${ariaAttrs}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
 
@@ -182,7 +191,7 @@ export function renderInteractiveCardStars(productId, averageRating = 0, reviewC
 
   return `
     <div class="card-inline-rating" data-product-id="${productId}">
-      <div class="card-stars-group" role="group" aria-label="Rate product 1 to 5 stars">
+      <div class="card-stars-group" data-product-id="${productId}" role="group" aria-label="Rate product 1 to 5 stars">
         ${starsHtml}
       </div>
       <span class="rating-score">${score > 0 ? score.toFixed(1) : ''}</span>

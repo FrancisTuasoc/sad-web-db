@@ -189,18 +189,20 @@ const reviewRepository = {
     return summaryMap;
   },
 
-  async quickRate({ itemId, customerId, customerName, rating }) {
-    const existing = await this.findCustomerReviewForItem(customerId, itemId);
-    if (existing) {
-      return this.update(existing.id, customerId, {
-        rating: Number(rating),
-        comment: existing.comment || '',
-      });
+  async quickRate({ itemId, customerId = null, customerName = 'Guest Customer', rating }) {
+    if (customerId) {
+      const existing = await this.findCustomerReviewForItem(customerId, itemId);
+      if (existing) {
+        return this.update(existing.id, customerId, {
+          rating: Number(rating),
+          comment: existing.comment || '',
+        });
+      }
     }
     return this.create({
       itemId,
-      customerId,
-      customerName,
+      customerId: customerId || null,
+      customerName: customerName || 'Guest Customer',
       rating: Number(rating),
       comment: '',
     });
