@@ -32,12 +32,12 @@
   );
   --color-brand-secondary: var(--brand-primary);
   --color-brand-secondary-hover: var(--brand-primary-hover);
-  --brand-primary: #216a3c;
-  --brand-primary-hover: #19512e;
+  --brand-primary: #D14B2D;
+  --brand-primary-hover: #b93e23;
   --brand-on-primary: #ffffff;
 
   --color-accent: var(--brand-primary);
-  --color-accent-soft: #e8f3ea;
+  --color-accent-soft: #fdeae8;
   --color-accent-gradient: linear-gradient(
     135deg,
     var(--brand-primary),
@@ -47,7 +47,7 @@
   --color-accent-text: #ffffff;
   --color-accent-text-strong: var(--brand-primary);
 
-  --color-success: var(--brand-primary);
+  --color-success: #16a34a;
   --color-success-bg: #ebf7ee;
   --color-warning: #9d5c12;
   --color-warning-bg: #fff1d6;

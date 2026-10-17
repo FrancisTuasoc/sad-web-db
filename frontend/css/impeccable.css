@@ -371,7 +371,7 @@ site-header.site-header .nav-links a:hover {
 
 body:not(.admin-page) .site-header .nav-links a.active,
 site-header.site-header .nav-links a.active {
-  color: #c84825 !important;
+  color: #D14B2D !important;
   font-weight: 600 !important;
   background: transparent !important;
 }
@@ -426,7 +426,7 @@ site-header.site-header .cart-badge {
   min-width: 17px !important;
   height: 17px !important;
   border-radius: 9999px !important;
-  background: #c84825 !important;
+  background: #D14B2D !important;
   color: #ffffff !important;
   font-size: 0.7rem !important;
   font-weight: 700 !important;
@@ -447,7 +447,7 @@ site-header.site-header .notification-badge {
   height: 8px !important;
   min-width: 8px !important;
   border-radius: 50% !important;
-  background: #c84825 !important;
+  background: #D14B2D !important;
   border: none !important;
   padding: 0 !important;
 }
@@ -510,7 +510,7 @@ body:not(.admin-page) .site-header .mobile-drawer a.active,
 site-header.site-header .mobile-drawer a:hover,
 site-header.site-header .mobile-drawer a.active {
   background: rgba(255, 255, 255, 0.08) !important;
-  color: #c84825 !important;
+  color: #D14B2D !important;
 }
 
 .btn {
@@ -600,10 +600,15 @@ textarea,
   position: relative !important;
   overflow: hidden !important;
   isolation: isolate !important;
+  height: calc(100vh - var(--header-height, 68px)) !important;
+  height: calc(100dvh - var(--header-height, 68px)) !important;
   min-height: calc(100vh - var(--header-height, 68px)) !important;
+  min-height: calc(100dvh - var(--header-height, 68px)) !important;
+  max-height: calc(100vh - var(--header-height, 68px)) !important;
+  max-height: calc(100dvh - var(--header-height, 68px)) !important;
   display: flex !important;
   align-items: center !important;
-  padding: clamp(48px, 6vw, 92px) 0 !important;
+  padding: clamp(20px, 3.5vh, 48px) 0 !important;
   background-color: #070707 !important;
   background-image: url('../assets/items/images/revised-background.png'), url('../assets/items/images/revised-backgroud.png') !important;
   background-repeat: no-repeat !important;
@@ -611,6 +616,7 @@ textarea,
   background-position: right center !important;
   border: none !important;
   box-shadow: none !important;
+  box-sizing: border-box !important;
 }
 
 .home-page .hero-section::before,
@@ -663,7 +669,7 @@ textarea,
 }
 
 .home-page .hero-title-highlight {
-  color: #c84825 !important;
+  color: #D14B2D !important;
   display: inline !important;
 }
 
@@ -13584,13 +13590,23 @@ body.home-page #testimonials {
   border-color: rgba(200, 72, 37, 0.35);
 }
 
-/* Testimonials Pagination */
+/* Testimonials Pagination inside Header */
+.testimonials-section-header .testimonials-pagination-wrap,
 .testimonials-pagination-wrap {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: clamp(16px, 2.5vh, 28px);
-  width: 100%;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  margin: 0 !important;
+  width: auto !important;
+}
+
+@media (max-width: 768px) {
+  .testimonials-section-header .testimonials-pagination-wrap,
+  .testimonials-pagination-wrap {
+    justify-content: flex-start !important;
+    width: 100% !important;
+    margin-top: 8px !important;
+  }
 }
 
 .testimonials-pagination {
@@ -14028,8 +14044,13 @@ body {
 /* ==========================================================================
    SCROLL SNAP & SECTION FULL-HEIGHT CONFIGURATION (EXCLUDING MENU PAGE)
    ========================================================================== */
+:root {
+  --header-height: 68px;
+}
+
 html:not(:has(body.menu-page)):not(:has(.menu-page)) {
   scroll-snap-type: y mandatory;
+  scroll-padding-top: var(--header-height, 68px) !important;
   scroll-behavior: smooth;
   overflow-x: clip;
 }
@@ -14037,6 +14058,7 @@ html:not(:has(body.menu-page)):not(:has(.menu-page)) {
 @supports not (selector(:has(*))) {
   html {
     scroll-snap-type: y mandatory;
+    scroll-padding-top: var(--header-height, 68px) !important;
     scroll-behavior: smooth;
   }
 }
@@ -14058,28 +14080,85 @@ body.auth-page {
   scroll-behavior: auto;
 }
 
-/* Apply min-height: 100vh (with 100dvh fallback) & scroll-snap-align: start to every section on page except Menu page/section */
-body.home-page > main > section,
-body.home-page section:not(.add-to-cart-addons):not(#product-modal section),
-body:not(.menu-page):not(.admin-page):not(.cart-page):not(.profile-page):not(.auth-page) > main > section:not(.add-to-cart-addons):not(.menu-page-hero):not(.menu-toolbar) {
-  min-height: 100vh !important;
-  min-height: 100dvh !important;
+/* Hero Section: Exact 100vh minus sticky header, so Header + Hero = 100vh precisely */
+body.home-page .hero-section {
+  height: calc(100vh - var(--header-height, 68px)) !important;
+  height: calc(100dvh - var(--header-height, 68px)) !important;
+  min-height: calc(100vh - var(--header-height, 68px)) !important;
+  min-height: calc(100dvh - var(--header-height, 68px)) !important;
+  max-height: calc(100vh - var(--header-height, 68px)) !important;
+  max-height: calc(100dvh - var(--header-height, 68px)) !important;
+  scroll-snap-align: start !important;
+  scroll-snap-stop: normal !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+
+/* Each included page section fills the exact available screen height beneath sticky header */
+body.home-page > main > section:not(.hero-section),
+body.home-page section:not(.hero-section):not(.add-to-cart-addons):not(#product-modal section),
+body:not(.menu-page):not(.admin-page):not(.cart-page):not(.profile-page):not(.auth-page) > main > section:not(.hero-section):not(.add-to-cart-addons):not(.menu-page-hero):not(.menu-toolbar) {
+  height: calc(100vh - var(--header-height, 68px)) !important;
+  height: calc(100dvh - var(--header-height, 68px)) !important;
+  min-height: calc(100vh - var(--header-height, 68px)) !important;
+  min-height: calc(100dvh - var(--header-height, 68px)) !important;
+  max-height: calc(100vh - var(--header-height, 68px)) !important;
+  max-height: calc(100dvh - var(--header-height, 68px)) !important;
   scroll-snap-align: start !important;
   scroll-snap-stop: normal !important;
   box-sizing: border-box !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-width: thin;
+  padding: clamp(16px, 2.5vh, 32px) 0 !important;
 }
 
-body.home-page .hero-section {
-  min-height: 100vh !important;
-  min-height: 100dvh !important;
-  scroll-snap-align: start !important;
-  box-sizing: border-box !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+@media (max-width: 768px) {
+  body.home-page > main > section:not(.hero-section),
+  body.home-page section:not(.hero-section):not(.add-to-cart-addons):not(#product-modal section) {
+    height: auto !important;
+    max-height: none !important;
+    min-height: calc(100vh - var(--header-height, 68px)) !important;
+  }
+}
+
+/* ==========================================================================
+   GLOBAL BRAND BUTTONS & INTERACTIVE ACCENTS (#D14B2D)
+   ========================================================================== */
+.btn-primary,
+button.btn-primary,
+a.btn-primary,
+.modal-btn-primary,
+#website-review-submit-btn,
+.cart-checkout-btn,
+.checkout-btn,
+#checkout-form button[type="submit"] {
+  background: #D14B2D !important;
+  background-color: #D14B2D !important;
+  border-color: #D14B2D !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(209, 75, 45, 0.3) !important;
+}
+
+.btn-primary:hover:not(:disabled),
+button.btn-primary:hover:not(:disabled),
+a.btn-primary:hover:not(:disabled),
+.modal-btn-primary:hover:not(:disabled),
+#website-review-submit-btn:hover:not(:disabled),
+.cart-checkout-btn:hover:not(:disabled),
+.checkout-btn:hover:not(:disabled),
+#checkout-form button[type="submit"]:hover:not(:disabled) {
+  background: #b93e23 !important;
+  background-color: #b93e23 !important;
+  border-color: #b93e23 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(209, 75, 45, 0.45) !important;
 }
 
 /* Leave Menu page and menu sections out of full-height and scroll snap entirely */
