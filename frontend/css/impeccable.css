@@ -9000,43 +9000,42 @@ body.admin-page .admin-header-brand {
 }
 
 body.admin-page .admin-header-brand .brand-logo {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 8px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
+  display: inline-flex !important;
+  align-items: center !important;
+  text-decoration: none !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  color: var(--brand-on-primary) !important;
 }
 
 body.admin-page .admin-header-brand .brand-logo::after {
-  content: 'GIGABITE';
-  color: var(--brand-on-primary);
-  font-family: var(--font-heading);
-  font-size: 1.05rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  line-height: 1;
+  content: none !important;
+  display: none !important;
 }
 
 body.admin-page .admin-header-brand .brand-logo img {
-  display: block;
-  width: 40px !important;
-  height: 40px !important;
-  max-width: none !important;
-  max-height: none !important;
-  flex: 0 0 40px;
-  object-fit: cover;
-  object-position: left center;
+  display: block !important;
+  width: auto !important;
+  height: 34px !important;
+  max-height: 34px !important;
+  flex: none !important;
+  object-fit: contain !important;
+  object-position: left center !important;
 }
 
 body.admin-page .admin-header-brand > .badge {
   display: inline-flex !important;
-  flex: 0 0 auto;
-  align-items: center;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+  line-height: 1 !important;
 }
 
 body.admin-page .admin-header-actions {
@@ -13182,23 +13181,18 @@ body.admin-page .admin-header-brand .brand-logo:focus-visible {
 }
 
 body.admin-page .admin-header-brand .brand-logo::after {
-  content: 'GIGABITE' !important;
-  color: #ffffff !important;
-  font-family: var(--font-heading);
-  font-size: 1.05rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  line-height: 1;
+  content: none !important;
+  display: none !important;
 }
 
 body.admin-page .admin-header-brand .brand-logo img {
-  width: 40px !important;
-  height: 40px !important;
-  max-width: none !important;
-  max-height: none !important;
-  flex: 0 0 40px;
-  object-fit: cover;
-  object-position: left center;
+  width: auto !important;
+  height: 34px !important;
+  max-height: 34px !important;
+  flex: none !important;
+  display: block !important;
+  object-fit: contain !important;
+  object-position: left center !important;
 }
 
 body.admin-page .admin-layout .admin-sidebar .admin-nav-item {
@@ -16395,6 +16389,282 @@ body.theme-dark .add-to-cart-modal .stepper-btn:hover:not(:disabled) {
   background: #383330 !important;
   color: #f97316 !important;
 }
+
+/* ========================================================
+   LOGO ALIGNMENT & GLOBAL TYPOGRAPHIC CONSISTENCY SYSTEM
+   Eradicates AI-slop visual artifacts, unifies logo-to-text
+   vertical baseline alignment, standardizes typographic scales,
+   and enforces rock-solid casing and optical harmony.
+   ======================================================== */
+
+/* 1. Universal Logo Alignment & Sizing */
+.site-header .brand-logo,
+body:not(.admin-page) .site-header .brand-logo,
+site-header.site-header .brand-logo,
+.admin-header-brand .brand-logo,
+.auth-brand-logo-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  text-decoration: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+
+.site-header .brand-logo img,
+body:not(.admin-page) .site-header .brand-logo img,
+site-header.site-header .brand-logo img,
+.admin-header-brand .brand-logo img,
+.auth-brand-logo-img {
+  height: 36px !important;
+  max-height: 36px !important;
+  width: auto !important;
+  display: block !important;
+  flex: none !important;
+  object-fit: contain !important;
+  object-position: left center !important;
+  filter: none !important;
+}
+
+.site-header .brand-logo::after,
+body:not(.admin-page) .site-header .brand-logo::after,
+site-header.site-header .brand-logo::after,
+.admin-header-brand .brand-logo::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Scrolled Header Brand Logo Scaling */
+body:not(.admin-page) .site-header.site-header-scrolled .brand-logo,
+site-header.site-header.site-header-scrolled .brand-logo {
+  height: 32px !important;
+  min-height: 32px !important;
+}
+
+body:not(.admin-page) .site-header.site-header-scrolled .brand-logo img,
+site-header.site-header.site-header-scrolled .brand-logo img {
+  height: 32px !important;
+  max-height: 32px !important;
+}
+
+/* 2. Admin Header Brand Group Optical Centering */
+.admin-header-brand,
+body.admin-page .admin-header-brand {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  height: 100% !important;
+}
+
+.admin-header-brand #admin-toggle-sidebar-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  align-self: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 8px !important;
+}
+
+.admin-header-brand > .badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  align-self: center !important;
+  font-family: var(--font-heading) !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+/* 3. Customer Profile Header Alignment */
+.profile-page .site-header #profile-sidebar-toggle {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  align-self: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  margin-right: 12px !important;
+  padding: 0 !important;
+  border-radius: 8px !important;
+}
+
+.profile-page .site-header .brand-logo {
+  margin-right: auto !important;
+}
+
+.profile-page .site-header .customer-store-navigation {
+  margin: 0 auto !important;
+}
+
+.profile-page .site-header .header-actions {
+  margin-left: auto !important;
+}
+
+/* 4. Global Typographic Scale & Font Harmony */
+/* Primary Section Headings */
+.section-title,
+.menu-catalog-heading .section-title,
+body.home-page #featured .section-title,
+body.home-page #about .section-title,
+body.home-page #testimonials .section-title,
+body.home-page #contact .section-title,
+body.home-page #featured h2,
+body.home-page #about h2,
+body.home-page #testimonials h2,
+body.home-page #contact h2,
+.profile-tab-content h2,
+.receipt-title,
+.admin-section > h2,
+.admin-main > .admin-section:not(.hidden) > h2 {
+  font-family: var(--font-heading) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.2 !important;
+  color: var(--color-text-main) !important;
+}
+
+/* Section Subtitles & Descriptions */
+.section-desc,
+.menu-catalog-heading > p,
+body.home-page #featured .section-desc,
+body.home-page #about .section-desc,
+body.home-page #testimonials .section-desc,
+body.home-page #contact .section-desc,
+.receipt-caption,
+.cart-page-description {
+  font-family: var(--font-body) !important;
+  font-size: clamp(0.92rem, 1.2vw, 1.02rem) !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  color: var(--color-text-muted) !important;
+}
+
+/* Eyebrows, Trackers & Metadata Badges */
+.eyebrow,
+.hero-badge,
+.menu-page-eyebrow,
+.auth-brand-eyebrow,
+.cart-page-eyebrow,
+.customer-sidebar-eyebrow,
+.store-overview-label,
+.ops-eyebrow,
+.ops-period-label {
+  font-family: var(--font-heading) !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+/* Card & Subsection Titles */
+.card-title,
+.menu-item-name,
+.product-card-title,
+.order-card h3,
+.favorite-card-title,
+.account-section-heading h3,
+.ops-panel-heading h3,
+.admin-layout .chart-card-header h3 {
+  font-family: var(--font-heading) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.015em !important;
+  line-height: 1.3 !important;
+}
+
+/* Buttons Typography & Alignment */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-outline,
+.tab-pill,
+.chip {
+  font-family: var(--font-heading) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.015em !important;
+}
+
+/* Navigation Links Typography & Alignment */
+.site-header .nav-links a,
+.mobile-drawer a,
+.customer-sidebar .profile-nav-btn,
+.admin-sidebar .admin-nav-item {
+  font-family: var(--font-heading) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Footer Typography & Brand Title */
+.site-footer .footer-brand-title,
+.site-footer #footer-store-name {
+  font-family: var(--font-heading) !important;
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.05em !important;
+  color: #ffffff !important;
+}
+
+.site-footer .footer-col-title {
+  font-family: var(--font-heading) !important;
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: #ffffff !important;
+  margin-bottom: 16px !important;
+}
+
+.site-footer .footer-brand-text,
+.site-footer .footer-links-list li,
+.site-footer .footer-links-list a,
+.site-footer .footer-services-list li,
+.site-footer .footer-contact-items,
+.site-footer .footer-contact-row span {
+  font-family: var(--font-body) !important;
+  font-size: 0.9rem !important;
+  line-height: 1.65 !important;
+}
+
+/* Dark Mode Harmonization */
+body.theme-dark .section-title,
+body.theme-dark .menu-catalog-heading .section-title,
+body.theme-dark .profile-tab-content h2,
+body.theme-dark .receipt-title,
+body.theme-dark .admin-section > h2,
+body.theme-dark .card-title,
+body.theme-dark .menu-item-name,
+body.theme-dark .product-card-title,
+body.theme-dark .order-card h3,
+body.theme-dark .account-section-heading h3,
+body.theme-dark .ops-panel-heading h3 {
+  color: #fafaf9 !important;
+}
+
+body.theme-dark .section-desc,
+body.theme-dark .menu-catalog-heading > p,
+body.theme-dark .receipt-caption,
+body.theme-dark .cart-page-description {
+  color: #a8a29e !important;
+}
+
 
 
 

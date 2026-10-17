@@ -21,7 +21,7 @@ class SiteHeader extends HTMLElement {
 
     const brandHref = isAdmin ? 'admin.html' : 'index.html';
     const brandLabel = isAdmin ? 'GIGABITE Admin Dashboard' : 'GIGABITE Home';
-    const brandLogoSrc = 'assets/logo-white.png';
+    const brandLogoSrc = 'assets/logo-white.svg';
 
     this.innerHTML = `
       <div class="container header-container">
@@ -104,12 +104,12 @@ class SiteHeader extends HTMLElement {
             : `
         <a href="index.html">Home</a>
         <a href="menu.html">Menu</a>
-        <a href="index.html#featured">Featured Burgers</a>
-        <a href="index.html#about">About Us</a>
-        <a href="index.html#testimonials">Customer Reviews</a>
-        <a href="index.html#contact">Contact &amp; Store Hours</a>
-        <a href="cart.html">My Cart</a>
-        <a href="login.html" style="color: var(--color-accent); font-weight: 700">Sign In / Sign Up</a>`
+        <a href="index.html#featured">Featured</a>
+        <a href="index.html#about">About</a>
+        <a href="index.html#testimonials">Reviews</a>
+        <a href="index.html#contact">Contact</a>
+        <a href="cart.html">Cart</a>
+        <a href="login.html" style="color: var(--color-accent); font-weight: 700">Sign In</a>`
         }
       </div>
     `;
