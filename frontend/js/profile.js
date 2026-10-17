@@ -1903,7 +1903,6 @@ function setupProfileSidebar() {
     else toggleRail();
   };
   toggle.addEventListener('click', toggleNavigation);
-  toggle.addEventListener('click', toggleNavigation);
 
   const closeSidebar = () => {
     sidebar.classList.remove('open-mobile');

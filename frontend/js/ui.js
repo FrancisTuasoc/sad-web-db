@@ -503,12 +503,12 @@ export function renderHeader(activeNav = '') {
       mobileDrawer.innerHTML = `
         <a href="index.html">Home</a>
         <a href="menu.html">Menu</a>
-        <a href="index.html#featured">Featured Burgers</a>
-        <a href="index.html#about">About Us</a>
-        <a href="index.html#testimonials">Customer Reviews</a>
-        <a href="index.html#contact">Contact &amp; Store Hours</a>
-        <a href="cart.html">My Cart</a>
-        <a href="profile.html">My Account &amp; Status</a>
+        <a href="index.html#featured">Featured</a>
+        <a href="index.html#about">About</a>
+        <a href="index.html#testimonials">Reviews</a>
+        <a href="index.html#contact">Contact</a>
+        <a href="cart.html">Cart</a>
+        <a href="profile.html">My Account</a>
         ${isAdmin() ? `<a href="admin.html" style="color:var(--color-accent);font-weight:700;">Admin Dashboard</a>` : ''}
         <a href="#" id="mobile-logout-btn">Log Out</a>
       `;
@@ -516,12 +516,12 @@ export function renderHeader(activeNav = '') {
       mobileDrawer.innerHTML = `
         <a href="index.html">Home</a>
         <a href="menu.html">Menu</a>
-        <a href="index.html#featured">Featured Burgers</a>
-        <a href="index.html#about">About Us</a>
-        <a href="index.html#testimonials">Customer Reviews</a>
-        <a href="index.html#contact">Contact &amp; Store Hours</a>
-        <a href="cart.html">My Cart</a>
-        <a href="login.html" style="color:var(--color-accent);font-weight:700;">Sign In / Sign Up</a>
+        <a href="index.html#featured">Featured</a>
+        <a href="index.html#about">About</a>
+        <a href="index.html#testimonials">Reviews</a>
+        <a href="index.html#contact">Contact</a>
+        <a href="cart.html">Cart</a>
+        <a href="login.html" style="color:var(--color-accent);font-weight:700;">Sign In</a>
       `;
     }
   }
