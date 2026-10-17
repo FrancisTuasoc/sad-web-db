@@ -441,11 +441,53 @@ export function renderHeader(activeNav = '') {
       loadHeaderAvatar(user, userSlot.querySelector('.avatar-circle'));
       if (!adminUser) {
         initCustomerNotifications();
+
+        // Sync mobile drawer for logged-in customers
+        const drawer = document.querySelector('#mobile-drawer-menu');
+        if (drawer) {
+          const guestSignIn = drawer.querySelector('a[href="login.html"]');
+          if (guestSignIn) guestSignIn.remove();
+          if (!drawer.querySelector('#mobile-profile-link')) {
+            const profileLink = document.createElement('a');
+            profileLink.href = 'profile.html';
+            profileLink.id = 'mobile-profile-link';
+            profileLink.textContent = 'My Profile';
+            drawer.appendChild(profileLink);
+
+            const mobileLogoutLink = document.createElement('a');
+            mobileLogoutLink.href = '#';
+            mobileLogoutLink.id = 'mobile-logout-link';
+            mobileLogoutLink.textContent = 'Log Out';
+            mobileLogoutLink.style.cssText = 'color: var(--color-accent); font-weight: 700;';
+            drawer.appendChild(mobileLogoutLink);
+
+            mobileLogoutLink.addEventListener('click', (e) => {
+              e.preventDefault();
+              const desktopLogout = document.querySelector('#logout-btn');
+              if (desktopLogout) desktopLogout.click();
+            });
+          }
+        }
       }
     } else {
       userSlot.innerHTML = `<a href="login.html" class="btn btn-primary btn-sm">Sign In</a>`;
       const notifWrapper = document.getElementById('header-notifications-wrapper');
       if (notifWrapper) notifWrapper.classList.add('hidden');
+
+      const drawer = document.querySelector('#mobile-drawer-menu');
+      if (drawer) {
+        const pl = drawer.querySelector('#mobile-profile-link');
+        const ll = drawer.querySelector('#mobile-logout-link');
+        if (pl) pl.remove();
+        if (ll) ll.remove();
+        if (!drawer.querySelector('a[href="login.html"]')) {
+          const signInLink = document.createElement('a');
+          signInLink.href = 'login.html';
+          signInLink.textContent = 'Sign In / Sign Up';
+          signInLink.style.cssText = 'color: var(--color-accent); font-weight: 700;';
+          drawer.appendChild(signInLink);
+        }
+      }
     }
   }
 

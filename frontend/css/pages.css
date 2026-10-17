@@ -1110,7 +1110,7 @@
   max-height: min(90dvh, 760px);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.68);
-  border-radius: var(--radius-xl);
+  border-radius: 16px;
   box-shadow: 0 28px 80px rgba(29, 18, 12, 0.3);
 }
 
@@ -2523,6 +2523,12 @@
   }
 }
 
+@media (max-width: 600px) {
+  .cart-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 480px) {
   .hero-section {
     padding: 24px 0;
@@ -2537,9 +2543,6 @@
     display: none;
   }
 
-  .cart-layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
   .cart-box,
   .receipt-sidebar {
     min-width: 0;
