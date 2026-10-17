@@ -148,3 +148,45 @@ export function renderRatingBadge(averageRating = 0, reviewCount = 0, options = 
     </div>
   `;
 }
+
+/**
+ * Render interactive clickable stars (1-5) directly on product cards without opening a dialog
+ */
+export function renderInteractiveCardStars(productId, averageRating = 0, reviewCount = 0, userRating = 0, options = {}) {
+  const { size = 15 } = options;
+  const score = Math.max(0, Math.min(5, Number(averageRating) || 0));
+  const count = Number(reviewCount) || 0;
+  const myRating = Number(userRating) || 0;
+
+  let starsHtml = '';
+  for (let star = 1; star <= 5; star++) {
+    const isFilled = myRating > 0 ? myRating >= star : score >= star - 0.25;
+    starsHtml += `
+      <button type="button" 
+              class="card-star-btn ${isFilled ? 'is-filled' : ''}" 
+              data-product-id="${productId}" 
+              data-star-val="${star}" 
+              title="Rate ${star} star${star > 1 ? 's' : ''}" 
+              aria-label="Rate ${star} star${star > 1 ? 's' : ''}">
+        ${lucideIcon('star', {
+          size,
+          fill: isFilled ? '#F59E0B' : 'none',
+          stroke: isFilled ? '#F59E0B' : '#9CA3AF',
+          strokeWidth: 1.8,
+          className: 'card-star-icon',
+          ariaHidden: true,
+        })}
+      </button>
+    `;
+  }
+
+  return `
+    <div class="card-inline-rating" data-product-id="${productId}">
+      <div class="card-stars-group" role="group" aria-label="Rate product 1 to 5 stars">
+        ${starsHtml}
+      </div>
+      ${score > 0 ? `<span class="rating-score">${score.toFixed(1)}</span>` : ''}
+      <span class="rating-count">(${count})</span>
+    </div>
+  `;
+}

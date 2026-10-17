@@ -14,13 +14,19 @@ import {
 } from './ui.js';
 import { isLoggedIn } from './auth.js';
 import { stockStream } from './stock-stream.js';
-import { lucideIcon, renderRatingBadge } from './icons.js';
+import { lucideIcon, renderRatingBadge, renderInteractiveCardStars } from './icons.js';
 import {
   isItemFavorited,
   toggleFavorite,
   openReviewModalForProduct,
   loadCustomerFavorites,
   ensureReviewModalDOM,
+  loadCustomerRatings,
+  getUserRatingForItem,
+  submitDirectProductRating,
+  openWebsiteReviewModal,
+  loadWebsiteTestimonials,
+  ensureWebsiteReviewModalDOM,
 } from './reviews-favorites.js';
 
 export const DEFAULT_FEATURED_PRODUCTS = [
@@ -182,15 +188,7 @@ export function renderProductCard(
       <div class="card-content">
         <div class="card-meta-row">
           ${categoryName ? `<span class="card-category">${escapeHtml(categoryName)}</span>` : '<span class="card-category">Specialty</span>'}
-          <div class="card-rating-clickable" 
-               data-open-review-btn="true" 
-               data-product-id="${productId}"
-               role="button"
-               tabindex="0"
-               title="Click to write or view review"
-               aria-label="Rating: ${avgRating.toFixed(1)} stars out of 5 from ${reviewCount} reviews. Click to review.">
-            ${renderRatingBadge(avgRating, reviewCount, { size: 14 })}
-          </div>
+          ${renderInteractiveCardStars(productId, avgRating, reviewCount, getUserRatingForItem(productId), { size: 14 })}
         </div>
         <h3 class="card-title">${escapeHtml(product.name)}</h3>
         <div class="card-desc-container">
@@ -605,16 +603,17 @@ export function attachProductGridListeners(
       return;
     }
 
-    // 3. Rate & Review Click Trigger
-    const reviewTrigger = e.target.closest('[data-open-review-btn="true"]');
-    if (reviewTrigger) {
+    // 3. Direct Star Click Rating (1 to 5 stars, NO dialog box!)
+    const starBtn = e.target.closest('.card-star-btn');
+    if (starBtn) {
       e.preventDefault();
       e.stopPropagation();
-      const productId = reviewTrigger.getAttribute('data-product-id');
-      const card = reviewTrigger.closest('.product-card');
-      const cardTitle = card ? card.querySelector('.card-title')?.textContent : 'Menu Item';
-      const productObj = getProductById ? getProductById(productId) : { _id: productId, name: cardTitle };
-      await openReviewModalForProduct(productObj || { _id: productId, name: cardTitle });
+      const starVal = parseInt(starBtn.getAttribute('data-star-val'), 10);
+      const group = starBtn.closest('.card-stars-group');
+      const productId = group ? group.getAttribute('data-product-id') : starBtn.getAttribute('data-product-id');
+      if (productId && starVal >= 1 && starVal <= 5) {
+        await submitDirectProductRating(productId, starVal, starBtn);
+      }
       return;
     }
 
@@ -639,12 +638,53 @@ export function attachProductGridListeners(
   // Keyboard accessibility for Enter / Space
   container.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
-      const target = e.target.closest('[data-favorite-btn="true"], [data-open-review-btn="true"]');
+      const target = e.target.closest('[data-favorite-btn="true"], .card-star-btn');
       if (target) {
         e.preventDefault();
         target.click();
       }
     }
+  });
+
+  // Hover effect for interactive product rating stars
+  container.addEventListener('mouseover', (e) => {
+    const starBtn = e.target.closest('.card-star-btn');
+    if (!starBtn) return;
+    const group = starBtn.closest('.card-stars-group');
+    if (!group) return;
+    const starVal = parseInt(starBtn.getAttribute('data-star-val'), 10);
+    const buttons = group.querySelectorAll('.card-star-btn');
+    buttons.forEach((b) => {
+      const val = parseInt(b.getAttribute('data-star-val'), 10);
+      const svg = b.querySelector('svg');
+      if (svg) {
+        const isHovered = val <= starVal;
+        svg.setAttribute('fill', isHovered ? '#F59E0B' : 'none');
+        svg.setAttribute('stroke', isHovered ? '#F59E0B' : '#D1D5DB');
+      }
+    });
+  });
+
+  container.addEventListener('mouseout', (e) => {
+    const group = e.target.closest('.card-stars-group');
+    if (!group) return;
+    const related = e.relatedTarget;
+    if (related && group.contains(related)) return;
+
+    const productId = group.getAttribute('data-product-id');
+    const myRating = getUserRatingForItem(productId);
+    const avgScore = parseFloat(group.closest('.card-inline-rating')?.querySelector('.rating-score')?.textContent) || 0;
+
+    const buttons = group.querySelectorAll('.card-star-btn');
+    buttons.forEach((b) => {
+      const val = parseInt(b.getAttribute('data-star-val'), 10);
+      const isFilled = myRating > 0 ? myRating >= val : avgScore >= val - 0.25;
+      const svg = b.querySelector('svg');
+      if (svg) {
+        svg.setAttribute('fill', isFilled ? '#F59E0B' : 'none');
+        svg.setAttribute('stroke', isFilled ? '#F59E0B' : '#9CA3AF');
+      }
+    });
   });
 }
 
@@ -652,10 +692,33 @@ function initHome() {
   renderHeader('home');
   setupHomeSectionNavigation();
   renderFooter();
-  ensureReviewModalDOM();
-  loadCustomerFavorites().then(() => {
+  ensureWebsiteReviewModalDOM();
+
+  const heroReviewBtn = document.getElementById('btn-hero-review');
+  if (heroReviewBtn) {
+    heroReviewBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openWebsiteReviewModal();
+    });
+  }
+
+  const testimonialsReviewBtn = document.getElementById('btn-testimonials-review');
+  if (testimonialsReviewBtn) {
+    testimonialsReviewBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openWebsiteReviewModal();
+    });
+  }
+
+  Promise.all([
+    loadCustomerFavorites(),
+    loadCustomerRatings(),
+  ]).then(() => {
     loadStoreInfo().then(() => loadFeaturedProducts());
   });
+
+  loadWebsiteTestimonials();
+
   setupAddToCartModal();
   attachProductGridListeners('featured-grid', (id) =>
     DEFAULT_FEATURED_PRODUCTS.find((p) => p._id === id)
@@ -669,6 +732,7 @@ function setupHomeSectionNavigation() {
     { id: '', element: document.querySelector('.hero-section') },
     { id: 'featured', element: document.getElementById('featured') },
     { id: 'about', element: document.getElementById('about') },
+    { id: 'testimonials', element: document.getElementById('testimonials') },
     { id: 'contact', element: document.getElementById('contact') },
   ].filter((section) => section.element);
 

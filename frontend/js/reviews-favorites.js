@@ -544,3 +544,440 @@ export async function openReviewModalForProduct(product) {
   modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
 }
+
+// ---------------- Direct 1-5 Star Product Rating (No Modal Dialog) ----------------
+let customerRatingsMap = {};
+let customerRatingsLoaded = false;
+
+export async function loadCustomerRatings() {
+  if (!isLoggedIn()) {
+    customerRatingsMap = {};
+    customerRatingsLoaded = true;
+    return customerRatingsMap;
+  }
+  try {
+    const res = await apiFetch('/reviews/my-ratings');
+    if (res && res.ratings) {
+      customerRatingsMap = res.ratings;
+    }
+    customerRatingsLoaded = true;
+  } catch (err) {
+    console.warn('Could not load customer ratings:', err.message);
+  }
+  return customerRatingsMap;
+}
+
+export function getUserRatingForItem(itemId) {
+  if (!itemId) return 0;
+  return Number(customerRatingsMap[String(itemId)] || 0);
+}
+
+export async function submitDirectProductRating(productId, rating, sourceBtn = null) {
+  if (!isLoggedIn()) {
+    showToast('Please sign in to rate products.', 'info');
+    setTimeout(() => {
+      window.location.href = `login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+    }, 800);
+    return;
+  }
+
+  const ratingNum = Math.max(1, Math.min(5, Number(rating) || 5));
+  if (sourceBtn) {
+    sourceBtn.disabled = true;
+  }
+
+  try {
+    const res = await apiFetch('/reviews/rate', {
+      method: 'POST',
+      body: JSON.stringify({
+        itemId: productId,
+        rating: ratingNum,
+      }),
+    });
+
+    customerRatingsMap[String(productId)] = ratingNum;
+
+    const avg = res.summary ? Number(res.summary.averageRating) : ratingNum;
+    const count = res.summary ? Number(res.summary.reviewCount) : 1;
+
+    updateProductCardInteractiveRating(productId, avg, count, ratingNum);
+    showToast(`Rated ${ratingNum} ★! Thank you!`, 'success');
+
+    window.dispatchEvent(
+      new CustomEvent('gigabite:product-rated', {
+        detail: { productId, rating: ratingNum, summary: res.summary },
+      })
+    );
+  } catch (err) {
+    showToast(err.message || 'Could not save rating.', 'error');
+  } finally {
+    if (sourceBtn) {
+      sourceBtn.disabled = false;
+    }
+  }
+}
+
+export function updateProductCardInteractiveRating(productId, avgRating, reviewCount, userRating) {
+  const cardContainers = document.querySelectorAll(
+    `[data-product-id="${productId}"] .card-inline-rating`
+  );
+
+  cardContainers.forEach((container) => {
+    const score = Math.max(0, Math.min(5, Number(avgRating) || 0));
+    const count = Number(reviewCount) || 0;
+    const myRating = Number(userRating) || 0;
+
+    const starBtns = container.querySelectorAll('.card-star-btn');
+    starBtns.forEach((btn) => {
+      const starVal = Number(btn.getAttribute('data-star-val'));
+      const isFilled = myRating > 0 ? myRating >= starVal : score >= starVal - 0.25;
+      btn.classList.toggle('is-filled', isFilled);
+
+      const svg = btn.querySelector('svg');
+      if (svg) {
+        svg.setAttribute('fill', isFilled ? '#F59E0B' : 'none');
+        svg.setAttribute('stroke', isFilled ? '#F59E0B' : '#9CA3AF');
+      }
+    });
+
+    const scoreSpan = container.querySelector('.rating-score');
+    if (scoreSpan) {
+      scoreSpan.textContent = score > 0 ? score.toFixed(1) : '';
+    }
+    const countSpan = container.querySelector('.rating-count');
+    if (countSpan) {
+      countSpan.textContent = `(${count})`;
+    }
+  });
+}
+
+// ---------------- Website Review & Testimonials Controller ----------------
+let websiteReviewModal = null;
+let websiteStarRating = 5;
+
+export function ensureWebsiteReviewModalDOM() {
+  if (websiteReviewModal) return websiteReviewModal;
+
+  websiteReviewModal = document.getElementById('website-review-modal');
+  if (websiteReviewModal) return websiteReviewModal;
+
+  websiteReviewModal = document.createElement('div');
+  websiteReviewModal.id = 'website-review-modal';
+  websiteReviewModal.className = 'modal-backdrop website-review-modal-backdrop';
+  websiteReviewModal.setAttribute('role', 'dialog');
+  websiteReviewModal.setAttribute('aria-modal', 'true');
+  websiteReviewModal.setAttribute('aria-labelledby', 'website-review-modal-title');
+  websiteReviewModal.setAttribute('aria-hidden', 'true');
+
+  websiteReviewModal.innerHTML = `
+    <div class="modal-card review-modal-card website-review-card">
+      <div class="modal-header review-modal-header">
+        <div class="review-modal-header-info">
+          <h3 id="website-review-modal-title" class="review-modal-title">Rate Our Website &amp; Service</h3>
+          <p class="review-modal-subtitle">Tell us what you think of our food truck and online ordering!</p>
+        </div>
+        <button type="button" id="website-review-close-btn" class="modal-close-btn" aria-label="Close modal">
+          ${lucideIcon('x', { size: 20 })}
+        </button>
+      </div>
+
+      <div class="review-modal-body">
+        <div id="website-review-user-preview" class="website-review-user-preview">
+          <!-- Populated dynamically with customer avatar and name -->
+        </div>
+
+        <form id="website-review-form" class="review-form" novalidate>
+          <div class="form-group review-star-picker-group">
+            <label class="form-label review-picker-label">
+              Rate GIGABITE <span class="text-danger">*</span>
+            </label>
+            <div id="website-star-picker" class="interactive-star-picker" role="radiogroup" aria-label="Rate from 1 to 5 stars">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="review-comment-label-row">
+              <label for="website-review-comment" class="form-label">
+                Your Review / Feedback <span class="text-danger">*</span>
+              </label>
+              <span id="website-review-char-count" class="char-counter">0 / 400</span>
+            </div>
+            <textarea
+              id="website-review-comment"
+              class="form-control review-textarea"
+              rows="4"
+              maxlength="400"
+              placeholder="Tell others what you love about our burgers, packaging, delivery, or food truck experience..."
+              required
+            ></textarea>
+            <div id="website-review-error" class="form-error-msg hidden" role="alert"></div>
+          </div>
+
+          <div class="review-modal-actions">
+            <button type="button" id="website-review-cancel-btn" class="btn btn-secondary">
+              Cancel
+            </button>
+            <button type="submit" id="website-review-submit-btn" class="btn btn-primary">
+              <span class="btn-text">Publish Review</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(websiteReviewModal);
+  attachWebsiteReviewModalListeners(websiteReviewModal);
+  return websiteReviewModal;
+}
+
+function renderWebsiteStarPicker(activeRating = 5) {
+  const picker = document.getElementById('website-star-picker');
+  if (!picker) return;
+
+  let html = '';
+  for (let i = 1; i <= 5; i++) {
+    const isFilled = activeRating >= i;
+    html += `
+      <button type="button" 
+              class="star-picker-btn ${isFilled ? 'is-active' : ''}" 
+              data-star-val="${i}" 
+              role="radio" 
+              aria-checked="${activeRating === i}" 
+              aria-label="${i} of 5 stars">
+        ${lucideIcon('star', {
+          size: 28,
+          fill: isFilled ? '#F59E0B' : 'none',
+          stroke: isFilled ? '#F59E0B' : '#9CA3AF',
+          strokeWidth: 2,
+          className: 'picker-star-icon',
+          ariaHidden: true,
+        })}
+      </button>
+    `;
+  }
+  picker.innerHTML = html;
+}
+
+function attachWebsiteReviewModalListeners(modal) {
+  const closeBtn = document.getElementById('website-review-close-btn');
+  const cancelBtn = document.getElementById('website-review-cancel-btn');
+  const form = document.getElementById('website-review-form');
+  const textarea = document.getElementById('website-review-comment');
+  const charCounter = document.getElementById('website-review-char-count');
+  const picker = document.getElementById('website-star-picker');
+
+  function closeModal() {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) {
+      closeModal();
+    }
+  });
+
+  if (textarea && charCounter) {
+    textarea.addEventListener('input', () => {
+      const len = textarea.value.length;
+      charCounter.textContent = `${len} / 400`;
+    });
+  }
+
+  if (picker) {
+    picker.addEventListener('click', (e) => {
+      const btn = e.target.closest('.star-picker-btn');
+      if (btn) {
+        websiteStarRating = Number(btn.getAttribute('data-star-val')) || 5;
+        renderWebsiteStarPicker(websiteStarRating);
+      }
+    });
+  }
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const comment = (textarea.value || '').trim();
+      const errorDiv = document.getElementById('website-review-error');
+
+      if (!comment) {
+        if (errorDiv) {
+          errorDiv.textContent = 'Please write a brief review.';
+          errorDiv.classList.remove('hidden');
+        }
+        return;
+      }
+      if (errorDiv) errorDiv.classList.add('hidden');
+
+      const submitBtn = document.getElementById('website-review-submit-btn');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span>Publishing...</span>`;
+      }
+
+      try {
+        const res = await apiFetch('/reviews/website', {
+          method: 'POST',
+          body: JSON.stringify({
+            rating: websiteStarRating,
+            comment,
+          }),
+        });
+
+        showToast('Thank you! Your review is now live on our website.', 'success');
+        closeModal();
+
+        if (res.review) {
+          prependTestimonialCard(res.review);
+          const testimonialsSec = document.getElementById('testimonials');
+          if (testimonialsSec) {
+            testimonialsSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      } catch (err) {
+        showToast(err.message || 'Could not submit review.', 'error');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<span class="btn-text">Publish Review</span>`;
+        }
+      }
+    });
+  }
+}
+
+export function openWebsiteReviewModal() {
+  if (!isLoggedIn()) {
+    showToast('Please sign in to rate and review the website.', 'info');
+    setTimeout(() => {
+      window.location.href = `login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+    }, 800);
+    return;
+  }
+
+  const modal = ensureWebsiteReviewModalDOM();
+  let user = null;
+  try {
+    const raw = localStorage.getItem('user');
+    user = raw ? JSON.parse(raw) : null;
+  } catch (e) {}
+
+  const userPreview = document.getElementById('website-review-user-preview');
+  if (userPreview && user) {
+    const name = user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username || 'Customer';
+    const avatarHtml = user.avatar
+      ? `<img src="${escapeHtml(user.avatar)}" alt="${escapeHtml(name)}" class="preview-avatar-img">`
+      : `<div class="preview-avatar-circle">${escapeHtml(name.charAt(0).toUpperCase())}</div>`;
+
+    userPreview.innerHTML = `
+      <div class="user-preview-card">
+        ${avatarHtml}
+        <div>
+          <strong class="user-preview-name">${escapeHtml(name)}</strong>
+          <span class="user-preview-role">Verified Customer</span>
+        </div>
+      </div>
+    `;
+  }
+
+  websiteStarRating = 5;
+  renderWebsiteStarPicker(5);
+
+  const textarea = document.getElementById('website-review-comment');
+  if (textarea) textarea.value = '';
+  const charCounter = document.getElementById('website-review-char-count');
+  if (charCounter) charCounter.textContent = '0 / 400';
+  const errorDiv = document.getElementById('website-review-error');
+  if (errorDiv) errorDiv.classList.add('hidden');
+
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+export function renderTestimonialCard(rev) {
+  const rating = Number(rev.rating) || 5;
+  const name = rev.customerName || 'Happy Customer';
+  const comment = rev.comment || '';
+  const dateStr = rev.createdAt ? new Date(rev.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent';
+
+  let starsHtml = '';
+  for (let i = 1; i <= 5; i++) {
+    starsHtml += lucideIcon('star', {
+      size: 16,
+      fill: i <= rating ? '#F59E0B' : 'none',
+      stroke: i <= rating ? '#F59E0B' : '#D1D5DB',
+      strokeWidth: 2,
+      ariaHidden: true,
+    });
+  }
+
+  const initial = (name.charAt(0) || 'C').toUpperCase();
+  const avatarHtml = rev.customerAvatar
+    ? `<img src="${escapeHtml(rev.customerAvatar)}" alt="${escapeHtml(name)}" class="testimonial-avatar-img">`
+    : `<div class="testimonial-avatar-fallback">${escapeHtml(initial)}</div>`;
+
+  return `
+    <article class="testimonial-card">
+      <div class="testimonial-header">
+        <div class="testimonial-avatar-wrap">
+          ${avatarHtml}
+        </div>
+        <div class="testimonial-author-meta">
+          <h4 class="testimonial-author-name">${escapeHtml(name)}</h4>
+          <span class="testimonial-date">${escapeHtml(dateStr)}</span>
+        </div>
+        <span class="testimonial-badge-verified">
+          ${lucideIcon('check-circle', { size: 14, className: 'verified-icon' })}
+          Verified
+        </span>
+      </div>
+      <div class="testimonial-stars" aria-label="${rating} out of 5 stars">
+        ${starsHtml}
+      </div>
+      <p class="testimonial-text">"${escapeHtml(comment)}"</p>
+    </article>
+  `;
+}
+
+export function prependTestimonialCard(review) {
+  const grid = document.getElementById('testimonials-grid');
+  if (!grid) return;
+  const empty = grid.querySelector('.state-box');
+  if (empty) empty.remove();
+  const html = renderTestimonialCard(review);
+  grid.insertAdjacentHTML('afterbegin', html);
+}
+
+export async function loadWebsiteTestimonials() {
+  const grid = document.getElementById('testimonials-grid');
+  if (!grid) return;
+
+  try {
+    const res = await apiFetch('/reviews/website');
+    const reviews = res && Array.isArray(res.reviews) ? res.reviews : [];
+
+    if (!reviews.length) {
+      grid.innerHTML = `
+        <div class="state-box" style="grid-column: 1 / -1;">
+          <p class="state-desc">No reviews yet. Be the first to share your experience!</p>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = reviews.map(renderTestimonialCard).join('');
+  } catch (err) {
+    console.warn('Could not load website testimonials:', err.message);
+  }
+}

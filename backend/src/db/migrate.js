@@ -11,6 +11,7 @@ const MIGRATIONS = [
   '20261015_notifications.sql',
   '20261016_reviews_favorites.sql',
   '20261016_cloudinary_storage.sql',
+  '20261017_website_reviews.sql',
 ];
 
 async function runMigrations() {

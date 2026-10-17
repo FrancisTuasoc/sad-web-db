@@ -12,6 +12,7 @@ import {
 } from './home.js';
 import {
   loadCustomerFavorites,
+  loadCustomerRatings,
   ensureReviewModalDOM,
 } from './reviews-favorites.js';
 
@@ -615,7 +616,10 @@ function initMenu() {
     liveProducts.find((p) => p._id === id)
   );
   loadCategories();
-  loadCustomerFavorites().then(() => {
+  Promise.all([
+    loadCustomerFavorites(),
+    loadCustomerRatings(),
+  ]).then(() => {
     loadOrderingSettings().then(loadProducts);
   });
   stockStream.init();

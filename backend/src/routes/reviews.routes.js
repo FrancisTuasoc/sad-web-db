@@ -35,6 +35,109 @@ router.get(
   })
 );
 
+// 1b. Get website reviews / testimonials (Public)
+router.get(
+  '/website',
+  asyncHandler(async (req, res) => {
+    const { limit } = req.query;
+    const reviews = await reviewRepository.getWebsiteReviews(limit ? Number(limit) : 30);
+    res.json({
+      success: true,
+      reviews,
+    });
+  })
+);
+
+// 1c. Submit website review / feedback (Authenticated Customer)
+router.post(
+  '/website',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { rating, comment } = req.body;
+    const ratingNum = Number(rating);
+    if (!rating || isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
+      throw new AppError('Please select a star rating between 1 and 5.', 400);
+    }
+
+    const trimmedComment = (comment || '').trim();
+    if (!trimmedComment) {
+      throw new AppError('Please write a short review or feedback about the website.', 400);
+    }
+
+    const customerName = getDisplayName(req.user);
+    const customerAvatar = req.user.avatar || req.user.profile_image || '';
+
+    const review = await reviewRepository.createWebsiteReview({
+      customerId: req.user.id,
+      customerName,
+      customerAvatar,
+      rating: ratingNum,
+      comment: trimmedComment.slice(0, 500),
+    });
+
+    res.status(201).json({
+      success: true,
+      review,
+      message: 'Thank you for your feedback!',
+    });
+  })
+);
+
+// 1d. Quick-rate a product directly (1-5 stars without dialog modal)
+router.post(
+  '/rate',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { itemId, rating } = req.body;
+    if (!itemId) {
+      throw new AppError('Item ID is required.', 400);
+    }
+    const ratingNum = Number(rating);
+    if (!rating || isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
+      throw new AppError('Please select a valid star rating (1 to 5).', 400);
+    }
+
+    const product = await productRepository.findById(itemId);
+    if (!product) {
+      throw new AppError('Menu item not found.', 404);
+    }
+
+    const customerName = getDisplayName(req.user);
+    const review = await reviewRepository.quickRate({
+      itemId,
+      customerId: req.user.id,
+      customerName,
+      rating: ratingNum,
+    });
+
+    const summary = await reviewRepository.getItemSummary(itemId);
+
+    res.json({
+      success: true,
+      review,
+      summary,
+      message: `Rated ${ratingNum} stars!`,
+    });
+  })
+);
+
+// 1e. Get current customer's star ratings map (Authenticated)
+router.get(
+  '/my-ratings',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const reviews = await reviewRepository.findByCustomer(req.user.id);
+    const ratingsMap = {};
+    for (const r of reviews) {
+      if (r.itemId) ratingsMap[r.itemId] = r.rating;
+    }
+    res.json({
+      success: true,
+      ratings: ratingsMap,
+    });
+  })
+);
+
 // 2. Get customer's reviews (Authenticated)
 router.get(
   '/my',

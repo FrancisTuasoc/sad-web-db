@@ -188,6 +188,70 @@ const reviewRepository = {
     }
     return summaryMap;
   },
+
+  async quickRate({ itemId, customerId, customerName, rating }) {
+    const existing = await this.findCustomerReviewForItem(customerId, itemId);
+    if (existing) {
+      return this.update(existing.id, customerId, {
+        rating: Number(rating),
+        comment: existing.comment || '',
+      });
+    }
+    return this.create({
+      itemId,
+      customerId,
+      customerName,
+      rating: Number(rating),
+      comment: '',
+    });
+  },
+
+  // --- Website Testimonials / Reviews ---
+  async getWebsiteReviews(limit = 30) {
+    const sql = `
+      SELECT id, customer_id, customer_name, customer_avatar, rating, comment, created_at
+      FROM website_reviews
+      ORDER BY created_at DESC
+      LIMIT $1
+    `;
+    const res = await query(sql, [Math.min(Number(limit) || 30, 100)]);
+    return res.rows.map((r) => ({
+      id: r.id,
+      _id: r.id,
+      customerId: r.customer_id,
+      customerName: r.customer_name,
+      customerAvatar: r.customer_avatar || '',
+      rating: Number(r.rating),
+      comment: r.comment || '',
+      createdAt: r.created_at,
+    }));
+  },
+
+  async createWebsiteReview({ customerId, customerName, customerAvatar, rating, comment }) {
+    const sql = `
+      INSERT INTO website_reviews (customer_id, customer_name, customer_avatar, rating, comment)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING *
+    `;
+    const res = await query(sql, [
+      customerId || null,
+      customerName || 'Happy Customer',
+      customerAvatar || '',
+      Number(rating),
+      (comment || '').trim().slice(0, 500),
+    ]);
+    const r = res.rows[0];
+    return {
+      id: r.id,
+      _id: r.id,
+      customerId: r.customer_id,
+      customerName: r.customer_name,
+      customerAvatar: r.customer_avatar || '',
+      rating: Number(r.rating),
+      comment: r.comment || '',
+      createdAt: r.created_at,
+    };
+  },
 };
 
 module.exports = reviewRepository;
