@@ -15309,7 +15309,16 @@ body.home-page main {
   height: 0 !important;
 }
 
-/* 1. All sections: remove 100vh viewport expansion, pull content up, and eliminate top dead space */
+/* 1. All sections: full-screen viewport height (fit screen), pull content up, eliminate top dead space */
+body.home-page .hero-section {
+  min-height: calc(100vh - var(--header-height, 68px)) !important;
+  min-height: calc(100dvh - var(--header-height, 68px)) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+
 body.home-page #featured,
 body.home-page #about,
 body.home-page #testimonials,
@@ -15322,21 +15331,21 @@ body.home-page section#featured,
 body.home-page section#about,
 body.home-page section#testimonials,
 body.home-page section#contact {
-  min-height: auto !important;
-  min-height: unset !important;
+  min-height: calc(100vh - var(--header-height, 68px)) !important;
+  min-height: calc(100dvh - var(--header-height, 68px)) !important;
   display: flex !important;
   flex-direction: column !important;
-  justify-content: flex-start !important;
+  justify-content: center !important;
   align-content: flex-start !important;
   align-items: stretch !important;
   margin-top: 0 !important;
-  padding-top: clamp(16px, 2.5vw, 24px) !important;
-  padding-bottom: clamp(24px, 3.5vh, 40px) !important;
-  scroll-margin-top: var(--header-height, 60px) !important;
+  padding-top: clamp(16px, 2.5vh, 28px) !important;
+  padding-bottom: clamp(20px, 3.5vh, 36px) !important;
+  scroll-margin-top: var(--header-height, 68px) !important;
   box-sizing: border-box !important;
 }
 
-/* 2. Desktop breakpoint: override grid align-content: center and min-height */
+/* 2. Desktop breakpoint: ensure full screen height and proper flex alignment */
 @media (min-width: 901px) {
   body.home-page main > #featured.section,
   body.home-page main > #about.section,
@@ -15346,14 +15355,13 @@ body.home-page section#contact {
   body.home-page #about,
   body.home-page #testimonials,
   body.home-page #contact {
-    min-height: auto !important;
-    min-height: unset !important;
+    min-height: calc(100vh - var(--header-height, 68px)) !important;
+    min-height: calc(100dvh - var(--header-height, 68px)) !important;
     display: flex !important;
     flex-direction: column !important;
-    align-content: flex-start !important;
-    justify-content: flex-start !important;
-    padding-block-start: clamp(16px, 2.5vw, 24px) !important;
-    padding-top: clamp(16px, 2.5vw, 24px) !important;
+    justify-content: center !important;
+    padding-block-start: clamp(16px, 2.5vh, 28px) !important;
+    padding-top: clamp(16px, 2.5vh, 28px) !important;
     margin-top: 0 !important;
   }
 }
@@ -15422,7 +15430,7 @@ body.home-page #contact h2 {
   font-weight: 700 !important;
   letter-spacing: -0.02em !important;
   line-height: 1.25 !important;
-  color: var(--color-text, #ffffff) !important;
+  color: var(--home-ink, #1a261d) !important;
 }
 
 body.home-page #featured .section-desc,
@@ -15432,7 +15440,7 @@ body.home-page #contact .section-desc {
   margin: 6px 0 0 !important;
   padding: 0 !important;
   text-align: left !important;
-  color: var(--color-text-muted, #94a3b8) !important;
+  color: var(--home-muted, #556259) !important;
   font-size: clamp(0.9rem, 1.2vw, 1rem) !important;
   line-height: 1.45 !important;
 }
