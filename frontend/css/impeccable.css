@@ -5003,19 +5003,20 @@ body.admin-account [data-customer-only] {
   color: #475569 !important;
   background: #f8fafc !important;
   border-bottom: 2px solid #e2e8f0 !important;
-  font-size: 0.78rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  padding: 10px 14px !important;
+  padding: 8px 10px !important;
   text-align: left;
 }
 
 .admin-table td {
   border-bottom: 1px solid #f1f5f9 !important;
-  padding: 10px 14px !important;
+  padding: 7px 10px !important;
   color: #1e293b !important;
-  font-size: 0.86rem !important;
+  font-size: 0.83rem !important;
+  vertical-align: middle !important;
 }
 
 .admin-table tr:hover {
@@ -6550,12 +6551,12 @@ body.admin-account nav[data-admin-only] {
 }
 
 .admin-main .admin-section .admin-table th {
-  padding: 10px 14px !important;
+  padding: 8px 10px !important;
   border: none !important;
   border-bottom: 2px solid #e2e8f0 !important;
   background: #f8fafc !important;
   color: #475569 !important;
-  font-size: 0.78rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
   text-align: left !important;
   text-transform: uppercase !important;
@@ -6563,11 +6564,11 @@ body.admin-account nav[data-admin-only] {
 }
 
 .admin-main .admin-section .admin-table td {
-  padding: 10px 14px !important;
+  padding: 7px 10px !important;
   border: none !important;
   border-bottom: 1px solid #f1f5f9 !important;
   color: #1e293b !important;
-  font-size: 0.86rem !important;
+  font-size: 0.83rem !important;
   vertical-align: middle !important;
 }
 
@@ -15021,3 +15022,65 @@ body.admin-page [data-customer-only],
 body.admin-account [data-customer-only] {
   display: none !important;
 }
+
+/* Top Favorites & Top Items Consolidated Section Layout */
+#section-top-favorites {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+#section-top-favorites .admin-top-items-card {
+  padding: 0 !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+}
+
+#section-top-favorites #top-items-list > div {
+  padding: 8px 12px !important;
+  font-size: 0.88rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+#section-top-favorites #top-items-list > div:last-child {
+  border-bottom: none !important;
+}
+
+#section-top-favorites .admin-ranking-card {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  padding: 10px 14px !important;
+  margin-bottom: 8px !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  background: #ffffff !important;
+}
+
+#section-top-favorites .admin-ranking-card:last-child {
+  margin-bottom: 0 !important;
+}
+
+#favorites-pagination-wrapper {
+  margin-top: 12px !important;
+  padding-top: 10px !important;
+  border-top: 1px solid #f1f5f9 !important;
+}
+
+/* Compact Table Spacing Reductions */
+.admin-main .table-wrap,
+.admin-main .table-responsive-wrapper {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.admin-main .step-card {
+  padding: 12px 16px !important;
+  gap: 10px !important;
+}
+

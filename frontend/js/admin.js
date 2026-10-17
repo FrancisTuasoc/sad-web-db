@@ -376,16 +376,18 @@ function setupAdminNavigation() {
           loadAdminReviews();
           break;
         case 'top-favorites':
+        case 'top-items':
+          activeSection = 'top-favorites';
+          const topFavSec = document.getElementById('section-top-favorites');
+          if (topFavSec) topFavSec.classList.remove('hidden');
           loadAdminTopFavorites();
+          loadDashboardStats();
           break;
         case 'orders':
           loadAdminOrders();
           break;
         case 'recent-orders':
           loadDashboardRecentOrders();
-          break;
-        case 'top-items':
-          loadDashboardStats();
           break;
         case 'menu':
           loadAdminMenu();
@@ -788,6 +790,10 @@ async function loadAdminReviews() {
   }
 }
 
+let adminFavoritesRankings = [];
+let adminFavoritesCurrentPage = 1;
+const ADMIN_FAVORITES_PER_PAGE = 5;
+
 // ---------------- Admin Top Favorites Rankings ----------------
 async function loadAdminTopFavorites() {
   const container = document.getElementById('admin-favorites-rankings-container');
@@ -802,91 +808,9 @@ async function loadAdminTopFavorites() {
 
   try {
     const res = await apiFetch('/favorites/rankings');
-    const rankings = res.rankings || [];
-
-    if (!rankings.length) {
-      container.innerHTML = `
-        <div class="state-box">
-          <div class="state-icon-wrap" style="color:var(--color-primary);margin-bottom:12px;">
-            ${lucideIcon('heart', { size: 48, stroke: '#9CA3AF', fill: 'none' })}
-          </div>
-          <h4 class="state-title">No favorites data yet.</h4>
-          <p class="state-desc">When customers save items to their favorites, they will appear ranked here.</p>
-        </div>
-      `;
-      return;
-    }
-
-    container.innerHTML = `
-      <div class="admin-rankings-grid">
-        ${rankings
-          .map((item, index) => {
-            const rank = index + 1;
-            let rankClass = '';
-            let rankBadge = '';
-
-            if (rank === 1) {
-              rankClass = 'rank-highlight rank-gold';
-              rankBadge = '<span class="rank-badge rank-badge-gold">🥇 Rank #1</span>';
-            } else if (rank === 2) {
-              rankClass = 'rank-highlight rank-silver';
-              rankBadge = '<span class="rank-badge rank-badge-silver">🥈 Rank #2</span>';
-            } else if (rank === 3) {
-              rankClass = 'rank-highlight rank-bronze';
-              rankBadge = '<span class="rank-badge rank-badge-bronze">🥉 Rank #3</span>';
-            } else {
-              rankBadge = `<span class="rank-badge rank-badge-regular">#${rank}</span>`;
-            }
-
-            const img = item.image || 'assets/placeholder-burger.png';
-            const favCount = Number(item.favoriteCount || 0);
-            const avgRating = Number(item.averageRating || 0);
-            const revCount = Number(item.reviewCount || 0);
-            const price = Number(item.price || 0).toFixed(2);
-
-            return `
-              <article class="admin-ranking-card ${rankClass}">
-                <div class="ranking-card-left">
-                  <div class="ranking-badge-container">
-                    ${rankBadge}
-                  </div>
-                  <img
-                    src="${escapeHtml(img)}"
-                    alt="${escapeHtml(item.name)}"
-                    class="ranking-item-thumb"
-                    onerror="this.onerror=null;this.src='assets/placeholder-burger.png';"
-                  />
-                  <div class="ranking-item-info">
-                    <h4 class="ranking-item-name">${escapeHtml(item.name)}</h4>
-                    <div class="ranking-item-sub">
-                      ${item.categoryName ? `<span class="badge" style="font-size:0.7rem;">${escapeHtml(item.categoryName)}</span>` : ''}
-                      <span class="ranking-item-price">₱${price}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="ranking-card-stats">
-                  <div class="ranking-stat-box ranking-favorites-box">
-                    <span class="ranking-stat-label">Customer Favorites</span>
-                    <div class="ranking-stat-value" style="display:inline-flex;align-items:center;gap:6px;color:#E53E3E;">
-                      ${lucideIcon('heart', { size: 20, fill: '#E53E3E', stroke: '#E53E3E', ariaHidden: true })}
-                      <strong>${favCount}</strong>
-                    </div>
-                  </div>
-
-                  <div class="ranking-stat-box ranking-rating-box">
-                    <span class="ranking-stat-label">Customer Rating</span>
-                    <div>
-                      ${renderRatingBadge(avgRating, revCount, { size: 16 })}
-                    </div>
-                  </div>
-                </div>
-              </article>
-            `;
-          })
-          .join('')}
-      </div>
-    `;
+    adminFavoritesRankings = res.rankings || [];
+    adminFavoritesCurrentPage = 1;
+    renderAdminTopFavoritesPage();
   } catch (err) {
     container.innerHTML = `
       <div class="state-box">
@@ -894,6 +818,128 @@ async function loadAdminTopFavorites() {
         <p class="state-desc">${escapeHtml(err.message)}</p>
       </div>
     `;
+    const pagWrapper = document.getElementById('favorites-pagination-wrapper');
+    if (pagWrapper) pagWrapper.style.display = 'none';
+  }
+}
+
+function renderAdminTopFavoritesPage() {
+  const container = document.getElementById('admin-favorites-rankings-container');
+  const pagWrapper = document.getElementById('favorites-pagination-wrapper');
+  const pagInfo = document.getElementById('favorites-pagination-info');
+  const prevBtn = document.getElementById('favorites-prev-btn');
+  const nextBtn = document.getElementById('favorites-next-btn');
+
+  if (!container) return;
+
+  const totalItems = adminFavoritesRankings.length;
+  if (!totalItems) {
+    container.innerHTML = `
+      <div class="state-box">
+        <div class="state-icon-wrap" style="color:var(--color-primary);margin-bottom:12px;">
+          ${lucideIcon('heart', { size: 48, stroke: '#9CA3AF', fill: 'none' })}
+        </div>
+        <h4 class="state-title">No favorites data yet.</h4>
+        <p class="state-desc">When customers save items to their favorites, they will appear ranked here.</p>
+      </div>
+    `;
+    if (pagWrapper) pagWrapper.style.display = 'none';
+    return;
+  }
+
+  const totalPages = Math.max(1, Math.ceil(totalItems / ADMIN_FAVORITES_PER_PAGE));
+  if (adminFavoritesCurrentPage > totalPages) adminFavoritesCurrentPage = totalPages;
+  if (adminFavoritesCurrentPage < 1) adminFavoritesCurrentPage = 1;
+
+  const startIndex = (adminFavoritesCurrentPage - 1) * ADMIN_FAVORITES_PER_PAGE;
+  const pageItems = adminFavoritesRankings.slice(
+    startIndex,
+    startIndex + ADMIN_FAVORITES_PER_PAGE
+  );
+
+  container.innerHTML = `
+    <div class="admin-rankings-grid">
+      ${pageItems
+        .map((item, index) => {
+          const rank = startIndex + index + 1;
+          let rankClass = '';
+          let rankBadge = '';
+
+          if (rank === 1) {
+            rankClass = 'rank-highlight rank-gold';
+            rankBadge = '<span class="rank-badge rank-badge-gold">🥇 Rank #1</span>';
+          } else if (rank === 2) {
+            rankClass = 'rank-highlight rank-silver';
+            rankBadge = '<span class="rank-badge rank-badge-silver">🥈 Rank #2</span>';
+          } else if (rank === 3) {
+            rankClass = 'rank-highlight rank-bronze';
+            rankBadge = '<span class="rank-badge rank-badge-bronze">🥉 Rank #3</span>';
+          } else {
+            rankBadge = `<span class="rank-badge rank-badge-regular">#${rank}</span>`;
+          }
+
+          const img = item.image || 'assets/placeholder-burger.png';
+          const favCount = Number(item.favoriteCount || 0);
+          const avgRating = Number(item.averageRating || 0);
+          const revCount = Number(item.reviewCount || 0);
+          const price = Number(item.price || 0).toFixed(2);
+
+          return `
+            <article class="admin-ranking-card ${rankClass}">
+              <div class="ranking-card-left">
+                <div class="ranking-badge-container">
+                  ${rankBadge}
+                </div>
+                <img
+                  src="${escapeHtml(img)}"
+                  alt="${escapeHtml(item.name)}"
+                  class="ranking-item-thumb"
+                  onerror="this.onerror=null;this.src='assets/placeholder-burger.png';"
+                />
+                <div class="ranking-item-info">
+                  <h4 class="ranking-item-name">${escapeHtml(item.name)}</h4>
+                  <div class="ranking-item-sub">
+                    ${item.categoryName ? `<span class="badge" style="font-size:0.7rem;">${escapeHtml(item.categoryName)}</span>` : ''}
+                    <span class="ranking-item-price">₱${price}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ranking-card-stats">
+                <div class="ranking-stat-box ranking-favorites-box">
+                  <span class="ranking-stat-label">Customer Favorites</span>
+                  <div class="ranking-stat-value" style="display:inline-flex;align-items:center;gap:6px;color:#E53E3E;">
+                    ${lucideIcon('heart', { size: 20, fill: '#E53E3E', stroke: '#E53E3E', ariaHidden: true })}
+                    <strong>${favCount}</strong>
+                  </div>
+                </div>
+
+                <div class="ranking-stat-box ranking-rating-box">
+                  <span class="ranking-stat-label">Customer Rating</span>
+                  <div>
+                    ${renderRatingBadge(avgRating, revCount, { size: 16 })}
+                  </div>
+                </div>
+              </div>
+            </article>
+          `;
+        })
+        .join('')}
+    </div>
+  `;
+
+  if (pagWrapper) {
+    pagWrapper.style.display = 'flex';
+  }
+  if (pagInfo) {
+    const end = Math.min(startIndex + ADMIN_FAVORITES_PER_PAGE, totalItems);
+    pagInfo.textContent = `Showing ${startIndex + 1}–${end} of ${totalItems} favorites (Page ${adminFavoritesCurrentPage} of ${totalPages})`;
+  }
+  if (prevBtn) {
+    prevBtn.disabled = adminFavoritesCurrentPage <= 1;
+  }
+  if (nextBtn) {
+    nextBtn.disabled = adminFavoritesCurrentPage >= totalPages;
   }
 }
 
@@ -2066,6 +2112,29 @@ function attachAdminEventListeners() {
     favoritesRefreshBtn.addEventListener('click', () => loadAdminTopFavorites());
   }
 
+  const favPrevBtn = document.getElementById('favorites-prev-btn');
+  if (favPrevBtn) {
+    favPrevBtn.addEventListener('click', () => {
+      if (adminFavoritesCurrentPage > 1) {
+        adminFavoritesCurrentPage--;
+        renderAdminTopFavoritesPage();
+      }
+    });
+  }
+
+  const favNextBtn = document.getElementById('favorites-next-btn');
+  if (favNextBtn) {
+    favNextBtn.addEventListener('click', () => {
+      const totalPages = Math.ceil(
+        adminFavoritesRankings.length / ADMIN_FAVORITES_PER_PAGE
+      );
+      if (adminFavoritesCurrentPage < totalPages) {
+        adminFavoritesCurrentPage++;
+        renderAdminTopFavoritesPage();
+      }
+    });
+  }
+
   // Orders pagination
   const prevPageBtn = document.getElementById('orders-prev-page');
   const nextPageBtn = document.getElementById('orders-next-page');
@@ -2658,7 +2727,8 @@ function initAdmin() {
       loadDashboardRecentOrders();
     } else if (
       activeSection === 'dashboard' ||
-      activeSection === 'top-items'
+      activeSection === 'top-items' ||
+      activeSection === 'top-favorites'
     ) {
       loadDashboardStats();
     }
