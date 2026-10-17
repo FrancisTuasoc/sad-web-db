@@ -21,6 +21,8 @@ class SiteHeader extends HTMLElement {
 
     const brandHref = isAdmin ? 'admin.html' : 'index.html';
     const brandLabel = isAdmin ? 'GIGABITE Admin Dashboard' : 'GIGABITE Home';
+    const isHomePage = document.body.classList.contains('home-page');
+    const brandLogoSrc = isHomePage ? 'assets/logo-white.png' : 'assets/logo.svg';
 
     this.innerHTML = `
       <div class="container header-container">
@@ -30,7 +32,7 @@ class SiteHeader extends HTMLElement {
             : ''
         }
         <a href="${brandHref}" class="brand-logo" aria-label="${brandLabel}">
-          <img src="assets/logo.svg" alt="GIGABITE Logo" />
+          <img src="${brandLogoSrc}" alt="GIGABITE Logo" />
         </a>
         ${
           isAdmin

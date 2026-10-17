@@ -276,56 +276,120 @@ h6 {
 
 .home-page .site-header {
   background: #000000 !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-bottom: none !important;
   box-shadow: none !important;
+  height: 72px !important;
+  min-height: 72px !important;
+}
+
+.home-page .site-header .container.header-container {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  max-width: var(--container-max) !important;
+  height: 100% !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .home-page .site-header .brand-logo {
-  gap: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  height: auto !important;
+  text-decoration: none !important;
+  gap: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
 }
 
 .home-page .site-header .brand-logo img {
-  width: 32px !important;
-  height: 32px !important;
+  height: 38px !important;
+  max-height: 38px !important;
+  width: auto !important;
+  flex: none !important;
+  display: block !important;
   object-fit: contain !important;
-  filter: brightness(0) invert(1) !important;
+  object-position: left center !important;
+  filter: none !important;
 }
 
 .home-page .site-header .brand-logo::after {
-  content: 'GIGABITE' !important;
-  color: #ffffff !important;
-  font-family: var(--font-heading) !important;
-  font-weight: 800 !important;
-  font-size: 1.25rem !important;
-  letter-spacing: 0.05em !important;
+  content: none !important;
+  display: none !important;
+}
+
+.home-page .site-header .customer-store-navigation {
+  margin-left: auto !important;
+  margin-right: 28px !important;
+}
+
+.home-page .site-header .nav-links {
+  display: flex !important;
+  align-items: center !important;
+  gap: 28px !important;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .home-page .site-header .nav-links a {
-  color: rgba(255, 255, 255, 0.88) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-family: var(--font-heading) !important;
   font-size: 0.95rem !important;
   font-weight: 500 !important;
+  line-height: 1 !important;
+  padding: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  text-decoration: none !important;
   transition: color 0.15s ease !important;
 }
 
 .home-page .site-header .nav-links a:hover {
   color: #ffffff !important;
+  background: transparent !important;
 }
 
 .home-page .site-header .nav-links a.active {
   color: #c84825 !important;
   font-weight: 600 !important;
+  background: transparent !important;
 }
 
 .home-page .site-header .nav-links a::after {
   display: none !important;
+  content: none !important;
+}
+
+.home-page .site-header .header-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
 }
 
 .home-page .site-header .cart-btn,
 .home-page .site-header .notification-btn {
+  position: relative !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   color: #ffffff !important;
+  padding: 0 !important;
+  font-size: 1.15rem !important;
+  cursor: pointer !important;
+  border-radius: 50% !important;
+  transition: background 0.15s ease !important;
 }
 
 .home-page .site-header .cart-btn:hover,
@@ -335,17 +399,72 @@ h6 {
 }
 
 .home-page .site-header .cart-badge {
+  position: absolute !important;
+  top: -2px !important;
+  right: -4px !important;
+  min-width: 17px !important;
+  height: 17px !important;
+  border-radius: 9999px !important;
   background: #c84825 !important;
   color: #ffffff !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 4px !important;
   border: none !important;
+  line-height: 1 !important;
+}
+
+.home-page .site-header .notification-badge {
+  position: absolute !important;
+  top: 4px !important;
+  right: 4px !important;
+  width: 8px !important;
+  height: 8px !important;
+  min-width: 8px !important;
+  border-radius: 50% !important;
+  background: #c84825 !important;
+  border: none !important;
+  padding: 0 !important;
 }
 
 .home-page .site-header .avatar-btn {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
   border: 2px solid #b46b43 !important;
   border-radius: 50% !important;
   background: transparent !important;
   padding: 0 !important;
   overflow: hidden !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.home-page .site-header .avatar-btn img,
+.home-page .site-header .avatar-circle {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+}
+
+.home-page .site-header #header-user-slot .btn-primary {
+  background: #c54424 !important;
+  border-color: #c54424 !important;
+  color: #ffffff !important;
+  border-radius: 9999px !important;
+  padding: 8px 18px !important;
+  font-weight: 600 !important;
+}
+
+.home-page .site-header #header-user-slot .btn-primary:hover {
+  background: #d44d2b !important;
+  border-color: #d44d2b !important;
 }
 
 .site-header #header-user-slot .btn-primary {
@@ -3432,8 +3551,7 @@ textarea:focus-visible {
   max-width: var(--container-max);
 }
 
-.site-header,
-.home-page .site-header {
+.site-header {
   height: 72px;
   background: rgba(255, 255, 255, 0.97) !important;
   color: var(--color-text-main) !important;
@@ -3463,8 +3581,7 @@ textarea:focus-visible {
   gap: 6px;
 }
 
-.site-header .nav-links a,
-.home-page .site-header .nav-links a {
+.site-header .nav-links a {
   min-height: 40px !important;
   padding: 0 12px !important;
   border: 0;
@@ -3475,9 +3592,7 @@ textarea:focus-visible {
 }
 
 .site-header .nav-links a:hover,
-.site-header .nav-links a.active,
-.home-page .site-header .nav-links a:hover,
-.home-page .site-header .nav-links a.active {
+.site-header .nav-links a.active {
   background: #edf4ee;
   color: var(--brand-primary-hover) !important;
 }
@@ -3488,7 +3603,6 @@ textarea:focus-visible {
 }
 
 .site-header .cart-btn,
-.home-page .site-header .cart-btn,
 .site-header .mobile-nav-toggle{
   color: var(--brand-primary-hover) !important;
   background: #f5f8f5 !important;
@@ -8782,12 +8896,12 @@ body:not(.admin-page) .site-header {
   backdrop-filter: none !important;
 }
 
-body:not(.admin-page) .site-header .brand-logo {
+body:not(.admin-page):not(.home-page) .site-header .brand-logo {
   gap: 8px;
   color: var(--public-header-foreground) !important;
 }
 
-body:not(.admin-page) .site-header .brand-logo img {
+body:not(.admin-page):not(.home-page) .site-header .brand-logo img {
   width: 40px !important;
   height: 40px !important;
   max-height: none !important;
@@ -8796,7 +8910,7 @@ body:not(.admin-page) .site-header .brand-logo img {
   object-position: left center;
 }
 
-body:not(.admin-page) .site-header .brand-logo::after {
+body:not(.admin-page):not(.home-page) .site-header .brand-logo::after {
   content: 'GIGABITE' !important;
   color: var(--public-header-foreground) !important;
   font-family: var(--font-heading);
@@ -8806,7 +8920,7 @@ body:not(.admin-page) .site-header .brand-logo::after {
   line-height: 1;
 }
 
-body:not(.admin-page) .site-header .nav-links a {
+body:not(.admin-page):not(.home-page) .site-header .nav-links a {
   min-height: 40px;
   padding: 0 12px !important;
   border: 1px solid transparent;
@@ -8821,15 +8935,15 @@ body:not(.admin-page) .site-header .nav-links a {
     opacity 160ms ease;
 }
 
-body:not(.admin-page) .site-header .nav-links a:hover,
-body:not(.admin-page) .site-header .nav-links a:focus-visible {
+body:not(.admin-page):not(.home-page) .site-header .nav-links a:hover,
+body:not(.admin-page):not(.home-page) .site-header .nav-links a:focus-visible {
   border-color: transparent;
   background: rgba(255, 255, 255, 0.08) !important;
   color: var(--public-header-foreground) !important;
   opacity: 1;
 }
 
-body:not(.admin-page) .site-header .nav-links a.active {
+body:not(.admin-page):not(.home-page) .site-header .nav-links a.active {
   border-color: transparent;
   border-radius: var(--radius-btn, 6px);
   background: rgba(255, 255, 255, 0.12) !important;
