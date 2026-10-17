@@ -14710,6 +14710,132 @@ body.auth-split-body {
   color: #ffffff;
 }
 
+/* ==========================================================================
+   SECTION VERTICAL WHITESPACE & ALIGNMENT FIXES
+   (Popular Favorites, About, Reviews, Visit Us)
+   ========================================================================== */
+
+/* 1. Reduce padding-top and margin-top on main section wrappers & h1/h2 tags */
+body.home-page #featured,
+body.home-page #about,
+body.home-page #testimonials,
+body.home-page #contact {
+  justify-content: flex-start !important;
+  padding-top: clamp(14px, 2.5vh, 22px) !important;
+  padding-bottom: clamp(20px, 3vh, 32px) !important;
+}
+
+body.home-page #featured .section-title,
+body.home-page #about .section-title,
+body.home-page #testimonials .section-title,
+body.home-page #contact .section-title,
+body.home-page #featured h1,
+body.home-page #featured h2,
+body.home-page #about h1,
+body.home-page #about h2,
+body.home-page #testimonials h1,
+body.home-page #testimonials h2,
+body.home-page #contact h1,
+body.home-page #contact h2,
+body.home-page #about .home-section-eyebrow,
+body.home-page #testimonials .hero-badge {
+  margin-top: 0 !important;
+}
+
+/* 2. Visit Us section: Reduce margin-bottom of main title & margin-top of card grid */
+body.home-page #contact .section-header {
+  margin-bottom: 12px !important;
+}
+
+body.home-page #contact .section-title {
+  margin-bottom: 4px !important;
+}
+
+body.home-page #contact .section-desc {
+  margin-bottom: 0 !important;
+}
+
+body.home-page #contact .contact-grid {
+  margin-top: 0 !important;
+}
+
+/* 3. Reviews section: Reduce container height & center 'No reviews yet' box with flexbox */
+body.home-page #testimonials,
+#testimonials.testimonials-section {
+  min-height: auto !important;
+}
+
+#testimonials .container {
+  min-height: auto !important;
+}
+
+#testimonials .testimonials-grid:has(.state-box),
+#testimonials:has(.state-box) .testimonials-grid {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 180px !important;
+  width: 100% !important;
+}
+
+#testimonials .state-box {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  min-height: 160px !important;
+  margin: 0 auto !important;
+  grid-column: 1 / -1 !important;
+}
+
+/* 4. Popular section: Left edge of heading aligns with 1st card, View Full Menu aligns with last card */
+body.home-page #featured .container {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+body.home-page #featured .section-header {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body.home-page #featured .section-header > div:first-child {
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+}
+
+body.home-page #featured .section-title {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  text-align: left !important;
+}
+
+body.home-page #featured #featured-grid.product-grid {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body.home-page #featured .section-header > .btn,
+body.home-page #featured .section-header a.btn {
+  margin-right: 0 !important;
+  margin-left: auto !important;
+  align-self: flex-end !important;
+}
+
+
 
 
 
