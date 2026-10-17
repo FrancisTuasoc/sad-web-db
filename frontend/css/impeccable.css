@@ -11373,7 +11373,7 @@ body:not(.admin-page) .site-header .nav-links a::after {
   left: 0 !important;
   width: 100% !important;
   height: 2.5px !important;
-  background: #4ade80 !important;
+  background: var(--brand-primary, #D14B2D) !important;
   border-radius: 2px !important;
   transform: scaleX(0);
   transform-origin: center;
@@ -11386,26 +11386,27 @@ body:not(.admin-page) .site-header .nav-links a:hover,
 body:not(.admin-page) .site-header .nav-links a:focus-visible {
   text-decoration: none !important;
   opacity: 1 !important;
+  color: var(--brand-primary, #D14B2D) !important;
 }
 
 body:not(.admin-page) .site-header .nav-links a:hover::after,
 body:not(.admin-page) .site-header .nav-links a:focus-visible::after {
-  transform: scaleX(0.65) !important;
-  opacity: 0.75 !important;
+  transform: scaleX(0.75) !important;
+  opacity: 0.85 !important;
 }
 
 body:not(.admin-page) .site-header .nav-links a.active {
-  color: #c84825 !important;
-  font-weight: 600 !important;
+  color: var(--brand-primary, #D14B2D) !important;
+  font-weight: 700 !important;
   opacity: 1 !important;
   text-decoration: none !important;
   background: transparent !important;
 }
 
-body:not(.admin-page) .site-header .nav-links a::after,
 body:not(.admin-page) .site-header .nav-links a.active::after {
-  content: none !important;
-  display: none !important;
+  transform: scaleX(1) !important;
+  opacity: 1 !important;
+  display: block !important;
 }
 
 body:not(.admin-page) .site-header :is(
@@ -13368,19 +13369,76 @@ body.theme-dark .admin-layout #section-dashboard .stat-card-customers .stat-icon
   scroll-margin-top: var(--header-height, 60px) !important;
 }
 
-/* Mobile Drawer Navigation Active State */
+/* Mobile & Tablet Drawer Navigation Underline & Active Styling */
+body:not(.admin-page) .site-header .mobile-drawer a,
+site-header.site-header .mobile-drawer a,
 .site-header .mobile-drawer a {
   position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  min-height: 48px !important;
+  padding: 12px 14px !important;
+  margin: 2px 0 !important;
+  border-left: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
   text-decoration: none !important;
-  transition: color 0.2s ease, padding-left 0.2s ease, background 0.2s ease !important;
+  background: transparent !important;
+  transition: color 180ms ease, background 180ms ease, padding-left 180ms ease !important;
 }
 
+body:not(.admin-page) .site-header .mobile-drawer a::after,
+site-header.site-header .mobile-drawer a::after,
+.site-header .mobile-drawer a::after {
+  content: '' !important;
+  display: block !important;
+  position: absolute !important;
+  bottom: -1px !important;
+  left: 14px !important;
+  width: 0 !important;
+  height: 3px !important;
+  background: var(--brand-primary, #D14B2D) !important;
+  border-radius: 3px !important;
+  box-shadow: 0 0 10px rgba(209, 75, 45, 0.6) !important;
+  transition: width 240ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  pointer-events: none !important;
+}
+
+body:not(.admin-page) .site-header .mobile-drawer a:hover,
+site-header.site-header .mobile-drawer a:hover,
+.site-header .mobile-drawer a:hover,
+body:not(.admin-page) .site-header .mobile-drawer a:focus-visible,
+site-header.site-header .mobile-drawer a:focus-visible,
+.site-header .mobile-drawer a:focus-visible {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  padding-left: 18px !important;
+}
+
+body:not(.admin-page) .site-header .mobile-drawer a:hover::after,
+site-header.site-header .mobile-drawer a:hover::after,
+.site-header .mobile-drawer a:hover::after {
+  width: 50px !important;
+}
+
+body:not(.admin-page) .site-header .mobile-drawer a.active,
+site-header.site-header .mobile-drawer a.active,
 .site-header .mobile-drawer a.active {
-  color: #4ade80 !important;
+  color: var(--brand-primary, #D14B2D) !important;
   font-weight: 700 !important;
-  border-left: 3px solid #4ade80 !important;
-  padding-left: 14px !important;
-  background: rgba(74, 222, 128, 0.1) !important;
+  background: rgba(209, 75, 45, 0.08) !important;
+  border-left: none !important;
+  border-radius: 8px 8px 0 0 !important;
+  padding-left: 16px !important;
+}
+
+body:not(.admin-page) .site-header .mobile-drawer a.active::after,
+site-header.site-header .mobile-drawer a.active::after,
+.site-header .mobile-drawer a.active::after {
+  width: calc(100% - 28px) !important;
+  background: var(--brand-primary, #D14B2D) !important;
 }
 
 /* Universal tab styling in dark mode */
@@ -15594,4 +15652,87 @@ body.home-page #contact .contact-grid {
 body.home-page #contact .contact-card {
   margin-top: 0 !important;
 }
+
+/* ==========================================================================
+   Shopping Cart Hero Banner (Matches Reference Mockup)
+   ========================================================================== */
+.cart-page-intro,
+body.theme-dark .cart-page-intro {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  min-height: clamp(180px, 20vw, 240px) !important;
+  margin: 28px 0 24px !important;
+  padding: clamp(24px, 4vw, 44px) clamp(20px, 4vw, 48px) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background-color: #171614 !important;
+  background-image:
+    linear-gradient(to right, rgba(23, 22, 20, 0.94) 0%, rgba(23, 22, 20, 0.8) 42%, rgba(23, 22, 20, 0.25) 75%, transparent 100%),
+    url('../assets/items/images/shopping-cart-image.png') !important;
+  background-repeat: no-repeat !important;
+  background-position: right center !important;
+  background-size: cover !important;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.16) !important;
+  overflow: hidden !important;
+}
+
+.cart-intro-art {
+  display: none !important;
+}
+
+.cart-page-intro > div:first-child,
+.cart-page-intro .cart-page-intro-copy {
+  position: relative !important;
+  z-index: 2 !important;
+  max-width: 580px !important;
+}
+
+.cart-page-eyebrow,
+.cart-page-intro .cart-page-eyebrow {
+  color: var(--brand-primary, #D14B2D) !important;
+  font-size: clamp(0.72rem, 1.2vw, 0.8rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  margin: 0 0 10px 0 !important;
+}
+
+.cart-page-intro h1,
+body.theme-dark .cart-page-intro h1 {
+  color: #fdf5ec !important;
+  font-size: clamp(1.85rem, 4vw, 2.6rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.15 !important;
+  margin: 0 0 10px 0 !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
+}
+
+.cart-page-description,
+.cart-page-intro .cart-page-description {
+  color: rgba(255, 255, 255, 0.78) !important;
+  font-size: clamp(0.9rem, 1.4vw, 1rem) !important;
+  line-height: 1.5 !important;
+  margin: 0 !important;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6) !important;
+}
+
+@media (max-width: 600px) {
+  .cart-page-intro,
+  body.theme-dark .cart-page-intro {
+    margin: 16px 0 20px 0 !important;
+    padding: 24px 20px !important;
+    min-height: 160px !important;
+    background-image:
+      linear-gradient(to right, rgba(23, 22, 20, 0.95) 0%, rgba(23, 22, 20, 0.85) 60%, rgba(23, 22, 20, 0.45) 100%),
+      url('../assets/items/images/shopping-cart-image.png') !important;
+    background-position: right center !important;
+  }
+  .cart-page-intro h1,
+  body.theme-dark .cart-page-intro h1 {
+    font-size: clamp(1.6rem, 7vw, 2rem) !important;
+  }
+}
+
 
