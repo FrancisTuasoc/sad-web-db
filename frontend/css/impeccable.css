@@ -7502,37 +7502,30 @@ body:has(.admin-layout) * {
 .admin-layout #section-orders .admin-table :is(th, td):nth-child(6),
 .admin-layout #section-orders .admin-table :is(th, td):nth-child(7),
 .admin-layout #section-orders .admin-table :is(th, td):nth-child(8),
-.admin-layout #section-menu .admin-table :is(th, td):nth-child(4),
-.admin-layout #section-menu .admin-table :is(th, td):nth-child(5),
-.admin-layout #section-menu .admin-table :is(th, td):nth-child(6),
-.admin-layout #section-categories .admin-table :is(th, td):nth-child(2),
-.admin-layout #section-categories .admin-table :is(th, td):nth-child(3),
-.admin-layout #section-categories .admin-table :is(th, td):nth-child(4),
-.admin-layout #section-customers .admin-table :is(th, td):nth-child(6),
-.admin-layout #section-customers .admin-table :is(th, td):nth-child(7) {
-  text-align: center;
-}
-
-.admin-layout #section-orders .admin-table :is(th, td):nth-child(5),
-.admin-layout #section-menu .admin-table :is(th, td):nth-child(3),
-.admin-layout #section-customers .admin-table :is(th, td):nth-child(5) {
-  text-align: right;
+.admin-layout .admin-table th,
+.admin-layout .admin-table td {
+  text-align: left !important;
+  vertical-align: middle !important;
 }
 
 .admin-layout .admin-table td:last-child > div {
-  justify-content: center;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
 }
 
 .admin-layout .admin-table td:last-child .btn {
-  white-space: nowrap;
+  white-space: nowrap !important;
 }
 
 .admin-layout .customer-orders-metric {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  white-space: nowrap;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
+  white-space: nowrap !important;
 }
 
 .admin-layout .customer-orders-metric span {
@@ -7774,40 +7767,27 @@ body:has(.admin-layout) * {
 .admin-layout #section-orders .admin-table :is(th, td):nth-child(6),
 .admin-layout #section-orders .admin-table :is(th, td):nth-child(7),
 .admin-layout #section-orders .admin-table :is(th, td):nth-child(8),
-.admin-layout #section-menu .admin-table :is(th, td):nth-child(4),
-.admin-layout #section-menu .admin-table :is(th, td):nth-child(5),
-.admin-layout #section-menu .admin-table :is(th, td):nth-child(6),
-.admin-layout #section-categories .admin-table :is(th, td):nth-child(2),
-.admin-layout #section-categories .admin-table :is(th, td):nth-child(3),
-.admin-layout #section-categories .admin-table :is(th, td):nth-child(4),
-.admin-layout #section-customers .admin-table :is(th, td):nth-child(4),
-.admin-layout #section-customers .admin-table :is(th, td):nth-child(6),
-.admin-layout #section-customers .admin-table :is(th, td):nth-child(7) {
-  text-align: center;
-}
-
-.admin-layout #section-orders .admin-table :is(th, td):nth-child(5),
-.admin-layout #section-menu .admin-table :is(th, td):nth-child(3),
-.admin-layout #section-customers .admin-table :is(th, td):nth-child(5) {
-  text-align: right;
+.admin-layout .admin-table th,
+.admin-layout .admin-table td {
+  text-align: left !important;
+  vertical-align: middle !important;
 }
 
 .admin-layout .admin-table td:last-child > div {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
   gap: 6px !important;
 }
 
 .admin-layout .admin-table td:last-child .btn {
-  min-width: 84px;
-  white-space: nowrap;
+  white-space: nowrap !important;
 }
 
 .admin-layout #admin-customers-tbody .customer-orders-metric {
-  align-items: flex-end;
-  gap: 2px;
+  align-items: flex-start !important;
+  gap: 2px !important;
 }
 
 .admin-layout #admin-customers-tbody .customer-orders-metric span {
@@ -15187,6 +15167,129 @@ body.admin-page .site-header.admin-site-header,
   background-color: #000000 !important;
   color: #ffffff !important;
   border-bottom: 1px solid #1f1f1f !important;
+}
+
+/* Admin Table Text Alignments */
+body.admin-page .admin-table th,
+body.admin-page .admin-table td {
+  text-align: left !important;
+  vertical-align: middle !important;
+}
+
+body.admin-page .admin-table td:last-child > div {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+}
+
+body.admin-page .customer-orders-metric,
+body.admin-page #admin-customers-tbody .customer-orders-metric {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  text-align: left !important;
+}
+
+/* Admin Modals & Edit Menu Item Dialog Box */
+body.admin-page .modal-overlay {
+  z-index: 99999 !important;
+}
+
+body.admin-page .modal-overlay.open {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+body.admin-page #product-modal .modal-card {
+  max-width: 540px !important;
+  width: 95vw !important;
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-radius: 12px !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.28) !important;
+  max-height: 90vh !important;
+  max-height: 90dvh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+body.admin-page #product-modal #product-form {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+body.admin-page #product-modal .modal-header {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  padding: 16px 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+body.admin-page #product-modal .modal-header h3 {
+  color: #111827 !important;
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+}
+
+body.admin-page #product-modal .modal-body {
+  overflow-y: auto !important;
+  flex: 1 1 auto !important;
+  padding: 18px 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  text-align: left !important;
+}
+
+body.admin-page #product-modal .modal-footer {
+  background: #f9fafb !important;
+  border-top: 1px solid #e5e7eb !important;
+  padding: 14px 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+}
+
+body.admin-page #product-modal .form-label {
+  color: #374151 !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 4px !important;
+  display: block !important;
+  text-align: left !important;
+}
+
+body.admin-page #product-modal :is(.form-input, .form-select, .form-textarea) {
+  border: 1px solid #d1d5db !important;
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  font-size: 0.88rem !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+}
+
+body.admin-page #product-modal :is(.form-input, .form-select, .form-textarea):focus {
+  border-color: var(--brand-primary, #D14B2D) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(209, 75, 45, 0.2) !important;
 }
 
 

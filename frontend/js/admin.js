@@ -57,6 +57,7 @@ let menuSearchQuery = '';
 let editingProductId = null;
 let editingCategoryId = null;
 let categoriesList = [];
+let menuProductsList = [];
 
 function renderOpsDashboard(stats) {
   const chartError = document.getElementById('ops-chart-error');
@@ -1480,7 +1481,7 @@ async function loadAdminMenu() {
   if (!tbody) return;
 
   tbody.innerHTML =
-    '<tr><td colspan="7" class="text-center" style="padding:24px;">Loading menu items...</td></tr>';
+    '<tr><td colspan="6" class="text-center" style="padding:24px;">Loading menu items...</td></tr>';
 
   try {
     const params = new URLSearchParams();
@@ -1492,10 +1493,11 @@ async function loadAdminMenu() {
 
     const res = await apiFetch(`/admin/products?${params.toString()}`);
     const products = res.products || [];
+    menuProductsList = products;
 
     if (products.length === 0) {
       tbody.innerHTML =
-        '<tr><td colspan="7" class="text-center text-muted" style="padding:32px;">No menu items found.</td></tr>';
+        '<tr><td colspan="6" class="text-center text-muted" style="padding:32px;">No menu items found.</td></tr>';
       return;
     }
 
@@ -1530,7 +1532,6 @@ async function loadAdminMenu() {
               <span style="font-weight:700;${isOut ? 'color:var(--color-danger);' : isLow ? 'color:var(--color-warning);' : ''}">
                 ${p.stock}
               </span>
-              <div style="font-size:0.75rem;color:var(--color-text-muted);">Threshold: ${p.lowStockThreshold}</div>
             </td>
             <td>
               <span class="badge ${p.isAvailable ? 'badge-in-stock' : 'badge-out-stock'}">
@@ -1538,13 +1539,13 @@ async function loadAdminMenu() {
               </span>
             </td>
             <td>
-              <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                <button class="btn btn-secondary btn-sm btn-edit-product" data-product-id="${p._id}">Edit</button>
-                <button class="btn btn-secondary btn-sm btn-restock-product" data-product-id="${p._id}" data-current-stock="${p.stock}">Restock</button>
-                <button class="btn btn-secondary btn-sm btn-toggle-availability" data-product-id="${p._id}">
+              <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">
+                <button class="btn btn-secondary btn-sm btn-edit-product" data-product-id="${p._id || p.id}">Edit</button>
+                <button class="btn btn-secondary btn-sm btn-restock-product" data-product-id="${p._id || p.id}" data-current-stock="${p.stock}">Restock</button>
+                <button class="btn btn-secondary btn-sm btn-toggle-availability" data-product-id="${p._id || p.id}">
                   ${p.isAvailable ? 'Disable' : 'Enable'}
                 </button>
-                <button class="btn btn-danger btn-sm btn-delete-product" data-product-id="${p._id}" data-name="${escapeHtml(p.name)}">Delete</button>
+                <button class="btn btn-danger btn-sm btn-delete-product" data-product-id="${p._id || p.id}" data-name="${escapeHtml(p.name)}">Delete</button>
               </div>
             </td>
           </tr>
@@ -1552,7 +1553,7 @@ async function loadAdminMenu() {
       })
       .join('');
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger" style="padding:24px;">Failed to load items: ${escapeHtml(err.message)}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger" style="padding:24px;">Failed to load items: ${escapeHtml(err.message)}</td></tr>`;
   }
 }
 
@@ -1565,31 +1566,61 @@ async function openProductModal(productId = null) {
 
   if (!modal || !form) return;
 
+  // Clear image file input
+  const imgInput = document.getElementById('product-image-file');
+  if (imgInput) imgInput.value = '';
+
   // Populate category select
   const catSelect = document.getElementById('product-category-input');
   if (catSelect) {
     if (categoriesList.length === 0) {
-      const res = await apiFetch('/categories');
-      categoriesList = res.categories || [];
+      try {
+        const res = await apiFetch('/categories');
+        categoriesList = res.categories || [];
+      } catch (err) {
+        console.error('Failed to load categories', err);
+      }
     }
     catSelect.innerHTML = categoriesList
-      .map((c) => `<option value="${c._id}">${escapeHtml(c.name)}</option>`)
+      .map((c) => `<option value="${c._id || c.id}">${escapeHtml(c.name)}</option>`)
       .join('');
   }
 
   if (productId) {
     title.textContent = 'Edit Menu Item';
-    try {
-      const res = await apiFetch(`/products/${productId}`);
-      const p = res.product;
-      document.getElementById('product-name-input').value = p.name;
-      document.getElementById('product-price-input').value = p.price;
+    // Find product in cached list first for instant display
+    let p = menuProductsList.find((item) => (item._id || item.id) === productId);
+
+    if (!p) {
+      try {
+        const res = await apiFetch(`/products/${productId}`);
+        p = res.product;
+      } catch (e) {
+        showToast('Error loading item details', 'error');
+        return;
+      }
+    }
+
+    if (p) {
+      document.getElementById('product-name-input').value = p.name || '';
+      document.getElementById('product-price-input').value =
+        p.price !== undefined ? p.price : '';
       document.getElementById('product-description-input').value =
         p.description || '';
-      document.getElementById('product-stock-input').value = p.stock;
+      document.getElementById('product-stock-input').value =
+        p.stock !== undefined ? p.stock : 0;
       document.getElementById('product-threshold-input').value =
-        p.lowStockThreshold || 10;
-      if (catSelect) catSelect.value = p.category._id || p.category;
+        p.lowStockThreshold !== undefined ? p.lowStockThreshold : 10;
+
+      const catId =
+        p.category?._id ||
+        p.category?.id ||
+        p.categoryId ||
+        (typeof p.category === 'string' ? p.category : '');
+      if (catSelect && catId) {
+        catSelect.value = catId;
+      }
+
       document.getElementById('product-is-addon-input').checked = Boolean(
         p.isAddon
       );
@@ -1599,9 +1630,6 @@ async function openProductModal(productId = null) {
       document.getElementById('product-is-featured-input').checked = Boolean(
         p.isFeatured
       );
-    } catch (e) {
-      showToast('Error loading item details', 'error');
-      return;
     }
   } else {
     title.textContent = 'Add New Menu Item';
@@ -2391,23 +2419,24 @@ function attachAdminEventListeners() {
 
       try {
         const name = document.getElementById('product-name-input').value.trim();
-        const price = parseFloat(
-          document.getElementById('product-price-input').value
-        );
+        const price =
+          parseFloat(document.getElementById('product-price-input').value) || 0;
         const description = document
           .getElementById('product-description-input')
           .value.trim();
-        const stock = parseInt(
-          document.getElementById('product-stock-input').value,
-          10
-        );
-        const lowStockThreshold = parseInt(
-          document.getElementById('product-threshold-input').value,
-          10
-        );
-        const category = document.getElementById(
+        const stock =
+          parseInt(document.getElementById('product-stock-input').value, 10) || 0;
+        const lowStockThreshold =
+          parseInt(
+            document.getElementById('product-threshold-input').value,
+            10
+          ) || 10;
+        let category = document.getElementById(
           'product-category-input'
         ).value;
+        if (!category && categoriesList.length > 0) {
+          category = categoriesList[0]._id || categoriesList[0].id;
+        }
         const isAddon = document.getElementById(
           'product-is-addon-input'
         ).checked;
