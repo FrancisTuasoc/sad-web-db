@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -41,12 +41,21 @@
               class="brand-logo"
               style="text-decoration: none"
             >
-              <img src="assets/logo.svg" alt="GIGABITE Admin home" />
+              <img src="assets/logo-white.svg" alt="GIGABITE Admin" class="admin-logo-img" style="height: 34px; width: auto;" />
             </a>
             <span class="badge">ADMIN PORTAL</span>
           </div>
 
           <div class="admin-header-actions header-actions">
+            <a
+              href="index.html"
+              class="admin-view-store-btn"
+              target="_blank"
+              title="View Customer Storefront"
+            >
+              <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+              <span>View Store</span>
+            </a>
             <div class="notification-center-wrapper" id="admin-notifications-wrapper">
               <button
                 type="button"
@@ -71,6 +80,10 @@
                 </div>
               </div>
             </div>
+            <a href="profile.html" class="admin-header-profile-btn" title="Admin Profile">
+              <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+              <span>Profile</span>
+            </a>
           </div>
         </div>
       </header>
@@ -84,135 +97,201 @@
         ></button>
         <!-- Left Sidebar -->
         <aside class="admin-sidebar" id="admin-sidebar">
-        <button
-          type="button"
-          class="admin-nav-item active"
-          data-section="dashboard"
-          aria-label="Dashboard"
-          title="Dashboard"
-        >
-          <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>
-          <span class="admin-nav-label">Dashboard</span>
-        </button>
-        <button
-          type="button"
-          class="admin-nav-item"
-          data-section="all-reviews"
-          aria-label="All Reviews"
-          title="All Reviews"
-        >
-          <i class="fa-solid fa-comments" aria-hidden="true"></i>
-          <span class="admin-nav-label">All Reviews</span>
-        </button>
-        <button
-          type="button"
-          class="admin-nav-item"
-          data-section="top-favorites"
-          aria-label="Top Favorites"
-          title="Top Favorites"
-        >
-          <i class="fa-solid fa-heart" aria-hidden="true"></i>
-          <span class="admin-nav-label">Top Favorites</span>
-        </button>
-        <button
-          type="button"
-          class="admin-nav-item"
-          data-section="orders"
-          aria-label="Orders Management"
-          title="Orders Management"
-        >
-          <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
-          <span class="admin-nav-label">Orders Management</span
-          ><span
-            id="admin-pending-count"
-            class="badge badge-pending hidden"
-            aria-live="polite"
-            >0</span
-          >
-        </button>
-        <button
-          type="button"
-          class="admin-nav-item"
-          data-section="recent-orders"
-          aria-label="Recent Orders"
-          title="Recent Orders"
-        >
-          <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
-          <span class="admin-nav-label">Recent Orders</span>
-        </button>
-        <button
-          type="button"
-          class="admin-nav-item"
-          data-section="top-items"
-          aria-label="Top 5 Items"
-          title="Top 5 Items"
-        >
-          <i class="fa-solid fa-trophy" aria-hidden="true"></i>
-          <span class="admin-nav-label">Top 5 Items</span>
-        </button>
-        <button
-          type="button"
-          class="admin-nav-item"
-          data-section="menu"
-          aria-label="Menu and inventory"
-          title="Menu and inventory"
-        >
-          <i class="fa-solid fa-burger" aria-hidden="true"></i>
-          <span class="admin-nav-label">Menu & Add-ons</span>
-        </button>
-        <button
-          type="button"
-          class="admin-nav-item"
-          data-section="categories"
-          aria-label="Categories"
-          title="Categories"
-        >
-          <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
-          <span class="admin-nav-label">Categories</span>
-        </button>
-        <button
-          type="button"
-          class="admin-nav-item"
-          data-section="customers"
-          aria-label="Customers"
-          title="Customers"
-        >
-          <i class="fa-solid fa-user-group" aria-hidden="true"></i>
-          <span class="admin-nav-label">Customers</span>
-        </button>
-        <button
-          type="button"
-          class="admin-nav-item"
-          data-section="settings"
-          aria-label="Store Settings"
-          title="Store Settings"
-        >
-          <i class="fa-solid fa-store" aria-hidden="true"></i>
-          <span class="admin-nav-label">Store Settings</span>
-        </button>
-        <button
-          type="button"
-          class="admin-nav-item"
-          data-section="security"
-          aria-label="Security"
-          title="Security"
-        >
-          <i class="fa-solid fa-shield" aria-hidden="true"></i>
-          <span class="admin-nav-label">Security</span>
-        </button>
-        <div class="admin-sidebar-footer">
-          <button
-            type="button"
-            id="admin-logout-btn"
-            class="admin-nav-item admin-logout-nav"
-            aria-label="Log Out"
-            title="Log Out"
-          >
-            <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
-            <span class="admin-nav-label">Log Out</span>
-          </button>
-        </div>
-      </aside>
+          <div class="admin-sidebar-nav">
+            <!-- Section: Overview -->
+            <div class="admin-nav-category">
+              <span class="admin-nav-category-title">OVERVIEW</span>
+              <button
+                type="button"
+                class="admin-nav-item active"
+                data-section="dashboard"
+                aria-label="Dashboard"
+                title="Dashboard"
+              >
+                <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>
+                <span class="admin-nav-label">Dashboard</span>
+              </button>
+            </div>
+
+            <!-- Section: Operations -->
+            <div class="admin-nav-category">
+              <span class="admin-nav-category-title">OPERATIONS</span>
+              <div class="admin-nav-group">
+                <button
+                  type="button"
+                  class="admin-nav-item admin-nav-parent"
+                  data-section="orders"
+                  aria-label="Orders Management"
+                  title="Orders Management"
+                >
+                  <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
+                  <span class="admin-nav-label">Orders</span>
+                  <span
+                    id="admin-pending-count"
+                    class="badge badge-pending hidden"
+                    aria-live="polite"
+                    >0</span
+                  >
+                </button>
+                <div class="admin-nav-sublist">
+                  <button
+                    type="button"
+                    class="admin-nav-item admin-nav-subitem"
+                    data-section="orders"
+                    title="All Orders"
+                  >
+                    <span>All Orders</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="admin-nav-item admin-nav-subitem"
+                    data-section="recent-orders"
+                    title="Recent Orders"
+                  >
+                    <span>Recent Orders</span>
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="admin-nav-item"
+                data-section="customers"
+                aria-label="Customers"
+                title="Customers"
+              >
+                <i class="fa-solid fa-user-group" aria-hidden="true"></i>
+                <span class="admin-nav-label">Customers</span>
+              </button>
+            </div>
+
+            <!-- Section: Catalog -->
+            <div class="admin-nav-category">
+              <span class="admin-nav-category-title">CATALOG</span>
+              <div class="admin-nav-group">
+                <button
+                  type="button"
+                  class="admin-nav-item admin-nav-parent"
+                  data-section="menu"
+                  aria-label="Menu and Inventory"
+                  title="Menu & Catalog"
+                >
+                  <i class="fa-solid fa-burger" aria-hidden="true"></i>
+                  <span class="admin-nav-label">Menu & Catalog</span>
+                </button>
+                <div class="admin-nav-sublist">
+                  <button
+                    type="button"
+                    class="admin-nav-item admin-nav-subitem"
+                    data-section="menu"
+                    title="Items & Add-ons"
+                  >
+                    <span>Items & Add-ons</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="admin-nav-item admin-nav-subitem"
+                    data-section="categories"
+                    title="Categories"
+                  >
+                    <span>Categories</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section: Feedback & Insights -->
+            <div class="admin-nav-category">
+              <span class="admin-nav-category-title">FEEDBACK & STATS</span>
+              <div class="admin-nav-group">
+                <button
+                  type="button"
+                  class="admin-nav-item admin-nav-parent"
+                  data-section="all-reviews"
+                  aria-label="Customer Reviews & Insights"
+                  title="Reviews & Insights"
+                >
+                  <i class="fa-solid fa-comments" aria-hidden="true"></i>
+                  <span class="admin-nav-label">Reviews & Insights</span>
+                </button>
+                <div class="admin-nav-sublist">
+                  <button
+                    type="button"
+                    class="admin-nav-item admin-nav-subitem"
+                    data-section="all-reviews"
+                    title="Customer Reviews"
+                  >
+                    <span>All Reviews</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="admin-nav-item admin-nav-subitem"
+                    data-section="top-favorites"
+                    title="Top Favorites"
+                  >
+                    <span>Top Favorites</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="admin-nav-item admin-nav-subitem"
+                    data-section="top-items"
+                    title="Top 5 Items"
+                  >
+                    <span>Top 5 Items</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section: Settings -->
+            <div class="admin-nav-category">
+              <span class="admin-nav-category-title">SYSTEM</span>
+              <div class="admin-nav-group">
+                <button
+                  type="button"
+                  class="admin-nav-item admin-nav-parent"
+                  data-section="settings"
+                  aria-label="Store Settings"
+                  title="Settings"
+                >
+                  <i class="fa-solid fa-gear" aria-hidden="true"></i>
+                  <span class="admin-nav-label">Settings</span>
+                </button>
+                <div class="admin-nav-sublist">
+                  <button
+                    type="button"
+                    class="admin-nav-item admin-nav-subitem"
+                    data-section="settings"
+                    title="Store Configuration"
+                  >
+                    <span>Store Configuration</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="admin-nav-item admin-nav-subitem"
+                    data-section="security"
+                    title="Account Security"
+                  >
+                    <span>Security</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-sidebar-footer">
+            <button
+              type="button"
+              id="admin-logout-btn"
+              class="admin-nav-item admin-logout-nav"
+              aria-label="Log Out"
+              title="Log Out"
+            >
+              <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+              <span class="admin-nav-label">Log Out</span>
+            </button>
+          </div>
+        </aside>
 
       <!-- Main Content Area -->
         <main class="admin-main">
@@ -538,6 +617,25 @@
 
         <!-- SECTION: ALL REVIEWS -->
         <div id="section-all-reviews" class="admin-section hidden">
+          <div class="admin-section-header">
+            <div>
+              <h2 class="admin-section-title">Reviews & Insights</h2>
+              <span style="font-size: 0.85rem; color: var(--color-text-muted)"
+                >Customer feedback and item popularity statistics</span
+              >
+            </div>
+            <div class="admin-section-tabs">
+              <button type="button" class="admin-tab-btn active" data-target-section="all-reviews">
+                <i class="fa-solid fa-comments"></i> All Reviews
+              </button>
+              <button type="button" class="admin-tab-btn" data-target-section="top-favorites">
+                <i class="fa-solid fa-heart"></i> Top Favorites
+              </button>
+              <button type="button" class="admin-tab-btn" data-target-section="top-items">
+                <i class="fa-solid fa-trophy"></i> Top 5 Items
+              </button>
+            </div>
+          </div>
           <section class="step-card" aria-labelledby="all-reviews-heading">
             <div class="admin-insights-heading" style="flex-wrap:wrap;gap:16px;">
               <div>
@@ -593,6 +691,25 @@
 
         <!-- SECTION: TOP FAVORITES RANKING -->
         <div id="section-top-favorites" class="admin-section hidden">
+          <div class="admin-section-header">
+            <div>
+              <h2 class="admin-section-title">Reviews & Insights</h2>
+              <span style="font-size: 0.85rem; color: var(--color-text-muted)"
+                >Customer feedback and item popularity statistics</span
+              >
+            </div>
+            <div class="admin-section-tabs">
+              <button type="button" class="admin-tab-btn" data-target-section="all-reviews">
+                <i class="fa-solid fa-comments"></i> All Reviews
+              </button>
+              <button type="button" class="admin-tab-btn active" data-target-section="top-favorites">
+                <i class="fa-solid fa-heart"></i> Top Favorites
+              </button>
+              <button type="button" class="admin-tab-btn" data-target-section="top-items">
+                <i class="fa-solid fa-trophy"></i> Top 5 Items
+              </button>
+            </div>
+          </div>
           <section class="step-card" aria-labelledby="top-favorites-heading">
             <div class="admin-insights-heading">
               <div>
@@ -615,6 +732,22 @@
         </div>
 
         <div id="section-recent-orders" class="admin-section hidden">
+          <div class="admin-section-header">
+            <div>
+              <h2 class="admin-section-title">Recent Orders</h2>
+              <span style="font-size: 0.85rem; color: var(--color-text-muted)"
+                >Live incoming order stream</span
+              >
+            </div>
+            <div class="admin-section-tabs">
+              <button type="button" class="admin-tab-btn" data-target-section="orders">
+                <i class="fa-solid fa-clipboard-list"></i> All Orders
+              </button>
+              <button type="button" class="admin-tab-btn active" data-target-section="recent-orders">
+                <i class="fa-solid fa-clock-rotate-left"></i> Recent Orders
+              </button>
+            </div>
+          </div>
           <section class="admin-insights-section step-card" aria-labelledby="recent-orders-heading">
             <div class="admin-insights-heading">
               <h2 id="recent-orders-heading">Recent Orders</h2>
@@ -672,6 +805,25 @@
         </div>
 
         <div id="section-top-items" class="admin-section hidden">
+          <div class="admin-section-header">
+            <div>
+              <h2 class="admin-section-title">Reviews & Insights</h2>
+              <span style="font-size: 0.85rem; color: var(--color-text-muted)"
+                >Customer feedback and item popularity statistics</span
+              >
+            </div>
+            <div class="admin-section-tabs">
+              <button type="button" class="admin-tab-btn" data-target-section="all-reviews">
+                <i class="fa-solid fa-comments"></i> All Reviews
+              </button>
+              <button type="button" class="admin-tab-btn" data-target-section="top-favorites">
+                <i class="fa-solid fa-heart"></i> Top Favorites
+              </button>
+              <button type="button" class="admin-tab-btn active" data-target-section="top-items">
+                <i class="fa-solid fa-trophy"></i> Top 5 Items
+              </button>
+            </div>
+          </div>
           <section class="admin-insights-section step-card" aria-labelledby="top-items-heading">
             <div class="admin-insights-heading">
               <h2 id="top-items-heading">Top 5 Items</h2>
@@ -684,19 +836,21 @@
 
         <!-- SECTION 2: ORDERS MANAGEMENT -->
         <div id="section-orders" class="admin-section hidden">
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              flex-wrap: wrap;
-              gap: 12px;
-            "
-          >
-            <h2 style="font-size: 1.6rem">Orders Management</h2>
-            <span style="font-size: 0.85rem; color: var(--color-text-muted)"
-              >Auto-refreshes every 10 seconds</span
-            >
+          <div class="admin-section-header">
+            <div>
+              <h2 class="admin-section-title">Orders Management</h2>
+              <span style="font-size: 0.85rem; color: var(--color-text-muted)"
+                >Auto-refreshes every 10 seconds</span
+              >
+            </div>
+            <div class="admin-section-tabs">
+              <button type="button" class="admin-tab-btn active" data-target-section="orders">
+                <i class="fa-solid fa-clipboard-list"></i> All Orders
+              </button>
+              <button type="button" class="admin-tab-btn" data-target-section="recent-orders">
+                <i class="fa-solid fa-clock-rotate-left"></i> Recent Orders
+              </button>
+            </div>
           </div>
 
           <!-- Filters toolbar -->
@@ -799,34 +953,38 @@
 
         <!-- SECTION 3: MENU MANAGEMENT -->
         <div id="section-menu" class="admin-section hidden">
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              flex-wrap: wrap;
-              gap: 12px;
-            "
-          >
-            <h2 style="font-size: 1.6rem">Menu & Inventory</h2>
-            <button
-              type="button"
-              id="btn-add-product"
-              class="btn btn-primary btn-sm"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
+          <div class="admin-section-header">
+            <div>
+              <h2 class="admin-section-title">Menu & Inventory</h2>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <div class="admin-section-tabs">
+                <button type="button" class="admin-tab-btn active" data-target-section="menu">
+                  <i class="fa-solid fa-burger"></i> Items & Add-ons
+                </button>
+                <button type="button" class="admin-tab-btn" data-target-section="categories">
+                  <i class="fa-solid fa-layer-group"></i> Categories
+                </button>
+              </div>
+              <button
+                type="button"
+                id="btn-add-product"
+                class="btn btn-primary btn-sm"
               >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              Add New Item
-            </button>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Add New Item
+              </button>
+            </div>
           </div>
 
           <!-- Stock filters -->
@@ -876,21 +1034,27 @@
 
         <!-- SECTION 4: CATEGORIES MANAGEMENT -->
         <div id="section-categories" class="admin-section hidden">
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-            "
-          >
-            <h2 style="font-size: 1.6rem">Categories Management</h2>
-            <button
-              type="button"
-              id="btn-add-category"
-              class="btn btn-primary btn-sm"
-            >
-              Add Category
-            </button>
+          <div class="admin-section-header">
+            <div>
+              <h2 class="admin-section-title">Menu Categories</h2>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <div class="admin-section-tabs">
+                <button type="button" class="admin-tab-btn" data-target-section="menu">
+                  <i class="fa-solid fa-burger"></i> Items & Add-ons
+                </button>
+                <button type="button" class="admin-tab-btn active" data-target-section="categories">
+                  <i class="fa-solid fa-layer-group"></i> Categories
+                </button>
+              </div>
+              <button
+                type="button"
+                id="btn-add-category"
+                class="btn btn-primary btn-sm"
+              >
+                <i class="fa-solid fa-plus"></i> Add Category
+              </button>
+            </div>
           </div>
           <div class="table-wrap">
             <table class="admin-table">
@@ -909,14 +1073,13 @@
 
         <!-- SECTION 5: CUSTOMERS MANAGEMENT -->
         <div id="section-customers" class="admin-section hidden">
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-            "
-          >
-            <h2 style="font-size: 1.6rem">Customer Accounts</h2>
+          <div class="admin-section-header">
+            <div>
+              <h2 class="admin-section-title">Customer Accounts</h2>
+              <span style="font-size: 0.85rem; color: var(--color-text-muted)"
+                >Registered customer profiles and ordering history</span
+              >
+            </div>
           </div>
           <input
             type="text"
@@ -944,9 +1107,22 @@
 
         <!-- SECTION 6: STORE SETTINGS -->
         <div id="section-settings" class="admin-section hidden">
-          <h2 style="font-size: 1.6rem">
-            Store Configuration
-          </h2>
+          <div class="admin-section-header">
+            <div>
+              <h2 class="admin-section-title">System Settings</h2>
+              <span style="font-size: 0.85rem; color: var(--color-text-muted)"
+                >Store operational rules, fees, and administrative preferences</span
+              >
+            </div>
+            <div class="admin-section-tabs">
+              <button type="button" class="admin-tab-btn active" data-target-section="settings">
+                <i class="fa-solid fa-store"></i> Store Configuration
+              </button>
+              <button type="button" class="admin-tab-btn" data-target-section="security">
+                <i class="fa-solid fa-shield-halved"></i> Security
+              </button>
+            </div>
+          </div>
 
           <form id="store-settings-form">
             <div
@@ -1470,9 +1646,22 @@
 
         <!-- SECTION 7: ADMIN SECURITY -->
         <div id="section-security" class="admin-section hidden">
-          <h2 style="font-size: 1.6rem">
-            Account Security
-          </h2>
+          <div class="admin-section-header">
+            <div>
+              <h2 class="admin-section-title">System Settings</h2>
+              <span style="font-size: 0.85rem; color: var(--color-text-muted)"
+                >Store operational rules, fees, and administrative preferences</span
+              >
+            </div>
+            <div class="admin-section-tabs">
+              <button type="button" class="admin-tab-btn" data-target-section="settings">
+                <i class="fa-solid fa-store"></i> Store Configuration
+              </button>
+              <button type="button" class="admin-tab-btn active" data-target-section="security">
+                <i class="fa-solid fa-shield-halved"></i> Security
+              </button>
+            </div>
+          </div>
           <div class="step-card admin-security-card">
             <h3 style="font-size: 1.1rem; margin-bottom: 14px">
               Change Administrator Password
@@ -1930,6 +2119,17 @@
       document
         .getElementById('admin-logout-btn')
         .addEventListener('click', promptLogout);
+
+      // Tab switcher for grouped admin sections
+      document.querySelectorAll('.admin-tab-btn[data-target-section]').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          const target = tab.getAttribute('data-target-section');
+          const navBtn = document.querySelector(`.admin-nav-item[data-section="${target}"]`);
+          if (navBtn) {
+            navBtn.click();
+          }
+        });
+      });
     </script>
   </body>
 </html>
