@@ -582,6 +582,26 @@ export async function submitDirectProductRating(productId, rating, sourceBtn = n
   }
 
   const ratingNum = Math.max(1, Math.min(5, Number(rating) || 5));
+  customerRatingsMap[String(productId)] = ratingNum;
+
+  // Optimistic instantaneous live update of numbers beside the star
+  const existingContainer = sourceBtn
+    ? sourceBtn.closest('.card-inline-rating')
+    : document.querySelector(`.card-inline-rating[data-product-id="${productId}"], [data-product-id="${productId}"] .card-inline-rating`);
+  let prevCount = 0;
+  let prevScore = 0;
+  if (existingContainer) {
+    const rawCount = existingContainer.querySelector('.rating-count')?.textContent?.replace(/\D/g, '');
+    prevCount = parseInt(rawCount, 10) || 0;
+    const rawScore = parseFloat(existingContainer.querySelector('.rating-score')?.textContent) || 0;
+    prevScore = rawScore;
+  }
+  const optimisticCount = prevScore > 0 ? prevCount : Math.max(1, prevCount + 1);
+  const optimisticScore = prevScore > 0
+    ? ((prevScore * prevCount + ratingNum) / (prevCount + 1))
+    : ratingNum;
+  updateProductCardInteractiveRating(productId, optimisticScore, optimisticCount, ratingNum);
+
   if (sourceBtn) {
     sourceBtn.disabled = true;
   }
@@ -595,10 +615,8 @@ export async function submitDirectProductRating(productId, rating, sourceBtn = n
       }),
     });
 
-    customerRatingsMap[String(productId)] = ratingNum;
-
-    const avg = res.summary ? Number(res.summary.averageRating) : ratingNum;
-    const count = res.summary ? Number(res.summary.reviewCount) : 1;
+    const avg = res.summary ? Number(res.summary.averageRating) : optimisticScore;
+    const count = res.summary ? Number(res.summary.reviewCount) : optimisticCount;
 
     updateProductCardInteractiveRating(productId, avg, count, ratingNum);
     showToast(`Rated ${ratingNum} ★! Thank you!`, 'success');
@@ -619,7 +637,7 @@ export async function submitDirectProductRating(productId, rating, sourceBtn = n
 
 export function updateProductCardInteractiveRating(productId, avgRating, reviewCount, userRating) {
   const cardContainers = document.querySelectorAll(
-    `[data-product-id="${productId}"] .card-inline-rating`
+    `.card-inline-rating[data-product-id="${productId}"], [data-product-id="${productId}"] .card-inline-rating`
   );
 
   cardContainers.forEach((container) => {
@@ -640,14 +658,28 @@ export function updateProductCardInteractiveRating(productId, avgRating, reviewC
       }
     });
 
-    const scoreSpan = container.querySelector('.rating-score');
-    if (scoreSpan) {
-      scoreSpan.textContent = score > 0 ? score.toFixed(1) : '';
+    let scoreSpan = container.querySelector('.rating-score');
+    if (!scoreSpan) {
+      scoreSpan = document.createElement('span');
+      scoreSpan.className = 'rating-score';
+      const countSpan = container.querySelector('.rating-count');
+      if (countSpan) {
+        container.insertBefore(scoreSpan, countSpan);
+      } else {
+        container.appendChild(scoreSpan);
+      }
     }
-    const countSpan = container.querySelector('.rating-count');
-    if (countSpan) {
-      countSpan.textContent = `(${count})`;
+    const displayScore = score > 0 ? score.toFixed(1) : (myRating > 0 ? myRating.toFixed(1) : '');
+    scoreSpan.textContent = displayScore;
+    scoreSpan.style.display = displayScore ? 'inline' : 'none';
+
+    let countSpan = container.querySelector('.rating-count');
+    if (!countSpan) {
+      countSpan = document.createElement('span');
+      countSpan.className = 'rating-count';
+      container.appendChild(countSpan);
     }
+    countSpan.textContent = `(${count})`;
   });
 }
 

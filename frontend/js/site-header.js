@@ -148,6 +148,17 @@ class SiteHeader extends HTMLElement {
         link.classList.add('active');
       }
     });
+
+    // Sticky header scroll shrink effect
+    const self = this;
+    const updateScrollState = () => {
+      const isScrolled = window.scrollY > 20;
+      self.classList.toggle('site-header-scrolled', isScrolled);
+      const inner = self.querySelector('.site-header');
+      if (inner) inner.classList.toggle('site-header-scrolled', isScrolled);
+    };
+    window.addEventListener('scroll', updateScrollState, { passive: true });
+    updateScrollState();
   }
 }
 

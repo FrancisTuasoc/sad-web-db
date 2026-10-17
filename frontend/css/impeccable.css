@@ -13272,11 +13272,14 @@ body.theme-dark .payment-method-dropdown {
 }
 
 /* ==========================================================================
-   PURE BLACK HEADER ACROSS ALL CUSTOMER PAGES (DEFINITIVE ENFORCEMENT)
+   PURE BLACK STICKY HEADER ACROSS ALL CUSTOMER PAGES (WITH SCROLL SHRINK)
    ========================================================================== */
 body:not(.admin-page) .site-header,
 body:not(.admin-page) site-header.site-header,
 site-header.site-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
   --public-header-bg: #000000 !important;
   --public-header-background: #000000 !important;
   --header-bg: #000000 !important;
@@ -13284,6 +13287,21 @@ site-header.site-header {
   background-color: #000000 !important;
   color: #ffffff !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  height: 72px !important;
+  transition: height 240ms ease, padding 240ms ease, box-shadow 240ms ease, background-color 240ms ease !important;
+}
+
+body:not(.admin-page) .site-header .container,
+body:not(.admin-page) .site-header .header-container,
+site-header.site-header .container {
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding-top: 14px !important;
+  padding-bottom: 14px !important;
+  box-sizing: border-box !important;
+  transition: padding 240ms ease !important;
 }
 
 body:not(.admin-page) .site-header .brand-logo,
@@ -13304,6 +13322,7 @@ site-header.site-header .brand-logo img {
   display: block !important;
   object-fit: contain !important;
   filter: none !important;
+  transition: height 240ms ease !important;
 }
 
 body:not(.admin-page) .site-header .brand-logo::after,
@@ -13316,6 +13335,28 @@ body:not(.admin-page) .site-header .mobile-drawer {
   background: #000000 !important;
   background-color: #000000 !important;
   border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Scrolled state: slightly reduced size & padding, consistent alignment */
+body:not(.admin-page) .site-header.site-header-scrolled,
+body:not(.admin-page) site-header.site-header.site-header-scrolled,
+site-header.site-header.site-header-scrolled,
+site-header.site-header.site-header-scrolled .site-header {
+  height: 58px !important;
+  box-shadow: 0 4px 22px rgba(0, 0, 0, 0.5) !important;
+}
+
+body:not(.admin-page) .site-header.site-header-scrolled .container,
+body:not(.admin-page) .site-header.site-header-scrolled .header-container,
+site-header.site-header.site-header-scrolled .container {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+body:not(.admin-page) .site-header.site-header-scrolled .brand-logo img,
+site-header.site-header.site-header-scrolled .brand-logo img {
+  height: 32px !important;
+  max-height: 32px !important;
 }
 
 /* ==========================================================================
@@ -13379,43 +13420,61 @@ body:not(.admin-page) .site-header .mobile-drawer {
 }
 
 /* ==========================================================================
-   HERO "RATE OUR WEBSITE" BUTTON
+   VISIT US / DELIVERY SECTION CTA BUTTONS (ROUNDED PILL BORDERS)
    ========================================================================== */
-.hero-cta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
+.contact-order-cta {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  margin-top: 22px !important;
 }
 
-.btn-hero-review {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  padding: 12px 22px !important;
+.contact-order-cta .btn-contact-order,
+.contact-order-cta a.btn-primary {
   border-radius: 9999px !important;
+  padding: 11px 26px !important;
   font-family: var(--font-heading, inherit) !important;
   font-size: 0.95rem !important;
   font-weight: 600 !important;
-  color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.14) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  backdrop-filter: blur(8px) !important;
   text-decoration: none !important;
-  cursor: pointer !important;
-  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 3px 10px rgba(200, 72, 37, 0.28) !important;
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease !important;
 }
 
-.btn-hero-review:hover {
-  background: rgba(255, 255, 255, 0.22) !important;
-  border-color: rgba(255, 255, 255, 0.55) !important;
+.contact-order-cta .btn-contact-order:hover,
+.contact-order-cta a.btn-primary:hover {
   transform: translateY(-2px) !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 5px 16px rgba(200, 72, 37, 0.42) !important;
 }
 
-.btn-hero-review:active {
-  transform: translateY(0) !important;
+.contact-order-cta .btn-contact-review,
+.contact-order-cta button.btn-secondary {
+  border-radius: 9999px !important;
+  padding: 11px 22px !important;
+  font-family: var(--font-heading, inherit) !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: var(--color-text-main, #111827) !important;
+  border: 1px solid var(--color-border, #d1d5db) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+  transition: background 160ms ease, transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease !important;
+}
+
+.contact-order-cta .btn-contact-review:hover,
+.contact-order-cta button.btn-secondary:hover {
+  background: #ffffff !important;
+  border-color: #f59e0b !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.2) !important;
 }
 
 /* ==========================================================================

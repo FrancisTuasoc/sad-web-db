@@ -694,9 +694,9 @@ function initHome() {
   renderFooter();
   ensureWebsiteReviewModalDOM();
 
-  const heroReviewBtn = document.getElementById('btn-hero-review');
-  if (heroReviewBtn) {
-    heroReviewBtn.addEventListener('click', (e) => {
+  const contactReviewBtn = document.getElementById('btn-contact-review');
+  if (contactReviewBtn) {
+    contactReviewBtn.addEventListener('click', (e) => {
       e.preventDefault();
       openWebsiteReviewModal();
     });

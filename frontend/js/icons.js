@@ -185,7 +185,7 @@ export function renderInteractiveCardStars(productId, averageRating = 0, reviewC
       <div class="card-stars-group" role="group" aria-label="Rate product 1 to 5 stars">
         ${starsHtml}
       </div>
-      ${score > 0 ? `<span class="rating-score">${score.toFixed(1)}</span>` : ''}
+      <span class="rating-score">${score > 0 ? score.toFixed(1) : ''}</span>
       <span class="rating-count">(${count})</span>
     </div>
   `;

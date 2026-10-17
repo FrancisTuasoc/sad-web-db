@@ -459,6 +459,7 @@ export function renderHeader(activeNav = '') {
         <a href="menu.html">Menu</a>
         <a href="index.html#featured">Featured Burgers</a>
         <a href="index.html#about">About Us</a>
+        <a href="index.html#testimonials">Customer Reviews</a>
         <a href="index.html#contact">Contact &amp; Store Hours</a>
         <a href="cart.html">My Cart</a>
         <a href="profile.html">My Account &amp; Status</a>
@@ -471,6 +472,7 @@ export function renderHeader(activeNav = '') {
         <a href="menu.html">Menu</a>
         <a href="index.html#featured">Featured Burgers</a>
         <a href="index.html#about">About Us</a>
+        <a href="index.html#testimonials">Customer Reviews</a>
         <a href="index.html#contact">Contact &amp; Store Hours</a>
         <a href="cart.html">My Cart</a>
         <a href="login.html" style="color:var(--color-accent);font-weight:700;">Sign In / Sign Up</a>
@@ -527,6 +529,15 @@ export function renderHeader(activeNav = '') {
   }
 
   updateCartBadge();
+
+  const updateScrollState = () => {
+    const isScrolled = window.scrollY > 20;
+    headerElem.classList.toggle('site-header-scrolled', isScrolled);
+    const inner = headerElem.querySelector('.site-header');
+    if (inner) inner.classList.toggle('site-header-scrolled', isScrolled);
+  };
+  window.addEventListener('scroll', updateScrollState, { passive: true });
+  updateScrollState();
 }
 
 export async function renderFooter() {
