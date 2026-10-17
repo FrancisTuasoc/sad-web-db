@@ -3858,11 +3858,17 @@ textarea:focus {
   border-radius: 999px !important;
 }
 
-.chip:hover,
-.chip.active {
+.chip:hover {
+  border-color: #D14B2D !important;
+  color: #D14B2D !important;
+}
+
+.chip.active,
+.chip:active {
   color: #ffffff !important;
-  background: var(--brand-primary) !important;
-  border-color: var(--brand-primary) !important;
+  background: #D14B2D !important;
+  background-color: #D14B2D !important;
+  border-color: #D14B2D !important;
 }
 
 .product-card {
@@ -13860,6 +13866,31 @@ body {
 #menu-grid .card-price,
 #featured-grid .card-price {
   color: #000000 !important;
+}
+
+/* ==========================================================================
+   CATEGORY CHIPS ACTIVE / CLICKED COLOR (#D14B2D)
+   ========================================================================== */
+.category-chips .chip.active,
+.category-chips .chip:active,
+.category-chips button.active,
+.category-chips button:active,
+#category-chips .chip.active,
+#category-chips .chip:active,
+#category-chips button.active,
+#category-chips button:active {
+  background: #D14B2D !important;
+  background-color: #D14B2D !important;
+  border-color: #D14B2D !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(209, 75, 45, 0.35) !important;
+}
+
+.category-chips .chip:hover:not(.active),
+#category-chips .chip:hover:not(.active) {
+  border-color: #D14B2D !important;
+  color: #D14B2D !important;
+  background: rgba(209, 75, 45, 0.08) !important;
 }
 
 
