@@ -480,8 +480,8 @@ site-header.site-header .avatar-circle {
 
 body:not(.admin-page) .site-header #header-user-slot .btn-primary,
 site-header.site-header #header-user-slot .btn-primary {
-  background: #c54424 !important;
-  border-color: #c54424 !important;
+  background: #D14B2D !important;
+  border-color: #D14B2D !important;
   color: #ffffff !important;
   border-radius: 9999px !important;
   padding: 8px 18px !important;
@@ -490,8 +490,8 @@ site-header.site-header #header-user-slot .btn-primary {
 
 body:not(.admin-page) .site-header #header-user-slot .btn-primary:hover,
 site-header.site-header #header-user-slot .btn-primary:hover {
-  background: #d44d2b !important;
-  border-color: #d44d2b !important;
+  background: #b93e23 !important;
+  border-color: #b93e23 !important;
 }
 
 body:not(.admin-page) .site-header .mobile-drawer,
@@ -687,7 +687,7 @@ textarea,
 }
 
 .home-page .btn-hero-order {
-  background: #c54424 !important;
+  background: #D14B2D !important;
   color: #ffffff !important;
   border: none !important;
   border-radius: 9999px !important;
@@ -698,15 +698,15 @@ textarea,
   display: inline-flex !important;
   align-items: center !important;
   gap: 10px !important;
-  box-shadow: 0 4px 18px rgba(197, 68, 36, 0.35) !important;
+  box-shadow: 0 4px 18px rgba(209, 75, 45, 0.35) !important;
   text-decoration: none !important;
   transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease !important;
 }
 
 .home-page .btn-hero-order:hover {
-  background: #d44d2b !important;
+  background: #b93e23 !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 6px 22px rgba(197, 68, 36, 0.5) !important;
+  box-shadow: 0 6px 22px rgba(209, 75, 45, 0.5) !important;
 }
 
 .home-page .btn-hero-story {
@@ -13432,47 +13432,73 @@ site-header.site-header.site-header-scrolled .brand-logo img {
   display: flex !important;
   align-items: center !important;
   flex-wrap: wrap !important;
-  gap: 12px !important;
-  margin-top: 22px !important;
+  gap: 14px !important;
+  margin-top: 24px !important;
 }
 
-.contact-order-cta .btn-contact-order,
-.contact-order-cta a.btn-primary {
-  background: #c54424 !important;
-  background-color: #c54424 !important;
+body .btn-hero-order,
+body.home-page .btn-hero-order,
+body:not(.theme-dark) .btn-hero-order,
+body .btn-contact-order,
+body.home-page .btn-contact-order,
+body:not(.theme-dark) .btn-contact-order,
+body .contact-order-cta .btn-contact-order,
+body.home-page .contact-order-cta .btn-contact-order,
+body:not(.theme-dark) .contact-order-cta .btn-contact-order,
+body:not(.theme-dark) .contact-order-cta a.btn-primary,
+body .contact-order-cta a.btn-hero-order,
+body .contact-order-cta a {
+  background: #D14B2D !important;
+  background-color: #D14B2D !important;
   color: #ffffff !important;
   border: none !important;
   border-radius: 9999px !important;
-  padding: 12px 28px !important;
+  padding: 13px 28px !important;
+  min-height: 48px !important;
   font-family: var(--font-heading, inherit) !important;
-  font-size: 0.95rem !important;
+  font-size: 0.96rem !important;
   font-weight: 700 !important;
   text-decoration: none !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  box-shadow: 0 3px 14px rgba(197, 68, 36, 0.35) !important;
-  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease !important;
+  gap: 10px !important;
+  box-shadow: 0 4px 18px rgba(209, 75, 45, 0.35) !important;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease !important;
 }
 
-.contact-order-cta .btn-contact-order:hover,
-.contact-order-cta a.btn-primary:hover {
-  background: #d44d2b !important;
-  background-color: #d44d2b !important;
+body .btn-hero-order:hover,
+body.home-page .btn-hero-order:hover,
+body:not(.theme-dark) .btn-hero-order:hover,
+body .btn-contact-order:hover,
+body.home-page .btn-contact-order:hover,
+body:not(.theme-dark) .btn-contact-order:hover,
+body .contact-order-cta .btn-contact-order:hover,
+body.home-page .contact-order-cta .btn-contact-order:hover,
+body:not(.theme-dark) .contact-order-cta .btn-contact-order:hover,
+body:not(.theme-dark) .contact-order-cta a.btn-primary:hover,
+body .contact-order-cta a.btn-hero-order:hover,
+body .contact-order-cta a:hover {
+  background: #b93e23 !important;
+  background-color: #b93e23 !important;
   color: #ffffff !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 6px 22px rgba(197, 68, 36, 0.5) !important;
+  box-shadow: 0 6px 22px rgba(209, 75, 45, 0.5) !important;
 }
 
-.contact-order-cta .btn-contact-review,
-.contact-order-cta button.btn-secondary {
+body .contact-order-cta .btn-contact-review,
+body.home-page .contact-order-cta .btn-contact-review,
+body:not(.theme-dark) .contact-order-cta .btn-contact-review,
+body:not(.theme-dark) .contact-order-cta button.btn-secondary {
   border-radius: 9999px !important;
-  padding: 11px 22px !important;
+  padding: 13px 24px !important;
+  min-height: 48px !important;
   font-family: var(--font-heading, inherit) !important;
-  font-size: 0.95rem !important;
+  font-size: 0.96rem !important;
   font-weight: 600 !important;
   display: inline-flex !important;
   align-items: center !important;
+  justify-content: center !important;
   gap: 8px !important;
   cursor: pointer !important;
   background: rgba(255, 255, 255, 0.92) !important;
@@ -13482,12 +13508,14 @@ site-header.site-header.site-header-scrolled .brand-logo img {
   transition: background 160ms ease, transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease !important;
 }
 
-.contact-order-cta .btn-contact-review:hover,
-.contact-order-cta button.btn-secondary:hover {
+body .contact-order-cta .btn-contact-review:hover,
+body.home-page .contact-order-cta .btn-contact-review:hover,
+body:not(.theme-dark) .contact-order-cta .btn-contact-review:hover,
+body:not(.theme-dark) .contact-order-cta button.btn-secondary:hover {
   background: #ffffff !important;
   border-color: #f59e0b !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.2) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25) !important;
 }
 
 /* ==========================================================================
