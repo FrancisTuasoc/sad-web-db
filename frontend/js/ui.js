@@ -502,10 +502,20 @@ export async function renderFooter() {
         'footer-store-tagline': s.tagline,
         'footer-store-address': s.address,
         'footer-store-phone': s.phone,
+        'footer-store-email': s.email,
       };
       Object.entries(values).forEach(([id, value]) => {
         const element = footerElem.querySelector(`#${id}`);
-        if (element && typeof value === 'string') element.textContent = value;
+        if (element && typeof value === 'string') {
+          element.textContent = value;
+          if (id === 'footer-store-phone' && element.tagName === 'A') {
+            const phoneDigits = value.replace(/\D/g, '');
+            const countryPrefix = value.trim().startsWith('+') ? '+' : '';
+            element.href = `tel:${countryPrefix}${phoneDigits}`;
+          } else if (id === 'footer-store-email' && element.tagName === 'A') {
+            element.href = `mailto:${encodeURI(value)}`;
+          }
+        }
       });
       renderBusinessHours(
         footerElem.querySelector('#footer-hours-list'),
