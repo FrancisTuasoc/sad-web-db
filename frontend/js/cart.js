@@ -11,7 +11,7 @@ import {
   updateCartBadge,
   getProductImageUrl,
 } from './ui.js';
-import { requireAuth } from './auth.js';
+import { requireAuth, isAdmin } from './auth.js';
 import { updateReceipt } from './checkout.js';
 
 let cartItems = [];
@@ -677,6 +677,10 @@ function setupCartListeners() {
 
 function initCart() {
   if (!requireAuth()) return;
+  if (isAdmin()) {
+    window.location.replace('admin.html');
+    return;
+  }
   renderHeader('cart');
   renderFooter();
   setupCartListeners();

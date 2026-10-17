@@ -240,7 +240,7 @@ export async function updateCartBadge() {
   const badge = document.getElementById('header-cart-badge');
   if (!badge) return;
 
-  if (!isLoggedIn()) {
+  if (!isLoggedIn() || isAdmin()) {
     badge.textContent = '0';
     badge.classList.add('hidden');
     return;
@@ -337,7 +337,35 @@ export function renderHeader(activeNav = '') {
 
   const user = getUser();
   const userLoggedIn = isLoggedIn();
-  const isAdminProfile = document.body.classList.contains('admin-account');
+  const adminUser = isAdmin();
+
+  document.body.classList.toggle('admin-account', adminUser);
+
+  headerElem.classList.toggle(
+    'theme-dark',
+    adminUser && localStorage.getItem('profile-theme') === 'dark'
+  );
+
+  const brandLink = headerElem.querySelector('.brand-logo');
+  if (brandLink) {
+    if (adminUser) {
+      brandLink.href = 'admin.html';
+      brandLink.setAttribute('aria-label', 'GIGABITE Admin Dashboard');
+    } else {
+      brandLink.href = 'index.html';
+      brandLink.setAttribute('aria-label', 'GIGABITE Home');
+    }
+  }
+
+  if (adminUser) {
+    headerElem.querySelectorAll('[data-customer-only]').forEach((el) => {
+      el.remove();
+    });
+    const headerCartBtn = document.getElementById('header-cart-btn');
+    if (headerCartBtn) headerCartBtn.remove();
+    const notifWrapper = document.getElementById('header-notifications-wrapper');
+    if (notifWrapper) notifWrapper.remove();
+  }
 
   // Active navigation highlight
   const navLinks = document.querySelectorAll(
@@ -347,21 +375,30 @@ export function renderHeader(activeNav = '') {
     link.classList.remove('active');
     const href = link.getAttribute('href') || '';
     const hash = window.location.hash;
-    if (
-      activeNav === 'home' &&
-      !hash &&
-      (href === 'index.html' || href === '/' || href.endsWith('index.html'))
-    ) {
-      link.classList.add('active');
-    }
-    if (activeNav === 'menu' && href.includes('menu.html')) {
-      link.classList.add('active');
-    }
-    if (activeNav === 'cart' && href.includes('cart.html')) {
-      link.classList.add('active');
-    }
-    if (activeNav === 'profile' && href.includes('profile.html')) {
-      link.classList.add('active');
+    if (adminUser) {
+      if (activeNav === 'admin' && href.includes('admin.html')) {
+        link.classList.add('active');
+      }
+      if (activeNav === 'profile' && href.includes('profile.html')) {
+        link.classList.add('active');
+      }
+    } else {
+      if (
+        activeNav === 'home' &&
+        !hash &&
+        (href === 'index.html' || href === '/' || href.endsWith('index.html'))
+      ) {
+        link.classList.add('active');
+      }
+      if (activeNav === 'menu' && href.includes('menu.html')) {
+        link.classList.add('active');
+      }
+      if (activeNav === 'cart' && href.includes('cart.html')) {
+        link.classList.add('active');
+      }
+      if (activeNav === 'profile' && href.includes('profile.html')) {
+        link.classList.add('active');
+      }
     }
   });
 
@@ -377,10 +414,10 @@ export function renderHeader(activeNav = '') {
           <div id="user-dropdown-menu" class="user-dropdown">
             <a href="profile.html">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              ${isAdminProfile ? 'My Profile' : 'My Profile &amp; Orders'}
+              ${adminUser ? 'My Profile' : 'My Profile &amp; Orders'}
             </a>
             ${
-              isAdmin()
+              adminUser
                 ? `
               <a href="admin.html" style="color:var(--color-brand-secondary);font-weight:700;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -397,7 +434,9 @@ export function renderHeader(activeNav = '') {
         </div>
       `;
       loadHeaderAvatar(user, userSlot.querySelector('.avatar-circle'));
-      initCustomerNotifications();
+      if (!adminUser) {
+        initCustomerNotifications();
+      }
     } else {
       userSlot.innerHTML = `<a href="login.html" class="btn btn-primary btn-sm">Sign In</a>`;
       const notifWrapper = document.getElementById('header-notifications-wrapper');
@@ -408,10 +447,10 @@ export function renderHeader(activeNav = '') {
   // Mobile drawer links
   const mobileDrawer = document.getElementById('mobile-drawer-menu');
   if (mobileDrawer) {
-    if (isAdminProfile && userLoggedIn && user) {
+    if (adminUser && userLoggedIn && user) {
       mobileDrawer.innerHTML = `
-        <a href="admin.html">Admin Dashboard</a>
-        <a href="profile.html" aria-current="page">My Profile</a>
+        <a href="admin.html"${activeNav === 'admin' ? ' class="active"' : ''}>Admin Dashboard</a>
+        <a href="profile.html"${activeNav === 'profile' ? ' class="active"' : ''}>My Profile</a>
         <a href="#" id="mobile-logout-btn">Log Out</a>
       `;
     } else if (userLoggedIn && user) {

@@ -5830,52 +5830,69 @@ body:not(.home-page):not(.auth-page):not(:has(.admin-layout)) {
   transform: scale(1);
 }
 
-/* Scrim overlay behind the text side to keep text readable */
+/* Scrim overlay behind the text side to keep text readable while keeping image visible */
 .menu-hero-blur-overlay {
   position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
-  width: 75%;
+  width: 48%;
+  max-width: 480px;
   z-index: 1;
   pointer-events: none;
   background: linear-gradient(
     90deg,
     rgba(8, 16, 11, 0.88) 0%,
-    rgba(8, 16, 11, 0.72) 48%,
-    rgba(8, 16, 11, 0.35) 78%,
+    rgba(8, 16, 11, 0.6) 55%,
+    rgba(8, 16, 11, 0.15) 85%,
     transparent 100%
   );
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
+  mask-image: linear-gradient(90deg, black 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, black 60%, transparent 100%);
 }
 
 @media (max-width: 768px) {
   .menu-page-hero-inner {
     grid-template-columns: 1fr;
     min-height: auto;
-    padding: 28px 18px;
+    padding: clamp(24px, 5vw, 32px) clamp(16px, 4vw, 24px);
+    gap: 16px;
   }
   .menu-hero-slide {
     background-size: cover;
-    background-position: center;
+    background-position: center right 20%;
   }
   .menu-hero-blur-overlay {
     width: 100%;
+    max-width: none;
+    height: 100%;
     background: linear-gradient(
       180deg,
-      rgba(8, 16, 11, 0.9) 0%,
-      rgba(8, 16, 11, 0.8) 70%,
-      rgba(8, 16, 11, 0.5) 100%
+      rgba(8, 16, 11, 0.82) 0%,
+      rgba(8, 16, 11, 0.55) 50%,
+      rgba(8, 16, 11, 0.15) 80%,
+      transparent 100%
     );
+    backdrop-filter: blur(1.5px);
+    -webkit-backdrop-filter: blur(1.5px);
+    mask-image: linear-gradient(180deg, black 45%, transparent 92%);
+    -webkit-mask-image: linear-gradient(180deg, black 45%, transparent 92%);
+  }
+  .menu-page-art {
+    min-height: 0;
+    height: auto;
+    margin: 0;
+    padding: 0;
   }
 }
 
 .menu-page-hero-copy {
   position: relative;
   z-index: 2;
-  max-width: 540px;
-  margin-left: clamp(40px, 8vw, 100px);
+  max-width: 480px;
+  margin-left: 0;
   padding-left: 0;
 }
 
@@ -6109,7 +6126,8 @@ body:not(.home-page):not(.auth-page):not(:has(.admin-layout)) {
   }
 
   .menu-page-art {
-    min-height: 190px;
+    min-height: 0;
+    height: auto;
   }
 
   .menu-page-art img {

@@ -271,7 +271,7 @@
 
 /* Mobile Hamburger */
 .mobile-nav-toggle {
-  display: none;
+  display: none !important;
   align-items: center;
   justify-content: center;
   width: 36px;
@@ -963,7 +963,7 @@
     display: none;
   }
   .mobile-nav-toggle {
-    display: inline-flex;
+    display: inline-flex !important;
   }
   .footer-grid {
     grid-template-columns: 1fr;

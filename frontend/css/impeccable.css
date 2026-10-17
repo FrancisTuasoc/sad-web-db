@@ -137,8 +137,7 @@ h6 {
 
 .site-header .cart-btn,
 .site-header .notification-btn,
-.site-header .avatar-btn,
-.site-header .mobile-nav-toggle {
+.site-header .avatar-btn {
   width: 36px !important;
   height: 36px !important;
   min-width: 36px !important;
@@ -153,6 +152,31 @@ h6 {
   background: rgba(255, 253, 250, 0.08) !important;
   border: 1px solid rgba(255, 253, 250, 0.2) !important;
   opacity: 1 !important;
+}
+
+.site-header .mobile-nav-toggle,
+.mobile-nav-toggle {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 9px !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  color: var(--color-surface) !important;
+  background: rgba(255, 253, 250, 0.08) !important;
+  border: 1px solid rgba(255, 253, 250, 0.2) !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 900px) {
+  .site-header .mobile-nav-toggle,
+  .mobile-nav-toggle {
+    display: inline-flex !important;
+  }
 }
 
 .site-header .cart-btn:hover,
@@ -639,9 +663,31 @@ textarea,
 .menu-page-hero-copy {
   position: relative !important;
   z-index: 2 !important;
-  max-width: 540px !important;
-  margin-left: clamp(40px, 8vw, 100px) !important;
+  max-width: 480px !important;
+  margin-left: 0 !important;
   padding-left: 0 !important;
+}
+
+.menu-hero-blur-overlay {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  width: 48% !important;
+  max-width: 480px !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+  background: linear-gradient(
+    90deg,
+    rgba(8, 16, 11, 0.88) 0%,
+    rgba(8, 16, 11, 0.6) 55%,
+    rgba(8, 16, 11, 0.15) 85%,
+    transparent 100%
+  ) !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
+  mask-image: linear-gradient(90deg, black 60%, transparent 100%) !important;
+  -webkit-mask-image: linear-gradient(90deg, black 60%, transparent 100%) !important;
 }
 
 .menu-hero-slide {
@@ -1433,6 +1479,65 @@ textarea,
   .admin-main {
     padding: 20px;
   }
+
+  .menu-page-hero {
+    width: min(calc(100% - 24px), var(--container-max)) !important;
+    margin-top: 16px !important;
+  }
+
+  .menu-page-hero-inner {
+    grid-template-columns: 1fr !important;
+    min-height: auto !important;
+    padding: clamp(28px, 5vw, 38px) clamp(20px, 4vw, 32px) !important;
+    gap: 16px !important;
+  }
+
+  .menu-page-hero-copy {
+    margin-left: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .menu-page-hero h1 {
+    font-size: clamp(2rem, 5.5vw, 2.75rem) !important;
+    line-height: 1.15 !important;
+    max-width: 18ch !important;
+  }
+
+  .menu-page-art {
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .menu-hero-dots {
+    position: absolute !important;
+    bottom: 12px !important;
+    right: 14px !important;
+    z-index: 3 !important;
+  }
+
+  .menu-hero-slide {
+    background-size: cover !important;
+    background-position: center right 20% !important;
+  }
+
+  .menu-hero-blur-overlay {
+    width: 100% !important;
+    max-width: none !important;
+    height: 100% !important;
+    background: linear-gradient(
+      180deg,
+      rgba(8, 16, 11, 0.85) 0%,
+      rgba(8, 16, 11, 0.58) 50%,
+      rgba(8, 16, 11, 0.15) 80%,
+      transparent 100%
+    ) !important;
+    backdrop-filter: blur(1.5px) !important;
+    -webkit-backdrop-filter: blur(1.5px) !important;
+    mask-image: linear-gradient(180deg, black 45%, transparent 92%) !important;
+    -webkit-mask-image: linear-gradient(180deg, black 45%, transparent 92%) !important;
+  }
 }
 
 @media (max-width: 600px) {
@@ -1483,14 +1588,17 @@ textarea,
   }
 
   .menu-page-hero {
-    width: calc(100% - 20px);
-    margin-top: 12px;
-    border-radius: 12px;
+    width: calc(100% - 16px) !important;
+    margin-top: 10px !important;
+    border-radius: 14px !important;
   }
 
   .menu-page-hero-inner {
     grid-template-columns: 1fr !important;
-    padding: 28px 22px !important;
+    min-height: auto !important;
+    padding: 22px 16px 14px !important;
+    gap: 12px !important;
+    border-radius: 14px !important;
   }
 
   .menu-page-hero-copy {
@@ -1499,7 +1607,44 @@ textarea,
   }
 
   .menu-page-hero h1 {
-    font-size: 2.35rem !important;
+    font-size: clamp(1.7rem, 6.5vw, 2.15rem) !important;
+    line-height: 1.16 !important;
+    margin-bottom: 10px !important;
+  }
+
+  .menu-page-hero-copy > p:not(.menu-page-eyebrow) {
+    font-size: 0.92rem !important;
+    line-height: 1.5 !important;
+    margin-bottom: 16px !important;
+  }
+
+  .menu-page-hero .btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .menu-page-highlights {
+    gap: 5px !important;
+    margin-top: 14px !important;
+  }
+
+  .menu-page-highlights span {
+    font-size: 0.68rem !important;
+    padding: 3px 7px !important;
+  }
+
+  .menu-page-art {
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .menu-hero-dots {
+    position: absolute !important;
+    bottom: 12px !important;
+    right: 14px !important;
+    z-index: 3 !important;
   }
 
   .product-grid {
@@ -5528,10 +5673,26 @@ button,
   display: none;
 }
 
+body.admin-account .customer-store-navigation,
+body.admin-account #header-cart-btn,
+body.admin-account #header-notifications-wrapper,
+body.admin-account [data-customer-only],
 .admin-account .customer-store-navigation,
 .admin-account #header-cart-btn,
 .admin-account [data-customer-only] {
   display: none !important;
+}
+
+[data-admin-only] {
+  display: none !important;
+}
+
+body.admin-account [data-admin-only] {
+  display: block !important;
+}
+
+body.admin-account nav[data-admin-only] {
+  display: flex !important;
 }
 
 .admin-account .profile-layout.customer-area {
