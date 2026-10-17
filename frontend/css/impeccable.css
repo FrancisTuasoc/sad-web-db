@@ -13805,3 +13805,50 @@ body {
   }
 }
 
+/* ==========================================================================
+   ITEM CARD ACTION BUTTONS COLOR (#D14B2D)
+   ========================================================================== */
+.product-card .btn-add-to-cart,
+.product-card .card-footer .btn,
+.product-card .card-footer .btn-primary,
+#menu-grid .product-card .btn,
+#featured-grid .product-card .btn,
+.menu-page .product-card .btn {
+  background: #D14B2D !important;
+  background-color: #D14B2D !important;
+  border-color: #D14B2D !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(209, 75, 45, 0.28) !important;
+  transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease !important;
+}
+
+.product-card .btn-add-to-cart:hover:not(:disabled),
+.product-card .card-footer .btn:hover:not(:disabled),
+.product-card .card-footer .btn-primary:hover:not(:disabled),
+#menu-grid .product-card .btn:hover:not(:disabled),
+#featured-grid .product-card .btn:hover:not(:disabled),
+.menu-page .product-card .btn:hover:not(:disabled) {
+  background: #b93e23 !important;
+  background-color: #b93e23 !important;
+  border-color: #b93e23 !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(209, 75, 45, 0.42) !important;
+}
+
+.product-card .btn-add-to-cart:active:not(:disabled),
+.product-card .card-footer .btn:active:not(:disabled) {
+  transform: translateY(0) !important;
+}
+
+.product-card .btn-add-to-cart:disabled,
+.product-card .card-footer .btn:disabled {
+  background: #e5e7eb !important;
+  background-color: #e5e7eb !important;
+  border-color: #d1d5db !important;
+  color: #9ca3af !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
