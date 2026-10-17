@@ -4898,7 +4898,7 @@ body.admin-page .admin-layout.is-sidebar-collapsed .admin-workspace-row > .admin
 }
 
 /* Sections: full remaining width, no overflow, clean vertical gap */
-.admin-main .admin-section,
+.admin-main .admin-section:not(.hidden),
 .admin-main > .admin-section:not(.hidden) {
   display: flex !important;
   flex-direction: column !important;
@@ -4914,7 +4914,19 @@ body.admin-page .admin-layout.is-sidebar-collapsed .admin-workspace-row > .admin
   box-sizing: border-box !important;
 }
 
-.admin-main .admin-section.hidden {
+.admin-main .admin-section.hidden,
+.admin-section.hidden,
+#section-top-favorites.hidden,
+#section-all-reviews.hidden,
+#section-top-items.hidden,
+#section-dashboard.hidden,
+#section-orders.hidden,
+#section-recent-orders.hidden,
+#section-menu.hidden,
+#section-categories.hidden,
+#section-customers.hidden,
+#section-settings.hidden,
+#section-security.hidden {
   display: none !important;
 }
 
@@ -15023,11 +15035,15 @@ body.admin-account [data-customer-only] {
   display: none !important;
 }
 
-/* Top Favorites & Top Items Consolidated Section Layout */
-#section-top-favorites {
+/* Top Favorites, Top Items & Reviews Consolidated Section Layout - ONLY when active */
+#section-top-favorites:not(.hidden) {
   display: flex !important;
   flex-direction: column !important;
   gap: 16px !important;
+}
+
+#section-top-favorites.hidden {
+  display: none !important;
 }
 
 #section-top-favorites .admin-top-items-card {

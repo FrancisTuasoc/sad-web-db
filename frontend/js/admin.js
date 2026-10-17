@@ -372,16 +372,15 @@ function setupAdminNavigation() {
         case 'dashboard':
           loadDashboardStats();
           break;
-        case 'all-reviews':
-          loadAdminReviews();
-          break;
         case 'top-favorites':
         case 'top-items':
+        case 'all-reviews':
           activeSection = 'top-favorites';
           const topFavSec = document.getElementById('section-top-favorites');
           if (topFavSec) topFavSec.classList.remove('hidden');
           loadAdminTopFavorites();
           loadDashboardStats();
+          loadAdminReviews();
           break;
         case 'orders':
           loadAdminOrders();

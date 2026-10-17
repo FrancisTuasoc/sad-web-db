@@ -97,16 +97,6 @@
         <button
           type="button"
           class="admin-nav-item"
-          data-section="all-reviews"
-          aria-label="All Reviews"
-          title="All Reviews"
-        >
-          <i class="fa-solid fa-comments" aria-hidden="true"></i>
-          <span class="admin-nav-label">All Reviews</span>
-        </button>
-        <button
-          type="button"
-          class="admin-nav-item"
           data-section="top-favorites"
           aria-label="Top Favorites"
           title="Top Favorites"
@@ -526,62 +516,9 @@
           </div>
         </div>
 
-        <!-- SECTION: ALL REVIEWS -->
-        <div id="section-all-reviews" class="admin-section hidden">
-          <section class="step-card" aria-labelledby="all-reviews-heading">
-            <div class="admin-insights-heading" style="flex-wrap:wrap;gap:16px;">
-              <div>
-                <h2 id="all-reviews-heading" style="display:flex;align-items:center;gap:8px;">
-                  <i class="fa-solid fa-comments" style="color:var(--brand-primary);" aria-hidden="true"></i>
-                  <span>Customer Reviews</span>
-                </h2>
-                <p class="text-muted" style="font-size:0.875rem;margin-top:2px;">All customer reviews across menu items, newest first.</p>
-              </div>
-              <div class="admin-reviews-toolbar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                <input
-                  type="search"
-                  id="admin-reviews-search"
-                  class="form-input"
-                  placeholder="Filter by item or customer..."
-                  style="width:240px;padding:6px 12px;font-size:0.85rem;"
-                />
-                <select id="admin-reviews-rating-filter" class="form-select" style="font-size:0.85rem;padding:6px 12px;width:150px;">
-                  <option value="all">All Ratings</option>
-                  <option value="5">5 Stars only</option>
-                  <option value="4">4 Stars only</option>
-                  <option value="3">3 Stars only</option>
-                  <option value="2">2 Stars only</option>
-                  <option value="1">1 Star only</option>
-                </select>
-                <button type="button" id="admin-reviews-refresh-btn" class="btn btn-secondary btn-sm" title="Refresh Reviews">
-                  <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
-                </button>
-              </div>
-            </div>
+        <div id="section-all-reviews" class="admin-section hidden" style="display:none;" aria-hidden="true"></div>
 
-            <div class="table-responsive-wrapper" style="overflow-x:auto;margin-top:16px;">
-              <table class="admin-table admin-reviews-table" style="width:100%;min-width:760px;">
-                <thead>
-                  <tr>
-                    <th style="width:22%;">Item Name</th>
-                    <th style="width:18%;">Customer Name</th>
-                    <th style="width:18%;">Star Rating</th>
-                    <th style="width:26%;">Review Text</th>
-                    <th style="width:10%;">Date</th>
-                    <th style="width:6%;text-align:right;">Action</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-reviews-tbody" aria-live="polite">
-                  <tr>
-                    <td colspan="6" class="text-center text-muted" style="padding:32px;">Loading reviews...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </div>
-
-        <!-- SECTION: TOP FAVORITES & TOP ITEMS -->
+        <!-- SECTION: TOP FAVORITES, TOP ITEMS & REVIEWS -->
         <div id="section-top-favorites" class="admin-section hidden">
           <!-- Top 5 Best-Selling Items -->
           <section class="admin-insights-section step-card" aria-labelledby="top-items-heading">
@@ -638,6 +575,59 @@
                   Next &rarr;
                 </button>
               </div>
+            </div>
+          </section>
+
+          <!-- Customer Reviews (All Reviews) -->
+          <section class="step-card" aria-labelledby="all-reviews-heading">
+            <div class="admin-insights-heading" style="flex-wrap:wrap;gap:16px;">
+              <div>
+                <h2 id="all-reviews-heading" style="display:flex;align-items:center;gap:8px;">
+                  <i class="fa-solid fa-comments" style="color:var(--brand-primary);" aria-hidden="true"></i>
+                  <span>Customer Reviews</span>
+                </h2>
+                <p class="text-muted" style="font-size:0.875rem;margin-top:2px;">All customer reviews across menu items, newest first.</p>
+              </div>
+              <div class="admin-reviews-toolbar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <input
+                  type="search"
+                  id="admin-reviews-search"
+                  class="form-input"
+                  placeholder="Filter by item or customer..."
+                  style="width:240px;padding:6px 12px;font-size:0.85rem;"
+                />
+                <select id="admin-reviews-rating-filter" class="form-select" style="font-size:0.85rem;padding:6px 12px;width:150px;">
+                  <option value="all">All Ratings</option>
+                  <option value="5">5 Stars only</option>
+                  <option value="4">4 Stars only</option>
+                  <option value="3">3 Stars only</option>
+                  <option value="2">2 Stars only</option>
+                  <option value="1">1 Star only</option>
+                </select>
+                <button type="button" id="admin-reviews-refresh-btn" class="btn btn-secondary btn-sm" title="Refresh Reviews">
+                  <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="table-responsive-wrapper" style="overflow-x:auto;margin-top:16px;">
+              <table class="admin-table admin-reviews-table" style="width:100%;min-width:760px;">
+                <thead>
+                  <tr>
+                    <th style="width:22%;">Item Name</th>
+                    <th style="width:18%;">Customer Name</th>
+                    <th style="width:18%;">Star Rating</th>
+                    <th style="width:26%;">Review Text</th>
+                    <th style="width:10%;">Date</th>
+                    <th style="width:6%;text-align:right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-reviews-tbody" aria-live="polite">
+                  <tr>
+                    <td colspan="6" class="text-center text-muted" style="padding:32px;">Loading reviews...</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </section>
         </div>
