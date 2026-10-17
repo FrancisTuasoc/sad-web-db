@@ -13928,4 +13928,148 @@ body {
   background: rgba(209, 75, 45, 0.08) !important;
 }
 
+/* ==========================================================================
+   SCROLL SNAP & SECTION FULL-HEIGHT CONFIGURATION (EXCLUDING MENU PAGE)
+   ========================================================================== */
+html:not(:has(body.menu-page)):not(:has(.menu-page)) {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  overflow-x: clip;
+}
+
+@supports not (selector(:has(*))) {
+  html {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+}
+
+body.home-page {
+  overflow-x: clip !important;
+}
+
+/* Explicitly leave Menu page / Menu sections and non-landing pages out of scroll snap */
+html:has(body.menu-page),
+html:has(.menu-page),
+body.menu-page,
+.menu-page,
+body.admin-page,
+body.cart-page,
+body.profile-page,
+body.auth-page {
+  scroll-snap-type: none !important;
+  scroll-behavior: auto;
+}
+
+/* Apply min-height: 100vh (with 100dvh fallback) & scroll-snap-align: start to every section on page except Menu page/section */
+body.home-page > main > section,
+body.home-page section:not(.add-to-cart-addons):not(#product-modal section),
+body:not(.menu-page):not(.admin-page):not(.cart-page):not(.profile-page):not(.auth-page) > main > section:not(.add-to-cart-addons):not(.menu-page-hero):not(.menu-toolbar) {
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  scroll-snap-align: start !important;
+  scroll-snap-stop: normal !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+body.home-page .hero-section {
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  scroll-snap-align: start !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Leave Menu page and menu sections out of full-height and scroll snap entirely */
+body.menu-page,
+body.menu-page main,
+body.menu-page section,
+.menu-page,
+.menu-page main,
+.menu-page section,
+.menu-page-hero,
+.menu-toolbar,
+#menu-grid,
+.menu-catalog {
+  scroll-snap-type: none !important;
+  scroll-snap-align: none !important;
+  min-height: auto !important;
+}
+
+/* ==========================================================================
+   FOOTER: DARK GRAY BACKGROUND & ALL TEXT WHITE (LAYOUT/BEHAVIOR PRESERVED)
+   ========================================================================== */
+footer.site-footer,
+.site-footer,
+body .site-footer,
+body:not(.admin-page) .site-footer,
+body:not(.theme-dark) .site-footer,
+body.theme-dark .site-footer {
+  background: #222222 !important;
+  background-color: #222222 !important;
+  background-image: none !important;
+  border-top: 1px solid #333333 !important;
+  color: #ffffff !important;
+}
+
+footer.site-footer *,
+.site-footer *,
+body .site-footer *,
+body:not(.admin-page) .site-footer *,
+body:not(.theme-dark) .site-footer *,
+body.theme-dark .site-footer * {
+  color: #ffffff !important;
+}
+
+footer.site-footer :is(h1, h2, h3, h4, h5, h6, p, a, span, li, div, strong, em, small, label),
+.site-footer :is(h1, h2, h3, h4, h5, h6, p, a, span, li, div, strong, em, small, label),
+.site-footer .footer-brand-title,
+.site-footer #footer-store-name,
+.site-footer .footer-brand-text,
+.site-footer .footer-col-title,
+.site-footer .footer-links-list,
+.site-footer .footer-links-list li,
+.site-footer .footer-links-list a,
+.site-footer .footer-services-list li,
+.site-footer .footer-contact-items,
+.site-footer .footer-contact-row,
+.site-footer .footer-contact-row span,
+.site-footer .footer-contact-row a,
+.site-footer .footer-facebook-link,
+.site-footer .footer-bottom {
+  color: #ffffff !important;
+}
+
+.site-footer a:hover,
+.site-footer a:focus-visible,
+.site-footer .footer-facebook-link:hover {
+  color: #ffffff !important;
+  opacity: 0.85;
+}
+
+.site-footer svg,
+.site-footer i,
+.site-footer .footer-contact-icon,
+.site-footer .footer-facebook-icon {
+  color: #ffffff !important;
+  stroke: currentColor;
+}
+
+.site-footer svg path,
+.site-footer svg circle,
+.site-footer svg rect {
+  color: #ffffff !important;
+}
+
+.site-footer .footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+}
+
+
 
