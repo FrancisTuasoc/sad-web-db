@@ -740,21 +740,31 @@ function setupHomeSectionNavigation() {
     { id: 'testimonials', element: document.getElementById('testimonials') },
     { id: 'contact', element: document.getElementById('contact') },
   ].filter((section) => section.element);
-  const isolatedSectionIds = ['featured', 'about', 'testimonials', 'contact'];
 
   let isClickScrolling = false;
   let clickLockTimer = null;
   let currentActiveId = null;
 
-  function setHomePageView(targetId) {
-    if (!isolatedSectionIds.includes(targetId)) {
-      delete document.body.dataset.homeView;
+  function scrollToTarget(targetId) {
+    if (!targetId) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
       return;
     }
 
-    document.body.dataset.homeView = targetId;
-    const targetSection = document.getElementById(targetId);
-    if (targetSection) targetSection.scrollTop = 0;
+    const targetElem = document.getElementById(targetId);
+    if (!targetElem) return;
+
+    const headerElem = document.getElementById('site-header');
+    const headerHeight = headerElem ? headerElem.getBoundingClientRect().height : 58;
+    const targetY = window.scrollY + targetElem.getBoundingClientRect().top - headerHeight;
+
+    window.scrollTo({
+      top: Math.max(0, Math.round(targetY)),
+      behavior: 'smooth',
+    });
   }
 
   function setActiveSection(targetId) {
@@ -788,8 +798,8 @@ function setupHomeSectionNavigation() {
     const contactElem = document.getElementById('contact');
     const isAtPageBottom =
       window.scrollY + window.innerHeight >=
-      document.documentElement.scrollHeight - 40;
-    if (isAtPageBottom && contactElem && contactElem.getBoundingClientRect().top <= window.innerHeight * 0.6) {
+      document.documentElement.scrollHeight - 50;
+    if (isAtPageBottom && contactElem && contactElem.getBoundingClientRect().top <= window.innerHeight * 0.7) {
       return 'contact';
     }
 
@@ -797,13 +807,16 @@ function setupHomeSectionNavigation() {
       return '';
     }
 
-    const midY = window.innerHeight * 0.45;
+    const headerElem = document.getElementById('site-header');
+    const headerHeight = headerElem ? headerElem.getBoundingClientRect().height : 58;
+    const scrollOffset = headerHeight + 60;
+
     const orderedSectionIds = ['contact', 'testimonials', 'about', 'featured'];
     for (const id of orderedSectionIds) {
       const elem = document.getElementById(id);
       if (elem) {
         const rect = elem.getBoundingClientRect();
-        if (rect.top <= midY && rect.bottom >= midY) {
+        if (rect.top <= scrollOffset && rect.bottom > scrollOffset) {
           return id;
         }
       }
@@ -813,7 +826,7 @@ function setupHomeSectionNavigation() {
       const elem = document.getElementById(id);
       if (elem) {
         const rect = elem.getBoundingClientRect();
-        if (rect.top <= window.innerHeight * 0.7 && rect.bottom > 0) {
+        if (rect.top <= window.innerHeight * 0.5 && rect.bottom > 0) {
           return id;
         }
       }
@@ -863,20 +876,15 @@ function setupHomeSectionNavigation() {
     const href = link.getAttribute('href') || '';
     const linkUrl = new URL(link.href, window.location.href);
 
-    const isCurrentPage =
-      linkUrl.pathname === window.location.pathname ||
-      (linkUrl.pathname.endsWith('index.html') &&
-        (window.location.pathname.endsWith('index.html') ||
-          window.location.pathname === '/')) ||
-      (linkUrl.pathname === '/' &&
-        window.location.pathname.endsWith('index.html'));
+    const normalizePath = (p) => p.replace(/\/+index\.html$/i, '/').replace(/\/+$/, '') || '/';
+    const isCurrentPage = normalizePath(linkUrl.pathname) === normalizePath(window.location.pathname);
 
     if (!isCurrentPage) return;
 
     const hash = linkUrl.hash ? linkUrl.hash.slice(1) : '';
     const isHome =
       !hash &&
-      (href === 'index.html' || href === '/' || href.endsWith('index.html'));
+      (href === 'index.html' || href === '/' || href.endsWith('index.html') || href === '#');
 
     if (hash || isHome) {
       event.preventDefault();
@@ -885,16 +893,12 @@ function setupHomeSectionNavigation() {
       if (mobileDrawer) mobileDrawer.classList.remove('open');
 
       setActiveSection(hash);
-      setHomePageView(hash);
 
       isClickScrolling = true;
       if (clickLockTimer) clearTimeout(clickLockTimer);
       clickLockTimer = setTimeout(releaseLock, 850);
 
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
+      scrollToTarget(hash);
 
       if (window.history && window.history.pushState) {
         window.history.pushState(
@@ -909,13 +913,13 @@ function setupHomeSectionNavigation() {
   window.addEventListener('hashchange', () => {
     const hash = window.location.hash ? window.location.hash.slice(1) : '';
     setActiveSection(hash);
-    setHomePageView(hash);
+    scrollToTarget(hash);
   });
 
   window.addEventListener('popstate', () => {
     const hash = window.location.hash ? window.location.hash.slice(1) : '';
     setActiveSection(hash);
-    setHomePageView(hash);
+    scrollToTarget(hash);
   });
 
   window.addEventListener('resize', handleScroll);
@@ -925,10 +929,11 @@ function setupHomeSectionNavigation() {
     : '';
   if (initialHash && ['featured', 'about', 'testimonials', 'contact'].includes(initialHash)) {
     setActiveSection(initialHash);
-    setHomePageView(initialHash);
+    setTimeout(() => {
+      scrollToTarget(initialHash);
+    }, 150);
   } else {
     setActiveSection('');
-    setHomePageView('');
   }
 }
 

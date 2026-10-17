@@ -15358,7 +15358,7 @@ body.home-page section#contact {
   }
 }
 
-/* 3. Containers: horizontally centered, zero top gap */
+/* 3. Containers: horizontally centered, matching site header container max-width and padding */
 body.home-page #featured > .container,
 body.home-page #about > .container,
 body.home-page #testimonials > .container,
@@ -15368,24 +15368,43 @@ body.home-page #about .container,
 body.home-page #testimonials .container,
 body.home-page #contact .container {
   width: 100% !important;
-  max-width: var(--container-max, 1200px) !important;
+  max-width: var(--container-max, 1440px) !important;
   margin-inline: auto !important;
   margin-left: auto !important;
   margin-right: auto !important;
   margin-top: 0 !important;
   padding-top: 0 !important;
+  padding-inline: clamp(14px, 2vw, 24px) !important;
   box-sizing: border-box !important;
 }
 
-/* 4. Section headers & titles: pull up to top edge */
+/* 4. Section headers & titles: pull up to top edge, unified layout & typography */
 body.home-page #featured .section-header,
 body.home-page #about .section-header,
 body.home-page #testimonials .section-header,
 body.home-page #contact .section-header,
 body.home-page .testimonials-section-header {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
   margin-top: 0 !important;
   padding-top: 0 !important;
-  margin-bottom: clamp(14px, 2vw, 20px) !important;
+  margin-bottom: clamp(14px, 2vw, 22px) !important;
+  box-sizing: border-box !important;
+}
+
+body.home-page #featured .section-header > div:first-child,
+body.home-page #about .section-header > div:first-child,
+body.home-page #testimonials .section-header > div:first-child,
+body.home-page #contact .section-header > div:first-child {
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
 }
 
 body.home-page #featured .section-title,
@@ -15395,11 +15414,27 @@ body.home-page #contact .section-title,
 body.home-page #featured h2,
 body.home-page #about h2,
 body.home-page #testimonials h2,
-body.home-page #contact h2,
-body.home-page #about .home-section-eyebrow,
-body.home-page #testimonials .hero-badge {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
+body.home-page #contact h2 {
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+  font-size: clamp(1.4rem, 2.2vw, 1.85rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.25 !important;
+  color: var(--color-text, #ffffff) !important;
+}
+
+body.home-page #featured .section-desc,
+body.home-page #about .section-desc,
+body.home-page #testimonials .section-desc,
+body.home-page #contact .section-desc {
+  margin: 6px 0 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+  color: var(--color-text-muted, #94a3b8) !important;
+  font-size: clamp(0.9rem, 1.2vw, 1rem) !important;
+  line-height: 1.45 !important;
 }
 
 /* 5. Specific card grids: centered horizontally and pulled up */
@@ -15423,36 +15458,14 @@ body.home-page #about .about-details {
   gap: 12px !important;
 }
 
-body.home-page #about .home-section-eyebrow {
-  margin-top: 0 !important;
-  margin-bottom: 2px !important;
-}
-
 body.home-page #about .about-proof-card {
   margin-top: 0 !important;
-}
-
-body.home-page #testimonials .testimonials-section-header {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  margin-bottom: clamp(12px, 1.8vw, 18px) !important;
-}
-
-body.home-page #testimonials .hero-badge {
-  margin-top: 0 !important;
-  margin-bottom: 4px !important;
 }
 
 body.home-page #testimonials .testimonials-grid {
   width: 100% !important;
   margin-top: 0 !important;
   margin-inline: auto !important;
-}
-
-body.home-page #contact .section-header {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  margin-bottom: clamp(12px, 1.8vw, 18px) !important;
 }
 
 body.home-page #contact .contact-grid {
@@ -15464,79 +15477,4 @@ body.home-page #contact .contact-grid {
 body.home-page #contact .contact-card {
   margin-top: 0 !important;
 }
-
-/* Show one landing destination at a time when reached through its hash route. */
-body.home-page[data-home-view] {
-  --container-max: 1200px;
-  height: 100vh !important;
-  height: 100dvh !important;
-  min-height: 0 !important;
-  overflow: hidden !important;
-}
-
-body.home-page[data-home-view] > .site-header {
-  flex: 0 0 auto !important;
-}
-
-body.home-page[data-home-view] > main {
-  display: flex !important;
-  flex: 1 1 0% !important;
-  flex-direction: column !important;
-  min-height: 0 !important;
-  height: auto !important;
-  overflow: hidden !important;
-}
-
-body.home-page[data-home-view] > main > .hero-section,
-body.home-page[data-home-view] > main > .section:not([id="featured"]):not([id="about"]):not([id="testimonials"]):not([id="contact"]) {
-  display: none !important;
-}
-
-body.home-page[data-home-view="featured"] > main > #about,
-body.home-page[data-home-view="featured"] > main > #testimonials,
-body.home-page[data-home-view="featured"] > main > #contact,
-body.home-page[data-home-view="about"] > main > #featured,
-body.home-page[data-home-view="about"] > main > #testimonials,
-body.home-page[data-home-view="about"] > main > #contact,
-body.home-page[data-home-view="testimonials"] > main > #featured,
-body.home-page[data-home-view="testimonials"] > main > #about,
-body.home-page[data-home-view="testimonials"] > main > #contact,
-body.home-page[data-home-view="contact"] > main > #featured,
-body.home-page[data-home-view="contact"] > main > #about,
-body.home-page[data-home-view="contact"] > main > #testimonials {
-  display: none !important;
-}
-
-body.home-page[data-home-view="featured"] > main > #featured,
-body.home-page[data-home-view="about"] > main > #about,
-body.home-page[data-home-view="testimonials"] > main > #testimonials,
-body.home-page[data-home-view="contact"] > main > #contact {
-  display: flex !important;
-  flex: 1 1 0% !important;
-  flex-direction: column !important;
-  justify-content: flex-start !important;
-  min-height: 0 !important;
-  height: auto !important;
-  padding: clamp(16px, 3vh, 32px) 0 !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  overscroll-behavior: contain;
-  box-sizing: border-box !important;
-}
-
-body.home-page[data-home-view="featured"] > main > #featured > .container,
-body.home-page[data-home-view="about"] > main > #about > .container,
-body.home-page[data-home-view="testimonials"] > main > #testimonials > .container,
-body.home-page[data-home-view="contact"] > main > #contact > .container {
-  width: 100% !important;
-  max-width: 1200px !important;
-  margin: auto !important;
-  padding-inline: clamp(16px, 3vw, 32px) !important;
-  box-sizing: border-box !important;
-}
-
-body.home-page[data-home-view] > footer {
-  display: none !important;
-}
-
 
