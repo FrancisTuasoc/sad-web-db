@@ -787,3 +787,262 @@ body.profile-page .profile-layout.customer-area .customer-sidebar .profile-nav-b
     display: none !important;
   }
 }
+
+/* ==========================================================================
+   CUSTOMER ACCOUNT SIDEBAR REFINEMENT (SIDEBAR ONLY)
+   ========================================================================== */
+body.profile-page .customer-sidebar,
+body.profile-page .profile-nav.customer-sidebar {
+  position: sticky !important;
+  top: 88px !important;
+  background: var(--surface, #ffffff) !important;
+  border: 1px solid var(--border, #e2e8f0) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
+  padding: 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  box-sizing: border-box !important;
+  transition: all 200ms ease !important;
+}
+
+/* Sidebar Header */
+body.profile-page .customer-sidebar .customer-sidebar-header {
+  padding: 4px 6px 14px !important;
+  border-bottom: 1px solid var(--border, #f1f5f9) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+}
+
+body.profile-page .customer-sidebar .customer-sidebar-header .eyebrow {
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: var(--brand-primary, #D14B2D) !important;
+  margin: 0 !important;
+}
+
+body.profile-page .customer-sidebar .customer-sidebar-header h2 {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  color: var(--text-primary, #0f172a) !important;
+  letter-spacing: -0.02em !important;
+  margin: 0 !important;
+}
+
+/* Navigation List */
+body.profile-page .customer-sidebar .profile-sidebar-nav {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+}
+
+/* Nav Item Buttons */
+body.profile-page .customer-sidebar .profile-nav-btn {
+  width: 100% !important;
+  min-height: 44px !important;
+  padding: 10px 12px !important;
+  border-radius: 10px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: var(--text-secondary, #475569) !important;
+  font-size: 0.92rem !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  text-align: left !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  cursor: pointer !important;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease !important;
+  box-sizing: border-box !important;
+}
+
+/* Clean, crisp Lucide Icons in Buttons */
+body.profile-page .customer-sidebar .profile-nav-btn :is(svg, i) {
+  width: 20px !important;
+  height: 20px !important;
+  flex: 0 0 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--text-muted, #64748b) !important;
+  stroke: currentColor !important;
+  stroke-width: 2 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  fill: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  transition: color 160ms ease, transform 160ms ease !important;
+}
+
+/* Hover state */
+body.profile-page .customer-sidebar .profile-nav-btn:hover:not(.active) {
+  background: color-mix(in srgb, var(--brand-primary, #D14B2D) 7%, transparent) !important;
+  border-color: color-mix(in srgb, var(--brand-primary, #D14B2D) 15%, transparent) !important;
+  color: var(--brand-primary, #D14B2D) !important;
+  transform: translateX(3px) !important;
+}
+
+body.profile-page .customer-sidebar .profile-nav-btn:hover:not(.active) :is(svg, i) {
+  color: var(--brand-primary, #D14B2D) !important;
+  transform: scale(1.08) !important;
+}
+
+/* Active state */
+body.profile-page .customer-sidebar .profile-nav-btn.active {
+  background: var(--brand-primary, #D14B2D) !important;
+  border-color: var(--brand-primary, #D14B2D) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(209, 75, 45, 0.28) !important;
+  font-weight: 700 !important;
+  transform: none !important;
+}
+
+body.profile-page .customer-sidebar .profile-nav-btn.active span {
+  color: #ffffff !important;
+}
+
+body.profile-page .customer-sidebar .profile-nav-btn.active :is(svg, i) {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  stroke-width: 2.2 !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.18)) !important;
+}
+
+/* Focus state */
+body.profile-page .customer-sidebar .profile-nav-btn:focus-visible {
+  outline: 2px solid var(--brand-primary, #D14B2D) !important;
+  outline-offset: 2px !important;
+}
+
+/* Sidebar Footer & Logout */
+body.profile-page .customer-sidebar .customer-sidebar-footer {
+  border-top: 1px solid var(--border, #f1f5f9) !important;
+  margin-top: 6px !important;
+  padding-top: 10px !important;
+}
+
+body.profile-page .customer-sidebar .logout-button {
+  width: 100% !important;
+  min-height: 42px !important;
+  padding: 8px 12px !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--border, #e2e8f0) !important;
+  background: rgba(0, 0, 0, 0.02) !important;
+  color: var(--text-secondary, #64748b) !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  cursor: pointer !important;
+  transition: all 180ms ease !important;
+  box-sizing: border-box !important;
+  margin-top: 0 !important;
+}
+
+body.profile-page .customer-sidebar .logout-button :is(svg, i) {
+  width: 18px !important;
+  height: 18px !important;
+  flex: 0 0 18px !important;
+  color: #94a3b8 !important;
+  stroke: currentColor !important;
+  stroke-width: 2 !important;
+  fill: none !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  transition: all 180ms ease !important;
+}
+
+body.profile-page .customer-sidebar .logout-button:hover {
+  background: #fef2f2 !important;
+  border-color: #fecaca !important;
+  color: #dc2626 !important;
+}
+
+body.profile-page .customer-sidebar .logout-button:hover :is(svg, i) {
+  color: #dc2626 !important;
+  transform: translateX(2px) !important;
+}
+
+/* Collapsed state for tablet / compact desktop */
+body.profile-page .profile-layout.is-sidebar-collapsed .customer-sidebar {
+  width: 68px !important;
+  padding: 12px 8px !important;
+}
+
+body.profile-page .profile-layout.is-sidebar-collapsed .customer-sidebar .customer-sidebar-header,
+body.profile-page .profile-layout.is-sidebar-collapsed .customer-sidebar .profile-nav-btn span,
+body.profile-page .profile-layout.is-sidebar-collapsed .customer-sidebar .logout-button span {
+  display: none !important;
+}
+
+body.profile-page .profile-layout.is-sidebar-collapsed .customer-sidebar .profile-nav-btn,
+body.profile-page .profile-layout.is-sidebar-collapsed .customer-sidebar .logout-button {
+  justify-content: center !important;
+  padding: 10px !important;
+}
+
+/* Dark theme support */
+body.theme-dark.profile-page .customer-sidebar,
+body.theme-dark .customer-sidebar {
+  background: #18241b !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.theme-dark.profile-page .customer-sidebar .customer-sidebar-header {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.theme-dark.profile-page .customer-sidebar .customer-sidebar-header h2 {
+  color: #f1f5f9 !important;
+}
+
+body.theme-dark.profile-page .customer-sidebar .profile-nav-btn:not(.active) {
+  color: #cbd5e1 !important;
+}
+
+body.theme-dark.profile-page .customer-sidebar .profile-nav-btn:not(.active) :is(svg, i) {
+  color: #94a3b8 !important;
+}
+
+body.theme-dark.profile-page .customer-sidebar .profile-nav-btn:hover:not(.active) {
+  background: rgba(209, 75, 45, 0.15) !important;
+  border-color: rgba(209, 75, 45, 0.25) !important;
+  color: #ff8c73 !important;
+}
+
+body.theme-dark.profile-page .customer-sidebar .profile-nav-btn:hover:not(.active) :is(svg, i) {
+  color: #ff8c73 !important;
+}
+
+body.theme-dark.profile-page .customer-sidebar .customer-sidebar-footer {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.theme-dark.profile-page .customer-sidebar .logout-button {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #94a3b8 !important;
+}
+
+body.theme-dark.profile-page .customer-sidebar .logout-button:hover {
+  background: rgba(220, 38, 38, 0.15) !important;
+  border-color: rgba(220, 38, 38, 0.3) !important;
+  color: #f87171 !important;
+}
+
+body.theme-dark.profile-page .customer-sidebar .logout-button:hover :is(svg, i) {
+  color: #f87171 !important;
+}

@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -36,6 +36,11 @@
         <div class="profile-layout customer-area">
           <!-- Profile Navigation -->
           <aside class="profile-nav customer-sidebar" id="profile-sidebar">
+            <div class="customer-sidebar-header">
+              <span class="eyebrow">Customer Portal</span>
+              <h2>My Account</h2>
+            </div>
+
             <nav class="profile-sidebar-nav" aria-label="Account sections">
               <button
                 type="button"
@@ -83,7 +88,7 @@
                 data-tab="status"
                 aria-label="Live Orders"
               >
-                <i class="fa-solid fa-truck-fast" aria-hidden="true"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-truck" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18.5" r="2.5"/><circle cx="7" cy="18.5" r="2.5"/></svg>
                 <span>Live Orders</span>
               </button>
               <button
@@ -92,7 +97,7 @@
                 data-tab="details"
                 aria-label="Saved Details"
               >
-                <i class="fa-solid fa-id-card" aria-hidden="true"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-id-card" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"/><circle cx="8" cy="12" r="2"/><path d="M14 10h4"/><path d="M14 14h3"/></svg>
                 <span>Saved Details</span>
               </button>
               <button
@@ -101,20 +106,22 @@
                 data-tab="security"
                 aria-label="Security"
               >
-                <i class="fa-solid fa-shield" aria-hidden="true"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
                 <span>Security</span>
               </button>
             </nav>
 
-            <button
-              type="button"
-              id="sidebar-logout-btn"
-              class="btn btn-secondary logout-button"
-              title="Logout"
-            >
-              <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
-              <span>Logout</span>
-            </button>
+            <div class="customer-sidebar-footer">
+              <button
+                type="button"
+                id="sidebar-logout-btn"
+                class="btn btn-secondary logout-button"
+                title="Logout"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                <span>Logout</span>
+              </button>
+            </div>
           </aside>
 
           <!-- Profile Tab Content -->
