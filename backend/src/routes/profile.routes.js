@@ -178,6 +178,12 @@ router.use((req, res, next) => {
   return next();
 });
 router.use(requireAuth);
+router.use((req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    return next(new AppError('Admin accounts cannot access customer profile', 403));
+  }
+  next();
+});
 
 const updateProfileSchema = z
   .object({

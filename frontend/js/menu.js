@@ -1,7 +1,7 @@
 // Menu Page Controller with Robust Fallback
 import { apiFetch } from './api.js';
 import { renderHeader, renderFooter, showToast, escapeHtml } from './ui.js';
-import { isLoggedIn } from './auth.js';
+import { isLoggedIn, isAdmin } from './auth.js';
 import { stockStream } from './stock-stream.js';
 import {
   renderProductCard,
@@ -608,6 +608,10 @@ async function loadOrderingSettings() {
 }
 
 function initMenu() {
+  if (isAdmin()) {
+    window.location.replace('admin.html');
+    return;
+  }
   renderHeader('menu');
   renderFooter();
   ensureReviewModalDOM();

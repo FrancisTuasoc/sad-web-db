@@ -1962,8 +1962,12 @@ function updateProfileSidebarToggle() {
 
 function initProfile() {
   if (!requireAuth()) return;
-  const adminAccount = isAdminAccount();
-  document.body.classList.toggle('admin-account', adminAccount);
+  if (isAdminAccount()) {
+    window.location.replace('admin.html');
+    return;
+  }
+  const adminAccount = false;
+  document.body.classList.toggle('admin-account', false);
   if (adminAccount) {
     document.title = 'Admin Profile - GIGABITE';
     document

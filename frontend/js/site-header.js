@@ -1,11 +1,24 @@
+// Admins cannot see the customer website or profile. Only the admin portal can the admin see.
+(function guardAdminPortalOnly() {
+  try {
+    const rawUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+    const user = rawUser ? JSON.parse(rawUser) : null;
+    const isAdmin = Boolean(token && user && user.role === 'admin');
+    const path = (window.location.pathname || '').toLowerCase();
+    const isDashboard = path.endsWith('admin.html');
+    if (isAdmin && !isDashboard) {
+      window.location.replace('admin.html');
+    }
+  } catch (e) {
+    // Ignore error
+  }
+})();
+
 class SiteHeader extends HTMLElement {
   connectedCallback() {
     if (this.dataset.rendered === 'true') return;
 
-    this.dataset.rendered = 'true';
-    this.classList.add('site-header');
-
-    const isProfilePage = document.body.classList.contains('profile-page');
     let isAdmin = false;
     try {
       const rawUser = localStorage.getItem('user');
@@ -14,6 +27,18 @@ class SiteHeader extends HTMLElement {
     } catch (e) {
       isAdmin = false;
     }
+
+    const currentPath = (window.location.pathname || '').toLowerCase();
+    const isDashboardPage = currentPath.endsWith('admin.html');
+    if (isAdmin && !isDashboardPage) {
+      window.location.replace('admin.html');
+      return;
+    }
+
+    this.dataset.rendered = 'true';
+    this.classList.add('site-header');
+
+    const isProfilePage = document.body.classList.contains('profile-page');
 
     if (isAdmin) {
       document.body.classList.add('admin-account');

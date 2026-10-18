@@ -62,7 +62,18 @@ export function isLoggedIn() {
 
 export function isAdmin() {
   const user = getUser();
-  return Boolean(user && user.role === 'admin');
+  return Boolean(getToken() && user && user.role === 'admin');
+}
+
+export function enforceAdminPortalOnly() {
+  if (isAdmin()) {
+    const path = (window.location.pathname || '').toLowerCase();
+    if (!path.endsWith('admin.html')) {
+      window.location.replace('admin.html');
+      return true;
+    }
+  }
+  return false;
 }
 
 export function logout() {
@@ -179,6 +190,14 @@ export function requireAuth(targetRole = null) {
   if (targetRole === 'admin' && !isAdmin()) {
     window.location.href = 'index.html';
     return false;
+  }
+
+  if (isAdmin()) {
+    const path = (window.location.pathname || '').toLowerCase();
+    if (!path.endsWith('admin.html')) {
+      window.location.replace('admin.html');
+      return false;
+    }
   }
 
   return true;

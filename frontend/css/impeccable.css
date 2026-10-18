@@ -17464,11 +17464,9 @@ body.cart-page .line-checkbox {
 /* ==========================================================================
    BUTTON CONSISTENCY ACROSS WEBSITE SPECIALLY ON PHONE
    ========================================================================== */
-/* Header toggles consistency (profile sidebar toggle, mobile nav, admin sidebar toggle) */
+/* Header toggles consistency (profile sidebar toggle, admin sidebar toggle) */
 .site-header #profile-sidebar-toggle,
 .profile-page .site-header #profile-sidebar-toggle,
-.site-header .mobile-nav-toggle,
-.mobile-nav-toggle,
 .admin-site-header #admin-toggle-sidebar-btn,
 .admin-header-brand #admin-toggle-sidebar-btn {
   width: 36px !important;
@@ -17481,6 +17479,37 @@ body.cart-page .line-checkbox {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+}
+
+/* Mobile & tablet navigation toggle button: hidden on desktop/laptop, visible only on phone and tablet */
+.site-header .mobile-nav-toggle,
+.mobile-nav-toggle {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  border-radius: 8px !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  align-items: center !important;
+  justify-content: center !important;
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .site-header .mobile-nav-toggle,
+  .mobile-nav-toggle {
+    display: inline-flex !important;
+  }
+}
+
+@media (min-width: 901px) {
+  .site-header .mobile-nav-toggle,
+  .mobile-nav-toggle,
+  .site-header .mobile-drawer,
+  .mobile-drawer {
+    display: none !important;
+  }
 }
 
 .site-header #profile-sidebar-toggle i,

@@ -183,8 +183,14 @@
     <script type="module">
       import { apiFetch } from './js/api.js';
       import { showToast } from './js/ui.js';
+      import { isLoggedIn, isAdmin } from './js/auth.js';
 
       function init() {
+        if (isLoggedIn() && isAdmin()) {
+          window.location.replace('admin.html');
+          return;
+        }
+
         // Password eye toggles
         document.querySelectorAll('.toggle-password-btn').forEach((btn) => {
           btn.addEventListener('click', () => {

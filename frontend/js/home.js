@@ -12,7 +12,7 @@ import {
   updateCartBadge,
   getProductImageUrl,
 } from './ui.js';
-import { isLoggedIn } from './auth.js';
+import { isLoggedIn, isAdmin } from './auth.js';
 import { stockStream } from './stock-stream.js';
 import { lucideIcon, renderRatingBadge, renderInteractiveCardStars } from './icons.js';
 import {
@@ -694,6 +694,10 @@ export function attachProductGridListeners(
 }
 
 function initHome() {
+  if (isAdmin()) {
+    window.location.replace('admin.html');
+    return;
+  }
   renderHeader('home');
   setupHomeSectionNavigation();
   renderFooter();
