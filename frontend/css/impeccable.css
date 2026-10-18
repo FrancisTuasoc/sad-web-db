@@ -16848,6 +16848,218 @@ body.theme-dark .testimonial-date {
 }
 
 /* ==========================================================================
+   CUSTOMER REVIEW STAR BREAKDOWN & SUMMARY CARD
+   ========================================================================== */
+.testimonials-header-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  flex-wrap: wrap !important;
+}
+
+.btn-write-review {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 8px 16px !important;
+  font-weight: 600 !important;
+  border-radius: 9999px !important;
+}
+
+.testimonials-rating-summary {
+  width: 100% !important;
+  margin-top: 6px !important;
+  margin-bottom: 32px !important; /* Move review cards a bit to the bottom */
+}
+
+.reviews-summary-card {
+  background: var(--color-surface, #ffffff) !important;
+  border: 1px solid rgba(220, 210, 200, 0.9) !important;
+  border-radius: 20px !important;
+  padding: clamp(20px, 3vh, 32px) clamp(22px, 3vw, 40px) !important;
+  box-shadow: 0 6px 24px rgba(35, 25, 20, 0.05) !important;
+  display: grid !important;
+  grid-template-columns: 280px 1fr !important;
+  gap: clamp(24px, 4vw, 56px) !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  transition: box-shadow 200ms ease !important;
+}
+
+.reviews-summary-card:hover {
+  box-shadow: 0 10px 32px rgba(35, 25, 20, 0.08) !important;
+}
+
+.reviews-summary-overview {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  padding-right: clamp(16px, 2.5vw, 36px) !important;
+  border-right: 1px solid var(--color-border, #e5e7eb) !important;
+}
+
+.summary-score-big {
+  font-family: var(--font-heading, 'Montserrat', sans-serif) !important;
+  font-size: clamp(3rem, 4.5vw, 4rem) !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  color: #1f2937 !important;
+  letter-spacing: -0.04em !important;
+}
+
+.summary-stars-row {
+  margin: 10px 0 8px 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.summary-total-label {
+  font-size: 0.88rem !important;
+  color: #6b7280 !important;
+  margin-bottom: 16px !important;
+}
+
+.summary-write-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 20px !important;
+  border-radius: 9999px !important;
+  font-weight: 600 !important;
+  font-size: 0.88rem !important;
+}
+
+.reviews-summary-breakdown {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+.breakdown-title {
+  font-family: var(--font-heading, 'Montserrat', sans-serif) !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  color: #1f2937 !important;
+  margin: 0 0 4px 0 !important;
+}
+
+.breakdown-bars-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+.star-breakdown-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  width: 100% !important;
+}
+
+.star-breakdown-label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  min-width: 44px !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  color: #374151 !important;
+}
+
+.star-breakdown-track {
+  flex: 1 !important;
+  height: 12px !important;
+  background: #f3f4f6 !important;
+  border-radius: 9999px !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+.star-breakdown-fill {
+  height: 100% !important;
+  background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%) !important;
+  border-radius: 9999px !important;
+  transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.star-breakdown-count {
+  min-width: 80px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  justify-content: flex-end !important;
+  font-size: 0.85rem !important;
+}
+
+.star-breakdown-count .count-val {
+  font-weight: 700 !important;
+  color: #1f2937 !important;
+}
+
+.star-breakdown-count .pct-val {
+  color: #9ca3af !important;
+  font-size: 0.8rem !important;
+}
+
+/* Dark mode support */
+body.theme-dark .reviews-summary-card {
+  background: var(--color-surface, #1f2937) !important;
+  border-color: var(--color-border, #374151) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25) !important;
+}
+
+body.theme-dark .summary-score-big,
+body.theme-dark .breakdown-title,
+body.theme-dark .star-breakdown-count .count-val {
+  color: #fafaf9 !important;
+}
+
+body.theme-dark .star-breakdown-label {
+  color: #e5e7eb !important;
+}
+
+body.theme-dark .summary-total-label,
+body.theme-dark .star-breakdown-count .pct-val {
+  color: #9ca3af !important;
+}
+
+body.theme-dark .reviews-summary-overview {
+  border-right-color: var(--color-border, #374151) !important;
+}
+
+body.theme-dark .star-breakdown-track {
+  background: #374151 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 860px) {
+  .reviews-summary-card {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+    text-align: center !important;
+  }
+
+  .reviews-summary-overview {
+    border-right: none !important;
+    border-bottom: 1px solid var(--color-border, #e5e7eb) !important;
+    padding-right: 0 !important;
+    padding-bottom: 22px !important;
+  }
+
+  body.theme-dark .reviews-summary-overview {
+    border-bottom-color: var(--color-border, #374151) !important;
+  }
+
+  .breakdown-title {
+    text-align: left !important;
+  }
+}
+
+/* ==========================================================================
    POLISH: CART PAGE UI ELEVATION
    ========================================================================== */
 body.cart-page .cart-box {
@@ -17637,9 +17849,8 @@ body.theme-dark #section-orders .admin-table tbody tr[style*='background-color: 
   color: #fef3c7 !important;
 }
 
-
-
-
-
-
-
+@media (max-width: 480px) {
+  body.admin-page .admin-header-brand > .badge {
+    display: none !important;
+  }
+}

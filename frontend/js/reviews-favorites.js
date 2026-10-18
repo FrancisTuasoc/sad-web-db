@@ -583,7 +583,12 @@ export function getUserRatingForItem(itemId) {
 }
 
 export async function submitDirectProductRating(productId, rating, sourceBtn = null) {
-  const ratingNum = Math.max(1, Math.min(5, Number(rating) || 5));
+  const parsed = Number(rating);
+  if (isNaN(parsed) || parsed < 1 || parsed > 5) {
+    showToast('Please select a valid rating between 1 and 5 stars.', 'error');
+    return;
+  }
+  const ratingNum = Math.round(parsed);
   customerRatingsMap[String(productId)] = ratingNum;
 
   try {
@@ -692,7 +697,7 @@ export function updateProductCardInteractiveRating(productId, avgRating, reviewC
 
 // ---------------- Website Review & Testimonials Controller ----------------
 let websiteReviewModal = null;
-let websiteStarRating = 5;
+let websiteStarRating = 0;
 
 export function ensureWebsiteReviewModalDOM() {
   if (websiteReviewModal) return websiteReviewModal;
@@ -733,6 +738,7 @@ export function ensureWebsiteReviewModalDOM() {
             <div id="website-star-picker" class="interactive-star-picker" role="radiogroup" aria-label="Rate from 1 to 5 stars">
               <!-- Rendered dynamically -->
             </div>
+            <div id="website-star-error" class="form-error-msg hidden" role="alert" style="margin-top:6px;">Please select a star rating.</div>
           </div>
 
           <div class="form-group">
@@ -771,7 +777,7 @@ export function ensureWebsiteReviewModalDOM() {
   return websiteReviewModal;
 }
 
-function renderWebsiteStarPicker(activeRating = 5) {
+function renderWebsiteStarPicker(activeRating = 0) {
   const picker = document.getElementById('website-star-picker');
   if (!picker) return;
 
@@ -811,6 +817,7 @@ function attachWebsiteReviewModalListeners(modal) {
     modal.classList.remove('open');
     modal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    websiteStarRating = 0;
   }
 
   if (closeBtn) closeBtn.addEventListener('click', closeModal);
@@ -837,8 +844,10 @@ function attachWebsiteReviewModalListeners(modal) {
     picker.addEventListener('click', (e) => {
       const btn = e.target.closest('.star-picker-btn');
       if (btn) {
-        websiteStarRating = Number(btn.getAttribute('data-star-val')) || 5;
+        websiteStarRating = Number(btn.getAttribute('data-star-val')) || 0;
         renderWebsiteStarPicker(websiteStarRating);
+        const starError = document.getElementById('website-star-error');
+        if (starError) starError.classList.add('hidden');
       }
     });
   }
@@ -847,7 +856,18 @@ function attachWebsiteReviewModalListeners(modal) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const comment = (textarea.value || '').trim();
+      const starError = document.getElementById('website-star-error');
       const errorDiv = document.getElementById('website-review-error');
+
+      if (!websiteStarRating || websiteStarRating < 1 || websiteStarRating > 5) {
+        if (starError) {
+          starError.textContent = 'Please select a star rating (1 to 5 stars).';
+          starError.classList.remove('hidden');
+        }
+        showToast('Please select a star rating.', 'error');
+        return;
+      }
+      if (starError) starError.classList.add('hidden');
 
       if (!comment) {
         if (errorDiv) {
@@ -936,8 +956,8 @@ export function openWebsiteReviewModal() {
     `;
   }
 
-  websiteStarRating = 5;
-  renderWebsiteStarPicker(5);
+  websiteStarRating = 0;
+  renderWebsiteStarPicker(0);
 
   const textarea = document.getElementById('website-review-comment');
   if (textarea) textarea.value = '';
@@ -945,6 +965,8 @@ export function openWebsiteReviewModal() {
   if (charCounter) charCounter.textContent = '0 / 400';
   const errorDiv = document.getElementById('website-review-error');
   if (errorDiv) errorDiv.classList.add('hidden');
+  const starError = document.getElementById('website-star-error');
+  if (starError) starError.classList.add('hidden');
 
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
@@ -952,7 +974,7 @@ export function openWebsiteReviewModal() {
 }
 
 export function renderTestimonialCard(rev) {
-  const rating = Number(rev.rating) || 5;
+  const rating = Math.max(0, Math.min(5, Number(rev.rating) || 0));
   const name = rev.customerName || rev.customer_name || 'Happy Customer';
   const comment = rev.comment || '';
   const dateStr = rev.createdAt ? new Date(rev.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent';
@@ -1012,10 +1034,89 @@ let allWebsiteReviews = [];
 let currentTestimonialsPage = 1;
 const TESTIMONIALS_PER_PAGE = 3;
 
+export function renderWebsiteRatingSummaryCard(reviews = []) {
+  const container = document.getElementById('testimonials-rating-summary');
+  if (!container) return;
+
+  if (!reviews || !reviews.length) {
+    container.innerHTML = '';
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = 'block';
+
+  const totalReviews = reviews.length;
+  const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  let sumScore = 0;
+
+  reviews.forEach((r) => {
+    const val = Math.max(1, Math.min(5, Math.round(Number(r.rating) || 0)));
+    counts[val] = (counts[val] || 0) + 1;
+    sumScore += Number(r.rating) || val;
+  });
+
+  const avgRating = totalReviews > 0 ? (sumScore / totalReviews).toFixed(1) : '0.0';
+
+  let barsHtml = '';
+  for (let star = 5; star >= 1; star--) {
+    const count = counts[star] || 0;
+    const pct = totalReviews > 0 ? Math.round((count / totalReviews) * 100) : 0;
+    barsHtml += `
+      <div class="star-breakdown-row" data-star="${star}">
+        <div class="star-breakdown-label">
+          <span class="star-num">${star}</span>
+          ${lucideIcon('star', { size: 14, fill: '#F59E0B', stroke: '#F59E0B', className: 'breakdown-star-icon' })}
+        </div>
+        <div class="star-breakdown-track" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="${count} customers gave ${star} stars">
+          <div class="star-breakdown-fill" style="width: ${pct}%;"></div>
+        </div>
+        <div class="star-breakdown-count">
+          <span class="count-val">${count}</span>
+          <span class="pct-val">(${pct}%)</span>
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    <div class="reviews-summary-card">
+      <div class="reviews-summary-overview">
+        <div class="summary-score-big">${avgRating}</div>
+        <div class="summary-stars-row">
+          ${renderRatingStars(Number(avgRating), { size: 20 })}
+        </div>
+        <div class="summary-total-label">
+          Based on <strong>${totalReviews}</strong> customer review${totalReviews !== 1 ? 's' : ''}
+        </div>
+        <button type="button" class="btn btn-primary btn-sm summary-write-btn" id="btn-summary-write-review">
+          ${lucideIcon('star', { size: 15 })}
+          <span>Share Your Feedback</span>
+        </button>
+      </div>
+      <div class="reviews-summary-breakdown">
+        <h4 class="breakdown-title">Customer Rating Breakdown</h4>
+        <div class="breakdown-bars-list">
+          ${barsHtml}
+        </div>
+      </div>
+    </div>
+  `;
+
+  const writeBtn = container.querySelector('#btn-summary-write-review');
+  if (writeBtn) {
+    writeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openWebsiteReviewModal();
+    });
+  }
+}
+
 export function displayTestimonialsPage(page = 1) {
   const grid = document.getElementById('testimonials-grid');
   const paginationWrap = document.getElementById('testimonials-pagination-wrap');
   if (!grid) return;
+
+  renderWebsiteRatingSummaryCard(allWebsiteReviews);
 
   if (!allWebsiteReviews.length) {
     grid.innerHTML = `
