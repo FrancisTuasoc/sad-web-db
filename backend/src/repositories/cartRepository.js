@@ -289,7 +289,8 @@ const cartRepository = {
   },
 
   async deleteMany(ids, userId) {
-    if (ids && ids.length > 0) {
+    if (Array.isArray(ids)) {
+      if (ids.length === 0) return { deletedCount: 0 };
       const res = await query(
         'DELETE FROM cart_items WHERE id = ANY($1::uuid[]) AND user_id = $2 RETURNING *',
         [ids, userId]

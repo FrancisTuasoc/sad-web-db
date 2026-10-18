@@ -78,7 +78,23 @@ async function placeOrder({
 
   let paymentProof = null;
   if (paymentMethod === 'gcash') {
-    if (gcashProofData && gcashProofMimeType) {
+    const hasProof = Boolean(gcashProofData && gcashProofMimeType);
+    const hasReference = Boolean(gcashReference && /^\d{13}$/.test(gcashReference));
+
+    if (!hasProof && !hasReference) {
+      if (gcashReference) {
+        throw new AppError(
+          'GCash reference numbers must contain exactly 13 digits.',
+          400
+        );
+      }
+      throw new AppError(
+        'Please provide either a GCash reference number or a payment confirmation picture.',
+        400
+      );
+    }
+
+    if (hasProof) {
       paymentProof = validateGcashProof({
         data: gcashProofData,
         mimeType: gcashProofMimeType,
@@ -98,11 +114,6 @@ async function placeOrder({
           publicId: uploadResult.publicId,
         };
       }
-    } else if (!gcashReference || !/^\d{13}$/.test(gcashReference)) {
-      throw new AppError(
-        'Enter the 13-digit demo reference or attach an image for admin review.',
-        400
-      );
     }
   }
 
@@ -277,7 +288,7 @@ async function placeOrder({
 
   // Remove only the checked and ordered cart items
   await cartRepository.deleteMany(
-    cartItems.map((c) => c.id),
+    cartItems.map((c) => c.id || c._id),
     userId
   );
 

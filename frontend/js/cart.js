@@ -23,6 +23,10 @@ let editingCartItem = null;
 let allAddons = [];
 let pendingCartDeletion = null;
 
+export function getCartItems() {
+  return cartItems;
+}
+
 export function getCheckedCartItems() {
   return cartItems.filter((item) => checkedItemIds.has(item._id));
 }
@@ -673,6 +677,10 @@ function setupCartListeners() {
       closeModal('edit-addons-modal')
     );
   if (saveEditBtn) saveEditBtn.addEventListener('click', saveEditedAddons);
+
+  window.addEventListener('gigabite:cart-changed', () => {
+    fetchCart();
+  });
 }
 
 function initCart() {

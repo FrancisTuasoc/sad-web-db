@@ -9,6 +9,7 @@ import {
 } from './ui.js';
 import { getUser, setUser } from './auth.js';
 import {
+  getCartItems,
   getCheckedCartItems,
   hasStockIssue,
   fetchCart,
@@ -30,9 +31,16 @@ const GCASH_PROOF_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 const DEMO_GCASH_REFERENCE = '0000000000000';
 
 function hasValidGcashReference() {
-  return (
-    document.getElementById('gcash-reference-input')?.value.trim() ===
-    DEMO_GCASH_REFERENCE
+  const ref =
+    document.getElementById('gcash-reference-input')?.value.trim() || '';
+  return /^\d{13}$/.test(ref);
+}
+
+function hasValidGcashProof() {
+  return Boolean(
+    selectedGcashProof &&
+      GCASH_PROOF_TYPES.includes(selectedGcashProof.type) &&
+      selectedGcashProof.size <= MAX_GCASH_PROOF_BYTES
   );
 }
 
@@ -450,18 +458,22 @@ export function updateReceipt() {
   const referenceMismatch =
     selectedPaymentMethod === 'gcash' &&
     enteredReference.length > 0 &&
-    enteredReference !== DEMO_GCASH_REFERENCE;
+    !hasValidGcashReference();
   gcashReferenceInput?.classList.toggle('is-invalid', referenceMismatch);
   if (gcashReferenceInput) {
     if (referenceMismatch) gcashReferenceInput.setAttribute('aria-invalid', 'true');
     else gcashReferenceInput.removeAttribute('aria-invalid');
   }
+  const hasGcashProofOrRef =
+    selectedPaymentMethod !== 'gcash' ||
+    hasValidGcashReference() ||
+    hasValidGcashProof();
   if (placeOrderBtn) {
     placeOrderBtn.disabled =
       checkedItems.length === 0 ||
       stockIssue ||
       !selectedPaymentMethod ||
-      (selectedPaymentMethod === 'gcash' && !hasValidGcashReference()) ||
+      !hasGcashProofOrRef ||
       !orderingAvailable ||
       belowMinimum;
   }
@@ -790,12 +802,19 @@ async function handlePlaceOrder() {
   }
 
   if (paymentMethod === 'gcash') {
-    const gcashReference = gcashReferenceInput?.value.trim() || '';
-    if (gcashReference !== DEMO_GCASH_REFERENCE) {
-      showToast('Enter the correct demo reference number.', 'warning');
+    const hasReference = hasValidGcashReference();
+    const hasProof = hasValidGcashProof();
+    const enteredRef = gcashReferenceInput?.value.trim() || '';
+
+    if (enteredRef && !hasReference) {
+      showToast(
+        'Please enter a valid 13-digit GCash reference number.',
+        'warning'
+      );
       gcashReferenceInput?.focus();
       return;
     }
+
     if (
       selectedGcashProof &&
       (!GCASH_PROOF_TYPES.includes(selectedGcashProof.type) ||
@@ -803,6 +822,15 @@ async function handlePlaceOrder() {
     ) {
       showToast('Choose a PNG, JPEG, or WebP test image up to 3 MiB.', 'warning');
       gcashProofInput?.focus();
+      return;
+    }
+
+    if (!hasReference && !hasProof) {
+      showToast(
+        'Please provide either a GCash reference number or a payment confirmation picture.',
+        'warning'
+      );
+      if (gcashReferenceInput) gcashReferenceInput.focus();
       return;
     }
   }
@@ -852,8 +880,8 @@ async function handlePlaceOrder() {
       fulfillment: fulfillmentMethod,
       paymentMethod,
       gcashReference:
-        paymentMethod === 'gcash' && hasValidGcashReference()
-          ? DEMO_GCASH_REFERENCE
+        paymentMethod === 'gcash'
+          ? (gcashReferenceInput?.value.trim() || '')
           : '',
       gcashProofData: gcashProof ? gcashProof.data : '',
       gcashProofMimeType: gcashProof ? gcashProof.mimeType : '',
@@ -892,6 +920,28 @@ async function handlePlaceOrder() {
     isChangingContact = false;
     initContactDetails();
 
+    // Reset GCash inputs & preview
+    selectedGcashProof = null;
+    if (gcashProofPreviewUrl) {
+      URL.revokeObjectURL(gcashProofPreviewUrl);
+      gcashProofPreviewUrl = null;
+    }
+    const gcashPreview = document.getElementById('gcash-proof-preview');
+    if (gcashPreview) {
+      gcashPreview.removeAttribute('src');
+      gcashPreview.classList.add('hidden');
+    }
+    if (gcashProofInput) gcashProofInput.value = '';
+    if (gcashReferenceInput) {
+      gcashReferenceInput.value = '';
+      gcashReferenceInput.classList.remove('is-invalid');
+      gcashReferenceInput.removeAttribute('aria-invalid');
+    }
+
+    // Refresh active cart from server
+    await fetchCart();
+    window.dispatchEvent(new CustomEvent('gigabite:cart-changed'));
+
     showSuccessReceipt(order);
   } catch (err) {
     showToast(err.message, 'error');
@@ -908,7 +958,9 @@ function showSuccessReceipt(order) {
   const cartLayout = document.getElementById('cart-layout-container');
   const successContainer = document.getElementById('order-success-screen');
 
-  if (cartLayout) cartLayout.classList.add('hidden');
+  if (cartLayout && getCartItems().length === 0) {
+    cartLayout.classList.add('hidden');
+  }
   if (successContainer) {
     successContainer.classList.remove('hidden');
 
@@ -998,7 +1050,7 @@ function showSuccessReceipt(order) {
               <div><span>Phone</span><strong>${escapeHtml(order.contact.phone)}</strong></div>
               ${order.contact.email ? `<div><span>Email</span><strong>${escapeHtml(order.contact.email)}</strong></div>` : ''}
               ${order.fulfillment === 'delivery' ? `<div class="receipt-address"><span>Delivery address</span><strong>${escapeHtml(order.contact.address)}</strong></div>` : ''}
-              ${order.paymentMethod === 'gcash' ? `<div><span>Payment status</span><strong>UNPAID — demo only; no payment was processed</strong></div><div><span>Demo reference</span><strong>${escapeHtml(order.gcashReference || DEMO_GCASH_REFERENCE)}</strong></div>` : ''}
+              ${order.paymentMethod === 'gcash' ? `<div><span>Payment status</span><strong>UNPAID — manual payment verification required</strong></div><div><span>GCash reference</span><strong>${escapeHtml(order.gcashReference || (order.paymentProof?.url || order.paymentProof ? 'Payment picture attached' : 'None provided'))}</strong></div>` : ''}
             </div>
           </section>
 
