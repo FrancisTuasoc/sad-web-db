@@ -865,11 +865,15 @@ function attachWebsiteReviewModalListeners(modal) {
       }
 
       try {
+        const guestNameInput = document.getElementById('website-review-guest-name');
+        const customName = guestNameInput ? guestNameInput.value.trim() : '';
+
         const res = await apiFetch('/reviews/website', {
           method: 'POST',
           body: JSON.stringify({
             rating: websiteStarRating,
             comment,
+            customerName: customName,
           }),
         });
 
@@ -878,6 +882,11 @@ function attachWebsiteReviewModalListeners(modal) {
 
         if (res.review) {
           prependTestimonialCard(res.review);
+          window.dispatchEvent(
+            new CustomEvent('gigabite:website-review-added', {
+              detail: { review: res.review },
+            })
+          );
           const testimonialsSec = document.getElementById('testimonials');
           if (testimonialsSec) {
             if (window.location.hash === '#testimonials') {
@@ -900,40 +909,52 @@ function attachWebsiteReviewModalListeners(modal) {
 }
 
 export function openWebsiteReviewModal() {
-  if (!isLoggedIn()) {
-    showToast('Please sign in to rate and review the website.', 'info');
-    setTimeout(() => {
-      window.location.href = `login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
-    }, 800);
-    return;
-  }
-
   const modal = ensureWebsiteReviewModalDOM();
   const user = getUser();
   const userPreview = document.getElementById('website-review-user-preview');
-  if (userPreview && user) {
-    const name = user.fullName || user.full_name || `${user.firstName || user.first_name || ''} ${user.lastName || user.last_name || ''}`.trim() || user.username || 'Customer';
-    let userAvatar = '';
-    try {
-      userAvatar = localStorage.getItem(`gigabite:avatar:${user.id || user._id}`) || '';
-    } catch {}
-    userAvatar = userAvatar || user.avatarUrl || user.avatar || '';
-    const initial = (name.charAt(0) || 'C').toUpperCase();
-    const hasValidDirectImage = userAvatar && !userAvatar.startsWith('pgavatar:') && !userAvatar.startsWith('gridfs:') && (userAvatar.startsWith('http://') || userAvatar.startsWith('https://') || userAvatar.startsWith('data:') || userAvatar.startsWith('/'));
 
-    const avatarHtml = hasValidDirectImage
-      ? `<img src="${escapeHtml(userAvatar)}" alt="${escapeHtml(name)}" class="preview-avatar-img" onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\\'preview-avatar-circle\\'>${escapeHtml(initial)}</div>';">`
-      : `<div class="preview-avatar-circle">${escapeHtml(initial)}</div>`;
+  if (userPreview) {
+    if (user && isLoggedIn()) {
+      const name = user.fullName || user.full_name || `${user.firstName || user.first_name || ''} ${user.lastName || user.last_name || ''}`.trim() || user.username || 'Customer';
+      let userAvatar = '';
+      try {
+        userAvatar = localStorage.getItem(`gigabite:avatar:${user.id || user._id}`) || '';
+      } catch {}
+      userAvatar = userAvatar || user.avatarUrl || user.avatar || '';
+      const initial = (name.charAt(0) || 'C').toUpperCase();
+      const hasValidDirectImage = userAvatar && !userAvatar.startsWith('pgavatar:') && !userAvatar.startsWith('gridfs:') && (userAvatar.startsWith('http://') || userAvatar.startsWith('https://') || userAvatar.startsWith('data:') || userAvatar.startsWith('/'));
 
-    userPreview.innerHTML = `
-      <div class="user-preview-card">
-        ${avatarHtml}
-        <div>
-          <strong class="user-preview-name">${escapeHtml(name)}</strong>
-          <span class="user-preview-role">Verified Customer</span>
+      const avatarHtml = hasValidDirectImage
+        ? `<img src="${escapeHtml(userAvatar)}" alt="${escapeHtml(name)}" class="preview-avatar-img" onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\\'preview-avatar-circle\\'>${escapeHtml(initial)}</div>';">`
+        : `<div class="preview-avatar-circle">${escapeHtml(initial)}</div>`;
+
+      userPreview.innerHTML = `
+        <div class="user-preview-card">
+          ${avatarHtml}
+          <div>
+            <strong class="user-preview-name">${escapeHtml(name)}</strong>
+            <span class="user-preview-role">Verified Customer</span>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    } else {
+      userPreview.innerHTML = `
+        <div class="user-preview-card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="preview-avatar-circle" style="background:#4b5563;">G</div>
+            <div>
+              <strong class="user-preview-name">Customer Review</strong>
+              <span class="user-preview-role">Public Feedback</span>
+            </div>
+          </div>
+          <a href="login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}" class="btn btn-secondary btn-sm" style="font-size:0.75rem;padding:4px 10px;">Sign In</a>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label for="website-review-guest-name" class="form-label" style="font-size:0.85rem;font-weight:600;">Your Name (optional)</label>
+          <input type="text" id="website-review-guest-name" class="form-control" placeholder="e.g. John D." maxlength="60" style="font-size:0.85rem;" />
+        </div>
+      `;
+    }
   }
 
   websiteStarRating = 5;

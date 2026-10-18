@@ -48,7 +48,7 @@ class SiteHeader extends HTMLElement {
             <li><a href="menu.html">Menu</a></li>
             <li><a href="index.html#featured">Featured</a></li>
             <li><a href="index.html#about">About</a></li>
-            <li><a href="index.html#testimonials">Reviews</a></li>
+            <li><a href="reviews.html">Reviews</a></li>
             <li><a href="index.html#contact">Contact</a></li>
           </ul>
         </nav>`
@@ -106,7 +106,7 @@ class SiteHeader extends HTMLElement {
         <a href="menu.html">Menu</a>
         <a href="index.html#featured">Featured</a>
         <a href="index.html#about">About</a>
-        <a href="index.html#testimonials">Reviews</a>
+        <a href="reviews.html">Reviews</a>
         <a href="index.html#contact">Contact</a>
         <a href="cart.html">Cart</a>
         <a href="login.html" style="color: var(--color-accent); font-weight: 700">Sign In</a>`
@@ -119,6 +119,7 @@ class SiteHeader extends HTMLElement {
     const hash = window.location.hash;
     const isHome = path === '/' || path.endsWith('index.html') || path === '';
     const isMenu = path.endsWith('menu.html');
+    const isReviews = path.endsWith('reviews.html');
     const isDashboard = path.endsWith('admin.html');
 
     this.querySelectorAll('.nav-links a, .mobile-drawer a').forEach((link) => {
@@ -140,6 +141,8 @@ class SiteHeader extends HTMLElement {
           );
         }
       } else if (isMenu && link.getAttribute('href')?.includes('menu.html')) {
+        link.classList.add('active');
+      } else if (isReviews && linkUrl.pathname.endsWith('reviews.html')) {
         link.classList.add('active');
       }
     });
