@@ -35,66 +35,7 @@ router.get(
   })
 );
 
-const { query } = require('../config/db');
-
-// 1b. Get all customer reviews feed (Website reviews + Item reviews with comments)
-router.get(
-  '/feed',
-  asyncHandler(async (req, res) => {
-    const { limit } = req.query;
-    const safeLimit = Math.min(Number(limit) || 100, 200);
-    const websiteReviews = await reviewRepository.getWebsiteReviews(safeLimit);
-
-    let itemReviews = [];
-    try {
-      const itemSql = `
-        SELECT r.id, r.customer_id, r.customer_name,
-               COALESCE(NULLIF(u.avatar_url, ''), '') AS customer_avatar,
-               r.rating, r.comment, r.created_at,
-               p.name AS item_name, p.image AS item_image
-        FROM reviews r
-        JOIN products p ON r.item_id = p.id
-        LEFT JOIN users u ON u.id = r.customer_id
-        WHERE r.comment IS NOT NULL AND TRIM(r.comment) != ''
-        ORDER BY r.created_at DESC
-        LIMIT $1
-      `;
-      const itemRes = await query(itemSql, [safeLimit]);
-      itemReviews = itemRes.rows.map((r) => ({
-        id: r.id,
-        _id: r.id,
-        customerId: r.customer_id,
-        customerName: r.customer_name,
-        customerAvatar: r.customer_avatar || '',
-        rating: Number(r.rating),
-        comment: r.comment || '',
-        createdAt: r.created_at,
-        source: r.item_name ? `Review for ${r.item_name}` : 'Menu Item',
-        media: r.item_image ? [r.item_image] : [],
-        verified: true,
-      }));
-    } catch (err) {
-      console.warn('Could not query item reviews for feed:', err.message);
-    }
-
-    const all = [
-      ...websiteReviews.map((w) => ({
-        ...w,
-        source: 'Website Review',
-        media: [],
-        verified: true,
-      })),
-      ...itemReviews,
-    ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    res.json({
-      success: true,
-      reviews: all,
-    });
-  })
-);
-
-// 1b-2. Get website reviews / testimonials (Public)
+// 1b. Get website reviews / testimonials (Public)
 router.get(
   '/website',
   asyncHandler(async (req, res) => {
@@ -107,12 +48,12 @@ router.get(
   })
 );
 
-// 1c. Submit website review / feedback (Authenticated Customer or Guest)
+// 1c. Submit website review / feedback (Authenticated Customer)
 router.post(
   '/website',
-  optionalAuth,
+  requireAuth,
   asyncHandler(async (req, res) => {
-    const { rating, comment, customerName: customName } = req.body;
+    const { rating, comment } = req.body;
     const ratingNum = Number(rating);
     if (!rating || isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
       throw new AppError('Please select a star rating between 1 and 5.', 400);
@@ -123,15 +64,11 @@ router.post(
       throw new AppError('Please write a short review or feedback about the website.', 400);
     }
 
-    const customerName = req.user
-      ? getDisplayName(req.user)
-      : ((customName || '').trim() || 'Happy Customer');
-    const customerAvatar = req.user
-      ? req.user.avatarUrl || req.user.avatar || req.user.profile_image || ''
-      : '';
+    const customerName = getDisplayName(req.user);
+    const customerAvatar = req.user.avatarUrl || req.user.avatar || req.user.profile_image || '';
 
     const review = await reviewRepository.createWebsiteReview({
-      customerId: req.user ? req.user.id : null,
+      customerId: req.user.id,
       customerName,
       customerAvatar,
       rating: ratingNum,
@@ -140,12 +77,7 @@ router.post(
 
     res.status(201).json({
       success: true,
-      review: {
-        ...review,
-        source: 'Website Review',
-        media: [],
-        verified: true,
-      },
+      review,
       message: 'Thank you for your feedback!',
     });
   })
