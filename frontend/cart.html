@@ -26,9 +26,6 @@
 
     <main>
       <div class="container">
-        <!-- Order Success Screen (Hidden by default) -->
-        <div id="order-success-screen" class="hidden"></div>
-
         <!-- Empty State (Hidden by default) -->
         <div
           id="cart-empty-state"
@@ -697,6 +694,28 @@
             Save Changes
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Post-Checkout Order Success Modal -->
+    <div
+      id="order-success-modal"
+      class="modal-overlay order-success-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="order-success-modal-title"
+      aria-hidden="true"
+    >
+      <div class="modal-card order-success-modal-card">
+        <button
+          type="button"
+          class="modal-close order-success-modal-close"
+          id="close-order-success-modal"
+          aria-label="Close order summary"
+        >
+          &times;
+        </button>
+        <div class="modal-body order-success-modal-body" id="order-success-screen"></div>
       </div>
     </div>
 

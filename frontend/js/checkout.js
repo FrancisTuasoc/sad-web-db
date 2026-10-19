@@ -952,18 +952,22 @@ async function handlePlaceOrder() {
   }
 }
 
+export function closeOrderSuccessModal() {
+  const modal = document.getElementById('order-success-modal');
+  if (modal) {
+    closeModal('order-success-modal');
+  }
+  const successContainer = document.getElementById('order-success-screen');
+  if (successContainer) {
+    successContainer.innerHTML = '';
+  }
+}
+
 function showSuccessReceipt(order) {
   closeCheckoutModal(false);
-  document.getElementById('cart-page-intro')?.classList.add('hidden');
-  const cartLayout = document.getElementById('cart-layout-container');
   const successContainer = document.getElementById('order-success-screen');
 
-  if (cartLayout && getCartItems().length === 0) {
-    cartLayout.classList.add('hidden');
-  }
   if (successContainer) {
-    successContainer.classList.remove('hidden');
-
     const itemsSummary = order.items
       .map((item) => {
         const addons =
@@ -1007,7 +1011,7 @@ function showSuccessReceipt(order) {
             </svg>
           </div>
           <p class="order-success-eyebrow">Order confirmed</p>
-          <h2>Thanks for your order!</h2>
+          <h2 id="order-success-modal-title">Thanks for your order!</h2>
           <p class="order-success-message">
             ${
               order.paymentMethod === 'pay_at_shop'
@@ -1082,16 +1086,28 @@ function showSuccessReceipt(order) {
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             Print receipt
           </button>
-          <a href="profile.html?tab=status" class="btn btn-primary">Track your order</a>
+          <a href="profile.html?tab=status" id="track-order-btn" class="btn btn-primary">Track your order</a>
         </div>
       </div>
     `;
+
+    openModal('order-success-modal');
 
     const printBtn = document.getElementById('print-receipt-btn');
     if (printBtn) {
       printBtn.addEventListener('click', () => {
         window.print();
       });
+    }
+
+    const closeBtn = document.getElementById('close-order-success-modal');
+    if (closeBtn) {
+      closeBtn.onclick = () => closeOrderSuccessModal();
+    }
+
+    const trackBtn = document.getElementById('track-order-btn');
+    if (trackBtn) {
+      trackBtn.onclick = () => closeOrderSuccessModal();
     }
   }
 }
@@ -1162,7 +1178,23 @@ export function setupCheckoutListeners() {
       if (event.target === checkoutModal) closeCheckoutModal();
     });
   }
+
+  const closeOrderSuccessBtn = document.getElementById(
+    'close-order-success-modal'
+  );
+  if (closeOrderSuccessBtn) {
+    closeOrderSuccessBtn.addEventListener('click', closeOrderSuccessModal);
+  }
+
   document.addEventListener('keydown', (event) => {
+    const successModal = document.getElementById('order-success-modal');
+    if (successModal && successModal.classList.contains('open')) {
+      if (event.key === 'Escape') {
+        closeOrderSuccessModal();
+        return;
+      }
+    }
+
     if (!checkoutModal || !checkoutModal.classList.contains('open')) return;
     if (event.key === 'Escape') {
       closeCheckoutModal();

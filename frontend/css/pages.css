@@ -1100,6 +1100,81 @@
   box-shadow: 0 7px 16px rgba(152, 37, 42, 0.16);
 }
 
+/* Post-Checkout Order Success Modal */
+.order-success-modal {
+  z-index: calc(var(--z-modal) + 2);
+  padding: 16px;
+  backdrop-filter: blur(6px);
+  background: rgba(42, 30, 24, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.order-success-modal-card {
+  position: relative !important;
+  max-width: 680px !important;
+  width: 100% !important;
+  max-height: min(92dvh, 840px) !important;
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: 0 28px 80px rgba(29, 18, 12, 0.32) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.order-success-modal.open .order-success-modal-card {
+  transform: scale(1) translateY(0) !important;
+  opacity: 1 !important;
+}
+
+.order-success-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.order-success-modal-close:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text-main);
+  border-color: var(--color-border-hover);
+}
+
+.order-success-modal-body {
+  padding: clamp(20px, 3.5vw, 32px);
+  overflow-y: auto;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+}
+
+.order-success-modal-body .order-success-card {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
 .add-to-cart-modal {
   z-index: calc(var(--z-modal) + 1);
   backdrop-filter: blur(8px);
@@ -5721,6 +5796,30 @@ body > main > .modal-card h2 {
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .order-success-modal {
+    padding: 10px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .order-success-modal-card {
+    max-height: calc(100dvh - 20px);
+    border-radius: var(--radius-lg);
+  }
+
+  .order-success-modal-close {
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+  }
+
+  .order-success-modal-body {
+    padding: 24px 14px 18px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -9017,3 +9116,35 @@ body.theme-dark .checkout-modal .gcash-exact-amount,
 body.theme-dark .checkout-modal #pay-at-shop-arrival-note {
   background: var(--color-surface-alt) !important;
 }
+
+body.theme-dark .order-success-modal-card {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+body.theme-dark .order-success-modal-close {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+}
+
+body.theme-dark .order-success-modal-close:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text-main);
+}
+
+body.theme-dark .order-success-modal-body .printable-receipt {
+  background: var(--color-surface-alt);
+  border-color: var(--color-border);
+}
+
+body.theme-dark .order-success-modal-body .receipt-document-header {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+body.theme-dark .order-success-modal-body .order-success-reference {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
