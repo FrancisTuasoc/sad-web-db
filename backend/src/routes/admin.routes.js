@@ -161,10 +161,10 @@ router.patch(
 // -------------------------------------------------------------
 const productSchema = z.object({
   name: z.string().trim().min(2, 'Name must be at least 2 characters'),
-  price: z.number().min(0, 'Price must be 0 or greater'),
+  price: z.coerce.number().min(0, 'Price must be 0 or greater'),
   description: z.string().trim().optional().default(''),
-  stock: z.number().int().min(0, 'Stock cannot be negative').default(0),
-  lowStockThreshold: z.number().int().min(0).default(10),
+  stock: z.coerce.number().int().min(0, 'Stock cannot be negative').default(0),
+  lowStockThreshold: z.coerce.number().int().min(0).default(10),
   category: z.string().min(1, 'Category is required'),
   image: z
     .string()
@@ -204,15 +204,50 @@ router.post(
   '/products',
   validate(productSchema),
   asyncHandler(async (req, res) => {
+    let categoryId = req.body.category;
+    const UUID_REGEX =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_REGEX.test(categoryId)) {
+      const cat = await categoryRepository.findByName(categoryId);
+      if (cat) {
+        categoryId = cat.id;
+      } else {
+        const allCats = await categoryRepository.findAll();
+        if (allCats.length > 0) {
+          categoryId = allCats[0].id;
+        } else {
+          const newCat = await categoryRepository.create({
+            name: categoryId,
+            sortOrder: 0,
+          });
+          categoryId = newCat.id;
+        }
+      }
+    }
+
+    if (req.body.isFeatured) {
+      const featuredRes = await query(
+        'SELECT COUNT(*)::int as count FROM products WHERE is_featured = true'
+      );
+      if (featuredRes.rows[0].count >= 4) {
+        throw new AppError(
+          'You can only feature 4 items at a time. Please unfeature an existing item before featuring a new one.',
+          400
+        );
+      }
+    }
+
     let baseSlug = slugify(req.body.name);
     let slug = baseSlug;
     let count = 1;
     while (await productRepository.findBySlug(slug)) {
-      slug = `${baseSlug}-${count++}`;
+      slug = baseSlug + '-' + (count++);
     }
 
     const product = await productRepository.create({
       ...req.body,
+      category: categoryId,
+      categoryId,
       slug,
       image: req.body.image || `assets/items/${slug}.png`,
     });
@@ -236,13 +271,39 @@ router.put(
       throw new AppError('Product not found', 404);
     }
 
+    let categoryId = req.body.category;
+    const UUID_REGEX =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_REGEX.test(categoryId)) {
+      const cat = await categoryRepository.findByName(categoryId);
+      if (cat) {
+        categoryId = cat.id;
+      } else {
+        categoryId = existing.categoryId || existing.category;
+      }
+    }
+
+    if (req.body.isFeatured && !existing.isFeatured) {
+      const featuredRes = await query(
+        'SELECT COUNT(*)::int as count FROM products WHERE is_featured = true AND id != $1',
+        [req.params.id]
+      );
+      if (featuredRes.rows[0].count >= 4) {
+        throw new AppError(
+          'You can only feature 4 items at a time. Please unfeature an existing item before featuring a new one.',
+          400
+        );
+      }
+    }
+
     const updated = await productRepository.update(req.params.id, {
       name: req.body.name,
       price: req.body.price,
       description: req.body.description,
       stock: req.body.stock,
       lowStockThreshold: req.body.lowStockThreshold,
-      category: req.body.category,
+      category: categoryId,
+      categoryId,
       isAddon: req.body.isAddon,
       isAvailable: req.body.isAvailable,
       isFeatured: req.body.isFeatured,

@@ -422,8 +422,8 @@ site-header.site-header .notification-btn:hover {
   color: #ffffff !important;
 }
 
-body:not(.admin-page) .site-header .cart-badge,
-site-header.site-header .cart-badge {
+body:not(.admin-page) .site-header .cart-badge:not(.hidden),
+site-header.site-header .cart-badge:not(.hidden) {
   position: absolute !important;
   top: -2px !important;
   right: -4px !important;
@@ -442,8 +442,8 @@ site-header.site-header .cart-badge {
   line-height: 1 !important;
 }
 
-body:not(.admin-page) .site-header .notification-badge,
-site-header.site-header .notification-badge {
+body:not(.admin-page) .site-header .notification-badge:not(.hidden),
+site-header.site-header .notification-badge:not(.hidden) {
   position: absolute !important;
   top: -5px !important;
   right: -5px !important;
@@ -462,6 +462,22 @@ site-header.site-header .notification-badge {
   box-shadow: 0 2px 6px rgba(220, 38, 38, 0.45) !important;
   line-height: 1 !important;
   z-index: 2 !important;
+}
+
+body .site-header .cart-badge.hidden,
+body .site-header .notification-badge.hidden,
+body:not(.admin-page) .site-header .cart-badge.hidden,
+body:not(.admin-page) .site-header .notification-badge.hidden,
+site-header.site-header .cart-badge.hidden,
+site-header.site-header .notification-badge.hidden,
+.cart-badge.hidden,
+.notification-badge.hidden,
+.badge-pending.hidden,
+#header-cart-badge.hidden,
+#header-notification-badge.hidden,
+#admin-notification-badge.hidden,
+#admin-pending-count.hidden {
+  display: none !important;
 }
 
 body:not(.admin-page) .site-header .avatar-btn,

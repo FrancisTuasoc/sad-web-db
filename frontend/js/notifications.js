@@ -139,8 +139,7 @@ export function initCustomerNotifications() {
   if (markAllBtn) {
     markAllBtn.onclick = async (e) => {
       e.stopPropagation();
-      badge.textContent = '0';
-      badge.classList.add('hidden');
+      updateCustomerBadge(0);
       const unreadItems = list.querySelectorAll('.notification-item.unread');
       unreadItems.forEach((el) => el.classList.remove('unread'));
       try {
@@ -168,12 +167,20 @@ async function loadCustomerNotifications() {
 
   try {
     const data = await apiFetch('/notifications?limit=20');
-    if (!data || !data.success) return;
+    if (!data || !data.success) {
+      updateCustomerBadge(0);
+      return;
+    }
 
-    updateCustomerBadge(data.unreadCount || 0);
+    const unread = Number.isFinite(Number(data.unreadCount))
+      ? Number(data.unreadCount)
+      : (Array.isArray(data.notifications)
+          ? data.notifications.filter((n) => !n.isRead).length
+          : 0);
+    updateCustomerBadge(unread);
     renderNotificationList(list, data.notifications || [], false);
   } catch (err) {
-    // network or auth error
+    updateCustomerBadge(0);
   }
 }
 
@@ -181,12 +188,15 @@ function updateCustomerBadge(count) {
   const badge = document.getElementById('header-notification-badge');
   if (!badge) return;
 
-  if (count > 0) {
-    badge.textContent = count > 99 ? '99+' : String(count);
+  const validCount = Math.max(0, parseInt(count, 10) || 0);
+  if (validCount > 0) {
+    badge.textContent = validCount > 99 ? '99+' : String(validCount);
     badge.classList.remove('hidden');
+    badge.style.display = 'inline-flex';
   } else {
-    badge.textContent = '0';
+    badge.textContent = '';
     badge.classList.add('hidden');
+    badge.style.display = 'none';
   }
 }
 
@@ -232,8 +242,11 @@ function renderNotificationList(listElement, notifications, isAdminScope) {
         if (badge) {
           const current = parseInt(badge.textContent, 10) || 0;
           const next = Math.max(0, current - 1);
-          badge.textContent = next > 0 ? (next > 99 ? '99+' : String(next)) : '0';
-          if (next === 0) badge.classList.add('hidden');
+          if (isAdminScope) {
+            updateAdminBadge(next);
+          } else {
+            updateCustomerBadge(next);
+          }
         }
         try {
           const query = isAdminScope ? '?scope=admin' : '';
@@ -350,8 +363,7 @@ function handleCustomerIncomingNotification(notif) {
         if (b) {
           const cur = parseInt(b.textContent, 10) || 0;
           const nxt = Math.max(0, cur - 1);
-          b.textContent = nxt > 0 ? (nxt > 99 ? '99+' : String(nxt)) : '0';
-          if (nxt === 0) b.classList.add('hidden');
+          updateCustomerBadge(nxt);
         }
         try {
           await apiFetch(`/notifications/${notif.id}/read`, {
@@ -416,8 +428,7 @@ export function initAdminNotifications() {
   if (markAllBtn) {
     markAllBtn.onclick = async (e) => {
       e.stopPropagation();
-      badge.textContent = '0';
-      badge.classList.add('hidden');
+      updateAdminBadge(0);
       const unreadItems = list.querySelectorAll('.notification-item.unread');
       unreadItems.forEach((el) => el.classList.remove('unread'));
       try {
@@ -442,12 +453,20 @@ async function loadAdminNotifications() {
 
   try {
     const data = await apiFetch('/notifications?scope=admin&limit=25');
-    if (!data || !data.success) return;
+    if (!data || !data.success) {
+      updateAdminBadge(0);
+      return;
+    }
 
-    updateAdminBadge(data.unreadCount || 0);
+    const unread = Number.isFinite(Number(data.unreadCount))
+      ? Number(data.unreadCount)
+      : (Array.isArray(data.notifications)
+          ? data.notifications.filter((n) => !n.isRead).length
+          : 0);
+    updateAdminBadge(unread);
     renderNotificationList(list, data.notifications || [], true);
   } catch (err) {
-    // network or auth error
+    updateAdminBadge(0);
   }
 }
 
@@ -455,12 +474,15 @@ function updateAdminBadge(count) {
   const badge = document.getElementById('admin-notification-badge');
   if (!badge) return;
 
-  if (count > 0) {
-    badge.textContent = count > 99 ? '99+' : String(count);
+  const validCount = Math.max(0, parseInt(count, 10) || 0);
+  if (validCount > 0) {
+    badge.textContent = validCount > 99 ? '99+' : String(validCount);
     badge.classList.remove('hidden');
+    badge.style.display = 'inline-flex';
   } else {
-    badge.textContent = '0';
+    badge.textContent = '';
     badge.classList.add('hidden');
+    badge.style.display = 'none';
   }
 }
 

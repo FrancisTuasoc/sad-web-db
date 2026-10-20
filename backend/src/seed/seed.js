@@ -221,7 +221,7 @@ const PRODUCTS_DATA = [
     name: 'Complete',
     price: 70,
     desc: 'Patty, ham, egg, cheese & slaw.',
-    featured: true,
+    featured: false,
   },
   {
     category: 'Complete',
@@ -235,7 +235,7 @@ const PRODUCTS_DATA = [
     name: 'Complete with Bacon',
     price: 72,
     desc: 'Patty, ham, egg, cheese & bacon.',
-    featured: true,
+    featured: false,
   },
 
   // Footlong

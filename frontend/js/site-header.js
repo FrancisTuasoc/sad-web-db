@@ -84,7 +84,7 @@ class SiteHeader extends HTMLElement {
               ? `
           <a href="cart.html" id="header-cart-btn" class="cart-btn" data-customer-only aria-label="View Shopping Cart">
             <i class="fa-solid fa-cart-shopping fa-fw" aria-hidden="true"></i>
-            <span id="header-cart-badge" class="cart-badge hidden">0</span>
+            <span id="header-cart-badge" class="cart-badge hidden" style="display: none;"></span>
           </a>
           <div class="notification-center-wrapper hidden" id="header-notifications-wrapper" data-customer-only>
             <button
@@ -95,7 +95,7 @@ class SiteHeader extends HTMLElement {
               title="Notifications"
             >
               <i class="fa-solid fa-bell fa-fw" aria-hidden="true"></i>
-              <span id="header-notification-badge" class="notification-badge hidden">0</span>
+              <span id="header-notification-badge" class="notification-badge hidden" style="display: none;"></span>
             </button>
             <div id="header-notification-dropdown" class="notification-dropdown">
               <div class="notification-dropdown-header">

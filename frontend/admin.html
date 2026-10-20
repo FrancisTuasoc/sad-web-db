@@ -56,7 +56,7 @@
                 title="Customer Order Alerts"
               >
                 <i class="fa-solid fa-bell fa-fw" aria-hidden="true"></i>
-                <span id="admin-notification-badge" class="notification-badge hidden">0</span>
+                <span id="admin-notification-badge" class="notification-badge hidden" style="display: none;"></span>
               </button>
               <div id="admin-notification-dropdown" class="notification-dropdown">
                 <div class="notification-dropdown-header">
@@ -115,9 +115,9 @@
           <span class="admin-nav-label">Orders Management</span
           ><span
             id="admin-pending-count"
-            class="badge badge-pending hidden"
+            class="badge badge-pending hidden" style="display: none;"
             aria-live="polite"
-            >0</span
+            ></span
           >
         </button>
 
@@ -125,11 +125,11 @@
           type="button"
           class="admin-nav-item"
           data-section="menu"
-          aria-label="Menu and inventory"
-          title="Menu and inventory"
+          aria-label="Menu Management"
+          title="Menu Management"
         >
           <i class="fa-solid fa-burger" aria-hidden="true"></i>
-          <span class="admin-nav-label">Menu & Add-ons</span>
+          <span class="admin-nav-label">Menu Management</span>
         </button>
         <button
           type="button"
@@ -667,9 +667,9 @@
               <div>
                 <h2 id="all-reviews-heading" style="display:flex;align-items:center;gap:8px;">
                   <i class="fa-solid fa-comments" style="color:var(--brand-primary);" aria-hidden="true"></i>
-                  <span>Customer Reviews</span>
+                  <span>Customer's Rating on Items</span>
                 </h2>
-                <p class="text-muted" style="font-size:0.875rem;margin-top:2px;">All customer reviews across menu items, newest first.</p>
+                <p class="text-muted" style="font-size:0.875rem;margin-top:2px;">All customer ratings across menu items, newest first.</p>
               </div>
               <div class="admin-reviews-toolbar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                 <input
@@ -697,17 +697,17 @@
               <table class="admin-table admin-reviews-table" style="width:100%;min-width:760px;">
                 <thead>
                   <tr>
-                    <th style="width:22%;">Item Name</th>
-                    <th style="width:18%;">Customer Name</th>
-                    <th style="width:18%;">Star Rating</th>
-                    <th style="width:26%;">Review Text</th>
-                    <th style="width:10%;">Date</th>
-                    <th style="width:6%;text-align:right;">Action</th>
+                    <th style="width:30%;">Item Name</th>
+                    <th style="width:24%;">Customer Name</th>
+                    <th style="width:22%;">Star Rating</th>
+
+                    <th style="width:14%;">Date</th>
+                    <th style="width:10%;text-align:right;">Action</th>
                   </tr>
                 </thead>
                 <tbody id="admin-reviews-tbody" aria-live="polite">
                   <tr>
-                    <td colspan="6" class="text-center text-muted" style="padding:32px;">Loading reviews...</td>
+                    <td colspan="5" class="text-center text-muted" style="padding:32px;">Loading reviews...</td>
                   </tr>
                 </tbody>
               </table>

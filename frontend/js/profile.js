@@ -6,6 +6,8 @@ import {
   escapeHtml,
   openModal,
   closeModal,
+  confirmModal,
+  alertModal,
 } from './ui.js';
 import {
   requireAuth,
@@ -1093,12 +1095,17 @@ async function openOrderReceipt(orderId) {
 
 // Cancel order handler
 async function handleCancelOrder(orderId, button) {
-  if (
-    !confirm(
-      'Cancel this order while it is still waiting for admin acceptance? If the admin accepts first, cancellation will be blocked and you will need to contact the shop.'
-    )
-  )
-    return;
+  const confirmed = await confirmModal({
+    title: 'Cancel Order',
+    message: 'Cancel this order while it is still awaiting acceptance?',
+    note: "If accepted by the kitchen, cancellation will be locked. Clicking 'Yes' will cancel the order, and 'No' will keep it active.",
+    confirmText: 'Yes',
+    cancelText: 'No',
+    icon: 'fa-ban',
+    iconBg: '#fee2e2',
+    iconColor: '#dc2626',
+  });
+  if (!confirmed) return;
 
   button.disabled = true;
   button.textContent = 'Cancelling...';
@@ -1115,7 +1122,17 @@ async function handleCancelOrder(orderId, button) {
 
 async function handleCompleteOrder(orderId, button) {
   const action = button.textContent.trim();
-  if (!confirm(`Confirm: ${action}?`)) return;
+  const confirmed = await confirmModal({
+    title: 'Confirm Action',
+    message: `Are you sure you want to mark: "${action}"?`,
+    note: "Clicking 'Yes' will confirm order completion, and 'No' will keep it unchanged.",
+    confirmText: 'Yes',
+    cancelText: 'No',
+    icon: 'fa-circle-check',
+    iconBg: '#dcfce7',
+    iconColor: '#16a34a',
+  });
+  if (!confirmed) return;
   button.disabled = true;
   button.textContent = 'Updating...';
   try {

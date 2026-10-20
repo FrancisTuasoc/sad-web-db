@@ -6,6 +6,7 @@ import {
   openModal,
   closeModal,
   getProductImageUrl,
+  BURGER_PLACEHOLDER,
   setupBackToTop,
 } from './ui.js';
 import { requireAuth, getUser, resizeImageToDataUrl } from './auth.js';
@@ -580,8 +581,15 @@ function updatePendingOrderBadge(count) {
   const pendingCount = Number.isFinite(Number(count))
     ? Math.max(0, Number(count))
     : 0;
-  pendingBadge.textContent = String(pendingCount);
-  pendingBadge.classList.toggle('hidden', pendingCount === 0);
+  if (pendingCount > 0) {
+    pendingBadge.textContent = String(pendingCount);
+    pendingBadge.classList.remove('hidden');
+    pendingBadge.style.display = 'inline-flex';
+  } else {
+    pendingBadge.textContent = '';
+    pendingBadge.classList.add('hidden');
+    pendingBadge.style.display = 'none';
+  }
   const ordersButton = pendingBadge.closest('.admin-nav-item');
   if (ordersButton) {
     ordersButton.setAttribute(
@@ -633,10 +641,10 @@ async function loadAdminReviews() {
 
   tbody.innerHTML = `
     <tr>
-      <td colspan="6" class="text-center text-muted" style="padding:32px;">
+      <td colspan="5" class="text-center text-muted" style="padding:32px;">
         <span style="display:inline-flex;align-items:center;gap:8px;">
           ${lucideIcon('loader-2', { size: 18, className: 'spin' })}
-          <span>Loading reviews...</span>
+          <span>Loading ratings...</span>
         </span>
       </td>
     </tr>
@@ -656,8 +664,8 @@ async function loadAdminReviews() {
     if (!reviews.length) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="6" class="text-center text-muted" style="padding:32px;">
-            No reviews found matching your filter.
+          <td colspan="5" class="text-center text-muted" style="padding:32px;">
+            No ratings found matching your filter.
           </td>
         </tr>
       `;
@@ -672,15 +680,17 @@ async function loadAdminReviews() {
           day: 'numeric',
         });
         const rating = Number(r.rating || 0);
-        const comment = r.comment || '';
-        const isLongComment = comment.length > 80;
-        const shortComment = isLongComment ? comment.slice(0, 80) + '...' : comment;
+        const itemImgSrc = getProductImageUrl({
+          name: r.itemName,
+          image: r.itemImage,
+          slug: r.itemSlug,
+        });
 
         return `
           <tr data-admin-review-id="${r.id}">
             <td style="font-weight:600;">
               <div style="display:flex;align-items:center;gap:8px;">
-                ${r.itemImage ? `<img src="${escapeHtml(r.itemImage)}" alt="" style="width:30px;height:30px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />` : ''}
+                <img src="${escapeHtml(itemImgSrc)}" alt="" style="width:30px;height:30px;border-radius:4px;object-fit:cover;" onerror="if(window.handleImageError){window.handleImageError(this);}else{this.onerror=null;this.src='${BURGER_PLACEHOLDER}';}" />
                 <span>${escapeHtml(r.itemName || 'Item')}</span>
               </div>
             </td>
@@ -691,14 +701,6 @@ async function loadAdminReviews() {
                 <span style="font-size:0.8rem;font-weight:600;margin-left:4px;color:var(--color-text-muted);">${rating.toFixed(1)}</span>
               </div>
             </td>
-            <td class="admin-review-text-cell">
-              ${comment ? `
-                <span class="review-text-short">${escapeHtml(shortComment)}</span>
-                ${isLongComment ? `
-                  <button type="button" class="btn-text-sm btn-expand-admin-review" data-full-text="${escapeHtml(comment)}" style="font-size:0.75rem;margin-left:4px;color:var(--color-primary);text-decoration:underline;">See more</button>
-                ` : ''}
-              ` : '<span class="text-muted italic" style="font-size:0.8rem;">(No comment)</span>'}
-            </td>
             <td style="font-size:0.85rem;color:var(--color-text-muted);">${escapeHtml(dateStr)}</td>
             <td style="text-align:right;">
               <button
@@ -706,8 +708,8 @@ async function loadAdminReviews() {
                 class="btn btn-secondary btn-sm btn-admin-delete-review"
                 data-review-id="${r.id}"
                 data-item-name="${escapeHtml(r.itemName || '')}"
-                title="Delete review"
-                aria-label="Delete review"
+                title="Delete rating"
+                aria-label="Delete rating"
                 style="color:var(--color-danger,#DC2626);"
               >
                 ${lucideIcon('trash-2', { size: 15 })}
@@ -718,17 +720,6 @@ async function loadAdminReviews() {
         `;
       })
       .join('');
-
-    // Attach expandable review text handler
-    tbody.querySelectorAll('.btn-expand-admin-review').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const cell = btn.closest('.admin-review-text-cell');
-        const full = btn.getAttribute('data-full-text');
-        if (cell) {
-          cell.innerHTML = `<span>${escapeHtml(full)}</span>`;
-        }
-      });
-    });
 
     // Attach inline delete confirmation
     tbody.querySelectorAll('.btn-admin-delete-review').forEach((btn) => {
@@ -790,8 +781,8 @@ async function loadAdminReviews() {
   } catch (err) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="6" class="text-center text-danger" style="padding:24px;">
-          Failed to load reviews: ${escapeHtml(err.message)}
+        <td colspan="5" class="text-center text-danger" style="padding:24px;">
+          Failed to load ratings: ${escapeHtml(err.message)}
         </td>
       </tr>
     `;
@@ -886,11 +877,16 @@ function renderAdminTopFavoritesPage() {
             rankBadge = `<span class="rank-badge rank-badge-regular">#${rank}</span>`;
           }
 
-          const img = item.image || 'assets/placeholder-burger.png';
+          const itemName = item.itemName || item.name || 'Menu item';
+          const imgUrl = getProductImageUrl({
+            name: itemName,
+            image: item.itemImage || item.image,
+            slug: item.itemSlug || item.slug,
+          });
           const favCount = Number(item.favoriteCount || 0);
           const avgRating = Number(item.averageRating || 0);
           const revCount = Number(item.reviewCount || 0);
-          const price = Number(item.price || 0).toFixed(2);
+          const price = Number(item.itemPrice ?? item.price ?? 0).toFixed(2);
 
           return `
             <article class="admin-ranking-card ${rankClass}">
@@ -899,13 +895,13 @@ function renderAdminTopFavoritesPage() {
                   ${rankBadge}
                 </div>
                 <img
-                  src="${escapeHtml(img)}"
-                  alt="${escapeHtml(item.name)}"
+                  src="${escapeHtml(imgUrl)}"
+                  alt="${escapeHtml(itemName)}"
                   class="ranking-item-thumb"
-                  onerror="this.onerror=null;this.src='assets/placeholder-burger.png';"
+                  onerror="if(window.handleImageError){window.handleImageError(this);}else{this.onerror=null;this.src='${BURGER_PLACEHOLDER}';}"
                 />
                 <div class="ranking-item-info">
-                  <h4 class="ranking-item-name">${escapeHtml(item.name)}</h4>
+                  <h4 class="ranking-item-name">${escapeHtml(itemName)}</h4>
                   <div class="ranking-item-sub">
                     ${item.categoryName ? `<span class="badge" style="font-size:0.7rem;">${escapeHtml(item.categoryName)}</span>` : ''}
                     <span class="ranking-item-price">₱${price}</span>
@@ -1279,6 +1275,10 @@ async function loadAdminOrders() {
     tbody.innerHTML = orders
       .map((o) => {
         const isPending = o.status === 'pending';
+        const isTerminal = ['completed', 'cancelled'].includes(
+          String(o.status || '').toLowerCase()
+        );
+        const actionBtnText = isTerminal ? 'View' : 'Manage';
         return `
           <tr style="${isPending ? 'background-color:#FFFBEB;' : ''}">
             <td>
@@ -1297,7 +1297,7 @@ async function loadAdminOrders() {
             <td><span class="badge badge-${o.status}">${statusLabel(o.status)}</span></td>
             <td>
               <button class="btn btn-secondary btn-sm btn-open-order-drawer" data-order-id="${o._id}">
-                Manage
+                ${actionBtnText}
               </button>
             </td>
           </tr>
@@ -1557,6 +1557,30 @@ async function loadAdminMenu() {
   }
 }
 
+async function refreshAdminCategoryDropdown() {
+  try {
+    const res = await apiFetch('/categories');
+    categoriesList = res.categories || [];
+    await refreshAdminCategoryDropdown();
+    const catSelect = document.getElementById('product-category-input');
+    if (catSelect) {
+      if (categoriesList.length === 0) {
+        catSelect.innerHTML =
+          '<option value="" disabled selected>No categories available</option>';
+      } else {
+        catSelect.innerHTML = categoriesList
+          .map(
+            (c) =>
+              `<option value="${c._id || c.id}">${escapeHtml(c.name)}</option>`
+          )
+          .join('');
+      }
+    }
+  } catch (err) {
+    console.error('Failed to refresh category dropdown', err);
+  }
+}
+
 // Open Product Modal (Add or Edit)
 async function openProductModal(productId = null) {
   editingProductId = productId;
@@ -1570,25 +1594,12 @@ async function openProductModal(productId = null) {
   const imgInput = document.getElementById('product-image-file');
   if (imgInput) imgInput.value = '';
 
-  // Populate category select
+  // Always refresh categories to ensure newly added categories are immediately selectable
+  await refreshAdminCategoryDropdown();
   const catSelect = document.getElementById('product-category-input');
-  if (catSelect) {
-    if (categoriesList.length === 0) {
-      try {
-        const res = await apiFetch('/categories');
-        categoriesList = res.categories || [];
-      } catch (err) {
-        console.error('Failed to load categories', err);
-      }
-    }
-    catSelect.innerHTML = categoriesList
-      .map((c) => `<option value="${c._id || c.id}">${escapeHtml(c.name)}</option>`)
-      .join('');
-  }
 
   if (productId) {
     title.textContent = 'Edit Menu Item';
-    // Find product in cached list first for instant display
     let p = menuProductsList.find((item) => (item._id || item.id) === productId);
 
     if (!p) {
@@ -1634,9 +1645,17 @@ async function openProductModal(productId = null) {
   } else {
     title.textContent = 'Add New Menu Item';
     form.reset();
+    document.getElementById('product-name-input').value = '';
+    document.getElementById('product-price-input').value = '';
+    document.getElementById('product-description-input').value = '';
     document.getElementById('product-stock-input').value = '40';
     document.getElementById('product-threshold-input').value = '10';
+    document.getElementById('product-is-addon-input').checked = false;
     document.getElementById('product-is-available-input').checked = true;
+    document.getElementById('product-is-featured-input').checked = false;
+    if (catSelect && categoriesList.length > 0) {
+      catSelect.value = categoriesList[0]._id || categoriesList[0].id;
+    }
   }
 
   openModal('product-modal');
@@ -1725,7 +1744,7 @@ async function loadAdminCustomers() {
           <td>
             <div style="display:flex;gap:6px;">
               <button class="btn btn-secondary btn-sm btn-view-customer-orders" data-customer-id="${c._id}">View History</button>
-              <button class="btn ${c.status === 'active' ? 'btn-danger' : 'btn-secondary'} btn-sm btn-toggle-customer-status" data-customer-id="${c._id}" data-status="${c.status}">
+              <button class="btn ${c.status === 'active' ? 'btn-danger' : 'btn-secondary'} btn-sm btn-toggle-customer-status" data-customer-id="${c._id}" data-status="${c.status}" data-name="${escapeHtml(c.fullName || c.username || 'this user')}">
                 ${c.status === 'active' ? 'Suspend' : 'Reactivate'}
               </button>
             </div>
@@ -2262,12 +2281,17 @@ function attachAdminEventListeners() {
     const cancelActionBtn = e.target.closest('.btn-action-cancel');
     if (cancelActionBtn) {
       const orderId = cancelActionBtn.getAttribute('data-order-id');
-      if (
-        !confirm(
-          'Cancel this pending customer order? Reserved stock will be returned.'
-        )
-      )
-        return;
+      const confirmed = await confirmModal({
+        title: 'Cancel Customer Order',
+        message: 'Are you sure you want to cancel this pending customer order?',
+        note: "Clicking 'Yes' will cancel the order and return reserved stock, and 'No' will keep it active.",
+        confirmText: 'Yes',
+        cancelText: 'No',
+        icon: 'fa-ban',
+        iconBg: '#fee2e2',
+        iconColor: '#dc2626',
+      });
+      if (!confirmed) return;
       cancelActionBtn.disabled = true;
       try {
         await apiFetch(`/admin/orders/${orderId}/cancel`, { method: 'PATCH' });
@@ -2336,19 +2360,24 @@ function attachAdminEventListeners() {
     const deleteProdBtn = e.target.closest('.btn-delete-product');
     if (deleteProdBtn) {
       const pid = deleteProdBtn.getAttribute('data-product-id');
-      const name = deleteProdBtn.getAttribute('data-name');
-      if (
-        confirm(
-          `Permanently delete "${name}"? It will also be removed from any active user carts.`
-        )
-      ) {
-        try {
-          await apiFetch(`/admin/products/${pid}`, { method: 'DELETE' });
-          showToast(`"${name}" was deleted permanently.`, 'info');
-          loadAdminMenu();
-        } catch (err) {
-          showToast(err.message, 'error');
-        }
+      const name = deleteProdBtn.getAttribute('data-name') || 'this item';
+      const confirmed = await confirmModal({
+        title: 'Delete Menu Item',
+        message: `Are you sure you want to delete "${name}"?`,
+        note: "Clicking 'Yes' will permanently remove it, and 'No' will keep it.",
+        confirmText: 'Yes',
+        cancelText: 'No',
+        icon: 'fa-trash-can',
+        iconBg: '#fee2e2',
+        iconColor: '#dc2626',
+      });
+      if (!confirmed) return;
+      try {
+        await apiFetch(`/admin/products/${pid}`, { method: 'DELETE' });
+        showToast(`"${name}" was deleted permanently.`, 'info');
+        loadAdminMenu();
+      } catch (err) {
+        showToast(err.message, 'error');
       }
       return;
     }
@@ -2365,6 +2394,34 @@ function attachAdminEventListeners() {
       const cid = toggleCustStatusBtn.getAttribute('data-customer-id');
       const cur = toggleCustStatusBtn.getAttribute('data-status');
       const nextStatus = cur === 'active' ? 'suspended' : 'active';
+      const custName = toggleCustStatusBtn.getAttribute('data-name') || 'this account';
+
+      if (nextStatus === 'suspended') {
+        const confirmed = await confirmModal({
+          title: 'Suspend Account',
+          message: `Are you sure you want to suspend ${custName}'s account?`,
+          note: "Clicking 'Yes' will suspend their access, and 'No' will cancel.",
+          confirmText: 'Yes',
+          cancelText: 'No',
+          icon: 'fa-user-slash',
+          iconBg: '#fee2e2',
+          iconColor: '#dc2626',
+        });
+        if (!confirmed) return;
+      } else {
+        const confirmed = await confirmModal({
+          title: 'Reactivate Account',
+          message: `Are you sure you want to reactivate ${custName}'s account?`,
+          note: "Clicking 'Yes' will restore their access, and 'No' will cancel.",
+          confirmText: 'Yes',
+          cancelText: 'No',
+          icon: 'fa-user-check',
+          iconBg: '#dcfce7',
+          iconColor: '#16a34a',
+        });
+        if (!confirmed) return;
+      }
+
       try {
         await apiFetch(`/admin/customers/${cid}/status`, {
           method: 'PATCH',
@@ -2395,15 +2452,25 @@ function attachAdminEventListeners() {
     const deleteCatBtn = e.target.closest('.btn-delete-category');
     if (deleteCatBtn) {
       const cid = deleteCatBtn.getAttribute('data-id');
-      const cname = deleteCatBtn.getAttribute('data-name');
-      if (confirm(`Delete category "${cname}"?`)) {
-        try {
-          await apiFetch(`/admin/categories/${cid}`, { method: 'DELETE' });
-          showToast('Category deleted', 'info');
-          loadAdminCategories();
-        } catch (err) {
-          showToast(err.message, 'error');
-        }
+      const cname = deleteCatBtn.getAttribute('data-name') || 'this category';
+      const confirmed = await confirmModal({
+        title: 'Delete Category',
+        message: `Are you sure you want to delete category "${cname}"?`,
+        note: "Clicking 'Yes' will permanently remove it, and 'No' will keep it.",
+        confirmText: 'Yes',
+        cancelText: 'No',
+        icon: 'fa-trash-can',
+        iconBg: '#fee2e2',
+        iconColor: '#dc2626',
+      });
+      if (!confirmed) return;
+      try {
+        await apiFetch(`/admin/categories/${cid}`, { method: 'DELETE' });
+        showToast('Category deleted successfully', 'info');
+        await loadAdminCategories();
+        await refreshAdminCategoryDropdown();
+      } catch (err) {
+        showToast(err.message, 'error');
       }
       return;
     }
@@ -2415,7 +2482,7 @@ function attachAdminEventListeners() {
     productForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const submitBtn = document.getElementById('save-product-btn');
-      submitBtn.disabled = true;
+      if (submitBtn) submitBtn.disabled = true;
 
       try {
         const name = document.getElementById('product-name-input').value.trim();
@@ -2437,6 +2504,19 @@ function attachAdminEventListeners() {
         if (!category && categoriesList.length > 0) {
           category = categoriesList[0]._id || categoriesList[0].id;
         }
+
+        if (!name || name.length < 2) {
+          showToast('Product name must be at least 2 characters.', 'error');
+          if (submitBtn) submitBtn.disabled = false;
+          return;
+        }
+
+        if (!category) {
+          showToast('Please select or create a category first.', 'error');
+          if (submitBtn) submitBtn.disabled = false;
+          return;
+        }
+
         const isAddon = document.getElementById(
           'product-is-addon-input'
         ).checked;
@@ -2446,6 +2526,22 @@ function attachAdminEventListeners() {
         const isFeatured = document.getElementById(
           'product-is-featured-input'
         ).checked;
+
+        // Enforce max 4 featured items limit
+        if (isFeatured) {
+          const featuredCount = menuProductsList.filter(
+            (p) => p.isFeatured && (p._id || p.id) !== editingProductId
+          ).length;
+          if (featuredCount >= 4) {
+            document.getElementById('product-is-featured-input').checked = false;
+            await alertModal(
+              "You can only feature 4 items at a time. Please unfeature an existing item before featuring a new one.",
+              { title: "Featured Limit Reached", type: "warning" }
+            );
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+          }
+        }
 
         // Image file upload
         let image = '';
@@ -2470,23 +2566,43 @@ function attachAdminEventListeners() {
         if (editingProductId) {
           await apiFetch(`/admin/products/${editingProductId}`, {
             method: 'PUT',
-            body: JSON.stringify(payload),
+            body: payload,
           });
           showToast('Product updated successfully', 'success');
         } else {
           await apiFetch('/admin/products', {
             method: 'POST',
-            body: JSON.stringify(payload),
+            body: payload,
           });
           showToast('Product created successfully', 'success');
         }
 
+        editingProductId = null;
         closeModal('product-modal');
-        loadAdminMenu();
+        await loadAdminMenu();
       } catch (err) {
         showToast(err.message, 'error');
       } finally {
-        submitBtn.disabled = false;
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    });
+  }
+
+  // Enforce featured items limit on checkbox change
+  const featuredCheckbox = document.getElementById('product-is-featured-input');
+  if (featuredCheckbox) {
+    featuredCheckbox.addEventListener('change', async () => {
+      if (featuredCheckbox.checked) {
+        const featuredCount = menuProductsList.filter(
+          (p) => p.isFeatured && (p._id || p.id) !== editingProductId
+        ).length;
+        if (featuredCount >= 4) {
+          featuredCheckbox.checked = false;
+          await alertModal(
+            "You can only feature 4 items at a time. Please unfeature an existing item before featuring a new one.",
+            { title: "Featured Limit Reached", type: "warning" }
+          );
+        }
       }
     });
   }
@@ -2537,29 +2653,43 @@ function attachAdminEventListeners() {
   if (categoryForm) {
     categoryForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const name = document.getElementById('category-name-input').value.trim();
-      const sortOrder =
-        parseInt(document.getElementById('category-order-input').value, 10) ||
-        0;
+      const submitBtn = categoryForm.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
+
+      const nameInput = document.getElementById('category-name-input');
+      const orderInput = document.getElementById('category-order-input');
+      const name = nameInput ? nameInput.value.trim() : '';
+      const sortOrder = parseInt(orderInput?.value, 10) || 0;
+
+      if (!name) {
+        if (submitBtn) submitBtn.disabled = false;
+        showToast('Please enter a category name.', 'error');
+        return;
+      }
 
       try {
         if (editingCategoryId) {
           await apiFetch(`/admin/categories/${editingCategoryId}`, {
             method: 'PUT',
-            body: JSON.stringify({ name, sortOrder }),
+            body: { name, sortOrder },
           });
-          showToast('Category updated', 'success');
+          showToast('Category updated successfully', 'success');
         } else {
           await apiFetch('/admin/categories', {
             method: 'POST',
-            body: JSON.stringify({ name, sortOrder }),
+            body: { name, sortOrder },
           });
-          showToast('Category created', 'success');
+          showToast('Category created successfully', 'success');
         }
+        editingCategoryId = null;
         closeModal('category-modal');
-        loadAdminCategories();
+        categoryForm.reset();
+        await loadAdminCategories();
+        await refreshAdminCategoryDropdown();
       } catch (err) {
         showToast(err.message, 'error');
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
       }
     });
   }

@@ -235,31 +235,184 @@ export function closeModal(modalId) {
   }
 }
 
+// ---------------- Confirmation & Alert Modals ----------------
+export function confirmModal(options = {}) {
+  const {
+    title = 'Confirm Action',
+    message = 'Are you sure you want to proceed?',
+    note = '',
+    icon = 'fa-triangle-exclamation',
+    iconBg = '#fee2e2',
+    iconColor = '#dc2626',
+    confirmText = 'Yes',
+    cancelText = 'No',
+  } = options;
+
+  return new Promise((resolve) => {
+    let modal = document.getElementById('custom-confirm-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'custom-confirm-modal';
+      modal.className = 'modal-overlay';
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
+      document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+      <div class="modal-card logout-modal-card" style="max-width: 400px; width: 90%; text-align: center; padding: 28px 24px; border-radius: 14px; box-shadow: 0 16px 36px rgba(0,0,0,0.25);">
+        <div style="width: 52px; height: 52px; border-radius: 50%; background: ${iconBg}; color: ${iconColor}; display: inline-flex; align-items: center; justify-content: center; font-size: 1.35rem; margin: 0 auto 16px;">
+          <i class="fa-solid ${icon}" aria-hidden="true"></i>
+        </div>
+        <h3 style="margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 700; color: var(--color-text-main, #111827);">${escapeHtml(title)}</h3>
+        <p style="margin: 0 0 ${note ? '8px' : '24px'} 0; color: var(--color-text-main, #111827); font-size: 0.95rem; line-height: 1.45; font-weight: 500;">
+          ${escapeHtml(message)}
+        </p>
+        ${note ? `<p style="margin: 0 0 24px 0; color: var(--color-text-muted, #4b5563); font-size: 0.88rem; line-height: 1.4;">${escapeHtml(note)}</p>` : ''}
+        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 8px;">
+          <button type="button" id="custom-confirm-no" class="btn logout-modal-btn logout-modal-no" style="flex: 1; min-height: 44px; font-weight: 700;">${escapeHtml(cancelText)}</button>
+          <button type="button" id="custom-confirm-yes" class="btn logout-modal-btn logout-modal-yes" style="flex: 1; min-height: 44px; font-weight: 700;">${escapeHtml(confirmText)}</button>
+        </div>
+      </div>
+    `;
+
+    let settled = false;
+    const close = (result) => {
+      if (settled) return;
+      settled = true;
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      resolve(result);
+    };
+
+    const noBtn = modal.querySelector('#custom-confirm-no');
+    const yesBtn = modal.querySelector('#custom-confirm-yes');
+
+    noBtn.onclick = () => close(false);
+    yesBtn.onclick = () => close(true);
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('open')) {
+        document.removeEventListener('keydown', onKeyDown);
+        close(false);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+
+    modal.onclick = (e) => {
+      if (e.target === modal) close(false);
+    };
+
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    noBtn.focus();
+  });
+}
+
+export function alertModal(message, options = {}) {
+  const opts = typeof options === 'string' ? { title: options } : options;
+  const type = opts.type || 'info'; // 'info' | 'error' | 'success' | 'warning'
+  const title = opts.title || (type === 'error' ? 'Error' : (type === 'success' ? 'Success' : (type === 'warning' ? 'Warning' : 'Notice')));
+  const confirmText = opts.confirmText || 'OK';
+
+  const iconMeta = {
+    error: { icon: 'fa-circle-xmark', bg: '#fee2e2', color: '#dc2626' },
+    warning: { icon: 'fa-triangle-exclamation', bg: '#fef3c7', color: '#d97706' },
+    success: { icon: 'fa-circle-check', bg: '#dcfce7', color: '#16a34a' },
+    info: { icon: 'fa-circle-info', bg: '#dbeafe', color: '#2563eb' },
+  }[type] || { icon: 'fa-circle-info', bg: '#dbeafe', color: '#2563eb' };
+
+  return new Promise((resolve) => {
+    let modal = document.getElementById('custom-alert-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'custom-alert-modal';
+      modal.className = 'modal-overlay';
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
+      document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+      <div class="modal-card logout-modal-card" style="max-width: 380px; width: 90%; text-align: center; padding: 28px 24px; border-radius: 14px; box-shadow: 0 16px 36px rgba(0,0,0,0.25);">
+        <div style="width: 52px; height: 52px; border-radius: 50%; background: ${iconMeta.bg}; color: ${iconMeta.color}; display: inline-flex; align-items: center; justify-content: center; font-size: 1.35rem; margin: 0 auto 16px;">
+          <i class="fa-solid ${iconMeta.icon}" aria-hidden="true"></i>
+        </div>
+        <h3 style="margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 700; color: var(--color-text-main, #111827);">${escapeHtml(title)}</h3>
+        <p style="margin: 0 0 24px 0; color: var(--color-text-muted, #4b5563); font-size: 0.95rem; line-height: 1.45;">
+          ${escapeHtml(message)}
+        </p>
+        <div style="display: flex; justify-content: center; margin-top: 8px;">
+          <button type="button" id="custom-alert-ok" class="btn btn-primary" style="min-width: 120px; min-height: 42px; font-weight: 700;">${escapeHtml(confirmText)}</button>
+        </div>
+      </div>
+    `;
+
+    let settled = false;
+    const close = () => {
+      if (settled) return;
+      settled = true;
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      resolve();
+    };
+
+    const okBtn = modal.querySelector('#custom-alert-ok');
+    okBtn.onclick = close;
+
+    const onKeyDown = (e) => {
+      if ((e.key === 'Escape' || e.key === 'Enter') && modal.classList.contains('open')) {
+        document.removeEventListener('keydown', onKeyDown);
+        close();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+
+    modal.onclick = (e) => {
+      if (e.target === modal) close();
+    };
+
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    okBtn.focus();
+  });
+}
+
+
 // ---------------- Cart Badge Update ----------------
 export async function updateCartBadge() {
   const badge = document.getElementById('header-cart-badge');
   if (!badge) return;
 
   if (!isLoggedIn() || isAdmin()) {
-    badge.textContent = '0';
+    badge.textContent = '';
     badge.classList.add('hidden');
+    badge.style.display = 'none';
     return;
   }
 
   try {
     const data = await apiFetch('/cart');
-    const count = data.items
-      ? data.items.reduce((sum, item) => sum + (item.quantity || 1), 0)
+    const count = data && Array.isArray(data.items)
+      ? data.items.reduce((sum, item) => sum + (Number(item.quantity) || 1), 0)
       : 0;
-    badge.textContent = String(count);
     if (count > 0) {
+      badge.textContent = count > 99 ? '99+' : String(count);
       badge.classList.remove('hidden');
+      badge.style.display = 'inline-flex';
     } else {
+      badge.textContent = '';
       badge.classList.add('hidden');
+      badge.style.display = 'none';
     }
   } catch (err) {
-    badge.textContent = '0';
+    badge.textContent = '';
     badge.classList.add('hidden');
+    badge.style.display = 'none';
   }
 }
 
@@ -667,4 +820,13 @@ export function renderBusinessHours(container, businessHours) {
       return row;
     })
   );
+}
+
+
+if (typeof window !== 'undefined') {
+  window.alertModal = alertModal;
+  window.confirmModal = confirmModal;
+  window.alert = function (msg) {
+    alertModal(String(msg !== undefined ? msg : ''));
+  };
 }
