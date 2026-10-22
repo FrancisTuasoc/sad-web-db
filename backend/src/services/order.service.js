@@ -514,24 +514,27 @@ async function updateOrderStatus(orderId, nextStatus) {
     throw new AppError('Order not found.', 404);
   }
 
-  let expectedStatus = null;
+  let expectedStatuses = null;
   let expectedFulfillment = null;
   if (nextStatus === 'preparing') {
-    expectedStatus = 'pending';
+    expectedStatuses = ['pending'];
     expectedFulfillment = order.fulfillment;
   } else if (nextStatus === 'ready_for_pickup') {
-    expectedStatus = 'preparing';
+    expectedStatuses = ['preparing'];
     expectedFulfillment = 'pickup';
   } else if (nextStatus === 'ready_to_deliver') {
-    expectedStatus = 'preparing';
+    expectedStatuses = ['preparing'];
     expectedFulfillment = 'delivery';
   } else if (nextStatus === 'completed' && order.fulfillment === 'pickup') {
-    expectedStatus = 'ready_for_pickup';
+    expectedStatuses = ['ready_for_pickup', 'to_pickup'];
     expectedFulfillment = 'pickup';
+  } else if (nextStatus === 'completed' && order.fulfillment === 'delivery') {
+    expectedStatuses = ['ready_to_deliver', 'to_ship'];
+    expectedFulfillment = 'delivery';
   }
   if (
-    !expectedStatus ||
-    order.status !== expectedStatus ||
+    !expectedStatuses ||
+    !expectedStatuses.includes(order.status) ||
     order.fulfillment !== expectedFulfillment
   ) {
     throw new AppError(
@@ -572,7 +575,10 @@ async function updateOrderStatus(orderId, nextStatus) {
       },
       completed: {
         title: 'Order Completed',
-        message: `Order #${updated.orderNumber} has been completed.`,
+        message:
+          updated.fulfillment === 'delivery'
+            ? `Order #${updated.orderNumber} delivery confirmed.`
+            : `Order #${updated.orderNumber} has been completed.`,
       },
     };
 

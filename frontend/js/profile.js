@@ -908,7 +908,9 @@ function renderOrderCard(order, isLive = false) {
     !(order.fulfillment === 'pickup' && order.paymentMethod === 'pay_at_shop')
   ) {
     const actionLabel =
-      order.fulfillment === 'pickup' ? 'Order Picked Up' : 'Order Received';
+      order.fulfillment === 'pickup'
+        ? 'Order Picked Up'
+        : 'Order Delivered (Confirm Received)';
     actionsHtml += `
       <button type="button" class="btn btn-primary btn-sm btn-complete-order" data-order-id="${order._id}">
         ${actionLabel}

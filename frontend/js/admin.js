@@ -5,6 +5,7 @@ import {
   escapeHtml,
   openModal,
   closeModal,
+  confirmModal,
   getProductImageUrl,
   BURGER_PLACEHOLDER,
   setupBackToTop,
@@ -1279,8 +1280,29 @@ async function loadAdminOrders() {
           String(o.status || '').toLowerCase()
         );
         const actionBtnText = isTerminal ? 'View' : 'Manage';
-        return `
-          <tr style="${isPending ? 'background-color:#FFFBEB;' : ''}">
+        const isReadyToDeliver =
+          (o.status === 'ready_to_deliver' || o.status === 'to_ship') &&
+          o.fulfillment === 'delivery';
+        const isReadyForPickup =
+          (o.status === 'ready_for_pickup' || o.status === 'to_pickup') &&
+          o.fulfillment === 'pickup';
+
+        let quickActionBtn = '';
+        if (isReadyToDeliver) {
+          quickActionBtn = `
+            <button type="button" class="btn btn-primary btn-sm btn-action-status" data-order-id="${o._id}" data-status="completed" title="Complete delivery" style="white-space:nowrap;">
+              <i class="fa-solid fa-circle-check" aria-hidden="true"></i> Order Delivered
+            </button>
+          `;
+        } else if (isReadyForPickup) {
+          quickActionBtn = `
+            <button type="button" class="btn btn-primary btn-sm btn-action-status" data-order-id="${o._id}" data-status="completed" title="Complete pickup" style="white-space:nowrap;">
+              <i class="fa-solid fa-circle-check" aria-hidden="true"></i> Pickup Done
+            </button>
+          `;
+        }
+
+        return `          <tr style="${isPending ? 'background-color:#FFFBEB;' : ''}">
             <td>
               <strong>#${escapeHtml(o.orderNumber)}</strong>
               ${isPending ? '<span class="badge badge-pending" style="margin-left:4px;">NEW</span>' : ''}
@@ -1296,9 +1318,12 @@ async function loadAdminOrders() {
             <td><span class="badge badge-${o.paymentStatus}">${o.paymentStatus.toUpperCase()}</span></td>
             <td><span class="badge badge-${o.status}">${statusLabel(o.status)}</span></td>
             <td>
-              <button class="btn btn-secondary btn-sm btn-open-order-drawer" data-order-id="${o._id}">
-                ${actionBtnText}
-              </button>
+              <div style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                <button class="btn btn-secondary btn-sm btn-open-order-drawer" data-order-id="${o._id}" style="white-space:nowrap;">
+                  ${actionBtnText}
+                </button>
+                ${quickActionBtn}
+              </div>
             </td>
           </tr>
         `;
@@ -1385,8 +1410,9 @@ async function openOrderDrawer(orderId) {
         </button>
       `;
     } else if (
-      order.status === 'ready_for_pickup' ||
-      order.status === 'to_pickup'
+      (order.status === 'ready_for_pickup' ||
+        order.status === 'to_pickup') &&
+      order.fulfillment === 'pickup'
     ) {
       actionButtons += `
         <button type="button" class="btn btn-primary btn-sm btn-action-status" data-order-id="${order._id}" data-status="completed">
@@ -1394,11 +1420,15 @@ async function openOrderDrawer(orderId) {
         </button>
       `;
     } else if (
-      order.status === 'ready_to_deliver' ||
-      order.status === 'to_ship'
+      (order.status === 'ready_to_deliver' ||
+        order.status === 'to_ship') &&
+      order.fulfillment === 'delivery'
     ) {
-      actionButtons +=
-        '<p class="text-muted">Waiting for the customer to confirm delivery.</p>';
+      actionButtons += `
+        <button type="button" class="btn btn-primary btn-sm btn-action-status" data-order-id="${order._id}" data-status="completed">
+          <i class="fa-solid fa-circle-check" aria-hidden="true"></i> Order Delivered
+        </button>
+      `;
     }
 
     if (order.paymentStatus === 'unpaid' && order.status !== 'cancelled') {
@@ -1406,6 +1436,66 @@ async function openOrderDrawer(orderId) {
         <button type="button" class="btn btn-secondary btn-sm btn-action-paid" data-order-id="${order._id}">
           Mark as Paid
         </button>
+      `;
+    }
+
+    // Visual delivery/pickup pipeline stepper for admin drawer
+    let progressTrackerHtml = '';
+    if (order.status !== 'cancelled') {
+      const isDelivery = order.fulfillment === 'delivery';
+      const steps = isDelivery
+        ? [
+            { label: 'Placed', icon: 'fa-receipt' },
+            { label: 'Kitchen', icon: 'fa-utensils' },
+            { label: 'Out for Delivery', icon: 'fa-truck-fast' },
+            { label: 'Order Delivered', icon: 'fa-circle-check' },
+          ]
+        : [
+            { label: 'Placed', icon: 'fa-receipt' },
+            { label: 'Kitchen', icon: 'fa-utensils' },
+            { label: 'Ready for Pickup', icon: 'fa-bag-shopping' },
+            { label: 'Completed', icon: 'fa-circle-check' },
+          ];
+
+      const statusStepMap = {
+        pending: 0,
+        preparing: 1,
+        ready_to_deliver: 2,
+        to_ship: 2,
+        ready_for_pickup: 2,
+        to_pickup: 2,
+        completed: 3,
+      };
+
+      const currentStepIdx = statusStepMap[order.status] ?? 0;
+      const fillPct = Math.min(100, Math.max(0, (currentStepIdx / (steps.length - 1)) * 100));
+
+      progressTrackerHtml = `
+        <div class="order-progress-tracker" style="margin: 0 0 16px 0; padding: 12px 6px;">
+          <div class="order-progress-line">
+            <div class="order-progress-line-fill" style="width: ${fillPct}%;"></div>
+          </div>
+          ${steps
+            .map((s, idx) => {
+              const isDone = idx < currentStepIdx || order.status === 'completed';
+              const isCurrent = idx === currentStepIdx && order.status !== 'completed';
+              let circleHtml = '';
+              if (isDone) {
+                circleHtml = `<div class="order-progress-circle step-done" title="Step completed: ${escapeHtml(s.label)}"><i class="fa-solid fa-check" aria-hidden="true"></i></div>`;
+              } else if (isCurrent) {
+                circleHtml = `<div class="order-progress-circle step-current" title="Current: ${escapeHtml(s.label)}"><i class="fa-solid ${s.icon}" aria-hidden="true"></i></div>`;
+              } else {
+                circleHtml = `<div class="order-progress-circle step-upcoming" title="Upcoming: ${escapeHtml(s.label)}"><i class="fa-solid ${s.icon}" aria-hidden="true"></i></div>`;
+              }
+              return `
+                <div class="order-progress-step ${isDone ? 'is-done' : ''} ${isCurrent ? 'is-current' : ''}">
+                  ${circleHtml}
+                  <span class="order-progress-label">${escapeHtml(s.label)}</span>
+                </div>
+              `;
+            })
+            .join('')}
+        </div>
       `;
     }
 
@@ -1419,6 +1509,8 @@ async function openOrderDrawer(orderId) {
         <span class="badge badge-${order.status}">${statusLabel(order.status)}</span>
         <span class="badge badge-${order.paymentStatus}">${order.paymentStatus.toUpperCase()}</span>
       </div>
+
+      ${progressTrackerHtml}
 
       <div class="step-card" style="margin-bottom:16px;">
         <h5 style="margin-bottom:6px;font-size:0.9rem;">Customer Information</h5>
@@ -2257,6 +2349,25 @@ function attachAdminEventListeners() {
     if (statusActionBtn) {
       const orderId = statusActionBtn.getAttribute('data-order-id');
       const status = statusActionBtn.getAttribute('data-status');
+      const actionLabelText = statusActionBtn.textContent.trim();
+
+      if (status === 'completed') {
+        const isDelivery = actionLabelText.toLowerCase().includes('delivered');
+        const confirmed = await confirmModal({
+          title: isDelivery ? 'Confirm Delivery Completion' : 'Confirm Order Completion',
+          message: isDelivery
+            ? 'Are you sure you want to confirm this order was delivered?'
+            : `Are you sure you want to mark: "${actionLabelText}"?`,
+          note: "Clicking 'Yes' will mark the order as completed, and 'No' will keep it unchanged.",
+          confirmText: 'Yes',
+          cancelText: 'No',
+          icon: 'fa-circle-check',
+          iconBg: '#dcfce7',
+          iconColor: '#16a34a',
+        });
+        if (!confirmed) return;
+      }
+
       statusActionBtn.disabled = true;
       try {
         await apiFetch(`/admin/orders/${orderId}/status`, {
