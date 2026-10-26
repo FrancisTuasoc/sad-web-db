@@ -2,6 +2,19 @@ const fs = require('fs');
 const path = require('path');
 const { getClient, closeDB } = require('../config/db');
 
+async function ensureBaseSchema(client) {
+  const result = await client.query(
+    "SELECT to_regclass('app.users') AS users_table"
+  );
+  if (result.rows[0].users_table) return false;
+
+  const schemaPath = path.join(__dirname, 'schema.sql');
+  const schemaSql = fs.readFileSync(schemaPath, 'utf8');
+  await client.query(schemaSql);
+  console.log('[MIGRATION] Base database schema initialized.');
+  return true;
+}
+
 const MIGRATIONS = [
   '20261011_email_verification.sql',
   '20261011_store_location.sql',
@@ -31,6 +44,8 @@ async function runMigrations() {
     await client.query(
       "SELECT pg_advisory_xact_lock(hashtext('app-schema-migrations'))"
     );
+
+    await ensureBaseSchema(client);
 
     for (const name of MIGRATIONS) {
       const applied = await client.query(
@@ -69,4 +84,4 @@ if (require.main === module) {
     .finally(closeDB);
 }
 
-module.exports = { runMigrations };
+module.exports = { runMigrations, ensureBaseSchema };
