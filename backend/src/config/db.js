@@ -5,8 +5,14 @@ let pool = null;
 
 function getPool(connectionString = DATABASE_URL) {
   if (!pool) {
+    const parsedConnectionString = new URL(connectionString);
+    for (const parameter of ['sslmode', 'sslcert', 'sslkey', 'sslrootcert']) {
+      parsedConnectionString.searchParams.delete(parameter);
+    }
+
     pool = new Pool({
-      connectionString,
+      // Keep pg-connection-string from overriding the SSL options below.
+      connectionString: parsedConnectionString.toString(),
       connectionTimeoutMillis: 10000,
       idleTimeoutMillis: 30000,
       max: 10,
